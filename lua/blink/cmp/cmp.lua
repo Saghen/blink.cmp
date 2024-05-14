@@ -70,8 +70,6 @@ M.select_prev = function(cmp_win)
 end
 
 M.update = function(cmp_win, doc_win, items, opts)
-  local start_time = vim.loop.hrtime()
-
   local query = M.get_query()
 
   -- get the items based on the user's query
@@ -133,10 +131,6 @@ M.update = function(cmp_win, doc_win, items, opts)
   end
 
   M.filtered_items = filtered_items
-
-  local end_time = vim.loop.hrtime()
-  local time_in_ms = (end_time - start_time) / 1e6
-  print('Time taken to filter ' .. #items .. ' completions: ' .. time_in_ms .. 'ms')
 end
 
 ---------- UTILS ------------
