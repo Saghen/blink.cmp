@@ -94,19 +94,8 @@ M.accept = function()
   if M.cmp_win.id ~= nil then M.cmp.accept(M.cmp_win) end
 end
 
-M.select_prev = function()
-  if M.cmp_win.id == nil then return end
+M.select_prev = function() M.cmp.select_prev(M.cmp_win, M.doc_win) end
 
-  local current_line = vim.api.nvim_win_get_cursor(M.cmp_win.id)[1]
-  vim.api.nvim_win_set_cursor(M.cmp_win.id, { math.max(1, current_line - 1), 0 })
-end
-
-M.select_next = function()
-  if M.cmp_win.id == nil then return end
-
-  local current_line = vim.api.nvim_win_get_cursor(M.cmp_win.id)[1]
-  local line_count = vim.api.nvim_buf_line_count(M.cmp_win.buf)
-  vim.api.nvim_win_set_cursor(M.cmp_win.id, { math.min(line_count, current_line + 1), 0 })
-end
+M.select_next = function() M.cmp.select_next(M.cmp_win, M.doc_win) end
 
 return M

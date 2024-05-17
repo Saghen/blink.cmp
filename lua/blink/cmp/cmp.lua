@@ -59,14 +59,37 @@ M.accept = function(cmp_win)
   end
 end
 
-M.select_next = function(cmp_win)
+M.select_next = function(cmp_win, doc_win)
+  if cmp_win.id == nil then return end
+
   local current_line = vim.api.nvim_win_get_cursor(cmp_win.id)[1]
-  vim.api.nvim_win_set_cursor(cmp_win.id, { current_line + 1, 0 })
+  local item_count = #M.filtered_items
+  local line_count = vim.api.nvim_buf_line_count(cmp_win.buf)
+
+  -- draw a new line if we're at the end and there's more items
+  -- todo: this is a hack while waiting for virtual scroll
+  if current_line == line_count and item_count > line_count then
+    M.draw_item(cmp_win.buf, line_count + 1, M.filtered_items[line_count + 1])
+    vim.api.nvim_win_set_cursor(cmp_win.id, { line_count + 1, 0 })
+  -- otherwise just move the cursor, wrapping if at the bottom
+  else
+    local line = current_line == item_count and 1 or current_line + 1
+    vim.api.nvim_win_set_cursor(cmp_win.id, { line, 0 })
+  end
+
+  M.update_doc(cmp_win, doc_win)
 end
 
-M.select_prev = function(cmp_win)
+-- todo: how to handle overflow to the bottom? should probably just do proper virtual scroll
+M.select_prev = function(cmp_win, doc_win)
+  if cmp_win.id == nil then return end
+
   local current_line = vim.api.nvim_win_get_cursor(cmp_win.id)[1]
-  vim.api.nvim_win_set_cursor(cmp_win.id, { current_line - 1, 0 })
+  local line_count = vim.api.nvim_buf_line_count(cmp_win.buf)
+  local line = current_line - 1 == 0 and line_count or current_line - 1
+  vim.api.nvim_win_set_cursor(cmp_win.id, { line, 0 })
+
+  M.update_doc(cmp_win, doc_win)
 end
 
 M.update = function(cmp_win, doc_win, items, opts)
@@ -89,51 +112,74 @@ M.update = function(cmp_win, doc_win, items, opts)
 
   -- update completion window
   vim.api.nvim_buf_set_lines(cmp_win.buf, 0, -1, true, {})
+  vim.api.nvim_buf_set_option(cmp_win.buf, 'modified', false)
+
   for idx, item in ipairs(filtered_items) do
-    local max_length = 40
-    local kind_hl = 'CmpItemKind' .. item.kind
-    local kind_icon = M.kind_icons[item.kind] or M.kind_icons.Field
-    local kind = item.kind
-
-    local utf8len = vim.fn.strdisplaywidth
-    local other_content_length = utf8len(kind_icon) + utf8len(kind) + 5
-    local remaining_length = math.max(0, max_length - other_content_length - utf8len(item.abbr))
-    local abbr = string.sub(item.abbr, 1, max_length - other_content_length) .. string.rep(' ', remaining_length)
-
-    local line = string.format(' %s  %s %s ', kind_icon, abbr, kind)
-    vim.api.nvim_buf_set_lines(cmp_win.buf, idx - 1, idx, false, { line })
-    vim.api.nvim_buf_add_highlight(cmp_win.buf, -1, kind_hl, idx - 1, 0, #kind_icon + 2)
-
-    if idx > cmp_win.config.max_height then break end
+    M.draw_item(cmp_win.buf, idx, item)
+    -- only draw until the window is full
+    if idx >= cmp_win.config.max_height then break end
   end
-
-  -- set height
-  vim.api.nvim_win_set_height(cmp_win.id, math.min(#filtered_items, cmp_win.config.max_height))
-
   -- select first line
   vim.api.nvim_win_set_cursor(cmp_win.id, { 1, 0 })
+  cmp_win:update()
 
   -- documentation
-  local first_item = filtered_items[1]
-  if first_item ~= nil then
-    M.lsp.resolve(first_item, function(_, resolved_item)
-      if resolved_item.detail == nil then
-        doc_win:close()
-        return
-      end
-      local doc_lines = {}
-      for s in resolved_item.detail:gmatch('[^\r\n]+') do
-        table.insert(doc_lines, s)
-      end
-      vim.api.nvim_buf_set_lines(doc_win.buf, 0, -1, true, doc_lines)
-      doc_win:open()
-    end)
-  end
+  M.update_doc(cmp_win, doc_win)
 
   M.filtered_items = filtered_items
 end
 
+function M.update_doc(cmp_win, doc_win)
+  -- completion window isn't open
+  if cmp_win.id == nil then return end
+
+  local current_line = vim.api.nvim_win_get_cursor(cmp_win.id)[1]
+  local item = M.filtered_items[current_line]
+  if item == nil then
+    doc_win:close()
+    return
+  end
+
+  M.lsp.resolve(item, function(_, resolved_item)
+    if resolved_item.detail == nil then
+      doc_win:close()
+      return
+    end
+    local doc_lines = {}
+    for s in resolved_item.detail:gmatch('[^\r\n]+') do
+      table.insert(doc_lines, s)
+    end
+    vim.api.nvim_buf_set_lines(doc_win.buf, 0, -1, true, doc_lines)
+    doc_win:open()
+
+    -- set unmodified so we don't get the prompt to save
+    vim.api.nvim_buf_set_option(doc_win.buf, 'modified', false)
+  end)
+end
+
 ---------- UTILS ------------
+M.draw_item = function(bufnr, idx, item)
+  -- get highlight
+  local kind_hl = 'CmpItemKind' .. item.kind
+  local kind_icon = M.kind_icons[item.kind] or M.kind_icons.Field
+  local kind = item.kind
+
+  -- get line text
+  local max_length = 40
+  local utf8len = vim.fn.strdisplaywidth
+  local other_content_length = utf8len(kind_icon) + utf8len(kind) + 5
+  local remaining_length = math.max(0, max_length - other_content_length - utf8len(item.abbr))
+  local abbr = string.sub(item.abbr, 1, max_length - other_content_length) .. string.rep(' ', remaining_length)
+
+  local line = string.format(' %s  %s %s ', kind_icon, abbr, kind)
+
+  -- draw the line
+  vim.api.nvim_buf_set_lines(bufnr, idx - 1, idx, false, { line })
+  vim.api.nvim_buf_add_highlight(bufnr, -1, kind_hl, idx - 1, 0, #kind_icon + 2)
+
+  -- set unmodified so we don't get the prompt to save
+  vim.api.nvim_buf_set_option(bufnr, 'modified', false)
+end
 
 M.filter_items = function(query, items)
   if query == '' then return items end
@@ -165,7 +211,7 @@ end
 
 M.get_query_to_replace = function(bufnr)
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
-  local current_col = vim.api.nvim_win_get_cursor(0)[2] + 1
+  local current_col = vim.api.nvim_win_get_cursor(0)[2]
   local line = vim.api.nvim_buf_get_lines(bufnr, current_line - 1, current_line, false)[1]
 
   -- Search forward/backward for the start/end of the word
@@ -184,7 +230,7 @@ M.get_query_to_replace = function(bufnr)
   end
 
   -- convert to 0-index
-  return current_line - 1, start_col - 1, end_col - 1
+  return current_line - 1, start_col - 1, end_col
 end
 
 M.apply_additional_text_edits = function(client_id, item) M.apply_text_edits(client_id, item.additionalTextEdits or {}) end
