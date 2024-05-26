@@ -15,17 +15,27 @@ win.new = function(config)
     padding = config.padding,
   }
 
-  self.buf = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_option(self.buf, 'tabstop', 1) -- prevents tab widths from being unpredictable
-  vim.api.nvim_buf_set_option(self.buf, 'filetype', self.config.filetype)
+  win.temp_buf_hack(self)
 
   return self
+end
+
+win.temp_buf_hack = function(self)
+  -- create buffer if it doesn't exist
+  if self.buf == nil or not vim.api.nvim_buf_is_valid(self.buf) then
+    self.buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_option(self.buf, 'tabstop', 1) -- prevents tab widths from being unpredictable
+    vim.api.nvim_buf_set_option(self.buf, 'filetype', self.config.filetype)
+  end
 end
 
 win.open = function(self)
   -- window already exists
   if self.id ~= nil then return end
 
+  win.temp_buf_hack(self)
+
+  -- create window
   self.id = vim.api.nvim_open_win(self.buf, false, {
     relative = 'cursor',
     style = 'minimal',
