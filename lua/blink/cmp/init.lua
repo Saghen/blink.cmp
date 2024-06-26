@@ -12,7 +12,8 @@ m.setup = function(config)
     max_height = 20,
     relative = m.cmp_win,
     wrap = true,
-    filetype = 'typescript', -- todo: set dynamically
+    -- todo: should be able to use the markdown stuff now?
+    -- filetype = 'typescript', -- todo: set dynamically
     padding = true,
   })
   m.lsp = require('blink.cmp.lsp')
