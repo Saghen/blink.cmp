@@ -2,7 +2,9 @@ local m = {}
 
 m.items = {}
 
-m.setup = function(config)
+m.setup = function(opts)
+  require('blink.cmp.config').setup(opts)
+
   m.cmp_win = require('blink.cmp.win').new({
     cursorline = true,
     winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
@@ -82,13 +84,14 @@ m.update = function(opts)
   m.doc_win:temp_buf_hack()
 
   -- immediately update the results
-  m.cmp.update(m.cmp_win, m.doc_win, m.items, opts)
+  m.cmp.update(m.cmp_win, m.doc_win, m.items, m.cmp.items_column, opts)
   m.cmp_win:update()
   m.doc_win:update()
   -- trigger the lsp and update the results after retrieving
+  local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
   m.lsp.completions(function(items)
     m.items = items
-    m.cmp.update(m.cmp_win, m.doc_win, m.items, opts)
+    m.cmp.update(m.cmp_win, m.doc_win, m.items, cursor_column, opts)
     m.cmp_win:update()
     m.doc_win:update()
   end)
