@@ -33,30 +33,70 @@ cmp.kind_icons = {
   TypeParameter = '󰬛',
 }
 cmp.filtered_items = {}
+-- the column of the cursor when the items were fetched
+cmp.items_column = -1
 
 cmp.fuzzy = require('blink.fuzzy').fuzzy
 cmp.lsp = require('blink.cmp.lsp')
 
 cmp.accept = function(cmp_win)
-  local bufnr = vim.api.nvim_get_current_buf()
-  local current_line, start_col, end_col = cmp.get_query_to_replace(bufnr)
-
   -- Get the item from the filtered items based on the cursorline position
   local item = cmp.filtered_items[vim.api.nvim_win_get_cursor(cmp_win.id)[1]]
+  local text_edit = item.item.textEdit
 
-  -- Apply text edit
-  vim.api.nvim_buf_set_text(bufnr, current_line, start_col, current_line, end_col, { item.word })
-  vim.api.nvim_win_set_cursor(0, { current_line + 1, start_col + #item.word })
+  if text_edit ~= nil then
+    -- Adjust the position of the text edit to be the current cursor position
+    -- since the data might be outdated. We compare the cursor column position
+    -- from when the items were fetched versus the current.
+    -- HACK: need to figure out a better way
+    local offset = vim.api.nvim_win_get_cursor(0)[2] - cmp.items_cursor_column
+    text_edit.range['end'].character = text_edit.range['end'].character + offset
+
+    -- Delete the old text
+    vim.api.nvim_buf_set_text(
+      vim.api.nvim_get_current_buf(),
+      text_edit.range.start.line,
+      text_edit.range.start.character,
+      text_edit.range['end'].line,
+      text_edit.range['end'].character,
+      {}
+    )
+
+    -- HACK: some LSPs (typescript-language-server) include snippets in non-snippet
+    -- completions because fuck a spec so we expand all text as a snippet
+    vim.snippet.expand(text_edit.newText)
+
+    -- Apply the text edit and move the cursor
+    -- cmp.apply_text_edits(item.client_id, { text_edit })
+    -- vim.api.nvim_win_set_cursor(
+    --   0,
+    --   { text_edit.range.start.line + 1, text_edit.range.start.character + #text_edit.newText }
+    -- )
+  else
+    -- No text edit so we fallback to our own resolution
+    -- TODO: LSP provides info on what chars should be replaced in general
+    -- and the get_query_to_replace function should take advantage of it
+    local current_line, start_col, end_col = cmp.get_query_to_replace(vim.api.nvim_get_current_buf())
+    vim.api.nvim_buf_set_text(
+      vim.api.nvim_get_current_buf(),
+      current_line,
+      start_col,
+      current_line,
+      end_col,
+      { item.word }
+    )
+    vim.api.nvim_win_set_cursor(0, { current_line + 1, start_col + #item.word })
+  end
 
   -- Apply additional text edits
   -- LSPs can either include these in the initial response or require a resolve
   -- These are used for things like auto-imports
-  -- todo: check capabilities to know ahead of time
+  -- TODO: check capabilities to know ahead of time
   if item.additionalTextEdits ~= nil then
     cmp.apply_additional_text_edits(item.client_id, item)
   else
     cmp.lsp.resolve(
-      item,
+      item.item,
       function(client_id, resolved_item) cmp.apply_additional_text_edits(client_id, resolved_item) end
     )
   end
@@ -95,11 +135,12 @@ cmp.select_prev = function(cmp_win, doc_win)
   cmp.update_doc(cmp_win, doc_win)
 end
 
-cmp.update = function(cmp_win, doc_win, items, opts)
+cmp.update = function(cmp_win, doc_win, items, cursor_column, opts)
   local query = cmp.get_query()
 
   -- get the items based on the user's query
   local filtered_items = cmp.filter_items(query, items)
+  cmp.items_cursor_column = cursor_column
 
   -- guards for cases where we shouldn't show the completion window
   local no_items = #filtered_items == 0
@@ -220,8 +261,11 @@ cmp.get_query_to_replace = function(bufnr)
   -- Search forward/backward for the start/end of the word
   local start_col = current_col
   while start_col > 1 do
-    local char = line:sub(start_col - 1, start_col - 1)
-    if char:match('[%w_\\-]') == nil then break end
+    local char = line:sub(start_col, start_col)
+    if char:match('[%w_\\-]') == nil then
+      start_col = start_col + 1
+      break
+    end
     start_col = start_col - 1
   end
 
