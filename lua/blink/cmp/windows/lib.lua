@@ -7,19 +7,12 @@ function win.new(config)
   self.config = {
     width = config.width or 40,
     max_height = config.max_height or 10,
-    relative = config.relative or 'cursor',
     cursorline = config.cursorline or false,
     wrap = config.wrap or false,
     filetype = config.filetype or 'cmp_menu',
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     padding = config.padding,
   }
-
-  if self.config.relative == 'cursor' then
-    vim.api.nvim_create_autocmd('CursorMovedI', {
-      callback = function() self:update_position() end,
-    })
-  end
 
   return self
 end
@@ -65,8 +58,6 @@ function win:open()
   vim.api.nvim_set_option_value('concealcursor', 'n', { win = self.id })
   vim.api.nvim_set_option_value('cursorlineopt', 'line', { win = self.id })
   vim.api.nvim_set_option_value('cursorline', self.config.cursorline, { win = self.id })
-
-  self:update_position()
 end
 
 function win:close()
@@ -77,7 +68,7 @@ function win:close()
 end
 
 -- todo: dynamic width
-function win:update_position()
+function win:update_position(relative_to)
   if not self:is_open() then return end
   local winnr = self:get_win()
   local config = self.config
@@ -94,7 +85,7 @@ function win:update_position()
   vim.api.nvim_win_set_height(winnr, height)
 
   -- relative to cursor
-  if config.relative == 'cursor' then
+  if relative_to == 'cursor' then
     local is_space_below = screen_height - cursor_row > height
 
     if is_space_below then
@@ -104,11 +95,11 @@ function win:update_position()
     end
 
   -- relative to window
-  elseif config.relative.id ~= nil then
-    local relative_win_config = vim.api.nvim_win_get_config(config.relative.id)
+  elseif type(relative_to) == 'number' then
+    local relative_win_config = vim.api.nvim_win_get_config(relative_to)
 
-    -- todo: why is there a -5 here?
-    local max_width_right = screen_width - cursor_col - relative_win_config.width - 5
+    -- todo: why is there a -7 here? probably the signcolumn stuff?
+    local max_width_right = screen_width - cursor_col - relative_win_config.width - 7
     local max_width_left = cursor_col
 
     local width = math.min(math.max(max_width_left, max_width_right), config.width)
@@ -116,7 +107,7 @@ function win:update_position()
     if max_width_right >= config.width or max_width_right >= max_width_left then
       vim.api.nvim_win_set_config(winnr, {
         relative = 'win',
-        win = config.relative.id,
+        win = relative_to,
         row = 0,
         col = relative_win_config.width,
         width = width,
@@ -124,7 +115,7 @@ function win:update_position()
     else
       vim.api.nvim_win_set_config(winnr, {
         relative = 'win',
-        win = config.relative.id,
+        win = relative_to,
         row = 0,
         col = -width,
         width = width,

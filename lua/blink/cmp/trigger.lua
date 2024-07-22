@@ -26,13 +26,14 @@ function trigger.activate_autocmds()
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
       -- character deleted so let cursormoved handle it
-      if last_char == '' then
-        return
+      if last_char == '' then return end
+
       -- ignore if in a special buffer
-      elseif helpers.is_special_buffer() then
+      if helpers.is_special_buffer() then
         trigger.hide()
-      -- character forces a trigger according to the sources
+      -- character forces a trigger according to the sources, create a fresh context
       elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
+        trigger.context = nil
         trigger.show({ trigger_character = last_char })
       -- character is part of the current context OR in an existing context
       elseif last_char:match(trigger.context_regex) ~= nil then
@@ -52,7 +53,13 @@ function trigger.activate_autocmds()
       -- text changed so let textchanged handle it
       if last_char ~= '' then return end
 
-      if trigger.within_query_bounds(vim.api.nvim_win_get_cursor(0)) then
+      local is_within_bounds = trigger.within_query_bounds(vim.api.nvim_win_get_cursor(0))
+
+      local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
+      local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col + 1)
+      local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
+
+      if is_within_bounds or (is_on_trigger and trigger.context ~= nil) then
         trigger.show()
       else
         trigger.hide()
@@ -66,6 +73,10 @@ function trigger.activate_autocmds()
   return trigger
 end
 
+--- @class TriggerOptions
+--- @field trigger_character string|nil
+---
+--- @param opts TriggerOptions|nil
 function trigger.show(opts)
   opts = opts or {}
 
