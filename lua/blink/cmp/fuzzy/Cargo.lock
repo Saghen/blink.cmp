@@ -197,6 +197,7 @@ dependencies = [
 [[package]]
 name = "fzrs"
 version = "0.1.0"
+source = "git+https://github.com/saghen/fzrs#2adc3439311e43864506878e3250e1e440e20ff6"
 dependencies = [
  "memchr",
  "smith_waterman_macro",
@@ -680,6 +681,7 @@ checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 [[package]]
 name = "smith_waterman_macro"
 version = "0.1.0"
+source = "git+https://github.com/saghen/fzrs#2adc3439311e43864506878e3250e1e440e20ff6"
 dependencies = [
  "proc-macro2 1.0.86",
  "quote 1.0.36",
