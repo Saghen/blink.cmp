@@ -1,6 +1,7 @@
 local M = {}
 
 M.default = {
+  highlight_ns = vim.api.nvim_create_namespace('blink_cmp'),
   kind_icons = {
     Text = '󰉿',
     Method = '󰊕',

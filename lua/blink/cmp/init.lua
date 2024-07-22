@@ -1,108 +1,66 @@
 local m = {}
 
-m.items = {}
-
 m.setup = function(opts)
   require('blink.cmp.config').setup(opts)
+  local utils = require('blink.cmp.util')
 
-  m.cmp_win = require('blink.cmp.win').new({
-    cursorline = true,
-    winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
-  })
-  m.doc_win = require('blink.cmp.win').new({
-    width = 60,
-    max_height = 20,
-    relative = m.cmp_win,
-    wrap = true,
-    -- todo: should be able to use the markdown stuff now?
-    -- filetype = 'typescript', -- todo: set dynamically
-    padding = true,
-  })
-  m.lsp = require('blink.cmp.lsp')
-  m.cmp = require('blink.cmp.cmp')
+  -- trigger -> sources -> fuzzy (filter/sort) -> windows (render)
+  --
+  -- trigger controls when to show the window and the current context
+  -- for caching
+  m.trigger = require('blink.cmp.trigger').activate_autocmds()
 
-  local last_char = ''
-  vim.api.nvim_create_autocmd('InsertCharPre', {
-    callback = function() last_char = vim.v.char end,
-  })
+  -- sources fetch autocomplete items and documentation
+  m.sources = require('blink.cmp.sources')
 
-  -- decide if we should show the completion window
-  vim.api.nvim_create_autocmd('TextChangedI', {
-    callback = function()
-      if m.cmp_win.id ~= nil then return end
-      -- todo: if went from prefix to no prefix, clear the items
-      if last_char ~= '' and last_char ~= ' ' and last_char ~= '\n' then m.update() end
-    end,
-  })
+  -- windows render and apply items
+  m.windows = {
+    autocomplete = require('blink.cmp.windows.autocomplete').setup(),
+    documentation = require('blink.cmp.windows.documentation').setup(),
+  }
 
-  -- update the completion window
-  vim.api.nvim_create_autocmd('CursorMovedI', {
-    callback = function()
-      if m.cmp_win.id ~= nil then m.update() end
-    end,
-  })
+  -- fuzzy combines smith waterman with frecency
+  -- and bonus from proximity words but I'm still working
+  -- on tuning the weights
+  m.fuzzy = require('blink.cmp.fuzzy.lib')
 
-  -- show completion windows
-  vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufLeave' }, {
-    callback = function()
-      m.lsp.cancel_completions()
-      m.cmp_win:close()
-      m.doc_win:close()
-      m.items = {}
-    end,
-  })
+  m.trigger.listen_on_show(function(context) m.sources.completions(context) end)
+  m.trigger.listen_on_hide(function()
+    m.sources.cancel_completions()
+    m.windows.autocomplete.close()
+  end)
+  m.sources.listen_on_completions(function(items)
+    -- avoid adding 1-4ms to insertion latency by scheduling for later
+    vim.schedule(function()
+      local filtered_items = m.fuzzy.filter_items(utils.get_query(), items)
+      if #filtered_items > 0 then
+        m.windows.autocomplete.open_with_items(filtered_items)
+      else
+        m.windows.autocomplete.close()
+      end
+    end)
+  end)
 
-  -- keybindings
-  -- todo: SCUFFED
-  local keymap = function(mode, key, callback)
-    vim.api.nvim_set_keymap(mode, key, '', {
-      expr = true,
-      noremap = true,
-      silent = true,
-      callback = function()
-        if m.cmp_win.id == nil then return vim.api.nvim_replace_termcodes(key, true, false, true) end
-        vim.schedule(callback)
-      end,
-    })
-  end
-  keymap('i', '<Tab>', m.accept)
-  keymap('i', '<C-j>', m.select_next)
-  keymap('i', '<C-k>', m.select_prev)
-  keymap('i', '<Up>', m.select_prev)
-  keymap('i', '<Down>', m.select_next)
+  utils.keymap('i', '<Tab>', m.accept)
+  utils.keymap('i', '<C-j>', m.select_next)
+  utils.keymap('i', '<C-k>', m.select_prev)
+  utils.keymap('i', '<Up>', m.select_prev)
+  utils.keymap('i', '<Down>', m.select_next)
   vim.api.nvim_set_keymap('i', '<C-space>', '', {
     noremap = true,
     silent = true,
-    callback = function() m.update({ force = true }) end,
+    callback = function() m.trigger.show() end,
   })
 end
 
-m.update = function(opts)
-  opts = opts or { force = false }
-
-  m.cmp_win:temp_buf_hack()
-  m.doc_win:temp_buf_hack()
-
-  -- immediately update the results
-  m.cmp.update(m.cmp_win, m.doc_win, m.items, m.cmp.items_column, opts)
-  m.cmp_win:update()
-  m.doc_win:update()
-  -- trigger the lsp and update the results after retrieving
-  local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
-  m.lsp.completions(function(items)
-    m.items = items
-    m.cmp.update(m.cmp_win, m.doc_win, m.items, cursor_column, opts)
-    m.cmp_win:update()
-    m.doc_win:update()
-  end)
-end
-
 m.accept = function()
-  if m.cmp_win.id ~= nil then m.cmp.accept(m.cmp_win) end
+  local item = m.windows.autocomplete.get_selected_item()
+  if item == nil then return end
+  require('blink.cmp.accept')(item)
 end
 
-m.select_prev = function() m.cmp.select_prev(m.cmp_win, m.doc_win) end
+m.select_prev = function() m.windows.autocomplete.select_prev() end
 
-m.select_next = function() m.cmp.select_next(m.cmp_win, m.doc_win) end
+m.select_next = function() m.windows.autocomplete.select_next() end
 
 return m
