@@ -5,7 +5,8 @@ function win.new(config)
 
   self.id = nil
   self.config = {
-    width = config.width or 40,
+    min_width = config.min_width or 30,
+    max_width = config.max_width or 60,
     max_height = config.max_height or 10,
     cursorline = config.cursorline or false,
     wrap = config.wrap or false,
@@ -21,8 +22,8 @@ function win:get_buf()
   -- create buffer if it doesn't exist
   if self.buf == nil or not vim.api.nvim_buf_is_valid(self.buf) then
     self.buf = vim.api.nvim_create_buf(false, true)
-    -- vim.api.nvim_buf_set_option(self.buf, 'tabstop', 1) -- prevents tab widths from being unpredictable
-    -- vim.api.nvim_buf_set_option(self.buf, 'filetype', self.config.filetype)
+    vim.api.nvim_set_option_value('tabstop', 1, { buf = self.buf }) -- prevents tab widths from being unpredictable
+    vim.api.nvim_set_option_value('filetype', self.config.filetype, { buf = self.buf })
   end
   return self.buf
 end
@@ -43,7 +44,7 @@ function win:open()
   self.id = vim.api.nvim_open_win(self:get_buf(), false, {
     relative = 'cursor',
     style = 'minimal',
-    width = self.config.width,
+    width = self.config.min_width,
     height = self.config.max_height,
     row = 1,
     col = 1,
@@ -80,11 +81,14 @@ function win:update_position(relative_to)
   local cursor_row = cursor[1]
   local cursor_col = cursor[2]
 
-  -- set height to current line count
+  -- set width to current content width, bounded by min and max
+  local width = math.max(math.min(self:get_content_width(), config.max_width), config.min_width)
+  vim.api.nvim_win_set_width(winnr, width)
+
+  -- set height to current line count, bounded by max
   local height = math.min(self:get_content_height(), config.max_height)
   vim.api.nvim_win_set_height(winnr, height)
 
-  -- relative to cursor
   if relative_to == 'cursor' then
     local is_space_below = screen_height - cursor_row > height
 
@@ -102,9 +106,7 @@ function win:update_position(relative_to)
     local max_width_right = screen_width - cursor_col - relative_win_config.width - 7
     local max_width_left = cursor_col
 
-    local width = math.min(math.max(max_width_left, max_width_right), config.width)
-
-    if max_width_right >= config.width or max_width_right >= max_width_left then
+    if max_width_right >= width or max_width_right >= max_width_left then
       vim.api.nvim_win_set_config(winnr, {
         relative = 'win',
         win = relative_to,
@@ -121,7 +123,6 @@ function win:update_position(relative_to)
         width = width,
       })
     end
-    -- No idea what it's supposed to be relative to
   else
     error('Invalid relative config')
   end
@@ -131,15 +132,15 @@ end
 function win:get_content_height()
   if not self:is_open() then return 0 end
   return vim.api.nvim_win_text_height(self:get_win(), {}).all
-  --
-  -- if not self.config.wrap then return vim.api.nvim_buf_line_count(self.buf) end
-  -- local height = 0
-  -- vim.api.nvim_buf_call(self.buf, function()
-  --   for _, text in ipairs(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false)) do
-  --     height = height + math.max(1, math.ceil(vim.fn.strdisplaywidth(text) / self.config.width))
-  --   end
-  -- end)
-  -- return height
+end
+
+function win:get_content_width()
+  if not self:is_open() then return 0 end
+  local max_width = 0
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(self.buf, 0, -1, false)) do
+    max_width = math.max(max_width, vim.api.nvim_strwidth(line))
+  end
+  return max_width
 end
 
 return win
