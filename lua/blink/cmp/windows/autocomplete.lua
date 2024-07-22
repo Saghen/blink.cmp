@@ -4,8 +4,8 @@ local config = require('blink.cmp.config')
 local autocomplete = {
   items = {},
   event_targets = {
+    on_position_update = function() end,
     on_select = function() end,
-    on_open = function() end,
     on_close = function() end,
   },
 }
@@ -47,6 +47,13 @@ function autocomplete.setup()
     end,
   })
 
+  vim.api.nvim_create_autocmd('CursorMovedI', {
+    callback = function()
+      autocomplete.win:update_position('cursor')
+      autocomplete.event_targets.on_position_update()
+    end,
+  })
+
   return autocomplete
 end
 
@@ -56,28 +63,26 @@ function autocomplete.open_with_items(items)
   autocomplete.items = items
   autocomplete.draw()
 
-  if autocomplete.win:is_open() then
-    -- todo: make a separate function for updating width/height
-    autocomplete.win:update_position()
-  else
-    autocomplete.win:open()
-  end
+  autocomplete.win:open()
+  autocomplete.win:update_position('cursor')
+  autocomplete.event_targets.on_position_update()
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
+  autocomplete.event_targets.on_select(autocomplete.get_selected_item())
 end
+
+function autocomplete.listen_on_position_update(callback) autocomplete.event_targets.on_position_update = callback end
 
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
   autocomplete.win:open()
-  autocomplete.on_open_callback(autocomplete.win:get_win())
 end
-function autocomplete.listen_on_open(callback) autocomplete.event_targets.on_open = callback end
 
 function autocomplete.close()
   if not autocomplete.win:is_open() then return end
   autocomplete.win:close()
-  autocomplete.on_close_callback()
+  autocomplete.event_targets.on_close()
 end
 function autocomplete.listen_on_close(callback) autocomplete.event_targets.on_close = callback end
 
@@ -91,7 +96,7 @@ function autocomplete.select_next()
   if current_line == line_count then return end
 
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { current_line + 1, 0 })
-  autocomplete.on_select_callback(autocomplete.get_selected_item())
+  autocomplete.event_targets.on_select(autocomplete.get_selected_item())
 end
 
 function autocomplete.select_prev()
@@ -101,7 +106,7 @@ function autocomplete.select_prev()
   if current_line == 1 then return end
 
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { math.max(current_line - 1, 1), 0 })
-  autocomplete.on_select_callback(autocomplete.get_selected_item())
+  autocomplete.event_targets.on_select(autocomplete.get_selected_item())
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end

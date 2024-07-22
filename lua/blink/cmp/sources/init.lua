@@ -4,11 +4,15 @@ local sources = {
     buffer = require('blink.cmp.sources.buffer'),
     snippets = require('blink.cmp.sources.snippets'),
   },
-  in_flight = {
-    lsp = false,
-    buffer = false,
-    snippets = false,
+
+  -- hack: sweet mother of all hacks
+  last_in_flight_id = -1,
+  in_flight_id = {
+    lsp = -1,
+    buffer = -1,
+    snippets = -1,
   },
+
   sources_items = {},
   current_context_id = -1,
   on_completions_callback = function(_) end,
@@ -49,12 +53,16 @@ function sources.completions(context)
     local previous_incomplete = sources.sources_items[source_name] ~= nil
       and sources.sources_items[source_name].isIncomplete
     -- check if we have no data and no calls are in flight
-    local no_data = sources.sources_items[source_name] == nil and sources.in_flight[source_name] == false
+    local no_data = sources.sources_items[source_name] == nil and sources.in_flight_id[source_name] == -1
 
     -- if none of these are true, we can use the existing cached results
     if is_new_context or trigger_character or previous_incomplete or no_data then
       if source.cancel_completions ~= nil then source.cancel_completions() end
-      sources.in_flight[source_name] = true
+
+      -- register the call
+      sources.last_in_flight_id = sources.last_in_flight_id + 1
+      local in_flight_id = sources.last_in_flight_id
+      sources.in_flight_id[source_name] = sources.last_in_flight_id
 
       -- get the reason for the trigger
       local trigger_context = trigger_character
@@ -68,10 +76,10 @@ function sources.completions(context)
       local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
       vim.schedule(function()
         source.completions({ trigger = trigger_context }, function(items)
-          -- context id changing indicates our current data is out of date
-          if sources.current_context_id ~= context.id then return end
+          -- a new call was made or this one was cancelled
+          if sources.in_flight_id[source_name] ~= in_flight_id then return end
+          sources.in_flight_id[source_name] = -1
 
-          sources.in_flight[source_name] = false
           sources.add_source_completions(source_name, items, cursor_column)
           if not sources.some_in_flight() then sources.send_completions() end
         end)
@@ -94,8 +102,8 @@ function sources.add_source_completions(source_name, source_items, cursor_column
 end
 
 function sources.some_in_flight()
-  for _, in_flight in pairs(sources.in_flight) do
-    if in_flight == true then return true end
+  for _, in_flight in pairs(sources.in_flight_id) do
+    if in_flight ~= -1 then return true end
   end
   return false
 end
@@ -122,7 +130,7 @@ end
 
 function sources.cancel_completions()
   for source_name, source in pairs(sources.registered) do
-    sources.in_flight[source_name] = false
+    sources.in_flight_id[source_name] = -1
     if source.cancel_completions ~= nil then source.cancel_completions() end
   end
 end
