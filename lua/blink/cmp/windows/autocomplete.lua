@@ -130,11 +130,12 @@ function autocomplete.draw_item(item)
   local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
 
   -- get line text
-  local max_length = 40
-  local utf8len = vim.fn.strdisplaywidth
+  local max_length = autocomplete.win.config.max_width
+  local utf8len = vim.api.nvim_strwidth
   local other_content_length = utf8len(kind_icon) + utf8len(kind) + 5
   local remaining_length = math.max(0, max_length - other_content_length - utf8len(item.label))
-  local abbr = string.sub(item.label, 1, max_length - other_content_length) .. string.rep(' ', remaining_length)
+  -- + 1 to include the final character, + 1 to account for lua being 1-indexed
+  local abbr = string.sub(item.label, 1, max_length - other_content_length + 2) .. string.rep(' ', remaining_length)
 
   return string.format(' %s  %s %s ', kind_icon, abbr, kind)
 end

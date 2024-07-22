@@ -116,13 +116,9 @@ function sources.send_completions()
   end
 
   -- flatten the items
-  local flattened_items = nil
+  local flattened_items = {}
   for _, response in pairs(sources.sources_items) do
-    if flattened_items == nil then
-      flattened_items = response.items
-    else
-      vim.list_extend(flattened_items, response.items)
-    end
+    vim.list_extend(flattened_items, response.items)
   end
 
   sources.on_completions_callback(flattened_items)
