@@ -68,8 +68,8 @@ function win:close()
   end
 end
 
--- todo: dynamic width
-function win:update_position(relative_to)
+-- todo: move this code to the individual windows
+function win:update_position(relative_to, offset)
   if not self:is_open() then return end
   local winnr = self:get_win()
   local config = self.config
@@ -93,9 +93,9 @@ function win:update_position(relative_to)
     local is_space_below = screen_height - cursor_row > height
 
     if is_space_below then
-      vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = 1, col = 0 })
+      vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = 1, col = offset })
     else
-      vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = -height, col = 0 })
+      vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = -height, col = offset })
     end
 
   -- relative to window

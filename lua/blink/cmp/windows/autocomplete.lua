@@ -3,6 +3,7 @@
 local config = require('blink.cmp.config')
 local autocomplete = {
   items = {},
+  context = nil,
   event_targets = {
     on_position_update = function() end,
     on_select = function() end,
@@ -49,7 +50,10 @@ function autocomplete.setup()
 
   vim.api.nvim_create_autocmd('CursorMovedI', {
     callback = function()
-      autocomplete.win:update_position('cursor')
+      if autocomplete.context == nil then return end
+
+      local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
+      autocomplete.win:update_position('cursor', autocomplete.context.bounds.start_col - cursor_column - 1)
       autocomplete.event_targets.on_position_update()
     end,
   })
@@ -59,12 +63,14 @@ end
 
 ---------- Visibility ----------
 
-function autocomplete.open_with_items(items)
+function autocomplete.open_with_items(context, items)
   autocomplete.items = items
+  autocomplete.context = context
   autocomplete.draw()
 
   autocomplete.win:open()
-  autocomplete.win:update_position('cursor')
+  local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
+  autocomplete.win:update_position('cursor', autocomplete.context.bounds.start_col - cursor_column - 1)
   autocomplete.event_targets.on_position_update()
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
