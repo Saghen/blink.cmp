@@ -2,7 +2,7 @@ local utils = {}
 
 local function accept(item)
   local sources = require('blink.cmp.sources')
-  local fuzzy = require('blink.cmp.fuzzy')
+  local fuzzy = require('blink.cmp.fuzzy.lib')
 
   local text_edit = item.textEdit
   if text_edit ~= nil then

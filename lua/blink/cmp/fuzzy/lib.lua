@@ -2,7 +2,20 @@ local fuzzy = {
   rust = require('blink.cmp.fuzzy'),
 }
 
-fuzzy.filter_items = function(needle, items)
+function fuzzy.init_db(db_path)
+  fuzzy.rust.init_db(db_path)
+  return fuzzy
+end
+
+function fuzzy.fuzzy(needle, haystack, haystack_score_offsets, nearby_words, max_items)
+  return fuzzy.rust.fuzzy(needle, haystack, haystack_score_offsets, nearby_words, max_items)
+end
+
+function fuzzy.access(item) fuzzy.rust.access(item) end
+
+function fuzzy.get_lines_words(lines) return fuzzy.rust.get_lines_words(lines) end
+
+function fuzzy.filter_items(needle, items)
   -- convert to table of strings
   local haystack = {}
   local haystack_score_offsets = {}
@@ -28,7 +41,7 @@ fuzzy.filter_items = function(needle, items)
   return filtered_items
 end
 
-fuzzy.get_query = function()
+function fuzzy.get_query()
   local bufnr = vim.api.nvim_get_current_buf()
   local current_line = vim.api.nvim_win_get_cursor(0)[1] - 1
   local current_col = vim.api.nvim_win_get_cursor(0)[2] - 1

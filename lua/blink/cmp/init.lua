@@ -22,19 +22,19 @@ m.setup = function(opts)
   -- fuzzy combines smith waterman with frecency
   -- and bonus from proximity words but I'm still working
   -- on tuning the weights
-  m.fuzzy = require('blink.cmp.fuzzy.lib')
+  m.fuzzy = require('blink.cmp.fuzzy.lib').init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
 
   m.trigger.listen_on_show(function(context) m.sources.completions(context) end)
   m.trigger.listen_on_hide(function()
     m.sources.cancel_completions()
     m.windows.autocomplete.close()
   end)
-  m.sources.listen_on_completions(function(items)
+  m.sources.listen_on_completions(function(context, items)
     -- avoid adding 1-4ms to insertion latency by scheduling for later
     vim.schedule(function()
       local filtered_items = m.fuzzy.filter_items(utils.get_query(), items)
       if #filtered_items > 0 then
-        m.windows.autocomplete.open_with_items(filtered_items)
+        m.windows.autocomplete.open_with_items(context, filtered_items)
       else
         m.windows.autocomplete.close()
       end

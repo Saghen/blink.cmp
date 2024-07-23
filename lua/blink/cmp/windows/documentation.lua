@@ -31,20 +31,20 @@ function docs.show_item(item)
   end
 
   sources.resolve(item, function(resolved_item)
-    if resolved_item.documentation == nil then
+    item = resolved_item or item
+    if item.documentation == nil then
       docs.win:close()
       return
     end
 
-    -- todo: respect .kind (MarkupKind) which is markdown or plaintext
     local doc_lines = {}
-    for s in resolved_item.documentation.value:gmatch('[^\r\n]+') do
+    for s in item.documentation.value:gmatch('[^\r\n]+') do
       table.insert(doc_lines, s)
     end
     vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, doc_lines)
     vim.api.nvim_set_option_value('modified', false, { buf = docs.win:get_buf() })
 
-    local filetype = resolved_item.documentation.kind == 'markdown' and 'markdown' or 'plaintext'
+    local filetype = item.documentation.kind == 'markdown' and 'markdown' or 'plaintext'
     if filetype ~= vim.api.nvim_get_option_value('filetype', { buf = docs.win:get_buf() }) then
       vim.api.nvim_set_option_value('filetype', filetype, { buf = docs.win:get_buf() })
     end

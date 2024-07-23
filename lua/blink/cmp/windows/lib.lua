@@ -82,6 +82,8 @@ function win:update_position(relative_to, offset)
   local cursor_col = cursor[2]
 
   -- set width to current content width, bounded by min and max
+  -- todo: should be determined based on the items since we format the items to the current width
+  -- so the get_content_width() will always be the window width
   local width = math.max(math.min(self:get_content_width(), config.max_width), config.min_width)
   vim.api.nvim_win_set_width(winnr, width)
 

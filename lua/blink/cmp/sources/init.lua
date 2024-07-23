@@ -81,7 +81,7 @@ function sources.completions(context)
           sources.in_flight_id[source_name] = -1
 
           sources.add_source_completions(source_name, items, cursor_column)
-          if not sources.some_in_flight() then sources.send_completions() end
+          if not sources.some_in_flight() then sources.send_completions(context) end
         end)
       end)
     end
@@ -89,7 +89,7 @@ function sources.completions(context)
 
   -- no completions will be in flight if none of them ran,
   -- so we send the completions
-  if not sources.some_in_flight() then sources.send_completions() end
+  if not sources.some_in_flight() then sources.send_completions(context) end
 end
 
 function sources.add_source_completions(source_name, source_items, cursor_column)
@@ -108,7 +108,7 @@ function sources.some_in_flight()
   return false
 end
 
-function sources.send_completions()
+function sources.send_completions(context)
   local sources_items = sources.sources_items
   -- apply source filters
   for _, source in pairs(sources.registered) do
@@ -121,7 +121,7 @@ function sources.send_completions()
     vim.list_extend(flattened_items, response.items)
   end
 
-  sources.on_completions_callback(flattened_items)
+  sources.on_completions_callback(context, flattened_items)
 end
 
 function sources.cancel_completions()

@@ -47,12 +47,12 @@ local function words_to_items(words)
 end
 
 local function run_sync(buf_text, callback)
-  callback(words_to_items(require('blink.cmp.fuzzy').get_lines_words(buf_text)))
+  callback(words_to_items(require('blink.cmp.fuzzy.lib').get_lines_words(buf_text)))
 end
 
 local function run_async(buf_text, callback)
   local worker = uv.new_work(
-    function(items) return table.concat(require('blink.cmp.fuzzy').get_lines_words(items), '\n') end,
+    function(items) return table.concat(require('blink.cmp.fuzzy.lib').get_lines_words(items), '\n') end,
     function(words)
       local items = words_to_items(vim.split(words, '\n'))
       vim.schedule(function() callback(items) end)
