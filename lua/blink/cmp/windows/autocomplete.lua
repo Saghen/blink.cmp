@@ -48,13 +48,10 @@ function autocomplete.setup()
     end,
   })
 
-  vim.api.nvim_create_autocmd('CursorMovedI', {
+  vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
     callback = function()
       if autocomplete.context == nil then return end
-
-      local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
-      autocomplete.win:update_position('cursor', autocomplete.context.bounds.start_col - cursor_column - 1)
-      autocomplete.event_targets.on_position_update()
+      autocomplete.update_position(autocomplete.context)
     end,
   })
 
@@ -65,20 +62,17 @@ end
 
 function autocomplete.open_with_items(context, items)
   autocomplete.items = items
-  autocomplete.context = context
   autocomplete.draw()
 
   autocomplete.win:open()
-  local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
-  autocomplete.win:update_position('cursor', autocomplete.context.bounds.start_col - cursor_column - 1)
-  autocomplete.event_targets.on_position_update()
+
+  autocomplete.context = context
+  autocomplete.update_position(context)
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
   autocomplete.event_targets.on_select(autocomplete.get_selected_item())
 end
-
-function autocomplete.listen_on_position_update(callback) autocomplete.event_targets.on_position_update = callback end
 
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
@@ -91,6 +85,15 @@ function autocomplete.close()
   autocomplete.event_targets.on_close()
 end
 function autocomplete.listen_on_close(callback) autocomplete.event_targets.on_close = callback end
+
+function autocomplete.update_position(context)
+  -- todo: should point to the window of the context?
+  local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
+  autocomplete.win:update_position('cursor', context.bounds.start_col - cursor_column - 1)
+  autocomplete.event_targets.on_position_update()
+end
+
+function autocomplete.listen_on_position_update(callback) autocomplete.event_targets.on_position_update = callback end
 
 ---------- Selection ----------
 
