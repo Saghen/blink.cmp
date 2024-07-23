@@ -10,17 +10,25 @@ pub mod extern_ffi {
     use regex::Regex;
     use std::cmp::Reverse;
     use std::collections::HashSet;
-    use std::sync::{Arc, Mutex};
+    use std::sync::RwLock;
 
     lazy_static! {
         static ref REGEX: Regex = Regex::new(r"[A-Za-z][A-Za-z0-9]{2,50}").unwrap();
-        static ref FRECENCY_CWD: Arc<Mutex<FrecencyTracker>> =
-            Arc::new(Mutex::new(FrecencyTracker::new("/home/saghen/frecency.db")));
+        static ref FRECENCY: RwLock<Option<FrecencyTracker>> = RwLock::new(None);
     }
 
     struct Item {
         index: u32,
         score: u32,
+    }
+
+    pub fn init_db(db_path: String) -> bool {
+        let mut frecency = FRECENCY.write().unwrap();
+        if frecency.is_some() {
+            return false;
+        }
+        *frecency = Some(FrecencyTracker::new(&db_path));
+        true
     }
 
     pub fn fuzzy(
@@ -30,7 +38,9 @@ pub mod extern_ffi {
         nearby_words: Vec<String>,
         max_items: u32,
     ) -> Vec<u32> {
-        let frecency = FRECENCY_CWD.lock().unwrap();
+        let frecency_handle = FRECENCY.read().unwrap();
+        let frecency = frecency_handle.as_ref().unwrap();
+
         let nearby_words = nearby_words
             .iter()
             .map(|s| s.as_str())
@@ -63,7 +73,8 @@ pub mod extern_ffi {
     }
 
     pub fn access(item: String) -> bool {
-        let mut frecency = FRECENCY_CWD.lock().unwrap();
+        let mut frecency_handle = FRECENCY.write().unwrap();
+        let mut frecency = frecency_handle.as_mut().unwrap();
         frecency.access(item.as_str()).unwrap();
         true
     }

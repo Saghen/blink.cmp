@@ -6,6 +6,13 @@
     
 
 
+
+
+typedef struct {
+    const int32_t *ptr;
+    size_t len;
+    size_t capacity;
+} blink_fuzzy__Vec_int32_t;
 typedef struct {
     const uint32_t *ptr;
     size_t len;
@@ -16,13 +23,11 @@ typedef struct {
     size_t len;
     size_t capacity;
 } blink_fuzzy__Vec___string_ptr;
-
-
-typedef struct {
-    const int32_t *ptr;
-    size_t len;
-    size_t capacity;
-} blink_fuzzy__Vec_int32_t;
+int32_t init_db(
+        const char *,
+    int8_t*);
+int32_t __gc_init_db(
+        int8_t);
 int32_t fuzzy(
         const char *,
     const blink_fuzzy__Vec___string_ptr*,
@@ -51,14 +56,30 @@ int32_t __gc_get_lines_words(
 
     
 
+local __const_c_typename_uint32_t = ffi.typeof("const uint32_t[?]")
+local __c_function_argument_uint32_t = ffi.typeof("uint32_t[?]")
+local __c_mut_function_argument_uint32_t = ffi.typeof("uint32_t[?]")
+
+
+local __const_c_typename_bool = ffi.typeof("const int8_t[?]")
+local __c_function_argument_bool = ffi.typeof("int8_t[?]")
+local __c_mut_function_argument_bool = ffi.typeof("int8_t[?]")
+
+
+local __const_c_typename_int32_t = ffi.typeof("const int32_t[?]")
+local __c_function_argument_int32_t = ffi.typeof("int32_t[?]")
+local __c_mut_function_argument_int32_t = ffi.typeof("int32_t[?]")
+
+
 local __const_c_typename___string_ptr = ffi.typeof("const char *[?]")
 local __c_function_argument___string_ptr = ffi.typeof("const char *[?]")
 local __c_mut_function_argument___string_ptr = ffi.typeof("char *[?]")
 
 
-local __const_c_typename_uint32_t = ffi.typeof("const uint32_t[?]")
-local __c_function_argument_uint32_t = ffi.typeof("uint32_t[?]")
-local __c_mut_function_argument_uint32_t = ffi.typeof("uint32_t[?]")
+local __typename_Vec_int32_t = ffi.metatype("blink_fuzzy__Vec_int32_t", {})
+local __const_c_typename_Vec_int32_t = ffi.typeof("const blink_fuzzy__Vec_int32_t[?]")
+local __c_function_argument_Vec_int32_t = ffi.typeof("const blink_fuzzy__Vec_int32_t*[?]")
+local __c_mut_function_argument_Vec_int32_t = ffi.typeof("blink_fuzzy__Vec_int32_t*[?]")
 
 
 local __typename_Vec_uint32_t = ffi.metatype("blink_fuzzy__Vec_uint32_t", {})
@@ -72,21 +93,22 @@ local __const_c_typename_Vec___string_ptr = ffi.typeof("const blink_fuzzy__Vec__
 local __c_function_argument_Vec___string_ptr = ffi.typeof("const blink_fuzzy__Vec___string_ptr*[?]")
 local __c_mut_function_argument_Vec___string_ptr = ffi.typeof("blink_fuzzy__Vec___string_ptr*[?]")
 
-
-local __const_c_typename_bool = ffi.typeof("const int8_t[?]")
-local __c_function_argument_bool = ffi.typeof("int8_t[?]")
-local __c_mut_function_argument_bool = ffi.typeof("int8_t[?]")
-
-
-local __const_c_typename_int32_t = ffi.typeof("const int32_t[?]")
-local __c_function_argument_int32_t = ffi.typeof("int32_t[?]")
-local __c_mut_function_argument_int32_t = ffi.typeof("int32_t[?]")
-
-
-local __typename_Vec_int32_t = ffi.metatype("blink_fuzzy__Vec_int32_t", {})
-local __const_c_typename_Vec_int32_t = ffi.typeof("const blink_fuzzy__Vec_int32_t[?]")
-local __c_function_argument_Vec_int32_t = ffi.typeof("const blink_fuzzy__Vec_int32_t*[?]")
-local __c_mut_function_argument_Vec_int32_t = ffi.typeof("blink_fuzzy__Vec_int32_t*[?]")
+function M.init_db(
+    db_path)
+    local __typeof = __c_mut_function_argument_bool
+    local __ret_ptr = __typeof(1, {})
+    local status = rust.init_db(
+        (function(value) return value end)(db_path),
+    __ret_ptr
+    )
+    if status ~= 0 then
+        error("init_db failed with status "..status)
+    end
+    local __ret = __ret_ptr[0]
+    
+    local f = function(value) return value ~= 0 end
+    return f(__ret)
+end
 
 function M.fuzzy(
     needle,
