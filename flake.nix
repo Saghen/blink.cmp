@@ -38,9 +38,7 @@
               cargo = toolchain;
               rustc = toolchain;
             };
-          in nearskLib.buildPackage { src = ./lua/blink/fuzzy; };
-
-          default = self'.packages.fuzzy;
+          in nearskLib.buildPackage { src = ./lua/blink/cmp/fuzzy; };
         };
 
         # define the default dev environment
@@ -52,7 +50,7 @@
             channel = "nightly";
           };
 
-          packages = [ config.packages.default pkgs.gnumake ];
+          packages = [ config.packages.fuzzy pkgs.gnumake ];
 
           scripts.build.exec = "make";
         };
