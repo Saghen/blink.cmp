@@ -21,6 +21,8 @@
         packages = {
           blink-nvim = pkgs.vimUtils.buildVimPlugin {
             pname = "blink-nvim";
+            version = "2024-07-25";
+
             src = ./.;
           };
 
