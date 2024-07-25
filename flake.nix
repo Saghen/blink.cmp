@@ -1,14 +1,13 @@
 {
-  description = "Fuzzy search with rust.";
+  description = "Set of simple, performant neovim plugins";
 
   inputs = {
-    nixpkgs.url = "github:cachix/devenv-nixpkgs/rolling";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = inputs@{ flake-parts, nixpkgs, fenix, naersk, ... }:
+  outputs = inputs@{ flake-parts, nixpkgs, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [ inputs.devenv.flakeModule ];
       systems = [
         "x86_64-linux"
         "i686-linux"
@@ -25,7 +24,7 @@
             src = ./.;
           };
 
-					default = self'.packages.blink-nvim;
+          default = self'.packages.blink-nvim;
         };
       };
     };
