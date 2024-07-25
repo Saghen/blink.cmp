@@ -20,7 +20,7 @@
         # define the packages provided by this flake
         packages = {
           blink-nvim = pkgs.vimUtils.buildVimPlugin {
-            name = "blink-nvim";
+            pname = "blink-nvim";
             src = ./.;
           };
 
