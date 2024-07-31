@@ -7,7 +7,7 @@
 - Simple hackable codebase
 - Updates on every keystroke (0.5-4ms non-blocking, single core)
 - Typo resistant fuzzy with frecncy and proximity bonus
-- Extensive LSP support (tracker)
+- Extensive LSP support ([tracker](./lsp-support-tracker.md))
 - Snippet support (including `friendly-snippets`)
 - TODO: Cmdline support
 - External sources support (including `nvim-cmp` compatibility layer)
