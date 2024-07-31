@@ -1,0 +1,67 @@
+local config = require('blink.cmp.config').fuzzy
+
+local fuzzy = {
+  rust = require('blink.cmp.fuzzy.ffi'),
+}
+
+function fuzzy.init_db(db_path)
+  fuzzy.rust.init_db(db_path)
+
+  vim.api.nvim_create_autocmd('VimLeavePre', {
+    callback = function() fuzzy.rust.destroy_db() end,
+  })
+
+  return fuzzy
+end
+
+function fuzzy.access(item) fuzzy.rust.access(item) end
+
+function fuzzy.get_words(lines) return fuzzy.rust.get_words(lines) end
+
+function fuzzy.filter_items(needle, items)
+  -- convert to table of strings
+  local haystack_labels = {}
+  local haystack_score_offsets = {}
+  local haystack_kinds = {}
+  local haystack_sources = {}
+  for _, item in ipairs(items) do
+    table.insert(haystack_labels, item.label)
+    table.insert(haystack_score_offsets, item.score_offset or 0)
+    table.insert(haystack_kinds, item.kind)
+    table.insert(haystack_sources, item.source)
+  end
+
+  -- get the nearby words
+  local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
+  local start_row = math.max(0, cursor_row - 30)
+  local end_row = math.min(cursor_row + 30, vim.api.nvim_buf_line_count(0))
+  local nearby_words =
+    fuzzy.rust.get_words(table.concat(vim.api.nvim_buf_get_lines(0, start_row, end_row, false), '\n'))
+
+  -- perform fuzzy search
+  local filtered_items = {}
+  local matched_indices =
+    fuzzy.rust.fuzzy(needle, haystack_labels, haystack_kinds, haystack_score_offsets, haystack_sources, {
+      max_items = config.max_items,
+      use_frecency = config.use_frecency,
+      use_proximity = config.use_proximity,
+      sorts = config.sorts,
+      nearby_words = nearby_words,
+    })
+  for _, idx in ipairs(matched_indices) do
+    table.insert(filtered_items, items[idx + 1])
+  end
+
+  return filtered_items
+end
+
+function fuzzy.get_query()
+  local bufnr = vim.api.nvim_get_current_buf()
+  local current_line = vim.api.nvim_win_get_cursor(0)[1] - 1
+  local current_col = vim.api.nvim_win_get_cursor(0)[2] - 1
+  local line = vim.api.nvim_buf_get_lines(bufnr, current_line, current_line + 1, false)[1]
+  local query = string.sub(line, 1, current_col + 1):match('[%w_\\-]+$') or ''
+  return query
+end
+
+return fuzzy

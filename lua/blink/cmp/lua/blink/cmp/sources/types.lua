@@ -1,0 +1,8 @@
+--- @class Source
+--- @field get_trigger_characters fun(): string[]
+--- @field completions fun(context: ShowContext, callback: fun(items: lsp.CompletionItem[]))
+--- @field filter_completions fun(context: ShowContext, items: CompletionItem[]): CompletionItem[]
+--- @field cancel_completions fun()
+--- @field should_show_completions fun(): boolean
+---
+--- @field resolve fun(item: lsp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil))
