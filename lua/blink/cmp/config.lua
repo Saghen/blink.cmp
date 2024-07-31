@@ -40,11 +40,15 @@
 --- @field direction_priority ("n" | "s")[]
 --- @field preselect boolean
 
+--- @class DocumentationDirectionPriorityConfig
+--- @field autocomplete_north ("n" | "s" | "e" | "w")[]
+--- @field autocomplete_south ("n" | "s" | "e" | "w")[]
+---
 --- @class DocumentationConfig
 --- @field min_width number
 --- @field max_width number
 --- @field max_height number
---- @field direction_priority ("n" | "s" | "e" | "w")[]
+--- @field direction_priority DocumentationDirectionPriorityConfig
 --- @field auto_show boolean
 --- @field debounce_ms number
 --- @field delay_ms number
@@ -89,7 +93,10 @@ local config = {
       min_width = 10,
       max_width = 60,
       max_height = 20,
-      direction_priority = { 'e', 'w', 's', 'n' },
+      direction_priority = {
+        autocomplete_north = { 'e', 'w', 'n', 's' },
+        autocomplete_south = { 'e', 'w', 's', 'n' },
+      },
       auto_show = true,
       delay_ms = 0,
       debounce_ms = 100,

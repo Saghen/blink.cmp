@@ -17,7 +17,9 @@ function docs.setup()
   autocomplete.listen_on_position_update(function()
     if autocomplete.win:get_win() then docs.update_position() end
   end)
-  autocomplete.listen_on_select(function(item) docs.show_item(item) end)
+  if config.windows.documentation.auto_show then
+    autocomplete.listen_on_select(function(item) docs.show_item(item) end)
+  end
   autocomplete.listen_on_close(function() docs.win:close() end)
 
   return docs
@@ -66,12 +68,15 @@ function docs.update_position()
   local autocomplete_winnr = autocomplete.win:get_win()
   if not autocomplete_winnr then return end
   local autocomplete_win_config = vim.api.nvim_win_get_config(autocomplete_winnr)
-  local function set_config(opts)
-    vim.api.nvim_win_set_config(winnr, { relative = 'win', win = autocomplete_winnr, row = opts.row, col = opts.col })
-  end
 
   local screen_width = vim.api.nvim_win_get_width(0)
   local screen_height = vim.api.nvim_win_get_height(0)
+  local cursor_screen_row = vim.fn.screenrow()
+
+  local autocomplete_win_is_up = autocomplete_win_config.row - cursor_screen_row < 0
+  local direction_priority = autocomplete_win_is_up
+      and config.windows.documentation.direction_priority.autocomplete_north
+    or config.windows.documentation.direction_priority.autocomplete_south
 
   local height = vim.api.nvim_win_get_height(winnr)
   local width = vim.api.nvim_win_get_width(winnr)
@@ -81,22 +86,29 @@ function docs.update_position()
   local space_left = autocomplete_win_config.col > width
   local space_right = screen_width - autocomplete_win_config.width - autocomplete_win_config.col > width
 
-  for _, direction in ipairs(config.windows.documentation.direction_priority) do
+  local function set_config(opts)
+    vim.api.nvim_win_set_config(winnr, { relative = 'win', win = autocomplete_winnr, row = opts.row, col = opts.col })
+  end
+  for _, direction in ipairs(direction_priority) do
     if direction == 'n' and space_above then
-      if autocomplete_win_config.row >= 0 then
+      if autocomplete_win_is_up then
         set_config({ row = -height, col = 0 })
       else
         set_config({ row = -1 - height, col = 0 })
       end
       return
     elseif direction == 's' and space_below then
-      set_config({ row = autocomplete_win_config.height, col = 0 })
+      if autocomplete_win_is_up then
+        set_config({ row = 1 + autocomplete_win_config.height, col = 0 })
+      else
+        set_config({ row = autocomplete_win_config.height, col = 0 })
+      end
       return
     elseif direction == 'e' and space_right then
       set_config({ row = 0, col = autocomplete_win_config.width })
       return
     elseif direction == 'w' and space_left then
-      set_config({ row = 0, col = -width })
+      set_config({ row = 0, col = -1 - width })
       return
     end
   end
