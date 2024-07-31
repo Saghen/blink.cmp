@@ -1,3 +1,2 @@
 target/
-.devenv
-.direnv
+.archive.lua

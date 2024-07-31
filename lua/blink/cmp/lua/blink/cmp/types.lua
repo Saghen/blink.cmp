@@ -1,0 +1,4 @@
+--- @class CompletionItem : lsp.CompletionItem
+--- @field score_offset number | nil
+--- @field source string
+--- @field cursor_column number
