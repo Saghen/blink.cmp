@@ -42,6 +42,8 @@ end
 
 {
   'saghen/blink.nvim',
+  -- note: requires nightly
+  build = 'cargo build --release',
   -- todo: should handle lazy loading internally
   event = 'InsertEnter',
   dependencies = {
