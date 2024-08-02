@@ -1,8 +1,18 @@
+--- @class TriggerContext
+--- @field kind number
+--- @field character string
+---
+--- @class CompletionContext : ShowContext
+--- @field trigger TriggerContext | nil
+---
+--- @class CompletionResponse
+--- @field isIncomplete boolean
+--- @field items CompletionItem[]
+---
 --- @class Source
 --- @field get_trigger_characters fun(): string[]
---- @field completions fun(context: ShowContext, callback: fun(items: lsp.CompletionItem[]))
---- @field filter_completions fun(context: ShowContext, items: CompletionItem[]): CompletionItem[]
+--- @field completions fun(context: CompletionContext, callback: fun(response: CompletionResponse))
+--- @field filter_completions fun(context: CompletionContext, source_responses: table<string, CompletionItem[]>): CompletionItem[]
 --- @field cancel_completions fun()
---- @field should_show_completions fun(): boolean
----
---- @field resolve fun(item: lsp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil))
+--- @field should_show_completions fun(context: CompletionContext, source_responses: table<string, CompletionResponse>): boolean
+--- @field resolve fun(item: CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil)): ((fun(): nil) | nil)

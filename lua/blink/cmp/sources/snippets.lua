@@ -1,3 +1,4 @@
+--- @class Source
 local snippets = {}
 
 function snippets.completions(_, callback)

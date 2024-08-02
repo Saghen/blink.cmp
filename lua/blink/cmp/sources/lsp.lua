@@ -1,3 +1,4 @@
+--- @class Source
 local lsp = {}
 
 ---@param capability string|table|nil Server capability (possibly nested
@@ -39,6 +40,7 @@ function lsp.get_clients_with_capability(capability, filter)
 end
 
 function lsp.completions(context, callback)
+  local start_time = vim.loop.hrtime()
   -- no providers with completion support
   if not lsp.has_capability('completionProvider') then return callback({ isIncomplete = false, items = {} }) end
 
@@ -54,6 +56,8 @@ function lsp.completions(context, callback)
   -- request from each of the clients
   -- todo: refactor
   lsp.cancel_completions_func = vim.lsp.buf_request_all(0, 'textDocument/completion', params, function(result)
+    local duration = vim.loop.hrtime() - start_time
+    print('lsp.completions duration: ' .. duration / 1000000 .. 'ms')
     local responses = {}
     for client_id, response in pairs(result) do
       -- todo: pass error upstream
@@ -103,15 +107,18 @@ function lsp.cancel_completions()
   end
 end
 
--- @return function Cancel function
 function lsp.resolve(item, callback)
   local client = vim.lsp.get_client_by_id(item.client_id)
-  if client == nil then return callback(item) end
+  if client == nil then
+    callback(item)
+    return
+  end
 
-  client.request('completionItem/resolve', item, function(error, result)
+  local _, request_id = client.request('completionItem/resolve', item, function(error, result)
     if error or result == nil then callback(item) end
     callback(result)
   end)
+  if request_id ~= nil then return function() client.cancel_request(request_id) end end
 end
 
 return lsp

@@ -14,11 +14,12 @@ local sources = {
     snippets = -1,
   },
 
-  sources_items = {},
+  sources_responses = {},
   current_context_id = -1,
   on_completions_callback = function(_) end,
 }
 
+--- @return string[]
 function sources.get_trigger_characters()
   local blocked_trigger_characters = {}
   for _, char in ipairs(config.trigger.blocked_trigger_characters) do
@@ -39,12 +40,13 @@ end
 
 function sources.listen_on_completions(callback) sources.on_completions_callback = callback end
 
+--- @param context ShowContext
 function sources.completions(context)
   -- a new context means we should refetch everything
   local is_new_context = context.id ~= sources.current_context_id
   sources.current_context_id = context.id
 
-  if is_new_context then sources.sources_items = {} end
+  if is_new_context then sources.sources_responses = {} end
 
   for source_name, source in pairs(sources.registered) do
     -- the source indicates we should refetch when this character is typed
@@ -52,10 +54,10 @@ function sources.completions(context)
     local trigger_character = context.trigger_character
       and vim.tbl_contains(trigger_characters, context.trigger_character)
     -- the source indicates the previous results were incomplete and should be refetched on the next trigger
-    local previous_incomplete = sources.sources_items[source_name] ~= nil
-      and sources.sources_items[source_name].isIncomplete
+    local previous_incomplete = sources.sources_responses[source_name] ~= nil
+      and sources.sources_responses[source_name].isIncomplete
     -- check if we have no data and no calls are in flight
-    local no_data = sources.sources_items[source_name] == nil and sources.in_flight_id[source_name] == -1
+    local no_data = sources.sources_responses[source_name] == nil and sources.in_flight_id[source_name] == -1
 
     -- if none of these are true, we can use the existing cached results
     if is_new_context or trigger_character or previous_incomplete or no_data then
@@ -76,15 +78,13 @@ function sources.completions(context)
       -- fixme: what if we refetch due to incomplete items or a trigger_character? the context trigger id wouldnt change
       -- change so stale data would be returned if the source doesn't support cancellation
       local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
-      vim.schedule(function()
-        source.completions({ trigger = trigger_context }, function(items)
-          -- a new call was made or this one was cancelled
-          if sources.in_flight_id[source_name] ~= in_flight_id then return end
-          sources.in_flight_id[source_name] = -1
+      source.completions({ trigger = trigger_context }, function(items)
+        -- a new call was made or this one was cancelled
+        if sources.in_flight_id[source_name] ~= in_flight_id then return end
+        sources.in_flight_id[source_name] = -1
 
-          sources.add_source_completions(source_name, items, cursor_column)
-          if not sources.some_in_flight() then sources.send_completions(context) end
-        end)
+        sources.add_source_completions(source_name, items, cursor_column)
+        if not sources.some_in_flight() then sources.send_completions(context) end
       end)
     end
   end
@@ -94,15 +94,19 @@ function sources.completions(context)
   if not sources.some_in_flight() then sources.send_completions(context) end
 end
 
-function sources.add_source_completions(source_name, source_items, cursor_column)
-  for _, item in ipairs(source_items.items) do
+--- @param source_name string
+--- @param source_response CompletionResponse
+--- @param cursor_column number
+function sources.add_source_completions(source_name, source_response, cursor_column)
+  for _, item in ipairs(source_response.items) do
     item.source = source_name
     item.cursor_column = cursor_column
   end
 
-  sources.sources_items[source_name] = source_items
+  sources.sources_responses[source_name] = source_response
 end
 
+--- @return boolean
 function sources.some_in_flight()
   for _, in_flight in pairs(sources.in_flight_id) do
     if in_flight ~= -1 then return true end
@@ -110,18 +114,23 @@ function sources.some_in_flight()
   return false
 end
 
+--- @param context ShowContext
 function sources.send_completions(context)
-  local sources_items = sources.sources_items
+  local sources_responses = sources.sources_responses
   -- apply source filters
   for _, source in pairs(sources.registered) do
-    if source.filter_completions ~= nil then sources_items = source.filter_completions(context, sources_items) end
+    if source.filter_completions ~= nil then
+      sources_responses = source.filter_completions(context, sources_responses)
+    end
   end
 
   -- flatten the items
   local flattened_items = {}
-  for source_name, response in pairs(sources.sources_items) do
+  for source_name, response in pairs(sources.sources_responses) do
     local source = sources.registered[source_name]
-    if source.should_show == nil or source.should_show() then vim.list_extend(flattened_items, response.items) end
+    if source.should_show_completions == nil or source.should_show_completions(context, sources_responses) then
+      vim.list_extend(flattened_items, response.items)
+    end
   end
 
   sources.on_completions_callback(context, flattened_items)
@@ -134,10 +143,16 @@ function sources.cancel_completions()
   end
 end
 
+--- @param item CompletionItem
+--- @param callback fun(resolved_item: CompletionItem | nil)
+--- @return fun(): nil Cancelation function
 function sources.resolve(item, callback)
   local item_source = sources.registered[item.source]
-  if item_source == nil or item_source.resolve == nil then return callback(item) end
-  item_source.resolve(item, callback)
+  if item_source == nil or item_source.resolve == nil then
+    callback(nil)
+    return function() end
+  end
+  return item_source.resolve(item, callback) or function() end
 end
 
 return sources

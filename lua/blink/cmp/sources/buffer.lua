@@ -1,5 +1,5 @@
 -- todo: nvim-cmp only updates the lines that got changed which is better
--- but this is *speeeeeed* and super simple. should add the better way
+-- but this is *speeeeeed* and simple. should add the better way
 -- but ensure it doesn't add too much complexity
 
 local uv = vim.uv
@@ -62,6 +62,7 @@ end
 
 --- Public API
 
+--- @class Source
 local buffer = {}
 
 function buffer.completions(_, callback)
@@ -76,44 +77,43 @@ function buffer.completions(_, callback)
     run_async(buf_text, transformed_callback)
   -- too big so ignore
   else
-    callback({})
+    transformed_callback({})
   end
 end
 
+function buffer.should_show_completions(context, sources_responses)
+  local context_length = context.bounds.end_col - context.bounds.start_col
+  if context_length <= 3 then return false end
+  if sources_responses.lsp ~= nil and #sources_responses.lsp.items > 0 then return false end
+  return true
+end
+
 function buffer.filter_completions(context, sources_responses)
-  -- if sources_responses.buffer == nil then return sources_responses end
-  --
-  -- -- copy to avoid mutating the original
-  -- local copied_sources_responses = {}
-  -- for name, response in pairs(sources_responses) do
-  --   copied_sources_responses[name] = response
-  -- end
-  -- sources_responses = copied_sources_responses
-  --
-  -- -- don't show if a trigger character triggered this
-  -- -- todo: the idea here is that situations like `text.|` shouldn't show
-  -- -- the buffer completions since it's likely not helpful
-  -- if context.trigger_character ~= nil then
-  --   sources_responses.buffer.items = {}
-  --   return sources_responses
-  -- end
-  --
-  -- -- get all of the unique labels
-  -- local unique_words = {}
-  -- for name, response in pairs(sources_responses) do
-  --   if name ~= 'buffer' then
-  --     for _, item in ipairs(response.items) do
-  --       unique_words[item.label] = true
-  --     end
-  --   end
-  -- end
-  --
-  -- -- filter any buffer words that already have a source
-  -- local filtered_buffer_items = {}
-  -- for _, item in ipairs(sources_responses.buffer.items) do
-  --   if not unique_words[item.label] then table.insert(filtered_buffer_items, item) end
-  -- end
-  -- sources_responses.buffer.items = filtered_buffer_items
+  if sources_responses.buffer == nil then return sources_responses end
+
+  -- copy to avoid mutating the original
+  local copied_sources_responses = {}
+  for name, response in pairs(sources_responses) do
+    copied_sources_responses[name] = response
+  end
+  sources_responses = copied_sources_responses
+
+  -- get all of the unique labels
+  local unique_words = {}
+  for name, response in pairs(sources_responses) do
+    if name ~= 'buffer' then
+      for _, item in ipairs(response.items) do
+        unique_words[item.label] = true
+      end
+    end
+  end
+
+  -- filter any buffer words that already have a source
+  local filtered_buffer_items = {}
+  for _, item in ipairs(sources_responses.buffer.items) do
+    if not unique_words[item.label] then table.insert(filtered_buffer_items, item) end
+  end
+  sources_responses.buffer.items = filtered_buffer_items
 
   return sources_responses
 end

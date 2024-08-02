@@ -2,3 +2,4 @@
 --- @field score_offset number | nil
 --- @field source string
 --- @field cursor_column number
+--- @field client_id number

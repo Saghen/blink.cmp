@@ -1,7 +1,8 @@
 -- todo: track cmp_win position
-local config = require('blink.cmp.config')
+local config = require('blink.cmp.config').windows.documentation
 local sources = require('blink.cmp.sources')
 local autocomplete = require('blink.cmp.windows.autocomplete')
+local utils = require('blink.cmp.util')
 local docs = {}
 
 function docs.setup()
@@ -9,7 +10,6 @@ function docs.setup()
     min_width = 10,
     max_height = 20,
     wrap = true,
-    -- todo: is just using markdown enough?
     filetype = 'markdown',
     padding = true,
   })
@@ -17,8 +17,12 @@ function docs.setup()
   autocomplete.listen_on_position_update(function()
     if autocomplete.win:get_win() then docs.update_position() end
   end)
-  if config.windows.documentation.auto_show then
-    autocomplete.listen_on_select(function(item) docs.show_item(item) end)
+  if config.auto_show then
+    if config.delay_ms > 0 then
+      autocomplete.listen_on_select(utils.debounce(docs.show_item, config.delay_ms))
+    else
+      autocomplete.listen_on_select(docs.show_item)
+    end
   end
   autocomplete.listen_on_close(function() docs.win:close() end)
 
@@ -32,6 +36,8 @@ function docs.show_item(item)
     return
   end
 
+  -- todo: cancellation
+  -- todo: only resolve if documentation does not exist
   sources.resolve(item, function(resolved_item)
     item = resolved_item or item
     if item.documentation == nil then
@@ -74,9 +80,8 @@ function docs.update_position()
   local cursor_screen_row = vim.fn.screenrow()
 
   local autocomplete_win_is_up = autocomplete_win_config.row - cursor_screen_row < 0
-  local direction_priority = autocomplete_win_is_up
-      and config.windows.documentation.direction_priority.autocomplete_north
-    or config.windows.documentation.direction_priority.autocomplete_south
+  local direction_priority = autocomplete_win_is_up and config.direction_priority.autocomplete_north
+    or config.direction_priority.autocomplete_south
 
   local height = vim.api.nvim_win_get_height(winnr)
   local width = vim.api.nvim_win_get_width(winnr)

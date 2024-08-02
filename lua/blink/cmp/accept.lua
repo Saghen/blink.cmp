@@ -1,12 +1,6 @@
 local utils = {}
 
 local function accept(item)
-  -- create an undo point
-  -- fixme: doesnt work
-  -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-G>u', true, false, true), 'n', false)
-  -- vim.cmd('normal! i<C-G>u')
-  -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-G>u', true, false, true), 'im', true)
-
   local sources = require('blink.cmp.sources')
   local fuzzy = require('blink.cmp.fuzzy')
 
@@ -47,6 +41,7 @@ local function accept(item)
   -- LSPs can either include these in the initial response or require a resolve
   -- These are used for things like auto-imports
   -- todo: check capabilities to know ahead of time
+  -- todo: if the text edit above was before this text edit, we need to compensate
   if item.additionalTextEdits ~= nil then
     utils.apply_text_edits(item.client_id, item.additionalTextEdits)
   else

@@ -97,7 +97,7 @@ local config = {
         autocomplete_north = { 'e', 'w', 'n', 's' },
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
-      auto_show = true,
+      auto_show = false,
       delay_ms = 0,
       debounce_ms = 100,
     },

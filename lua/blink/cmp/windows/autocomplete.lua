@@ -43,11 +43,11 @@ function autocomplete.setup()
 
       -- todo: use vim.lsp.protocol.CompletionItemTag
       if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then
-        vim.api.nvim_buf_set_extmark(bufnr, config.highlight_ns, line_number, 4, {
+        -- todo: why 7?
+        vim.api.nvim_buf_set_extmark(bufnr, config.highlight_ns, line_number, 7, {
           end_col = #line_text - 1,
           hl_group = 'BlinkCmpLabelDeprecated',
           hl_mode = 'combine',
-          hl_eol = true,
           ephemeral = true,
         })
       end

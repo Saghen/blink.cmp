@@ -28,17 +28,24 @@ cmp.setup = function(opts)
   cmp.fuzzy = require('blink.cmp.fuzzy')
   cmp.fuzzy.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
 
-  cmp.trigger.listen_on_show(function(context) cmp.sources.completions(context) end)
+  local start_time = vim.loop.hrtime()
+  cmp.trigger.listen_on_show(function(context)
+    start_time = vim.loop.hrtime()
+    cmp.sources.completions(context)
+  end)
   cmp.trigger.listen_on_hide(function()
     cmp.sources.cancel_completions()
     cmp.windows.autocomplete.close()
   end)
   cmp.sources.listen_on_completions(function(context, items)
+    local duration = vim.loop.hrtime() - start_time
+    print('cmp.sources.listen_on_completions duration: ' .. duration / 1000000 .. 'ms')
     -- avoid adding 1-4ms to insertion latency by scheduling for later
     vim.schedule(function()
       local filtered_items = cmp.fuzzy.filter_items(require('blink.cmp.util').get_query(), items)
       if #filtered_items > 0 then
         cmp.windows.autocomplete.open_with_items(context, filtered_items)
+        print('cmp.windows.autocomplete.open_with_items duration: ' .. duration / 1000000 .. 'ms')
       else
         cmp.windows.autocomplete.close()
       end
@@ -46,6 +53,7 @@ cmp.setup = function(opts)
   end)
 end
 
+-- todo: dont default to cmp, use new hl groups
 cmp.add_default_highlights = function()
   --- @class Opts
   --- @field name string

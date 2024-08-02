@@ -7,7 +7,7 @@
 - Simple hackable codebase
 - Updates on every keystroke (0.5-4ms non-blocking, single core)
 - Typo resistant fuzzy with frecncy and proximity bonus
-- Extensive LSP support ([tracker](./lsp-support-tracker.md))
+- Extensive LSP support ([tracker](./LSP_TRACKER.md))
 - Snippet support (including `friendly-snippets`)
 - TODO: Cmdline support
 - External sources support (including `nvim-cmp` compatibility layer)
@@ -19,8 +19,8 @@
 ```lua
 {
   'saghen/blink.cmp',
-  lazy = false, -- handled internally
-  version = "^1"
+  -- todo: should handle lazy loading internally
+  event = 'InsertEnter',
   keys = {
     map_cmp('')
   },
