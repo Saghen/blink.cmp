@@ -40,7 +40,6 @@ function lsp.get_clients_with_capability(capability, filter)
 end
 
 function lsp.completions(context, callback)
-  local start_time = vim.loop.hrtime()
   -- no providers with completion support
   if not lsp.has_capability('completionProvider') then return callback({ isIncomplete = false, items = {} }) end
 
@@ -56,8 +55,6 @@ function lsp.completions(context, callback)
   -- request from each of the clients
   -- todo: refactor
   lsp.cancel_completions_func = vim.lsp.buf_request_all(0, 'textDocument/completion', params, function(result)
-    local duration = vim.loop.hrtime() - start_time
-    print('lsp.completions duration: ' .. duration / 1000000 .. 'ms')
     local responses = {}
     for client_id, response in pairs(result) do
       -- todo: pass error upstream

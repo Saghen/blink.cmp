@@ -38,14 +38,11 @@ cmp.setup = function(opts)
     cmp.windows.autocomplete.close()
   end)
   cmp.sources.listen_on_completions(function(context, items)
-    local duration = vim.loop.hrtime() - start_time
-    print('cmp.sources.listen_on_completions duration: ' .. duration / 1000000 .. 'ms')
     -- avoid adding 1-4ms to insertion latency by scheduling for later
     vim.schedule(function()
       local filtered_items = cmp.fuzzy.filter_items(require('blink.cmp.util').get_query(), items)
       if #filtered_items > 0 then
         cmp.windows.autocomplete.open_with_items(context, filtered_items)
-        print('cmp.windows.autocomplete.open_with_items duration: ' .. duration / 1000000 .. 'ms')
       else
         cmp.windows.autocomplete.close()
       end
