@@ -44,6 +44,13 @@ end
   'saghen/blink.nvim',
   -- todo: should handle lazy loading internally
   event = 'InsertEnter',
+  dependencies = {
+    {
+      'garymjr/nvim-snippets',
+      dependencies = { 'rafamadriz/friendly-snippets' },
+      opts = { create_cmp_source = false, friendly_snippets = true },
+    },
+  },
   keys = {
     map_blink_cmp('i', '<C-space>', 'show'),
     map_blink_cmp('i', '<Tab>', 'accept'),
