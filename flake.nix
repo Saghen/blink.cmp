@@ -1,5 +1,5 @@
 {
-  description = "Super amazing neovim completion plugin";
+  description = "Set of simple, performant neovim plugins";
 
   inputs = {
     nixpkgs.url = "github:cachix/devenv-nixpkgs/rolling";
@@ -29,17 +29,19 @@
       perSystem = { config, self', inputs', pkgs, system, lib, ... }: {
         # define the packages provided by this flake
         packages = let
-          toolchain = fenix.packages.${system}.minimal.toolchain;
+          inherit (fenix.packages.${system}.minimal) toolchain;
+
           rustPlatform = pkgs.makeRustPlatform {
             cargo = toolchain;
             rustc = toolchain;
           };
-          fuzzy = rustPlatform.buildRustPackage {
-            pname = "blink-cmp-lib";
-            version = "2024-07-26";
 
-            src = ./.;
+          src = ./.;
+          version = "2024-08-02";
 
+          blink-fuzzy-lib = rustPlatform.buildRustPackage {
+            pname = "blink-fuzzy-lib";
+            inherit src version;
             cargoLock = {
               lockFile = ./Cargo.lock;
               outputHashes = {
@@ -51,31 +53,28 @@
             };
           };
         in {
-          blink-cmp = pkgs.vimUtils.buildVimPlugin {
-            pname = "blink-cmp";
-            version = "2024-07-26";
-
-            src = ./.;
-
-						preInstall = ''
-							mkdir -p target/release
-							ln -s ${fuzzy}/lib/libblink_cmp_fuzzy.so target/release/libblink_cmp_fuzzy.so
-						'';
+          blink-nvim = pkgs.vimUtils.buildVimPlugin {
+            pname = "blink-nvim";
+            inherit src version;
+            preInstall = ''
+              mkdir -p target/release
+              ln -s ${blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.so target/release/libblink_cmp_fuzzy.so
+            '';
 
             meta = {
-              description = "Super amazing neovim completion plugin";
-              homepage = "https://github.com/saghen/blink.cmp";
+              description = "Set of simple, performant neovim plugins";
+              homepage = "https://github.com/saghen/blink.nvim";
               license = lib.licenses.mit;
               maintainers = with lib.maintainers; [ redxtech ];
             };
           };
 
-          default = self'.packages.blink-cmp;
+          default = self'.packages.blink-nvim;
         };
 
         # define the default dev environment
         devenv.shells.default = {
-          name = "fuzzy";
+          name = "blink";
 
           languages.rust = {
             enable = true;
