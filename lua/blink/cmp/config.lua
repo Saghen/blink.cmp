@@ -1,3 +1,11 @@
+--- @class KeymapConfig
+--- @field show string | string[]
+--- @field accept string | string[]
+--- @field select_prev string | string[]
+--- @field select_next string | string[]
+--- @field snippet_forward string | string[]
+--- @field snippet_backward string | string[]
+
 --- @class TriggerConfig
 --- @field context_regex string
 --- @field blocked_trigger_characters string[]
@@ -63,6 +71,15 @@
 
 --- @type CmpConfig
 local config = {
+  keymap = {
+    show = '<C-space>',
+    hide = '<C-e>',
+    accept = '<Tab>',
+    select_prev = { '<Up>', '<C-j>' },
+    select_next = { '<Down>', '<C-k>' },
+    snippet_forward = '<Tab>',
+    snippet_backward = '<S-Tab>',
+  },
   trigger = {
     context_regex = '[%w_\\-]',
     blocked_trigger_characters = { ' ', '\n', '\t' },
@@ -142,6 +159,6 @@ local config = {
 local M = {}
 
 --- @param opts CmpConfig
-function M.merge_with(opts) end
+function M.merge_with(opts) config = vim.tbl_deep_extend('force', config, opts or {}) end
 
 return setmetatable(M, { __index = function(_, k) return config[k] end })

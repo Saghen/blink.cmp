@@ -2,15 +2,18 @@ local cmp = {}
 
 --- @param opts CmpConfig
 cmp.setup = function(opts)
-  require('blink.cmp.config').merge_with(opts)
+  local config = require('blink.cmp.config')
+  config.merge_with(opts)
+
+  require('blink.cmp.keymap').setup(config.keymap)
 
   cmp.add_default_highlights()
   vim.api.nvim_create_autocmd('ColorScheme', { callback = cmp.add_default_highlights })
 
+  -- STRUCTURE
   -- trigger -> sources -> fuzzy (filter/sort) -> windows (render)
-  --
-  -- trigger controls when to show the window and the current context
-  -- for caching
+
+  -- trigger controls when to show the window and the current context for caching
   cmp.trigger = require('blink.cmp.trigger').activate_autocmds()
 
   -- sources fetch autocomplete items and documentation
@@ -28,11 +31,7 @@ cmp.setup = function(opts)
   cmp.fuzzy = require('blink.cmp.fuzzy')
   cmp.fuzzy.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
 
-  local start_time = vim.loop.hrtime()
-  cmp.trigger.listen_on_show(function(context)
-    start_time = vim.loop.hrtime()
-    cmp.sources.completions(context)
-  end)
+  cmp.trigger.listen_on_show(function(context) cmp.sources.completions(context) end)
   cmp.trigger.listen_on_hide(function()
     cmp.sources.cancel_completions()
     cmp.windows.autocomplete.close()
@@ -50,35 +49,23 @@ cmp.setup = function(opts)
   end)
 end
 
--- todo: dont default to cmp, use new hl groups
 cmp.add_default_highlights = function()
-  --- @class Opts
-  --- @field name string
-  --- @field cmp_name string | nil
-  --- @field default_name string
-
-  --- @param opts Opts
-  local function default_to_cmp(opts)
-    local cmp_hl_name = 'CmpItem' .. (opts.cmp_name or opts.name)
-    local blink_hl_name = 'BlinkCmp' .. opts.name
-    if vim.api.nvim_get_hl(0, { name = cmp_hl_name, create = false }) ~= nil then
-      vim.api.nvim_set_hl(0, blink_hl_name, { link = cmp_hl_name, default = true })
-    else
-      vim.api.nvim_set_hl(0, blink_hl_name, { link = opts.default_name, default = true })
-    end
-  end
-
-  default_to_cmp({ name = 'Label', cmp_name = 'Abbr', default_name = 'Pmenu' })
-  default_to_cmp({ name = 'LabelDeprecated', cmp_name = 'AbbrDeprecated', default_name = 'Comment' })
-  default_to_cmp({ name = 'LabelMatch', cmp_name = 'AbbrMatch', default_name = 'Pmenu' })
-  default_to_cmp({ name = 'Kind', default_name = 'Special' })
+  vim.api.nvim_set_hl(0, 'BlinkCmpLabel', { link = 'Pmenu', default = true })
+  vim.api.nvim_set_hl(0, 'BlinkCmpLabelDeprecated', { link = 'Comment', default = true })
+  vim.api.nvim_set_hl(0, 'BlinkCmpLabelMatch', { link = 'Pmenu', default = true })
+  vim.api.nvim_set_hl(0, 'BlinkCmpKind', { link = 'Special', default = true })
   for _, kind in pairs(vim.lsp.protocol.CompletionItemKind) do
-    default_to_cmp({ name = 'Kind' .. kind, default_name = 'BlinkCmpItemKind' })
+    vim.api.nvim_set_hl(0, 'BlinkCmpKind' .. kind, { link = 'BlinkCmpItemKind', default = true })
   end
 end
 
 cmp.show = function()
   vim.schedule(function() cmp.trigger.show() end)
+  return true
+end
+
+cmp.hide = function()
+  vim.schedule(function() cmp.trigger.hide() end)
   return true
 end
 
