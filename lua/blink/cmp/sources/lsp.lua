@@ -40,6 +40,10 @@ function lsp.get_clients_with_capability(capability, filter)
 end
 
 function lsp.completions(context, callback)
+  -- todo: offset encoding is global but should be per-client
+  -- todo: should make separate LSP requests to return results earlier, in the case of slow LSPs
+  -- todo: should make a new call if the cursor moves backwards, before the first character of the trigger
+
   -- no providers with completion support
   if not lsp.has_capability('completionProvider') then return callback({ isIncomplete = false, items = {} }) end
 
@@ -50,6 +54,29 @@ function lsp.completions(context, callback)
   }
   if context.trigger.kind == vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter then
     params.context.triggerCharacter = context.trigger.character
+  end
+
+  -- special case, the first character of the context is a trigger character, so we adjust the position
+  -- sent to the LSP server to be the start of the trigger character
+  --
+  -- some LSP do their own filtering before returning results, which we want to avoid
+  -- since we perform fuzzy matching ourselves.
+  --
+  -- this also avoids having to make multiple calls to the LSP server in case characters are deleted
+  -- for these special cases
+  -- i.e. hello.wor| would be sent as hello.|wor
+  -- todo: should we still make two calls to the LSP server and merge?
+  local trigger_characters = lsp.get_trigger_characters()
+  local trigger_character_block_list = { ' ', '\n', '\t' }
+  local bounds = context.bounds
+  local trigger_character_before_context = bounds.line:sub(bounds.start_col - 1, bounds.start_col - 1)
+  if
+    vim.tbl_contains(trigger_characters, trigger_character_before_context)
+    and not vim.tbl_contains(trigger_character_block_list, trigger_character_before_context)
+  then
+    local offset_encoding = vim.lsp.get_clients({ bufnr = 0 })[1].offset_encoding
+    params.position.character =
+      vim.lsp.util.character_offset(0, params.position.line, bounds.start_col - 1, offset_encoding)
   end
 
   -- request from each of the clients
@@ -75,6 +102,7 @@ function lsp.completions(context, callback)
     for client_id, response in pairs(responses) do
       for _, item in ipairs(response.items) do
         -- todo: terraform lsp doesn't return a .kind in situations like `toset`, is there a default value we need to grab?
+        -- it doesn't seem to return itemDefaults either
         item.kind = item.kind or vim.lsp.protocol.CompletionItemKind.Text
         item.client_id = client_id
 
@@ -85,7 +113,7 @@ function lsp.completions(context, callback)
     end
 
     -- combine responses
-    -- todo: would be nice to pass multiple responses to the sources
+    -- todo: ideally pass multiple responses to the sources
     -- so that we can do fine-grained isIncomplete
     local combined_response = { isIncomplete = false, items = {} }
     for _, response in pairs(responses) do
@@ -111,9 +139,9 @@ function lsp.resolve(item, callback)
     return
   end
 
-  local _, request_id = client.request('completionItem/resolve', item, function(error, result)
-    if error or result == nil then callback(item) end
-    callback(result)
+  local _, request_id = client.request('completionItem/resolve', item, function(error, resolved_item)
+    if error or resolved_item == nil then callback(item) end
+    callback(resolved_item)
   end)
   if request_id ~= nil then return function() client.cancel_request(request_id) end end
 end

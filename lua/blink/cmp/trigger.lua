@@ -3,7 +3,8 @@
 -- This can be used downstream to determine if we should make new requests to the sources or not.
 
 --- @class TriggerBounds
---- @field line number
+--- @field line string
+--- @field line_number number
 --- @field start_col number
 --- @field end_col number
 ---
@@ -108,7 +109,7 @@ function trigger.show(opts)
   opts = opts or {}
 
   -- update context (to update bounds and treesitter node)
-  -- todo: this beahvior isn't obvious
+  -- todo: this behavior isn't obvious
   trigger.context = trigger.get_context()
 
   trigger.event_targets.on_show({
@@ -149,7 +150,7 @@ function trigger.within_query_bounds(cursor)
 
   local row, col = cursor[1], cursor[2]
   local bounds = trigger.context.bounds
-  return row == bounds.line and col >= bounds.start_col and col <= bounds.end_col
+  return row == bounds.line_number and col >= bounds.start_col and col <= bounds.end_col
 end
 
 ------ Helpers ------
@@ -185,7 +186,7 @@ function helpers.get_query(regex)
     end_col = end_col + 1
   end
 
-  return { line = cursor_line, start_col = start_col, end_col = end_col }
+  return { line = line, line_number = cursor_line, start_col = start_col, end_col = end_col }
 end
 
 --- @return TSNode | nil

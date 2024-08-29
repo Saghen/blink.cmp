@@ -78,7 +78,9 @@ function sources.completions(context)
       -- fixme: what if we refetch due to incomplete items or a trigger_character? the context trigger id wouldnt change
       -- change so stale data would be returned if the source doesn't support cancellation
       local cursor_column = vim.api.nvim_win_get_cursor(0)[2]
-      source.completions({ trigger = trigger_context }, function(items)
+      local source_context = vim.fn.deepcopy(context)
+      source_context.trigger = trigger_context
+      source.completions(source_context, function(items)
         -- a new call was made or this one was cancelled
         if sources.in_flight_id[source_name] ~= in_flight_id then return end
         sources.in_flight_id[source_name] = -1

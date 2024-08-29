@@ -1,9 +1,9 @@
---- @class TriggerContext
+--- @class CompletionTriggerContext
 --- @field kind number
 --- @field character string
 ---
 --- @class CompletionContext : ShowContext
---- @field trigger TriggerContext | nil
+--- @field trigger CompletionTriggerContext | nil
 ---
 --- @class CompletionResponse
 --- @field isIncomplete boolean
