@@ -4,42 +4,21 @@
 
 ## Features
 
+- Works out of the box with no additional configuration
 - Simple hackable codebase
 - Updates on every keystroke (0.5-4ms non-blocking, single core)
-- Typo resistant fuzzy with frecncy and proximity bonus
+- Typo resistant fuzzy with frecency and proximity bonus
 - Extensive LSP support ([tracker](./LSP_TRACKER.md))
 - Snippet support (including `friendly-snippets`)
 - TODO: Cmdline support
 - External sources support (including `nvim-cmp` compatibility layer)
+- [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
 ## Installation
-
-TODO: move the keymaps into the plugin?
 
 `lazy.nvim`
 
 ```lua
---- @param mode string|string[] modes to map
---- @param lhs string lhs
---- @param rhs string rhs
-local function map_blink_cmp(mode, lhs, rhs)
-	return {
-		lhs,
-		function()
-			local did_run = require('blink.cmp')[rhs]()
-			if not did_run then
-				return lhs
-			end
-		end,
-		mode = mode,
-		expr = true,
-		noremap = true,
-		silent = true,
-		replace_keycodes = true,
-	}
-end
-
-
 {
   'saghen/blink.nvim',
   -- note: requires nightly
@@ -52,14 +31,6 @@ end
       dependencies = { 'rafamadriz/friendly-snippets' },
       opts = { create_cmp_source = false, friendly_snippets = true },
     },
-  },
-  keys = {
-    map_blink_cmp('i', '<C-space>', 'show'),
-    map_blink_cmp('i', '<Tab>', 'accept'),
-    map_blink_cmp('i', '<Up>', 'select_prev'),
-    map_blink_cmp('i', '<Down>', 'select_next'),
-    map_blink_cmp('i', '<C-k>', 'select_prev'),
-    map_blink_cmp('i', '<C-j>', 'select_next'),
   },
   opts = {
     -- see lua/blink/cmp/config.lua for all options
@@ -84,7 +55,29 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 **Render:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overriden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting. 
 
+## Compared to nvim-cmp
+
+### Advantages
+
+- Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
+- Updates on every keystroke, versus nvim-cmp's default debounce of 60ms
+    - Setting nvim-cmp's deboucne to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp)
+- Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus
+- Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
+- Core sources (buffer, snippets, lsp) are built-in versus nvim-cmp's exclusively external sources
+- Uses native snippets versus nvim-cmp's required snippet engine
+
+### Disadvantages
+
+All of the following are planned, but not yet implemented.
+
+- Less customizable across the board wrt matching, sources, sorting, filtering, etc
+- Significantly less testing and documentation
+- No support for cmdline completions
+- No support for dynamic (i.e. per-filetype) sources
+- Customizable rendering of completion window
+
 ## Special Thanks
 
-@redxtech Help with design, testing and being my biggest fan
+@redxtech Help with design, testing and helping me keep my sanity
 @aadityasahay Help with rust and design
