@@ -28,6 +28,7 @@ pub struct MatchedLspItem {
 pub struct FuzzyOptions {
     use_frecency: bool,
     nearby_words: Option<Vec<String>>,
+    min_score: u16,
     max_items: usize,
     sorts: Vec<String>,
 }
@@ -46,7 +47,7 @@ pub fn fuzzy(
         .map(|s| s.label.as_str())
         .collect::<Vec<_>>();
     let options = frizbee::Options {
-        min_score: 0,
+        min_score: opts.min_score,
         stable_sort: false,
         ..Default::default()
     };
@@ -57,38 +58,36 @@ pub fn fuzzy(
         .iter()
         .map(|mtch| {
             (mtch.score as i32)
-                + frecency.get_score(&haystack[mtch.index]) as i32
+                + frecency.get_score(&haystack[mtch.index_in_haystack]) as i32
                 + nearby_words
-                    .get(&haystack[mtch.index].label)
+                    .get(&haystack[mtch.index_in_haystack].label)
                     .map(|_| 2)
                     .unwrap_or(0)
-                + haystack[mtch.index].score_offset.unwrap_or(0)
+                + haystack[mtch.index_in_haystack].score_offset.unwrap_or(0)
         })
         .collect::<Vec<_>>();
     matches.sort_by_cached_key(|mtch| Reverse(match_scores[mtch.index]));
-
-    // Grab the top N matches
-    let mut match_indices = matches
-        .iter()
-        .map(|mtch| mtch.index)
-        .take(opts.max_items)
-        .collect::<Vec<_>>();
 
     // Sort matches by sort criteria
     for sort in opts.sorts.iter() {
         match sort.as_str() {
             "kind" => {
-                match_indices.sort_by_key(|idx| haystack[*idx].kind);
+                matches.sort_by_key(|mtch| haystack[mtch.index_in_haystack].kind);
             }
             "score" => {
-                match_indices.sort_by_key(|idx| Reverse(match_scores[*idx]));
+                matches.sort_by_key(|mtch| Reverse(mtch.score));
             }
             "label" => {
-                match_indices.sort_by_key(|idx| haystack[*idx].label.clone());
+                matches.sort_by_key(|mtch| haystack[mtch.index_in_haystack].label.clone());
             }
             _ => {}
         }
     }
 
-    match_indices
+    // Grab the top N matches and return the indices
+    matches
+        .iter()
+        .map(|mtch| mtch.index_in_haystack)
+        .take(opts.max_items)
+        .collect::<Vec<_>>()
 }

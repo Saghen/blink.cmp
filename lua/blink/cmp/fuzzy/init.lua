@@ -42,12 +42,17 @@ function fuzzy.filter_items(needle, items)
   local filtered_items = {}
   local matched_indices =
     fuzzy.rust.fuzzy(needle, haystack_labels, haystack_kinds, haystack_score_offsets, haystack_sources, {
+      -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
+      -- so this should generally be good
+      -- TODO: make this configurable
+      min_score = 4 * needle:len(),
       max_items = config.max_items,
       use_frecency = config.use_frecency,
       use_proximity = config.use_proximity,
       sorts = config.sorts,
       nearby_words = nearby_words,
     })
+
   for _, idx in ipairs(matched_indices) do
     table.insert(filtered_items, items[idx + 1])
   end
