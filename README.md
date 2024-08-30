@@ -20,10 +20,9 @@
 
 ```lua
 {
-  'saghen/blink.nvim',
-  -- note: requires nightly
+  'saghen/blink.cmp',
+  -- note: requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
   build = 'cargo build --release',
-  -- todo: should handle lazy loading internally
   event = 'InsertEnter',
   dependencies = {
     {
@@ -32,12 +31,126 @@
       opts = { create_cmp_source = false, friendly_snippets = true },
     },
   },
-  opts = {
-    -- see lua/blink/cmp/config.lua for all options
-    cmp = { enabled = true }
-  }
+  opts = {}
 }
 ```
+
+<details>
+<summary>Default configuration</summary>
+
+<!-- config:start -->
+
+```lua
+{
+  -- all values may be string | string[]
+  -- use an empty table to disable a keymap
+  keymap = {
+    show = '<C-space>',
+    hide = '<C-e>',
+    accept = '<Tab>',
+    select_prev = { '<Up>', '<C-j>' },
+    select_next = { '<Down>', '<C-k>' },
+
+    show_documentation = {},
+    hide_documentation = {},
+    scroll_documentation_up = '<C-b>',
+    scroll_documentation_down = '<C-f>',
+
+    snippet_forward = '<Tab>',
+    snippet_backward = '<S-Tab>',
+  },
+  trigger = {
+    -- regex used to get the text when fuzzy matching
+    context_regex = '[%w_\\-]',
+    -- LSPs can indicate when to show the completion window via trigger characters
+    -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
+    -- always show the window. We block these by default
+    blocked_trigger_characters = { ' ', '\n', '\t' },
+  },
+  fuzzy = {
+    -- frencency tracks the most recently/frequently used items and boosts the score of the item
+    use_frecency = true,
+    -- proximity bonus boosts the score of items with a value in the buffer
+    use_proximity = true,
+    max_items = 200,
+    -- controls which sorts to use and in which order, these three are currently the only allowed options
+    sorts = { 'label', 'kind', 'score' },
+  },
+  sources = {
+    providers = {
+      { module = 'blink.cmp.sources.lsp' },
+      { module = 'blink.cmp.sources.buffer' },
+      { module = 'blink.cmp.sources.snippets', fallback_for = { 'blink.cmp.sources.lsp' } },
+    },
+  },
+  windows = {
+    autocomplete = {
+      min_width = 30,
+      max_width = 60,
+      max_height = 10,
+      order = 'top_down',
+      -- which directions to show the window,
+      -- falling back to the next direction when there's not enough space
+      direction_priority = { 'n', 's' },
+      -- whether to preselect the first item in the window
+      preselect = true,
+    },
+    documentation = {
+      min_width = 10,
+      max_width = 60,
+      max_height = 20,
+      -- which directions to show the documentation window,
+      -- for each of the possible autocomplete window directions,
+      -- falling back to the next direction when there's not enough space
+      direction_priority = {
+        autocomplete_north = { 'e', 'w', 'n', 's' },
+        autocomplete_south = { 'e', 'w', 's', 'n' },
+      },
+      auto_show = true,
+      delay_ms = 0,
+      debounce_ms = 100,
+    },
+  },
+
+  highlight_ns = vim.api.nvim_create_namespace('blink_cmp'),
+  kind_icons = {
+    Text = '󰉿',
+    Method = '󰊕',
+    Function = '󰊕',
+    Constructor = '󰒓',
+
+    Field = '󰜢',
+    Variable = '󰆦',
+    Property = '󰖷',
+
+    Class = '󱡠',
+    Interface = '󱡠',
+    Struct = '󱡠',
+    Module = '󰅩',
+
+    Unit = '󰪚',
+    Value = '󰦨',
+    Enum = '󰦨',
+    EnumMember = '󰦨',
+
+    Keyword = '󰻾',
+    Constant = '󰏿',
+
+    Snippet = '󱄽',
+    Color = '󰏘',
+    File = '󰈔',
+    Reference = '󰬲',
+    Folder = '󰉋',
+    Event = '󱐋',
+    Operator = '󰪚',
+    TypeParameter = '󰬛',
+  },
+}
+```
+
+<!-- config:end -->
+
+</details>
 
 ## How it works
 
@@ -71,11 +184,10 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 All of the following are planned, but not yet implemented.
 
-- Less customizable across the board wrt matching, sources, sorting, filtering, etc
+- Less customizable across the board wrt trigger, sources, sorting, filtering, and rendering
 - Significantly less testing and documentation
 - No support for cmdline completions
-- No support for dynamic (i.e. per-filetype) sources
-- Customizable rendering of completion window
+- No support for dynamic sources (i.e. per-filetype)
 
 ## Special Thanks
 
