@@ -48,7 +48,7 @@
                 "c-marshalling-0.2.0" =
                   "sha256-eL6nkZOtuLLQ0r31X7uroUUDYZsWOJ9KNXl4NCVNRuw=";
                 "frizbee-0.1.0" =
-                  "sha256-+Os6ioFXB2K86V/8Z2xNxmO7jo3RLC9VKpuztQRrIgE=";
+                  "sha256-FHyf5WqYCKVwbSZJ/Qg4aP+FHWsEORvPndRo5wHv+rU=";
               };
             };
           };
