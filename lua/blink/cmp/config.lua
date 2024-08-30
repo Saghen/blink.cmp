@@ -3,6 +3,10 @@
 --- @field accept string | string[]
 --- @field select_prev string | string[]
 --- @field select_next string | string[]
+--- @field show_documentation string | string[]
+--- @field hide_documentation string | string[]
+--- @field scroll_documentation_up string | string[]
+--- @field scroll_documentation_down string | string[]
 --- @field snippet_forward string | string[]
 --- @field snippet_backward string | string[]
 

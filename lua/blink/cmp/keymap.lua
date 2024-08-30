@@ -1,9 +1,19 @@
 local keymap = {}
 
-local insert_commands = { 'show', 'hide', 'accept', 'select_prev', 'select_next' }
+local insert_commands = {
+  'show',
+  'hide',
+  'accept',
+  'select_prev',
+  'select_next',
+  'show_documentation',
+  'hide_documentation',
+  'scroll_documentation_up',
+  'scroll_documentation_down',
+}
 local snippet_commands = { 'snippet_forward', 'snippet_backward' }
 
---- @param opts KeymapConfig
+--- @param opts blink.cmp.KeymapConfig
 function keymap.setup(opts)
   for command, keys in pairs(opts) do
     local is_snippet_command = vim.tbl_contains(snippet_commands, command)

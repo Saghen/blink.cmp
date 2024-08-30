@@ -65,6 +65,23 @@ function docs.show_item(item)
   end)
 end
 
+function docs.scroll_up(amount)
+  local winnr = docs.win:get_win()
+  local top_line = math.max(1, vim.fn.line('w0', winnr) - 1)
+  local desired_line = math.max(1, top_line - amount)
+
+  vim.api.nvim_win_set_cursor(docs.win:get_win(), { desired_line, 0 })
+end
+
+function docs.scroll_down(amount)
+  local winnr = docs.win:get_win()
+  local line_count = vim.api.nvim_buf_line_count(docs.win:get_buf())
+  local bottom_line = math.max(1, vim.fn.line('w$', winnr) + 1)
+  local desired_line = math.min(line_count, bottom_line + amount)
+
+  vim.api.nvim_win_set_cursor(docs.win:get_win(), { desired_line, 0 })
+end
+
 function docs.update_position()
   if not docs.win:is_open() or not autocomplete.win:is_open() then return end
   local winnr = docs.win:get_win()

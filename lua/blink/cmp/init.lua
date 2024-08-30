@@ -92,6 +92,31 @@ cmp.select_next = function()
   return true
 end
 
+cmp.show_documentation = function()
+  local item = cmp.windows.autocomplete.get_selected_item()
+  if not item then return end
+  vim.schedule(function() cmp.windows.documentation.show_item(item) end)
+  return true
+end
+
+cmp.hide_documentation = function()
+  if not cmp.windows.documentation.win:is_open() then return end
+  vim.schedule(function() cmp.windows.documentation.win:close() end)
+  return true
+end
+
+cmp.scroll_documentation_up = function()
+  if not cmp.windows.documentation.win:is_open() then return end
+  vim.schedule(function() cmp.windows.documentation.scroll_up(4) end)
+  return true
+end
+
+cmp.scroll_documentation_down = function()
+  if not cmp.windows.documentation.win:is_open() then return end
+  vim.schedule(function() cmp.windows.documentation.scroll_down(4) end)
+  return true
+end
+
 cmp.snippet_forward = function()
   if not vim.snippet.active({ direction = 1 }) then return end
   vim.schedule(function() vim.snippet.jump(1) end)
