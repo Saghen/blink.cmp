@@ -1,4 +1,4 @@
---- @class KeymapConfig
+--- @class blink.cmp.KeymapConfig
 --- @field show string | string[]
 --- @field accept string | string[]
 --- @field select_prev string | string[]
@@ -10,41 +10,49 @@
 --- @field snippet_forward string | string[]
 --- @field snippet_backward string | string[]
 
---- @class TriggerConfig
+--- @class blink.cmp.TriggerConfig
 --- @field context_regex string
 --- @field blocked_trigger_characters string[]
 
---- @class SourceConfig
---- @field providers SourceProviderConfig[]
+--- @class blink.cmp.SourceConfig
+--- @field providers blink.cmp.SourceProviderConfig[]
 ---
---- @class SourceProviderConfig
---- @field module string
+--- @class blink.cmp.SourceProviderConfig
+--- @field [1] string
+--- @field fallback_for string[] | nil
 --- @field keyword_length number | nil
 --- @field score_offset number | nil
---- @field deduplicate DeduplicateConfig | nil
+--- @field deduplicate blink.cmp.DeduplicateConfig | nil
 --- @field trigger_characters string[] | nil
+--- @field override blink.cmp.OverrideConfig | nil
 --- @field opts table | nil
---- @field override table | nil
 ---
---- @class DeduplicateConfig
+--- @class blink.cmp.DeduplicateConfig
 --- @field enabled boolean
 --- @field priority number
 ---
---- @class SourceOverrideConfig
---- @field completions fun(context: ShowContext, callback: fun(items: CompletionItem[]), orig_fn: fun(context: ShowContext, callback: fun(items: CompletionItem[])))
---- @field resolve fun(orig_fn: fun(item: CompletionItem, callback: fun(resolved_item: CompletionItem | nil)), item: CompletionItem, callback: fun(resolved_item: CompletionItem | nil))
+--- @class blink.cmp.OverrideConfig
+--- @field get_trigger_characters (fun(orig_fn: fun(): string[]): string[]) | nil
+--- @field completions (fun(context: blink.cmp.ShowContext, callback: fun(items: blink.cmp.CompletionItem[]), orig_fn: (fun(context: blink.cmp.ShowContext, callback: fun(items: blink.cmp.CompletionItem[]))): nil) | nil) | nil
+--- @field filter_completions (fun(context: blink.cmp.ShowContext, source_responses: table<string, blink.cmp.CompletionResponse>, orig_fn: (fun(context: blink.cmp.ShowContext, source_responses: table<string, blink.cmp.CompletionResponse>): blink.cmp.CompletionItem[]) | nil): blink.cmp.CompletionItem[]) | nil
+--- @field resolve (fun(item: blink.cmp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil), orig_fn: (fun(item: blink.cmp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil))) | nil): (fun(): nil) | nil) | nil
+--- @field cancel_completions (fun(orig_fn: fun() | nil): nil) | nil
+---
+--- @class blink.cmp.SourceOverrideConfig
+--- @field completions fun(context: blink.cmp.ShowContext, callback: fun(items: blink.cmp.CompletionItem[]), orig_fn: fun(context: blink.cmp.ShowContext, callback: fun(items: blink.cmp.CompletionItem[])))
+--- @field resolve fun(orig_fn: fun(item: blink.cmp.CompletionItem, callback: fun(resolved_item: blink.cmp.CompletionItem | nil)), item: blink.cmp.CompletionItem, callback: fun(resolved_item: blink.cmp.CompletionItem | nil))
 
---- @class FuzzyConfig
+--- @class blink.cmp.FuzzyConfig
 --- @field use_frecency boolean
 --- @field use_proximity boolean
 --- @field max_items number
 --- @field sorts ("label" | "kind" | "score")[]
 
---- @class WindowConfig
---- @field autocomplete AutocompleteConfig
---- @field documentation DocumentationConfig
+--- @class blink.cmp.WindowConfig
+--- @field autocomplete blink.cmp.AutocompleteConfig
+--- @field documentation blink.cmp.DocumentationConfig
 
---- @class AutocompleteConfig
+--- @class blink.cmp.AutocompleteConfig
 --- @field min_width number
 --- @field max_width number
 --- @field max_height number
@@ -52,28 +60,28 @@
 --- @field direction_priority ("n" | "s")[]
 --- @field preselect boolean
 
---- @class DocumentationDirectionPriorityConfig
+--- @class blink.cmp.DocumentationDirectionPriorityConfig
 --- @field autocomplete_north ("n" | "s" | "e" | "w")[]
 --- @field autocomplete_south ("n" | "s" | "e" | "w")[]
 ---
---- @class DocumentationConfig
+--- @class blink.cmp.DocumentationConfig
 --- @field min_width number
 --- @field max_width number
 --- @field max_height number
---- @field direction_priority DocumentationDirectionPriorityConfig
+--- @field direction_priority blink.cmp.DocumentationDirectionPriorityConfig
 --- @field auto_show boolean
 --- @field debounce_ms number
 --- @field delay_ms number
 
---- @class CmpConfig
---- @field trigger TriggerConfig
---- @field fuzzy FuzzyConfig
---- @field sources SourceConfig
---- @field windows WindowConfig
+--- @class blink.cmp.CmpConfig
+--- @field trigger blink.cmp.TriggerConfig
+--- @field fuzzy blink.cmp.FuzzyConfig
+--- @field sources blink.cmp.SourceConfig
+--- @field windows blink.cmp.WindowConfig
 --- @field highlight_ns number
 --- @field kind_icons table<string, string>
 
---- @type CmpConfig
+--- @type blink.cmp.CmpConfig
 local config = {
   keymap = {
     show = '<C-space>',
@@ -81,6 +89,12 @@ local config = {
     accept = '<Tab>',
     select_prev = { '<Up>', '<C-j>' },
     select_next = { '<Down>', '<C-k>' },
+
+    show_documentation = {},
+    hide_documentation = {},
+    scroll_documentation_up = '<C-b>',
+    scroll_documentation_down = '<C-f>',
+
     snippet_forward = '<Tab>',
     snippet_backward = '<S-Tab>',
   },
@@ -96,9 +110,9 @@ local config = {
   },
   sources = {
     providers = {
-      { module = 'blink.cmp.sources.lsp' },
-      { module = 'blink.cmp.sources.buffer' },
-      { module = 'blink.cmp.sources.snippets' },
+      { 'blink.cmp.sources.lsp' },
+      { 'blink.cmp.sources.buffer' },
+      { 'blink.cmp.sources.snippets' },
     },
   },
   windows = {
@@ -159,10 +173,10 @@ local config = {
   },
 }
 
---- @class CmpConfig
+--- @class blink.cmp.CmpConfig
 local M = {}
 
---- @param opts CmpConfig
+--- @param opts blink.cmp.CmpConfig
 function M.merge_with(opts) config = vim.tbl_deep_extend('force', config, opts or {}) end
 
 return setmetatable(M, { __index = function(_, k) return config[k] end })

@@ -2,33 +2,33 @@
 -- (provided by the sources) or anything matching the `context_regex`, we create a new `context`.
 -- This can be used downstream to determine if we should make new requests to the sources or not.
 
---- @class TriggerBounds
+--- @class blink.cmp.TriggerBounds
 --- @field line string
 --- @field line_number number
 --- @field start_col number
 --- @field end_col number
 ---
---- @class TriggerContext
+--- @class blink.cmp.TriggerContext
 --- @field id number
---- @field bounds TriggerBounds
+--- @field bounds blink.cmp.TriggerBounds
 --- @field treesitter_node table | nil
 ---
---- @class ShowContext : TriggerContext
+--- @class blink.cmp.ShowContext : blink.cmp.TriggerContext
 --- @field trigger_character string | nil
 ---
---- @class TriggerEventTargets
---- @field on_show fun(context: ShowContext)
+--- @class blink.cmp.TriggerEventTargets
+--- @field on_show fun(context: blink.cmp.ShowContext)
 --- @field on_hide fun()
 ---
---- @class Trigger
---- @field context TriggerContext | nil
+--- @class blink.cmp.Trigger
+--- @field context blink.cmp.TriggerContext | nil
 --- @field context_last_id number
 --- @field context_regex string
---- @field event_targets TriggerEventTargets
+--- @field event_targets blink.cmp.TriggerEventTargets
 
 local sources = require('blink.cmp.sources')
 
---- @class Trigger
+--- @class blink.cmp.Trigger
 local trigger = {
   context_last_id = -1,
   context = nil,
@@ -101,10 +101,10 @@ function trigger.activate_autocmds()
   return trigger
 end
 
---- @class TriggerOptions
+--- @class blink.cmp.TriggerOptions
 --- @field trigger_character string|nil
 ---
---- @param opts TriggerOptions|nil
+--- @param opts blink.cmp.TriggerOptions|nil
 function trigger.show(opts)
   opts = opts or {}
 
@@ -132,7 +132,7 @@ function trigger.listen_on_hide(callback) trigger.event_targets.on_hide = callba
 
 ------ Context ------
 -- Gets the current context, always updating the bounds to the current position
---- @return TriggerContext
+--- @return blink.cmp.TriggerContext
 function trigger.get_context()
   local bounds = helpers.get_query(trigger.context_regex)
   -- local treesitter_node = helpers.get_treesitter_node_at_cursor()
@@ -162,7 +162,7 @@ end
 
 -- Moves forward and backwards around the cursor looking for word boundaries
 --- @param regex string
---- @return TriggerBounds
+--- @return blink.cmp.TriggerBounds
 function helpers.get_query(regex)
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor_line = vim.api.nvim_win_get_cursor(0)[1]

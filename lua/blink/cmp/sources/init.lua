@@ -40,7 +40,7 @@ end
 
 function sources.listen_on_completions(callback) sources.on_completions_callback = callback end
 
---- @param context ShowContext
+--- @param context blink.cmp.ShowContext
 function sources.completions(context)
   -- a new context means we should refetch everything
   local is_new_context = context.id ~= sources.current_context_id
@@ -97,7 +97,7 @@ function sources.completions(context)
 end
 
 --- @param source_name string
---- @param source_response CompletionResponse
+--- @param source_response blink.cmp.CompletionResponse
 --- @param cursor_column number
 function sources.add_source_completions(source_name, source_response, cursor_column)
   for _, item in ipairs(source_response.items) do
@@ -116,7 +116,7 @@ function sources.some_in_flight()
   return false
 end
 
---- @param context ShowContext
+--- @param context blink.cmp.ShowContext
 function sources.send_completions(context)
   local sources_responses = sources.sources_responses
   -- apply source filters
@@ -145,8 +145,8 @@ function sources.cancel_completions()
   end
 end
 
---- @param item CompletionItem
---- @param callback fun(resolved_item: CompletionItem | nil)
+--- @param item blink.cmp.CompletionItem
+--- @param callback fun(resolved_item: blink.cmp.CompletionItem | nil)
 --- @return fun(): nil Cancelation function
 function sources.resolve(item, callback)
   local item_source = sources.registered[item.source]

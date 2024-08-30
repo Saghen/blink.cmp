@@ -1,6 +1,6 @@
 local cmp = {}
 
---- @param opts CmpConfig
+--- @param opts blink.cmp.CmpConfig
 cmp.setup = function(opts)
   local config = require('blink.cmp.config')
   config.merge_with(opts)
@@ -8,6 +8,7 @@ cmp.setup = function(opts)
   require('blink.cmp.keymap').setup(config.keymap)
 
   cmp.add_default_highlights()
+  -- todo: do we need to clear first?
   vim.api.nvim_create_autocmd('ColorScheme', { callback = cmp.add_default_highlights })
 
   -- STRUCTURE
@@ -58,6 +59,8 @@ cmp.add_default_highlights = function()
     vim.api.nvim_set_hl(0, 'BlinkCmpKind' .. kind, { link = 'BlinkCmpItemKind', default = true })
   end
 end
+
+------- Public API -------
 
 cmp.show = function()
   vim.schedule(function() cmp.trigger.show() end)

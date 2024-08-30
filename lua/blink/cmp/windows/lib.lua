@@ -1,6 +1,6 @@
 local win = {}
 
---- @class WindowOptions
+--- @class blink.cmp.WindowOptions
 --- @field min_width number
 --- @field max_width number
 --- @field max_height number
@@ -11,10 +11,11 @@ local win = {}
 --- @field padding boolean
 --- @field scrolloff number
 
---- @class Window
---- @field config WindowOptions
+--- @class blink.cmp.Window
+--- @field id number | nil
+--- @field config blink.cmp.WindowOptions
 ---
---- @param config WindowOptions
+--- @param config blink.cmp.WindowOptions
 function win.new(config)
   local self = setmetatable({}, { __index = win })
 

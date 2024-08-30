@@ -1,4 +1,4 @@
---- @class Source
+--- @class blink.cmp.Source
 local snippets = {}
 
 function snippets.completions(_, callback)
@@ -52,7 +52,7 @@ function snippets.filter_completions(context, sources_responses)
   end
   sources_responses = copied_sources_responses
 
-  -- don't show if since a trigger character triggered this
+  -- don't show if a trigger character triggered this
   -- todo: the idea here is that situations like `text.|` shouldn't show
   -- the buffer completions since it's likely not helpful
   sources_responses.snippets.items = {}

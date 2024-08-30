@@ -1,4 +1,4 @@
---- @class Source
+--- @class blink.cmp.Source
 local lsp = {}
 
 ---@param capability string|table|nil Server capability (possibly nested

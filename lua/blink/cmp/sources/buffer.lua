@@ -62,7 +62,7 @@ end
 
 --- Public API
 
---- @class Source
+--- @class blink.cmp.Source
 local buffer = {}
 
 function buffer.completions(_, callback)
