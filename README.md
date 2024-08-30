@@ -1,6 +1,8 @@
 # Blink Completion (blink.cmp)
 
-**blink.cmp** provides a completion plugin with support for LSPs and external sources while updating on every keystroke with minimal overhead (0.5-4ms async). It achieves this by writing the fuzzy searching in SIMD to easily handle >20k items. It provides extensibility via hooks into the trigger, sources and rendering pipeline. Plenty of work has been put into making each stage of the pipeline as intelligent as possible, such as frecency and proximity bonus on fuzzy matching, and this work is on-going. `nvim-cmp` sources are supported out of the box but migration to the `blink.cmp` style source is highly encouraged.
+**blink.cmp** provides a completion plugin with support for LSPs and external sources while updating on every keystroke with minimal overhead (0.5-4ms async). It achieves this by writing the fuzzy searching in SIMD to easily handle >20k items. It provides extensibility via hooks into the trigger, sources and rendering pipeline. Plenty of work has been put into making each stage of the pipeline as intelligent as possible, such as frecency and proximity bonus on fuzzy matching, and this work is on-going. 
+
+TODO: `nvim-cmp` sources are supported out of the box but migration to the `blink.cmp` style source is highly encouraged.
 
 ## Features
 
@@ -11,7 +13,7 @@
 - Extensive LSP support ([tracker](./LSP_TRACKER.md))
 - Snippet support (including `friendly-snippets`)
 - TODO: Cmdline support
-- External sources support (including `nvim-cmp` compatibility layer)
+- External sources support (TODO: including `nvim-cmp` compatibility layer)
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
 ## Installation
