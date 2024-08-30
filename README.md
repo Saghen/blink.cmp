@@ -20,7 +20,7 @@
 
 ```lua
 {
-  'saghen/blink.cmp',
+  'saghen/blink.nvim',
   -- note: requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
   build = 'cargo build --release',
   event = 'InsertEnter',
@@ -31,7 +31,12 @@
       opts = { create_cmp_source = false, friendly_snippets = true },
     },
   },
-  opts = {}
+  opts = {
+    cmp = {
+      enabled = true,
+      -- rest of your config
+    }
+  }
 }
 ```
 
