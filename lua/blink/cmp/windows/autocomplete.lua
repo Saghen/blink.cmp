@@ -20,7 +20,7 @@ function autocomplete.setup()
   -- Setting highlights is slow and we update on every keystroke so we instead use a decoration provider
   -- which will only render highlights of the visible lines. This also avoids having to do virtual scroll
   -- like nvim-cmp does, which breaks on UIs like neovide
-  vim.api.nvim_set_decoration_provider(config.highlight_ns, {
+  vim.api.nvim_set_decoration_provider(config.highlight.ns, {
     on_win = function(_, winnr, bufnr)
       return autocomplete.win:get_win() == winnr and bufnr == autocomplete.win:get_buf()
     end,
@@ -33,7 +33,7 @@ function autocomplete.setup()
       local kind_hl = 'BlinkCmpKind' .. kind
 
       -- todo: handle .labelDetails and others
-      vim.api.nvim_buf_set_extmark(bufnr, config.highlight_ns, line_number, 0, {
+      vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, line_number, 0, {
         end_col = 4,
         hl_group = kind_hl,
         hl_mode = 'combine',
@@ -44,7 +44,7 @@ function autocomplete.setup()
       -- todo: use vim.lsp.protocol.CompletionItemTag
       if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then
         -- todo: why 7?
-        vim.api.nvim_buf_set_extmark(bufnr, config.highlight_ns, line_number, 7, {
+        vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, line_number, 7, {
           end_col = #line_text - 1,
           hl_group = 'BlinkCmpLabelDeprecated',
           hl_mode = 'combine',

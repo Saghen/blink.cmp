@@ -52,6 +52,10 @@
 --- @field autocomplete blink.cmp.AutocompleteConfig
 --- @field documentation blink.cmp.DocumentationConfig
 
+--- @class blink.cmp.HighlightConfig
+--- @field ns number
+--- @field use_nvim_cmp_as_default boolean
+
 --- @class blink.cmp.AutocompleteConfig
 --- @field min_width number
 --- @field max_width number
@@ -78,7 +82,7 @@
 --- @field fuzzy blink.cmp.FuzzyConfig
 --- @field sources blink.cmp.SourceConfig
 --- @field windows blink.cmp.WindowConfig
---- @field highlight_ns number
+--- @field highlight blink.cmp.HighlightConfig
 --- @field kind_icons table<string, string>
 
 --- @type blink.cmp.CmpConfig
@@ -138,7 +142,10 @@ local config = {
     },
   },
 
-  highlight_ns = vim.api.nvim_create_namespace('blink_cmp'),
+  highlight = {
+    ns = vim.api.nvim_create_namespace('blink_cmp'),
+    use_nvim_cmp_as_default = false,
+  },
   kind_icons = {
     Text = '󰉿',
     Method = '󰊕',

@@ -51,12 +51,19 @@ cmp.setup = function(opts)
 end
 
 cmp.add_default_highlights = function()
-  vim.api.nvim_set_hl(0, 'BlinkCmpLabel', { link = 'Pmenu', default = true })
-  vim.api.nvim_set_hl(0, 'BlinkCmpLabelDeprecated', { link = 'Comment', default = true })
-  vim.api.nvim_set_hl(0, 'BlinkCmpLabelMatch', { link = 'Pmenu', default = true })
-  vim.api.nvim_set_hl(0, 'BlinkCmpKind', { link = 'Special', default = true })
+  local use_nvim_cmp = require('blink.cmp.config').highlight.use_nvim_cmp_as_default
+
+  local set_hl = function(hl_group, opts)
+    opts.default = true
+    vim.api.nvim_set_hl(0, hl_group, opts)
+  end
+
+  set_hl('BlinkCmpLabel', { link = use_nvim_cmp and 'CmpItemAbbr' or 'Pmenu' })
+  set_hl('BlinkCmpLabelDeprecated', { link = use_nvim_cmp and 'CmpItemAbbrDeprecated' or 'Comment' })
+  set_hl('BlinkCmpLabelMatch', { link = use_nvim_cmp and 'CmpItemAbbrMatch' or 'Pmenu' })
+  set_hl('BlinkCmpKind', { link = use_nvim_cmp and 'CmpItemKind' or 'Special' })
   for _, kind in pairs(vim.lsp.protocol.CompletionItemKind) do
-    vim.api.nvim_set_hl(0, 'BlinkCmpKind' .. kind, { link = 'BlinkCmpItemKind', default = true })
+    set_hl('BlinkCmpKind' .. kind, { link = use_nvim_cmp and 'CmpItemKind' .. kind or 'BlinkCmpItemKind' })
   end
 end
 
