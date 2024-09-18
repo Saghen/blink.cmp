@@ -5,7 +5,7 @@ mod fuzzy;
 
 pub mod extern_ffi {
     use crate::frecency::FrecencyTracker;
-    use crate::fuzzy::{self, FuzzyOptions, LspItem, MatchedLspItem};
+    use crate::fuzzy::{self, FuzzyOptions, LspItem};
     use lazy_static::lazy_static;
     use regex::Regex;
     use std::collections::HashSet;

@@ -1,35 +1,49 @@
+use crate::fuzzy::LspItem;
+use heed::types::*;
+use heed::{Database, Env, EnvOpenOptions};
+use serde::{Deserialize, Serialize};
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use heed::types::*;
-use heed::{Database, Env, EnvOpenOptions};
+#[derive(Clone, Serialize, Deserialize)]
+struct CompletionItemKey {
+    label: String,
+    kind: u32,
+    source: String,
+}
 
-// todo: changing score offset will change all the keys
-
-use crate::fuzzy::LspItem;
+impl From<&LspItem> for CompletionItemKey {
+    fn from(item: &LspItem) -> Self {
+        Self {
+            label: item.label.clone(),
+            kind: item.kind,
+            source: item.source.clone(),
+        }
+    }
+}
 
 pub struct FrecencyTracker {
     env: Env,
-    db: Database<SerdeBincode<LspItem>, SerdeBincode<Vec<u64>>>,
+    db: Database<SerdeBincode<CompletionItemKey>, SerdeBincode<Vec<u64>>>,
     access_thresholds: Vec<(f64, u64)>,
 }
 
 impl FrecencyTracker {
     pub fn new(db_path: &str) -> Self {
-        fs::create_dir_all(db_path);
+        fs::create_dir_all(db_path).unwrap();
         let env = unsafe { EnvOpenOptions::new().open(db_path).unwrap() };
-        env.clear_stale_readers();
+        env.clear_stale_readers().unwrap();
 
         // we will open the default unnamed database
         let mut wtxn = env.write_txn().unwrap();
         let db = env.create_database(&mut wtxn, None).unwrap();
 
         let access_thresholds = [
-            (2., 1000 * 60 * 2),            // 2 minutes
-            (1., 1000 * 60 * 5),            // 5 minutes
-            (0.5, 1000 * 60 * 30),          // 2 hours
-            (0.2, 1000 * 60 * 60 * 24),     // 1 day
-            (0.1, 1000 * 60 * 60 * 24 * 7), // 1 week
+            (1., 1000 * 60 * 2),             // 2 minutes
+            (0.5, 1000 * 60 * 5),            // 5 minutes
+            (0.2, 1000 * 60 * 30),           // 2 hours
+            (0.1, 1000 * 60 * 60 * 24),      // 1 day
+            (0.05, 1000 * 60 * 60 * 24 * 7), // 1 week
         ]
         .to_vec();
 
@@ -46,7 +60,7 @@ impl FrecencyTracker {
             .read_txn()
             .expect("Failed to start read transaction");
         self.db
-            .get(&rtxn, item)
+            .get(&rtxn, &CompletionItemKey::from(item))
             .expect("Failed to read from database")
     }
 
@@ -61,7 +75,8 @@ impl FrecencyTracker {
         let mut wtxn = self.env.write_txn()?;
         let mut accesses = self.get_accesses(item).unwrap_or_else(Vec::new);
         accesses.push(self.get_now());
-        self.db.put(&mut wtxn, item, &accesses)?;
+        self.db
+            .put(&mut wtxn, &CompletionItemKey::from(item), &accesses)?;
         wtxn.commit()?;
         Ok(())
     }
@@ -79,6 +94,6 @@ impl FrecencyTracker {
                 continue 'outer;
             }
         }
-        (score * accesses.len() as f64).min(5.) as i64
+        (score * accesses.len() as f64).min(4.) as i64
     }
 }

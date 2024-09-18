@@ -66,7 +66,6 @@ pub fn fuzzy(
                 + haystack[mtch.index_in_haystack].score_offset.unwrap_or(0)
         })
         .collect::<Vec<_>>();
-    matches.sort_by_cached_key(|mtch| Reverse(match_scores[mtch.index]));
 
     // Sort matches by sort criteria
     for sort in opts.sorts.iter() {
@@ -75,7 +74,7 @@ pub fn fuzzy(
                 matches.sort_by_key(|mtch| haystack[mtch.index_in_haystack].kind);
             }
             "score" => {
-                matches.sort_by_key(|mtch| Reverse(mtch.score));
+                matches.sort_by_cached_key(|mtch| Reverse(match_scores[mtch.index]));
             }
             "label" => {
                 matches.sort_by_key(|mtch| haystack[mtch.index_in_haystack].label.clone());
