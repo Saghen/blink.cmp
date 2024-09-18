@@ -16,6 +16,7 @@ function utils.keymap(mode, key, callback)
   })
 end
 
+--- Gets the text under the cursor to be used for fuzzy matching
 function utils.get_query()
   local bufnr = vim.api.nvim_get_current_buf()
 

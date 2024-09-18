@@ -36,8 +36,11 @@ TODO: `nvim-cmp` sources are supported out of the box but migration to the `blin
   opts = {
     cmp = {
       enabled = true,
-      -- rest of your config
-    }
+      highlight = {
+        -- defaults to nvim-cmp's highlight groups for now
+        -- will be removed in a future release, assuming themes add support
+        use_nvim_cmp_as_default = true,
+      }
   }
 }
 ```
@@ -49,7 +52,7 @@ TODO: `nvim-cmp` sources are supported out of the box but migration to the `blin
 
 ```lua
 {
-  -- all values may be string | string[]
+  -- for keymap, all values may be string | string[]
   -- use an empty table to disable a keymap
   keymap = {
     show = '<C-space>',
@@ -119,7 +122,10 @@ TODO: `nvim-cmp` sources are supported out of the box but migration to the `blin
     },
   },
 
-  highlight_ns = vim.api.nvim_create_namespace('blink_cmp'),
+  highlight = {
+    ns = vim.api.nvim_create_namespace('blink_cmp'),
+    use_nvim_cmp_as_default = false,
+  },
   kind_icons = {
     Text = '󰉿',
     Method = '󰊕',
@@ -181,7 +187,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 - Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
 - Updates on every keystroke, versus nvim-cmp's default debounce of 60ms
-    - Setting nvim-cmp's deboucne to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp)
+    - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp)
 - Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
 - Core sources (buffer, snippets, lsp) are built-in versus nvim-cmp's exclusively external sources
