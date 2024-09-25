@@ -1,7 +1,7 @@
 local utils = {}
 
 local function accept(item)
-  local sources = require('blink.cmp.sources')
+  local sources = require('blink.cmp.sources.lib')
   local fuzzy = require('blink.cmp.fuzzy')
 
   local text_edit = item.textEdit

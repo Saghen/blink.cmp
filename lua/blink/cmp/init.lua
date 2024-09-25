@@ -15,10 +15,12 @@ cmp.setup = function(opts)
   -- trigger -> sources -> fuzzy (filter/sort) -> windows (render)
 
   -- trigger controls when to show the window and the current context for caching
+  -- TODO: add first_trigger event for setting up the rest of the plugin
   cmp.trigger = require('blink.cmp.trigger').activate_autocmds()
 
   -- sources fetch autocomplete items and documentation
-  cmp.sources = require('blink.cmp.sources')
+  cmp.sources = require('blink.cmp.sources.lib')
+  cmp.sources.register()
 
   -- windows render and apply items
   cmp.windows = {
@@ -38,7 +40,7 @@ cmp.setup = function(opts)
     cmp.windows.autocomplete.close()
   end)
   cmp.sources.listen_on_completions(function(context, items)
-    -- avoid adding 1-4ms to insertion latency by scheduling for later
+    -- we avoid adding 1-4ms to insertion latency by scheduling for later
     vim.schedule(function()
       local filtered_items = cmp.fuzzy.filter_items(require('blink.cmp.util').get_query(), items)
       if #filtered_items > 0 then

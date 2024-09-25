@@ -1,11 +1,16 @@
 --- @class blink.cmp.Source
 local snippets = {}
 
-function snippets.completions(_, callback)
-  local response = { isIncomplete = false, items = {} }
+function snippets.new(config) return setmetatable(config, { __index = snippets }) end
+
+function snippets:get_completions(_, callback)
+  local response = { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
   local snips = require('snippets').load_snippets_for_ft(vim.bo.filetype)
 
-  if snips == nil then return callback(response) end
+  if snips == nil then
+    callback(response)
+    return function() end
+  end
 
   for key in pairs(snips) do
     local snippet = snips[key]
@@ -39,27 +44,12 @@ function snippets.completions(_, callback)
   end
 
   callback(response)
+  return function() end
 end
 
-function snippets.filter_completions(context, sources_responses)
-  if sources_responses.snippets == nil then return sources_responses end
-  if context.trigger_character == nil then return sources_responses end
+function snippets:should_show_completions(context) return context.trigger.character == nil end
 
-  -- copy to avoid mutating the original
-  local copied_sources_responses = {}
-  for name, response in pairs(sources_responses) do
-    copied_sources_responses[name] = response
-  end
-  sources_responses = copied_sources_responses
-
-  -- don't show if a trigger character triggered this
-  -- todo: the idea here is that situations like `text.|` shouldn't show
-  -- the buffer completions since it's likely not helpful
-  sources_responses.snippets.items = {}
-  return sources_responses
-end
-
-function snippets.resolve(item, callback)
+function snippets:resolve(item, callback)
   -- highlight code block
   local preview = require('snippets.utils').preview(item.insertText)
   preview = string.format('```%s\n%s\n```', vim.bo.filetype, preview)
@@ -67,9 +57,6 @@ function snippets.resolve(item, callback)
     kind = 'markdown',
     value = preview,
   }
-
-  -- todo: this wont be respected, but maybe not needed?
-  -- item.insertText = require('snippets.utils').expand_vars(item.data.body)
 
   callback(item)
 end

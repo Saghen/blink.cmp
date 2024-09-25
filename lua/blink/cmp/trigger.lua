@@ -26,7 +26,7 @@
 --- @field context_regex string
 --- @field event_targets blink.cmp.TriggerEventTargets
 
-local sources = require('blink.cmp.sources')
+local sources = require('blink.cmp.sources.lib')
 
 --- @class blink.cmp.Trigger
 local trigger = {
@@ -35,7 +35,7 @@ local trigger = {
   context_regex = '[%w_\\-]',
 
   event_targets = {
-    on_show = function(_) end,
+    on_show = function() end,
     on_hide = function() end,
   },
 }

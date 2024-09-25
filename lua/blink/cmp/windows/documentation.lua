@@ -1,6 +1,6 @@
 -- todo: track cmp_win position
 local config = require('blink.cmp.config').windows.documentation
-local sources = require('blink.cmp.sources')
+local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')
 local utils = require('blink.cmp.util')
 local docs = {}

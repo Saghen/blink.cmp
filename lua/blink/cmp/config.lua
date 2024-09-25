@@ -19,28 +19,15 @@
 ---
 --- @class blink.cmp.SourceProviderConfig
 --- @field [1] string
---- @field fallback_for string[] | nil
 --- @field keyword_length number | nil
 --- @field score_offset number | nil
 --- @field deduplicate blink.cmp.DeduplicateConfig | nil
 --- @field trigger_characters string[] | nil
---- @field override blink.cmp.OverrideConfig | nil
 --- @field opts table | nil
 ---
 --- @class blink.cmp.DeduplicateConfig
 --- @field enabled boolean
 --- @field priority number
----
---- @class blink.cmp.OverrideConfig
---- @field get_trigger_characters (fun(orig_fn: fun(): string[]): string[]) | nil
---- @field completions (fun(context: blink.cmp.ShowContext, callback: fun(items: blink.cmp.CompletionItem[]), orig_fn: (fun(context: blink.cmp.ShowContext, callback: fun(items: blink.cmp.CompletionItem[]))): nil) | nil) | nil
---- @field filter_completions (fun(context: blink.cmp.ShowContext, source_responses: table<string, blink.cmp.CompletionResponse>, orig_fn: (fun(context: blink.cmp.ShowContext, source_responses: table<string, blink.cmp.CompletionResponse>): blink.cmp.CompletionItem[]) | nil): blink.cmp.CompletionItem[]) | nil
---- @field resolve (fun(item: blink.cmp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil), orig_fn: (fun(item: blink.cmp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil))) | nil): (fun(): nil) | nil) | nil
---- @field cancel_completions (fun(orig_fn: fun() | nil): nil) | nil
----
---- @class blink.cmp.SourceOverrideConfig
---- @field completions fun(context: blink.cmp.ShowContext, callback: fun(items: blink.cmp.CompletionItem[]), orig_fn: fun(context: blink.cmp.ShowContext, callback: fun(items: blink.cmp.CompletionItem[])))
---- @field resolve fun(orig_fn: fun(item: blink.cmp.CompletionItem, callback: fun(resolved_item: blink.cmp.CompletionItem | nil)), item: blink.cmp.CompletionItem, callback: fun(resolved_item: blink.cmp.CompletionItem | nil))
 
 --- @class blink.cmp.FuzzyConfig
 --- @field use_frecency boolean
@@ -115,8 +102,8 @@ local config = {
   sources = {
     providers = {
       { 'blink.cmp.sources.lsp' },
-      { 'blink.cmp.sources.buffer' },
-      { 'blink.cmp.sources.snippets' },
+      { 'blink.cmp.sources.buffer', score_offset = -9 },
+      { 'blink.cmp.sources.snippets', score_offset = -3 },
     },
   },
   windows = {

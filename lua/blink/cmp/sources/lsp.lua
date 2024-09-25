@@ -1,12 +1,14 @@
 --- @class blink.cmp.Source
 local lsp = {}
 
+function lsp.new(config) return setmetatable(config, { __index = lsp }) end
+
 ---@param capability string|table|nil Server capability (possibly nested
 ---   supplied via table) to check.
 ---
 ---@return boolean Whether at least one LSP client supports `capability`.
 ---@private
-function lsp.has_capability(capability)
+function lsp:has_capability(capability)
   for _, client in pairs(vim.lsp.get_clients({ bufnr = 0 })) do
     local has_capability = client.server_capabilities[capability]
     if has_capability then return true end
@@ -14,7 +16,7 @@ function lsp.has_capability(capability)
   return false
 end
 
-function lsp.get_trigger_characters()
+function lsp:get_trigger_characters()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   local trigger_characters = {}
 
@@ -30,7 +32,7 @@ function lsp.get_trigger_characters()
   return trigger_characters
 end
 
-function lsp.get_clients_with_capability(capability, filter)
+function lsp:get_clients_with_capability(capability, filter)
   local clients = {}
   for _, client in pairs(vim.lsp.get_clients(filter)) do
     local capabilities = client.server_capabilities or {}
@@ -39,13 +41,15 @@ function lsp.get_clients_with_capability(capability, filter)
   return clients
 end
 
-function lsp.completions(context, callback)
+function lsp:get_completions(context, callback)
   -- todo: offset encoding is global but should be per-client
   -- todo: should make separate LSP requests to return results earlier, in the case of slow LSPs
-  -- todo: should make a new call if the cursor moves backwards, before the first character of the trigger
 
   -- no providers with completion support
-  if not lsp.has_capability('completionProvider') then return callback({ isIncomplete = false, items = {} }) end
+  if not self:has_capability('completionProvider') then
+    callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
+    return function() end
+  end
 
   -- completion context with additional info about how it was triggered
   local params = vim.lsp.util.make_position_params()
@@ -66,7 +70,7 @@ function lsp.completions(context, callback)
   -- for these special cases
   -- i.e. hello.wor| would be sent as hello.|wor
   -- todo: should we still make two calls to the LSP server and merge?
-  local trigger_characters = lsp.get_trigger_characters()
+  local trigger_characters = self:get_trigger_characters()
   local trigger_character_block_list = { ' ', '\n', '\t' }
   local bounds = context.bounds
   local trigger_character_before_context = bounds.line:sub(bounds.start_col - 1, bounds.start_col - 1)
@@ -81,20 +85,28 @@ function lsp.completions(context, callback)
 
   -- request from each of the clients
   -- todo: refactor
-  lsp.cancel_completions_func = vim.lsp.buf_request_all(0, 'textDocument/completion', params, function(result)
+  return vim.lsp.buf_request_all(0, 'textDocument/completion', params, function(result)
     local responses = {}
     for client_id, response in pairs(result) do
       -- todo: pass error upstream
       if response.error or response.result == nil then
-        responses[client_id] = { isIncomplete = false, items = {} }
-        -- as per the spec, we assume it's complete if we get CompletionItem[]
+        responses[client_id] = { is_incomplete_forward = true, is_incomplete_backward = true, items = {} }
+
+      -- as per the spec, we assume it's complete if we get CompletionItem[]
       elseif response.result.items == nil then
         responses[client_id] = {
-          isIncomplete = false,
+          is_incomplete_forward = false,
+          is_incomplete_backward = true,
           items = response.result,
         }
+
+      -- convert full response to our internal format
       else
-        responses[client_id] = response.result
+        responses[client_id] = {
+          is_incomplete_forward = response.result.isIncomplete,
+          is_incomplete_backward = true,
+          items = response.result.items,
+        }
       end
     end
 
@@ -117,22 +129,17 @@ function lsp.completions(context, callback)
     -- so that we can do fine-grained isIncomplete
     local combined_response = { isIncomplete = false, items = {} }
     for _, response in pairs(responses) do
-      combined_response.isIncomplete = response.isIncomplete or response.isIncomplete
+      combined_response.is_incomplete_forward = combined_response.is_incomplete_forward
+        or response.is_incomplete_forward
+      combined_response.is_incomplete_backward = combined_response.is_incomplete_backward
+        or response.is_incomplete_backward
       vim.list_extend(combined_response.items, response.items)
     end
     callback(combined_response)
   end)
 end
 
-function lsp.cancel_completions()
-  if lsp.cancel_completions_func then
-    -- fails if the LSP no longer exists so we wrap it
-    pcall(lsp.cancel_completions_func)
-    lsp.cancel_completions_func = nil
-  end
-end
-
-function lsp.resolve(item, callback)
+function lsp:resolve(item, callback)
   local client = vim.lsp.get_client_by_id(item.client_id)
   if client == nil then
     callback(item)

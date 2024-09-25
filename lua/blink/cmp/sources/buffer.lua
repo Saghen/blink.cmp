@@ -65,8 +65,12 @@ end
 --- @class blink.cmp.Source
 local buffer = {}
 
-function buffer.completions(_, callback)
-  local transformed_callback = function(items) callback({ isIncomplete = false, items = items }) end
+function buffer.new(config) return setmetatable(config, { __index = buffer }) end
+
+function buffer:get_completions(_, callback)
+  local transformed_callback = function(items)
+    callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
+  end
 
   local buf_text = get_buf_text()
   -- should take less than 2ms
@@ -79,43 +83,9 @@ function buffer.completions(_, callback)
   else
     transformed_callback({})
   end
-end
 
-function buffer.should_show_completions(context, sources_responses)
-  local context_length = context.bounds.end_col - context.bounds.start_col
-  if context_length <= 3 then return false end
-  if sources_responses.lsp ~= nil and #sources_responses.lsp.items > 0 then return false end
-  return true
-end
-
-function buffer.filter_completions(context, sources_responses)
-  if sources_responses.buffer == nil then return sources_responses end
-
-  -- copy to avoid mutating the original
-  local copied_sources_responses = {}
-  for name, response in pairs(sources_responses) do
-    copied_sources_responses[name] = response
-  end
-  sources_responses = copied_sources_responses
-
-  -- get all of the unique labels
-  local unique_words = {}
-  for name, response in pairs(sources_responses) do
-    if name ~= 'buffer' then
-      for _, item in ipairs(response.items) do
-        unique_words[item.label] = true
-      end
-    end
-  end
-
-  -- filter any buffer words that already have a source
-  local filtered_buffer_items = {}
-  for _, item in ipairs(sources_responses.buffer.items) do
-    if not unique_words[item.label] then table.insert(filtered_buffer_items, item) end
-  end
-  sources_responses.buffer.items = filtered_buffer_items
-
-  return sources_responses
+  -- TODO: cancel run_async
+  return function() end
 end
 
 return buffer
