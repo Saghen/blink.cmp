@@ -204,5 +204,8 @@ All of the following are planned, but not yet implemented.
 
 ## Special Thanks
 
-@redxtech Help with design, testing and helping me keep my sanity
-@aadityasahay Help with rust and design
+@garymjr nvim-snippets implementation used for snippets source
+
+@redxtech Help with design and testing
+
+@aadityasahay Help with rust, testing and design
