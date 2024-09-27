@@ -4,7 +4,7 @@
 
 ---@class blink.cmp.Snippet
 ---@field prefix string
----@field body string
+---@field body string[]
 ---@field description? string
 
 local registry = {
@@ -49,7 +49,9 @@ function registry:get_snippets_for_ft(filetype)
         local snippets = vim.json.decode(contents)
         for _, key in ipairs(vim.tbl_keys(snippets)) do
           local snippet = utils.read_snippet(snippets[key], key)
-          loaded_snippets = vim.tbl_deep_extend('force', {}, loaded_snippets, snippet)
+          for snippet_name, snippet_def in pairs(snippet) do
+            loaded_snippets[snippet_name] = snippet_def
+          end
         end
       end
     end
@@ -59,7 +61,9 @@ function registry:get_snippets_for_ft(filetype)
       local snippets = vim.json.decode(contents)
       for _, key in ipairs(vim.tbl_keys(snippets)) do
         local snippet = utils.read_snippet(snippets[key], key)
-        loaded_snippets = vim.tbl_deep_extend('force', {}, loaded_snippets, snippet)
+        for key, snippet in pairs(snippet) do
+          loaded_snippets[key] = snippet
+        end
       end
     end
   end
@@ -107,7 +111,7 @@ function registry:snippet_to_completion_item(snippet)
     kind = vim.lsp.protocol.CompletionItemKind.Snippet,
     label = snippet.prefix,
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
-    insertText = snippet.body,
+    insertText = table.concat(snippet.body, '\n'),
     description = snippet.description,
   }
 end
