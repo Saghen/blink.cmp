@@ -33,7 +33,6 @@ function snippets:get_completions(context, callback)
     for _, snippet in pairs(snips) do
       table.insert(self.cache[filetype], self.registry:snippet_to_completion_item(snippet))
     end
-    vim.print(self.cache[filetype])
   end
 
   callback({

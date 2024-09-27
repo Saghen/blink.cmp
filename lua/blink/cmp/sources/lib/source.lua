@@ -29,11 +29,11 @@ function source:get_completions(context)
   -- and the data doesn't need to be updated
   if self.last_response ~= nil and self.last_response.context.id == context.id then
     if utils.should_run_request(context, self.last_response) == false then
-      vim.print(self.name .. ': returning cached completions')
+      -- vim.print(self.name .. ': returning cached completions')
       return async.task.new(function(resolve) resolve(self.last_response) end)
     end
   end
-  vim.print(self.name .. ': running completions request')
+  -- vim.print(self.name .. ': running completions request')
 
   return async.task
     .new(function(resolve) return self.module:get_completions(context, resolve) end)

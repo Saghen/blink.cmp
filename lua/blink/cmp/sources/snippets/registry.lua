@@ -4,7 +4,7 @@
 
 ---@class blink.cmp.Snippet
 ---@field prefix string
----@field body string[]
+---@field body string[] | string
 ---@field description? string
 
 local registry = {
@@ -111,7 +111,7 @@ function registry:snippet_to_completion_item(snippet)
     kind = vim.lsp.protocol.CompletionItemKind.Snippet,
     label = snippet.prefix,
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
-    insertText = table.concat(snippet.body, '\n'),
+    insertText = type(snippet.body) == 'string' and snippet.body or table.concat(snippet.body, '\n'),
     description = snippet.description,
   }
 end

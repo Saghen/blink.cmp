@@ -26,11 +26,11 @@ function sources_context:get_completions(context)
   assert(context.id == self.id, 'Requested completions on a sources context with a different context ID')
 
   if self.active_request ~= nil and self.active_request.status == async.STATUS.RUNNING then
-    vim.print(tostring(context.id) .. ': queued request | col: ' .. context.bounds.end_col)
+    -- vim.print(tostring(context.id) .. ': queued request | col: ' .. context.bounds.end_col)
     self.queued_request_context = context
     return
   end
-  vim.print(tostring(context.id) .. ': running request | col: ' .. context.bounds.end_col)
+  -- vim.print(tostring(context.id) .. ': running request | col: ' .. context.bounds.end_col)
 
   -- Create a task to get the completions for the first sources group,
   -- falling back to the next sources group iteratively if there are no items
@@ -50,6 +50,9 @@ function sources_context:get_completions(context)
     self.last_successful_completions = items
     self.on_completions_callback(context, items)
 
+    -- todo: when the queued request results in 100% cached content, we end up
+    -- calling the on_completions_callback with the same data, which triggers
+    -- unnecessary fuzzy + render updates
     if self.queued_request_context ~= nil then
       local queued_context = self.queued_request_context
       self.queued_request_context = nil
@@ -99,7 +102,7 @@ function sources_context:get_completions_for_group(sources_group, context)
       return items
     end)
     :catch(function(err)
-      vim.print('failed to get completions with error: ' .. err)
+      vim.print('failed to get completions for group with error: ' .. err)
       return { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
     end)
 end

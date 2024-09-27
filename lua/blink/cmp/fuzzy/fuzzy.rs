@@ -67,6 +67,14 @@ pub fn fuzzy(
         })
         .collect::<Vec<_>>();
 
+    // Find the highest score and filter out matches that are unreasonably lower than it
+    let max_score = matches.iter().map(|mtch| mtch.score).max().unwrap_or(0);
+    let secondary_min_score = max_score.max(4) - 4;
+    matches = matches
+        .into_iter()
+        .filter(|mtch| mtch.score >= secondary_min_score)
+        .collect::<Vec<_>>();
+
     // Sort matches by sort criteria
     for sort in opts.sorts.iter() {
         match sort.as_str() {

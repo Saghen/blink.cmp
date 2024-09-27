@@ -45,7 +45,7 @@ function fuzzy.filter_items(needle, items)
       -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
       -- so this should generally be good
       -- TODO: make this configurable
-      min_score = 4 * needle:len(),
+      min_score = 6 * needle:len(),
       max_items = config.max_items,
       use_frecency = config.use_frecency,
       use_proximity = config.use_proximity,
