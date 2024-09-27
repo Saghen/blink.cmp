@@ -8,9 +8,10 @@ local utils = {}
 --- @param response blink.cmp.CompletionResponse
 ---
 --- @return false | 'forward' | 'backward' | 'unknown'
-function utils.should_run_request(context, new_context, response)
+function utils.should_run_request(new_context, response)
+  local old_context = response.context
   -- get the text for the current and queued context
-  local context_query = context.bounds.line:sub(context.bounds.start_col, context.bounds.end_col)
+  local context_query = old_context.bounds.line:sub(old_context.bounds.start_col, old_context.bounds.end_col)
   local queued_context_query = new_context.bounds.line:sub(new_context.bounds.start_col, new_context.bounds.end_col)
 
   -- check if the texts are overlapping
@@ -23,6 +24,18 @@ function utils.should_run_request(context, new_context, response)
     return 'unknown'
   end
   return false
+end
+
+function utils.cache_get_completions_func(fn, module)
+  local cached_function = {}
+  cached_function.call = function(context)
+    return fn(module, context):map(function(response)
+      cached_function.last_context = context
+      cached_function.last_response = response
+      return response
+    end)
+  end
+  return cached_function
 end
 
 return utils

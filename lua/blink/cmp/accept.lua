@@ -1,5 +1,7 @@
 local utils = {}
 
+-- todo: doesnt work when the item contains characters not included in the context regex
+
 local function accept(item)
   local sources = require('blink.cmp.sources.lib')
   local fuzzy = require('blink.cmp.fuzzy')

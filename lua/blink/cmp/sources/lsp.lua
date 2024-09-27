@@ -127,7 +127,9 @@ function lsp:get_completions(context, callback)
     -- combine responses
     -- todo: ideally pass multiple responses to the sources
     -- so that we can do fine-grained isIncomplete
-    local combined_response = { isIncomplete = false, items = {} }
+    -- or do caching here
+    local combined_response =
+      { is_incomplete_forward = false, is_incomplete_backward = false, context = context, items = {} }
     for _, response in pairs(responses) do
       combined_response.is_incomplete_forward = combined_response.is_incomplete_forward
         or response.is_incomplete_forward

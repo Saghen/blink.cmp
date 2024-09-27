@@ -34,7 +34,7 @@ cmp.setup = function(opts)
   cmp.fuzzy = require('blink.cmp.fuzzy')
   cmp.fuzzy.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
 
-  cmp.trigger.listen_on_show(function(context) cmp.sources.completions(context) end)
+  cmp.trigger.listen_on_show(function(context) cmp.sources.request_completions(context) end)
   cmp.trigger.listen_on_hide(function()
     cmp.sources.cancel_completions()
     cmp.windows.autocomplete.close()

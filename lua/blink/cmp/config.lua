@@ -15,7 +15,7 @@
 --- @field blocked_trigger_characters string[]
 
 --- @class blink.cmp.SourceConfig
---- @field providers blink.cmp.SourceProviderConfig[]
+--- @field providers blink.cmp.SourceProviderConfig[][]
 ---
 --- @class blink.cmp.SourceProviderConfig
 --- @field [1] string
@@ -101,9 +101,8 @@ local config = {
   },
   sources = {
     providers = {
-      { 'blink.cmp.sources.lsp' },
-      { 'blink.cmp.sources.buffer', score_offset = -9 },
-      { 'blink.cmp.sources.snippets', score_offset = -3 },
+      { { 'blink.cmp.sources.lsp' }, { 'blink.cmp.sources.snippets', score_offset = -3 } },
+      { { 'blink.cmp.sources.buffer', score_offset = -9 } },
     },
   },
   windows = {

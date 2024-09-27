@@ -17,7 +17,7 @@ function snippets.new(opts)
   return self
 end
 
-function snippets:get_completions(_, callback)
+function snippets:get_completions(context, callback)
   local filetype = vim.bo.filetype
   if vim.tbl_contains(self.registry.config.ignored_filetypes, filetype) then
     return callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
@@ -38,6 +38,7 @@ function snippets:get_completions(_, callback)
   callback({
     is_incomplete_forward = false,
     is_incomplete_backward = false,
+    context = context,
     items = self.cache[filetype],
   })
 end

@@ -1,6 +1,5 @@
 local utils = require('blink.cmp.sources.lib.utils')
 local async = require('blink.cmp.sources.lib.async')
---- @type blink.cmp.SourceProvider
 local source = {}
 
 --- @param config blink.cmp.SourceProviderConfig
@@ -8,113 +7,71 @@ local source = {}
 function source.new(config)
   local self = setmetatable({}, { __index = source })
   self.name = config[1]
+  --- @type blink.cmp.Source
   self.module = require(config[1]).new(config.opts or {})
   self.config = config
-  self.completions_task = nil
-  self.completions_task_context = nil
-  self.completions_queue_task_context = nil
-  self.on_completions_callback = function() end
+
+  self.last_response = nil
 
   return self
 end
 
+--- @return string[]
 function source:get_trigger_characters()
   if self.module.get_trigger_characters == nil then return {} end
   return self.module:get_trigger_characters()
 end
 
-function source:request_completions(context)
-  if self.completions_task ~= nil and self.completions_task_context ~= nil then
-    local is_new_context = self.completions_task_context.id ~= context.id
-    vim.print(
-      self.name .. ': is_new_context: ' .. tostring(is_new_context) .. ' | status: ' .. self.completions_task.status
-    )
-
-    -- cancel in-flight completions task if we have a new context
-    -- TODO: also cancel if we know for sure, that the data will be out of date
-    -- potentially by having the sources inform us whether results will be complete backwards/forwards or not
-    if is_new_context then
-      self:cancel_completions()
-
-    -- already running for this context, so queue this request, replacing any previously queued request
-    elseif self.completions_task.status == async.STATUS.RUNNING then
-      self.completions_queue_task_context = context
-      return
-
-    -- already ran for this context, check if we can ignore the request due to cached content
-    elseif self.completions_task.status == async.STATUS.COMPLETED then
-      local response = self.completions_task.result
-      if utils.should_run_request(response.context, context, response) == false then return end
+--- @param context blink.cmp.CompletionContext
+--- @return blink.cmp.Task
+function source:get_completions(context)
+  -- Return the previous successful completions if the context is the same
+  -- and the data doesn't need to be updated
+  if self.last_response ~= nil and self.last_response.context.id == context.id then
+    if utils.should_run_request(context, self.last_response) == false then
+      vim.print(self.name .. ': returning cached completions')
+      return async.task.new(function(resolve) resolve(self.last_response) end)
     end
   end
-
-  self:get_completions(context)
-end
-
-function source:get_completions(context)
   vim.print(self.name .. ': running completions request')
-  self.completions_task_context = context
-  self.completions_task = async.task
-    .new(self.module.get_completions, self.module, context)
+
+  return async.task
+    .new(function(resolve) return self.module:get_completions(context, resolve) end)
     :map(function(response)
-      response.context = context
+      self.last_response = response
 
       -- add score offset if configured
       for _, item in ipairs(response.items) do
-        item.score_offset = self.config.score_offset
-        item.cursor_column = context.end_col -- todo: is this correct?
+        item.score_offset = (item.score_offset or 0) + (self.config.score_offset or 0)
+        item.cursor_column = context.bounds.end_col -- todo: is this correct?
         item.source = self.config[1]
       end
 
       return response
     end)
-    :map_error(function()
-      -- TODO: log error
-      return { context = context, is_incomplete_forward = true, is_incomplete_backward = true, items = {} }
-    end)
-    :await(function(success, response)
-      if success then
-        self.on_completions_callback(response)
-      else
-        vim.print(self.name .. ': failed to load completions')
-      end -- TODO: error logging
-
-      -- run the queued completions request, if necessary
-      local queued_context = self.completions_queue_task_context
-      self.completions_queue_task_context = nil
-      local should_run_request = queued_context ~= nil and utils.should_run_request(context, queued_context, response)
-      if should_run_request ~= false then
-        if should_run_request == 'backward' then
-          queued_context.trigger = { kind = vim.lsp.protocol.CompletionTriggerKind.TriggerForIncompleteCompletions }
-        end
-        vim.print(self.name .. ': found completion request in queue')
-        self:get_completions(queued_context)
-      end
-    end)
 end
 
-function source:listen_on_completions(cb) self.on_completions_callback = cb end
-
-function source:cancel_completions()
-  if self.completions_task ~= nil then self.completions_task:cancel() end
-  self.completions_task = nil
-  self.completions_task_context = nil
-  self.completions_queue_task_context = nil
+--- @param response blink.cmp.CompletionResponse
+--- @return blink.cmp.CompletionItem[]
+function source:filter_completions(response)
+  if self.module.filter_completions == nil then return response.items end
+  return self.module:filter_completions(response)
 end
 
-function source:filter_completions(context, source_responses)
-  if self.module.filter_completions == nil then return source_responses end
-  return self.module:filter_completions(context, source_responses)
-end
-
-function source:should_show_completions(context, source_responses)
+--- @param response blink.cmp.CompletionResponse
+--- @return boolean
+function source:should_show_completions(response)
   if self.module.should_show_completions == nil then return true end
-  return self.module:should_show_completions(context, source_responses)
+  return self.module:should_show_completions(response)
 end
 
+--- @param item blink.cmp.CompletionItem
+--- @return blink.cmp.Task
 function source:resolve(item)
-  if self.module.resolve == nil then return async.task.new(function(cb) cb(nil) end) end
-  return async.task.new(self.module.resolve, self.module, item)
+  return async.task.new(function(resolve)
+    if self.module.resolve == nil then return resolve(nil) end
+    return self.module:resolve(item, resolve)
+  end)
 end
 
 return source
