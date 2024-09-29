@@ -66,7 +66,7 @@ local buffer = {}
 
 function buffer.new(config) return setmetatable(config, { __index = buffer }) end
 
-function buffer:get_completions(_, callback)
+function buffer:get_completions(context, callback)
   local transformed_callback = function(items)
     callback({ is_incomplete_forward = false, is_incomplete_backward = false, context = context, items = items })
   end
