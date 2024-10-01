@@ -38,6 +38,8 @@ function source:get_completions(context)
   return async.task
     .new(function(resolve) return self.module:get_completions(context, resolve) end)
     :map(function(response)
+      response.context = context
+
       self.last_response = response
 
       -- add score offset if configured

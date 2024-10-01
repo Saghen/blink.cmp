@@ -38,7 +38,6 @@ function snippets:get_completions(context, callback)
   callback({
     is_incomplete_forward = false,
     is_incomplete_backward = false,
-    context = context,
     items = self.cache[filetype],
   })
 end

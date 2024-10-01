@@ -68,7 +68,7 @@ function buffer.new(config) return setmetatable(config, { __index = buffer }) en
 
 function buffer:get_completions(context, callback)
   local transformed_callback = function(items)
-    callback({ is_incomplete_forward = false, is_incomplete_backward = false, context = context, items = items })
+    callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
   end
 
   local buf_text = get_buf_text()

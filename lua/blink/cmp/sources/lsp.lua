@@ -128,8 +128,7 @@ function lsp:get_completions(context, callback)
     -- todo: ideally pass multiple responses to the sources
     -- so that we can do fine-grained isIncomplete
     -- or do caching here
-    local combined_response =
-      { is_incomplete_forward = false, is_incomplete_backward = false, context = context, items = {} }
+    local combined_response = { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
     for _, response in pairs(responses) do
       combined_response.is_incomplete_forward = combined_response.is_incomplete_forward
         or response.is_incomplete_forward
@@ -137,6 +136,7 @@ function lsp:get_completions(context, callback)
         or response.is_incomplete_backward
       vim.list_extend(combined_response.items, response.items)
     end
+
     callback(combined_response)
   end)
 end
