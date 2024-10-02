@@ -101,7 +101,11 @@ local config = {
   },
   sources = {
     providers = {
-      { { 'blink.cmp.sources.lsp' }, { 'blink.cmp.sources.snippets', score_offset = -3 } },
+      {
+        { 'blink.cmp.sources.lsp' },
+        { 'blink.cmp.sources.path' },
+        { 'blink.cmp.sources.snippets', score_offset = -3 },
+      },
       { { 'blink.cmp.sources.buffer', score_offset = -9 } },
     },
   },
