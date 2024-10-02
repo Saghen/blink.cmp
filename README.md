@@ -1,8 +1,6 @@
 # Blink Completion (blink.cmp)
 
-**blink.cmp** provides a completion plugin with support for LSPs and external sources while updating on every keystroke with minimal overhead (0.5-4ms async). It achieves this by writing the fuzzy searching in SIMD to easily handle >20k items. It provides extensibility via hooks into the trigger, sources and rendering pipeline. Plenty of work has been put into making each stage of the pipeline as intelligent as possible, such as frecency and proximity bonus on fuzzy matching, and this work is on-going. 
-
-TODO: `nvim-cmp` sources are supported out of the box but migration to the `blink.cmp` style source is highly encouraged.
+**blink.cmp** provides a completion plugin with support for LSPs and external sources while updating on every keystroke with minimal overhead (0.5-4ms async). It achieves this by writing the fuzzy searching in SIMD to easily handle >20k items. It provides extensibility via hooks into the trigger, sources and rendering pipeline. Plenty of work has been put into making each stage of the pipeline as intelligent as possible, such as frecency and proximity bonus on fuzzy matching, and this work is on-going.
 
 ## Features
 
@@ -12,8 +10,8 @@ TODO: `nvim-cmp` sources are supported out of the box but migration to the `blin
 - Typo resistant fuzzy with frecency and proximity bonus
 - Extensive LSP support ([tracker](./LSP_TRACKER.md))
 - Snippet support (including `friendly-snippets`)
-- TODO: Cmdline support
-- External sources support (TODO: including `nvim-cmp` compatibility layer)
+- todo: Cmdline support
+- External sources support (todo: including `nvim-cmp` compatibility layer)
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
 ## Installation
@@ -197,14 +195,14 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 &nbsp;&nbsp;&nbsp;&nbsp;**Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking presedence over the LSP source. The paramaters here still need to be tuned, so please let me know if you find some magical parameters!
 
-**Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overriden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting. 
+**Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overriden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
 
 ## Compared to nvim-cmp
 
 ### Advantages
 
 - Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
-- Updates on every keystroke, versus nvim-cmp's default debounce of 60ms
+- Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
     - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp)
 - Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
@@ -222,10 +220,10 @@ All of the following are planned, but not yet implemented.
 
 ## Special Thanks
 
-@hrsh7th nvim-cmp used as inspiration, nvim-path implementation used for path source
+[@hrsh7th](https://github.com/hrsh7th/) nvim-cmp used as inspiration and nvim-path implementation modified for path source
 
-@garymjr nvim-snippets implementation used for snippets source
+[@garymjr](https://github.com/garymjr) nvim-snippets implementation modified for snippets source
 
-@redxtech Help with design and testing
+[@redxtech](https://github.com/redxtech) Help with design and testing
 
-@aadityasahay Help with rust, testing and design
+[@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing
