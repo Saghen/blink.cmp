@@ -2,7 +2,7 @@
 local config = require('blink.cmp.config').windows.documentation
 local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')
-local utils = require('blink.cmp.util')
+local utils = require('blink.cmp.utils')
 local docs = {}
 
 function docs.setup()

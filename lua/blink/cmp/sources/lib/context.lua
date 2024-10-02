@@ -12,6 +12,7 @@ function sources_context.new(context, sources_groups, on_completions_callback)
   self.active_request = nil
   self.queued_request_context = nil
   self.last_successful_completions = nil
+  self.last_sources_group_idx = nil
   --- @type fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
   self.on_completions_callback = on_completions_callback
 
@@ -32,21 +33,25 @@ function sources_context:get_completions(context)
 
   -- Create a task to get the completions for the first sources group,
   -- falling back to the next sources group iteratively if there are no items
-  local request = self:get_completions_for_group(self.sources_groups[1], context)
+  local request = self:get_completions_for_group(1, self.sources_groups[1], context)
   for idx, sources_group in ipairs(self.sources_groups) do
     if idx > 1 then
-      request = request:map(function(items)
-        if #items > 0 then return items end
-        return self:get_completions_for_group(sources_group, context)
+      request = request:map(function(res)
+        if #res.items > 0 then return res end
+        return self:get_completions_for_group(idx, sources_group, context)
       end)
     end
   end
 
   -- Send response upstream and run the queued request, if it exists
-  self.active_request = request:map(function(items)
+  self.active_request = request:map(function(response)
     self.active_request = nil
-    self.last_successful_completions = items
-    self.on_completions_callback(context, items)
+    self.last_successful_completions = response.items
+    -- only send upstream if the response contains something new
+    if not response.is_cached or response.sources_group_idx ~= self.last_sources_group_idx then
+      self.on_completions_callback(context, response.items)
+    end
+    self.last_sources_group_idx = response.sources_group_idx
 
     -- todo: when the queued request results in 100% cached content, we end up
     -- calling the on_completions_callback with the same data, which triggers
@@ -59,10 +64,11 @@ function sources_context:get_completions(context)
   end)
 end
 
+--- @param sources_group_idx number
 --- @param sources_group blink.cmp.Source[]
 --- @param context blink.cmp.Context
 --- @return blink.cmp.Task
-function sources_context:get_completions_for_group(sources_group, context)
+function sources_context:get_completions_for_group(sources_group_idx, sources_group, context)
   -- get completions for each source in the group
   local tasks = vim.tbl_map(function(source)
     -- the source indicates we should refetch when this character is typed
@@ -85,11 +91,13 @@ function sources_context:get_completions_for_group(sources_group, context)
   return async.task
     .await_all(tasks)
     :map(function(tasks_results)
+      local is_cached = true
       local items = {}
       -- for each task, filter the items and add them to the list
       -- if the source should show the completions
       for idx, task_result in ipairs(tasks_results) do
         if task_result.status == async.STATUS.COMPLETED then
+          is_cached = is_cached and (task_result.result.is_cached or false)
           local source = sources_group[idx]
           --- @type blink.cmp.CompletionResponse
           local response = task_result.result
@@ -97,11 +105,11 @@ function sources_context:get_completions_for_group(sources_group, context)
           if source:should_show_completions(response) then vim.list_extend(items, response.items) end
         end
       end
-      return items
+      return { sources_group_idx = sources_group_idx, is_cached = is_cached, items = items }
     end)
     :catch(function(err)
       vim.print('failed to get completions for group with error: ' .. err)
-      return { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
+      return { sources_group_idx = sources_group_idx, is_cached = false, items = {} }
     end)
 end
 

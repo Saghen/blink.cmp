@@ -10,9 +10,10 @@
 ---
 --- @class blink.cmp.Context
 --- @field id number
---- @field bounds blink.cmp.TriggerBounds
 --- @field bufnr number
---- @field treesitter_node table | nil
+--- @field cursor number[]
+--- @field line string
+--- @field bounds blink.cmp.TriggerBounds
 --- @field trigger { kind: number, character: string | nil }
 ---
 --- @class blink.cmp.TriggerEventTargets
@@ -138,7 +139,7 @@ end
 
 function trigger.listen_on_hide(callback) trigger.event_targets.on_hide = callback end
 
---- @param context blink.cmp.ShowContext | nil
+--- @param context blink.cmp.Context | nil
 --- @param cursor number[]
 --- @return boolean
 function trigger.within_query_bounds(cursor)
@@ -182,17 +183,6 @@ function helpers.get_context_bounds(regex)
   end
 
   return { line_number = cursor_line, start_col = start_col, end_col = end_col }
-end
-
---- @return TSNode | nil
-function helpers.get_treesitter_node_at_cursor()
-  local ts = vim.treesitter
-  local parser = ts.get_parser(0) -- Adjust language as needed
-  if not parser then return end
-  parser:parse()
-
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  return ts.get_node({ bufnr = 0, pos = { cursor[1] - 1, math.max(0, cursor[2] - 1) } })
 end
 
 return trigger

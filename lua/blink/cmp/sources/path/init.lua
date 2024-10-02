@@ -32,7 +32,7 @@ function path:get_completions(context, callback)
   local lib = require('blink.cmp.sources.path.lib')
 
   local dirname = lib.dirname(PATH_REGEX, self.opts.get_cwd, context)
-  if not dirname then return callback() end
+  if not dirname then return callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} }) end
 
   local include_hidden = self.opts.show_hidden_files_by_default
     or string.sub(context.line, context.bounds.start_col - 1, context.bounds.start_col - 1) == '.'
@@ -40,10 +40,37 @@ function path:get_completions(context, callback)
     .candidates(dirname, include_hidden, self.opts)
     :map(
       function(candidates)
-        callback({ is_incomplete_forward = false, is_incomplete_backward = true, items = candidates })
+        callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = candidates })
       end
     )
     :catch(function() callback() end)
+end
+
+function path:resolve(item, callback)
+  require('blink.cmp.sources.path.fs')
+    .read_file(item.data.full_path, 1024)
+    :map(function(content)
+      local is_binary = content:find('\0')
+
+      -- binary file
+      if is_binary then
+        item.documentation = {
+          kind = 'plaintext',
+          value = 'Binary file',
+        }
+      -- highlight with markdown
+      else
+        local ext = vim.fn.fnamemodify(item.data.path, ':e')
+        item.documentation = {
+          kind = 'markdown',
+          value = '```' .. ext .. '\n' .. content .. '```',
+        }
+      end
+
+      return item
+    end)
+    :map(function(resolved_item) callback(resolved_item) end)
+    :catch(function() callback(item) end)
 end
 
 return path

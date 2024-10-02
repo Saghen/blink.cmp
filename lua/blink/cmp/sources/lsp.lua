@@ -70,18 +70,19 @@ function lsp:get_completions(context, callback)
   -- for these special cases
   -- i.e. hello.wor| would be sent as hello.|wor
   -- todo: should we still make two calls to the LSP server and merge?
-  local trigger_characters = self:get_trigger_characters()
-  local trigger_character_block_list = { ' ', '\n', '\t' }
-  local bounds = context.bounds
-  local trigger_character_before_context = context.line:sub(bounds.start_col - 1, bounds.start_col - 1)
-  if
-    vim.tbl_contains(trigger_characters, trigger_character_before_context)
-    and not vim.tbl_contains(trigger_character_block_list, trigger_character_before_context)
-  then
-    local offset_encoding = vim.lsp.get_clients({ bufnr = 0 })[1].offset_encoding
-    params.position.character =
-      vim.lsp.util.character_offset(0, params.position.line, bounds.start_col - 1, offset_encoding)
-  end
+  -- todo: breaks the textEdit resolver since it assumes the request was made from the cursor
+  -- local trigger_characters = self:get_trigger_characters()
+  -- local trigger_character_block_list = { ' ', '\n', '\t' }
+  -- local bounds = context.bounds
+  -- local trigger_character_before_context = context.line:sub(bounds.start_col - 1, bounds.start_col - 1)
+  -- if
+  --   vim.tbl_contains(trigger_characters, trigger_character_before_context)
+  --   and not vim.tbl_contains(trigger_character_block_list, trigger_character_before_context)
+  -- then
+  --   local offset_encoding = vim.lsp.get_clients({ bufnr = 0 })[1].offset_encoding
+  --   params.position.character =
+  --     vim.lsp.util.character_offset(0, params.position.line, bounds.start_col - 1, offset_encoding)
+  -- end
 
   -- request from each of the clients
   -- todo: refactor
@@ -118,9 +119,8 @@ function lsp:get_completions(context, callback)
         item.kind = item.kind or vim.lsp.protocol.CompletionItemKind.Text
         item.client_id = client_id
 
-        if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then
-          item.score_offset = (item.score_for_deprecated or -2)
-        end
+        -- todo: make configurable
+        if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then item.score_offset = -2 end
       end
     end
 

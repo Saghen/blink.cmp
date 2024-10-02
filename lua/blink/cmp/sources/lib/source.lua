@@ -28,7 +28,7 @@ function source:get_completions(context)
   -- and the data doesn't need to be updated
   if self.last_response ~= nil and self.last_response.context.id == context.id then
     if utils.should_run_request(context, self.last_response) == false then
-      return async.task.new(function(resolve) resolve(self.last_response) end)
+      return async.task.new(function(resolve) resolve(require('blink.cmp.utils').shallow_copy(self.last_response)) end)
     end
   end
 
@@ -37,15 +37,16 @@ function source:get_completions(context)
     :map(function(response)
       if response == nil then response = { is_incomplete_forward = true, is_incomplete_backward = true, items = {} } end
       response.context = context
-      self.last_response = response
 
       -- add score offset if configured
       for _, item in ipairs(response.items) do
         item.score_offset = (item.score_offset or 0) + (self.config.score_offset or 0)
-        item.cursor_column = context.bounds.end_col -- todo: is this correct?
+        item.cursor_column = context.cursor[2]
         item.source = self.config[1]
       end
 
+      self.last_response = require('blink.cmp.utils').shallow_copy(response)
+      self.last_response.is_cached = true
       return response
     end)
 end
@@ -69,7 +70,9 @@ end
 function source:resolve(item)
   return async.task.new(function(resolve)
     if self.module.resolve == nil then return resolve(nil) end
-    return self.module:resolve(item, resolve)
+    return self.module:resolve(item, function(resolved_item)
+      vim.schedule(function() resolve(resolved_item) end)
+    end)
   end)
 end
 

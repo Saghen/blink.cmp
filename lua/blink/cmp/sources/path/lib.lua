@@ -51,7 +51,7 @@ function lib.candidates(dirname, include_hidden, opts)
       return vim.tbl_filter(function(entry) return include_hidden or entry.name ~= '.' end, entries)
     end)
     :map(function(entries)
-      return vim.tbl_map(function(entry) return lib.entry_to_completion_item(entry, opts) end, entries)
+      return vim.tbl_map(function(entry) return lib.entry_to_completion_item(entry, dirname, opts) end, entries)
     end)
 end
 
@@ -65,16 +65,17 @@ function lib.is_slash_comment(_)
 end
 
 --- @param entry { name: string, type: string, stat: table }
+--- @param dirname string
 --- @param opts table
 --- @return blink.cmp.CompletionItem[]
-function lib.entry_to_completion_item(entry, opts)
+function lib.entry_to_completion_item(entry, dirname, opts)
   local is_dir = entry.type == 'directory'
   return {
     label = (opts.label_trailing_slash and is_dir) and entry.name .. '/' or entry.name,
     kind = is_dir and vim.lsp.protocol.CompletionItemKind.Folder or vim.lsp.protocol.CompletionItemKind.File,
     insertText = is_dir and entry.name .. '/' or entry.name,
     word = opts.trailing_slash and entry.name or nil,
-    data = { path = entry.name, type = entry.type, stat = entry.stat },
+    data = { path = entry.name, full_path = dirname .. '/' .. entry.name, type = entry.type, stat = entry.stat },
   }
 end
 

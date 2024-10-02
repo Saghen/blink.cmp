@@ -38,7 +38,7 @@ end
 
 function sources.listen_on_completions(callback) sources.on_completions_callback = callback end
 
---- @param context blink.cmp.ShowContext
+--- @param context blink.cmp.Context
 function sources.request_completions(context)
   -- a new context means we should refetch everything
   local is_new_context = sources.current_context == nil or context.id ~= sources.current_context.id
@@ -79,10 +79,10 @@ function sources.resolve(item, callback)
     callback(nil)
     return function() end
   end
-  return item_source
-    :resolve(item)
-    :map(function(resolved_item) callback(resolved_item) end)
-    :catch(function() callback(nil) end)
+  return item_source:resolve(item):map(function(resolved_item) callback(resolved_item) end):catch(function(err)
+    vim.print('failed to resolve item with error: ' .. err)
+    callback(nil)
+  end)
 end
 
 return sources

@@ -5,7 +5,7 @@
 --- @class blink.cmp.CompletionResponse
 --- @field is_incomplete_forward boolean
 --- @field is_incomplete_backward boolean
---- @field context blink.cmp.CompletionContext
+--- @field context blink.cmp.Context
 --- @field items blink.cmp.CompletionItem[]
 ---
 --- @class blink.cmp.Source
