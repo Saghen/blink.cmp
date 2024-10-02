@@ -38,6 +38,9 @@
     nerd_font_variant = 'normal',
   }
 }
+
+-- note: for LazyVim/distro users, you can disable nvim-cmp via:
+{ 'hrsh7th/nvim-cmp', enabled = false }
 ```
 
 <details>
