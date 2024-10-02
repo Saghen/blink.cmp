@@ -38,8 +38,8 @@ function source:get_completions(context)
   return async.task
     .new(function(resolve) return self.module:get_completions(context, resolve) end)
     :map(function(response)
+      if response == nil then response = { is_incomplete_forward = true, is_incomplete_backward = true, items = {} } end
       response.context = context
-
       self.last_response = response
 
       -- add score offset if configured

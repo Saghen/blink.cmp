@@ -19,9 +19,7 @@ end
 
 function snippets:get_completions(context, callback)
   local filetype = vim.bo.filetype
-  if vim.tbl_contains(self.registry.config.ignored_filetypes, filetype) then
-    return callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
-  end
+  if vim.tbl_contains(self.registry.config.ignored_filetypes, filetype) then return callback() end
 
   if not self.cache[filetype] then
     local global_snippets = self.registry:get_global_snippets()
