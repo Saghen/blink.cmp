@@ -194,7 +194,7 @@ function autocomplete.draw_item(item, max_length)
   local other_content_length = 5
   local abbr = string.sub(label, 1, max_length - other_content_length)
 
-  return string.format(' %s  %s ', kind_icon, abbr)
+  return string.format(' %s%s%s ', kind_icon, config.nerd_font_variant == 'mono' and ' ' or '  ', abbr)
 end
 
 function autocomplete.get_label(item) return item.label end

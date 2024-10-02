@@ -51,10 +51,6 @@ function sources.request_completions(context)
   sources.current_context:get_completions(context)
 end
 
-function sources.get_last_successful_completions()
-  return sources.current_context and sources.current_context:get_last_successful_completions()
-end
-
 function sources.cancel_completions()
   if sources.current_context ~= nil then sources.current_context:destroy() end
   sources.current_context = nil

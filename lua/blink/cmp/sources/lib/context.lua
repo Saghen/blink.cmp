@@ -11,16 +11,12 @@ function sources_context.new(context, sources_groups, on_completions_callback)
 
   self.active_request = nil
   self.queued_request_context = nil
-  self.last_successful_completions = nil
   self.last_sources_group_idx = nil
   --- @type fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
   self.on_completions_callback = on_completions_callback
 
   return self
 end
-
---- @return blink.cmp.CompletionItem[]
-function sources_context:get_last_successful_completions() return self.last_successful_completions end
 
 --- @param context blink.cmp.Context
 function sources_context:get_completions(context)
@@ -46,7 +42,6 @@ function sources_context:get_completions(context)
   -- Send response upstream and run the queued request, if it exists
   self.active_request = request:map(function(response)
     self.active_request = nil
-    self.last_successful_completions = response.items
     -- only send upstream if the response contains something new
     if not response.is_cached or response.sources_group_idx ~= self.last_sources_group_idx then
       self.on_completions_callback(context, response.items)

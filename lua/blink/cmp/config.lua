@@ -62,18 +62,19 @@
 --- @field max_height number
 --- @field direction_priority blink.cmp.DocumentationDirectionPriorityConfig
 --- @field auto_show boolean
---- @field debounce_ms number
---- @field delay_ms number
+--- @field auto_show_delay_ms number Delay before showing the documentation window
+--- @field update_delay_ms number Delay before updating the documentation window
 
---- @class blink.cmp.CmpConfig
+--- @class blink.cmp.Config
 --- @field trigger blink.cmp.TriggerConfig
 --- @field fuzzy blink.cmp.FuzzyConfig
 --- @field sources blink.cmp.SourceConfig
 --- @field windows blink.cmp.WindowConfig
 --- @field highlight blink.cmp.HighlightConfig
+--- @field nerd_font_variant 'mono' | 'normal'
 --- @field kind_icons table<string, string>
 
---- @type blink.cmp.CmpConfig
+--- @type blink.cmp.Config
 local config = {
   keymap = {
     show = '<C-space>',
@@ -90,17 +91,21 @@ local config = {
     snippet_forward = '<Tab>',
     snippet_backward = '<S-Tab>',
   },
+
   trigger = {
+    -- todo: shouldnt this also affect the accept command? should this also be per language?
     context_regex = '[%w_\\-]',
     blocked_trigger_characters = { ' ', '\n', '\t' },
     show_on_insert_on_trigger_character = true,
   },
+
   fuzzy = {
     use_frecency = true,
     use_proximity = true,
     max_items = 200,
     sorts = { 'label', 'kind', 'score' },
   },
+
   sources = {
     providers = {
       {
@@ -108,9 +113,10 @@ local config = {
         { 'blink.cmp.sources.path' },
         { 'blink.cmp.sources.snippets', score_offset = -3 },
       },
-      { { 'blink.cmp.sources.buffer', score_offset = -9 } },
+      { { 'blink.cmp.sources.buffer' } },
     },
   },
+
   windows = {
     autocomplete = {
       min_width = 30,
@@ -118,6 +124,7 @@ local config = {
       max_height = 10,
       order = 'top_down',
       direction_priority = { 'n', 's' },
+      -- todo: implement
       preselect = true,
     },
     documentation = {
@@ -129,8 +136,8 @@ local config = {
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
       auto_show = true,
-      delay_ms = 0,
-      debounce_ms = 100,
+      auto_show_delay_ms = 0,
+      update_delay_ms = 100,
     },
   },
 
@@ -138,6 +145,8 @@ local config = {
     ns = vim.api.nvim_create_namespace('blink_cmp'),
     use_nvim_cmp_as_default = false,
   },
+
+  nerd_font_variant = 'normal',
   kind_icons = {
     Text = '󰉿',
     Method = '󰊕',
@@ -172,10 +181,10 @@ local config = {
   },
 }
 
---- @class blink.cmp.CmpConfig
+--- @class blink.cmp.Config
 local M = {}
 
---- @param opts blink.cmp.CmpConfig
+--- @param opts blink.cmp.Config
 function M.merge_with(opts) config = vim.tbl_deep_extend('force', config, opts or {}) end
 
 return setmetatable(M, { __index = function(_, k) return config[k] end })

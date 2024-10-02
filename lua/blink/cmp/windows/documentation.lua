@@ -15,14 +15,17 @@ function docs.setup()
   })
 
   autocomplete.listen_on_position_update(function()
-    if autocomplete.win:get_win() then docs.update_position() end
+    if autocomplete.win:is_open() then docs.update_position() end
   end)
   if config.auto_show then
-    if config.delay_ms > 0 then
-      autocomplete.listen_on_select(utils.debounce(docs.show_item, config.delay_ms))
-    else
-      autocomplete.listen_on_select(docs.show_item)
-    end
+    autocomplete.listen_on_select(function(item)
+      local delay = autocomplete.win:is_open() and config.update_delay_ms or config.auto_show_delay_ms
+      if delay == 0 then
+        return docs.show_item(item)
+      else
+        utils.debounce(docs.show_item, delay)(item)
+      end
+    end)
   end
   autocomplete.listen_on_close(function() docs.win:close() end)
 
