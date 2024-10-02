@@ -8,21 +8,20 @@
 --- @field start_col number
 --- @field end_col number
 ---
---- @class blink.cmp.TriggerContext
+--- @class blink.cmp.Context
 --- @field id number
 --- @field bounds blink.cmp.TriggerBounds
+--- @field bufnr number
 --- @field treesitter_node table | nil
----
---- @class blink.cmp.ShowContext : blink.cmp.TriggerContext
---- @field trigger_character string | nil
+--- @field trigger { kind: number, character: string | nil }
 ---
 --- @class blink.cmp.TriggerEventTargets
---- @field on_show fun(context: blink.cmp.ShowContext)
+--- @field on_show fun(context: blink.cmp.Context)
 --- @field on_hide fun()
 ---
 --- @class blink.cmp.Trigger
---- @field context blink.cmp.TriggerContext | nil
---- @field context_last_id number
+--- @field context blink.cmp.Context | nil
+--- @field current_context_id number
 --- @field context_regex string
 --- @field event_targets blink.cmp.TriggerEventTargets
 
@@ -30,7 +29,7 @@ local sources = require('blink.cmp.sources.lib')
 
 --- @class blink.cmp.Trigger
 local trigger = {
-  context_last_id = -1,
+  current_context_id = -1,
   context = nil,
   context_regex = '[%w_\\-]',
 
@@ -108,15 +107,23 @@ end
 function trigger.show(opts)
   opts = opts or {}
 
-  -- update context (to update bounds and treesitter node)
-  -- todo: this behavior isn't obvious
-  trigger.context = trigger.get_context()
+  -- update context
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  if trigger.context == nil then trigger.current_context_id = trigger.current_context_id + 1 end
+  trigger.context = {
+    id = trigger.current_context_id,
+    bufnr = vim.api.nvim_get_current_buf(),
+    cursor = cursor,
+    line = vim.api.nvim_buf_get_lines(0, cursor[1] - 1, cursor[1], false)[1],
+    bounds = helpers.get_context_bounds(trigger.context_regex),
+    trigger = {
+      kind = opts.trigger_character and vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter
+        or vim.lsp.protocol.CompletionTriggerKind.Invoked,
+      character = opts.trigger_character,
+    },
+  }
 
-  trigger.event_targets.on_show({
-    id = trigger.context.id,
-    bounds = trigger.context.bounds,
-    trigger_character = opts.trigger_character,
-  })
+  trigger.event_targets.on_show(trigger.context)
 end
 
 function trigger.listen_on_show(callback) trigger.event_targets.on_show = callback end
@@ -130,19 +137,7 @@ end
 
 function trigger.listen_on_hide(callback) trigger.event_targets.on_hide = callback end
 
------- Context ------
--- Gets the current context, always updating the bounds to the current position
---- @return blink.cmp.TriggerContext
-function trigger.get_context()
-  local bounds = helpers.get_query(trigger.context_regex)
-  -- local treesitter_node = helpers.get_treesitter_node_at_cursor()
-  if not trigger.context then
-    trigger.context_last_id = trigger.context_last_id + 1
-    trigger.context = { id = trigger.context_last_id, bounds = bounds }
-  end
-  return { id = trigger.context.id, bounds = bounds }
-end
-
+--- @param context blink.cmp.ShowContext | nil
 --- @param cursor number[]
 --- @return boolean
 function trigger.within_query_bounds(cursor)
@@ -163,12 +158,11 @@ end
 -- Moves forward and backwards around the cursor looking for word boundaries
 --- @param regex string
 --- @return blink.cmp.TriggerBounds
-function helpers.get_query(regex)
-  local bufnr = vim.api.nvim_get_current_buf()
+function helpers.get_context_bounds(regex)
   local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
 
-  local line = vim.api.nvim_buf_get_lines(bufnr, cursor_line - 1, cursor_line, false)[1]
+  local line = vim.api.nvim_buf_get_lines(0, cursor_line - 1, cursor_line, false)[1]
   local start_col = cursor_col
   while start_col > 1 do
     local char = line:sub(start_col, start_col)
@@ -186,7 +180,7 @@ function helpers.get_query(regex)
     end_col = end_col + 1
   end
 
-  return { line = line, line_number = cursor_line, start_col = start_col, end_col = end_col }
+  return { line_number = cursor_line, start_col = start_col, end_col = end_col }
 end
 
 --- @return TSNode | nil

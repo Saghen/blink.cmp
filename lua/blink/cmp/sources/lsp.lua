@@ -73,7 +73,7 @@ function lsp:get_completions(context, callback)
   local trigger_characters = self:get_trigger_characters()
   local trigger_character_block_list = { ' ', '\n', '\t' }
   local bounds = context.bounds
-  local trigger_character_before_context = bounds.line:sub(bounds.start_col - 1, bounds.start_col - 1)
+  local trigger_character_before_context = context.line:sub(bounds.start_col - 1, bounds.start_col - 1)
   if
     vim.tbl_contains(trigger_characters, trigger_character_before_context)
     and not vim.tbl_contains(trigger_character_block_list, trigger_character_before_context)

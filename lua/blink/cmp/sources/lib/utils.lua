@@ -11,8 +11,8 @@ local utils = {}
 function utils.should_run_request(new_context, response)
   local old_context = response.context
   -- get the text for the current and queued context
-  local context_query = old_context.bounds.line:sub(old_context.bounds.start_col, old_context.bounds.end_col)
-  local queued_context_query = new_context.bounds.line:sub(new_context.bounds.start_col, new_context.bounds.end_col)
+  local context_query = old_context.line:sub(old_context.bounds.start_col, old_context.bounds.end_col)
+  local queued_context_query = new_context.line:sub(new_context.bounds.start_col, new_context.bounds.end_col)
 
   -- check if the texts are overlapping
   local is_before = vim.startswith(context_query, queued_context_query)

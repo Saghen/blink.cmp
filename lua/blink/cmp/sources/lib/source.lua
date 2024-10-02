@@ -3,7 +3,6 @@ local async = require('blink.cmp.sources.lib.async')
 local source = {}
 
 --- @param config blink.cmp.SourceProviderConfig
---- @return blink.cmp.SourceProvider
 function source.new(config)
   local self = setmetatable({}, { __index = source })
   self.name = config[1]
@@ -22,18 +21,16 @@ function source:get_trigger_characters()
   return self.module:get_trigger_characters()
 end
 
---- @param context blink.cmp.CompletionContext
+--- @param context blink.cmp.Context
 --- @return blink.cmp.Task
 function source:get_completions(context)
   -- Return the previous successful completions if the context is the same
   -- and the data doesn't need to be updated
   if self.last_response ~= nil and self.last_response.context.id == context.id then
     if utils.should_run_request(context, self.last_response) == false then
-      -- vim.print(self.name .. ': returning cached completions')
       return async.task.new(function(resolve) resolve(self.last_response) end)
     end
   end
-  -- vim.print(self.name .. ': running completions request')
 
   return async.task
     .new(function(resolve) return self.module:get_completions(context, resolve) end)

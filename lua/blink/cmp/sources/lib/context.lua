@@ -1,9 +1,9 @@
 local async = require('blink.cmp.sources.lib.async')
 local sources_context = {}
 
---- @param context blink.cmp.ShowContext
+--- @param context blink.cmp.Context
 --- @param sources_groups blink.cmp.Source[][]
---- @param on_completions_callback fun(context: blink.cmp.ShowContext, items: blink.cmp.CompletionItem[])
+--- @param on_completions_callback fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
 function sources_context.new(context, sources_groups, on_completions_callback)
   local self = setmetatable({}, { __index = sources_context })
   self.id = context.id
@@ -12,7 +12,7 @@ function sources_context.new(context, sources_groups, on_completions_callback)
   self.active_request = nil
   self.queued_request_context = nil
   self.last_successful_completions = nil
-  --- @type fun(context: blink.cmp.ShowContext, items: blink.cmp.CompletionItem[])
+  --- @type fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
   self.on_completions_callback = on_completions_callback
 
   return self
@@ -21,16 +21,14 @@ end
 --- @return blink.cmp.CompletionItem[]
 function sources_context:get_last_successful_completions() return self.last_successful_completions end
 
---- @param context blink.cmp.ShowContext
+--- @param context blink.cmp.Context
 function sources_context:get_completions(context)
   assert(context.id == self.id, 'Requested completions on a sources context with a different context ID')
 
   if self.active_request ~= nil and self.active_request.status == async.STATUS.RUNNING then
-    -- vim.print(tostring(context.id) .. ': queued request | col: ' .. context.bounds.end_col)
     self.queued_request_context = context
     return
   end
-  -- vim.print(tostring(context.id) .. ': running request | col: ' .. context.bounds.end_col)
 
   -- Create a task to get the completions for the first sources group,
   -- falling back to the next sources group iteratively if there are no items
@@ -62,19 +60,19 @@ function sources_context:get_completions(context)
 end
 
 --- @param sources_group blink.cmp.Source[]
---- @param context blink.cmp.ShowContext
+--- @param context blink.cmp.Context
 --- @return blink.cmp.Task
 function sources_context:get_completions_for_group(sources_group, context)
   -- get completions for each source in the group
   local tasks = vim.tbl_map(function(source)
     -- the source indicates we should refetch when this character is typed
-    local trigger_character = context.trigger_character
-      and vim.tbl_contains(source:get_trigger_characters(), context.trigger_character)
+    local trigger_character = context.trigger.character
+      and vim.tbl_contains(source:get_trigger_characters(), context.trigger.character)
 
     -- The TriggerForIncompleteCompletions kind is handled by the source itself
     local source_context = vim.fn.deepcopy(context)
     source_context.trigger = trigger_character
-        and { kind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter, character = context.trigger_character }
+        and { kind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter, character = context.trigger.character }
       or { kind = vim.lsp.protocol.CompletionTriggerKind.Invoked }
 
     return source:get_completions(source_context):catch(function(err)
