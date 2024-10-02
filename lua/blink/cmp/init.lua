@@ -34,12 +34,12 @@ cmp.setup = function(opts)
   cmp.fuzzy = require('blink.cmp.fuzzy')
   cmp.fuzzy.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
 
-  cmp.trigger.listen_on_show(function(context) cmp.sources.request_completions(context) end)
-  cmp.trigger.listen_on_hide(function()
-    cmp.sources.cancel_completions()
-    cmp.windows.autocomplete.close()
-  end)
-  cmp.sources.listen_on_completions(function(context, items)
+  -- we store the previous items so we can immediately perform fuzzy matching on keystroke
+  -- and then update again when the sources return new results
+  local last_items = {}
+  local function update_completions(context, items)
+    if items == nil then items = last_items end
+    last_items = items
     -- we avoid adding 1-4ms to insertion latency by scheduling for later
     vim.schedule(function()
       local filtered_items = cmp.fuzzy.filter_items(require('blink.cmp.util').get_query(), items)
@@ -49,7 +49,17 @@ cmp.setup = function(opts)
         cmp.windows.autocomplete.close()
       end
     end)
+  end
+
+  cmp.trigger.listen_on_show(function(context)
+    update_completions(context)
+    cmp.sources.request_completions(context)
   end)
+  cmp.trigger.listen_on_hide(function()
+    cmp.sources.cancel_completions()
+    cmp.windows.autocomplete.close()
+  end)
+  cmp.sources.listen_on_completions(update_completions)
 end
 
 cmp.add_default_highlights = function()
