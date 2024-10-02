@@ -20,28 +20,22 @@
 
 ```lua
 {
-  'saghen/blink.nvim',
+  'saghen/blink.cmp',
   -- note: requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
   build = 'cargo build --release',
   event = 'InsertEnter',
-  dependencies = {
-    {
-      'garymjr/nvim-snippets',
-      dependencies = { 'rafamadriz/friendly-snippets' },
-      opts = { create_cmp_source = false, friendly_snippets = true },
-    },
-  },
+  -- optional: provides snippets for the snippet source
+  dependencies = 'rafamadriz/friendly-snippets',
   opts = {
-    cmp = {
-      enabled = true,
-      highlight = {
-        -- defaults to nvim-cmp's highlight groups for now
-        -- will be removed in a future release, assuming themes add support
-        use_nvim_cmp_as_default = true,
-      },
-      -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
-      -- adjusts spacing to ensure icons are aligned
-      nerd_font_variant = 'normal',
+    highlight = {
+      -- sets the fallback highlight groups to nvim-cmp's highlight groups
+      -- useful for when your theme doesn't support blink.cmp
+      -- will be removed in a future release, assuming themes add support
+      use_nvim_cmp_as_default = true,
+    },
+    -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+    -- adjusts spacing to ensure icons are aligned
+    nerd_font_variant = 'normal',
   }
 }
 ```
@@ -74,6 +68,7 @@
   trigger = {
     -- regex used to get the text when fuzzy matching
     -- changing this may break some sources, so please report if you run into issues
+    -- todo: shouldnt this also affect the accept command? should this also be per language?
     context_regex = '[%w_\\-]',
     -- LSPs can indicate when to show the completion window via trigger characters
     -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
@@ -94,7 +89,7 @@
   },
 
   sources = {
-    -- similar to nvim-cmp's sources, but we point directly to the source module
+    -- similar to nvim-cmp's sources, but we point directly to the source's lua module
     -- multiple groups can be provided, where it'll fallback to the next group if the previous
     -- returns no completion items
     providers = {
@@ -116,6 +111,8 @@
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 'n', 's' },
+      -- todo: implement
+      preselect = true,
     },
     documentation = {
       min_width = 10,
@@ -138,10 +135,14 @@
     ns = vim.api.nvim_create_namespace('blink_cmp'),
     -- sets the fallback highlight groups to nvim-cmp's highlight groups
     -- useful for when your theme doesn't support blink.cmp
+    -- will be removed in a future release, assuming themes add support
     use_nvim_cmp_as_default = false,
   },
 
-  nerd_font_variant = 'mono',
+  -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+  -- adjusts spacing to ensure icons are aligned
+  nerd_font_variant = 'normal',
+
   kind_icons = {
     Text = '󰉿',
     Method = '󰊕',

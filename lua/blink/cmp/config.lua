@@ -76,6 +76,8 @@
 
 --- @type blink.cmp.Config
 local config = {
+  -- for keymap, all values may be string | string[]
+  -- use an empty table to disable a keymap
   keymap = {
     show = '<C-space>',
     hide = '<C-e>',
@@ -93,20 +95,32 @@ local config = {
   },
 
   trigger = {
+    -- regex used to get the text when fuzzy matching
+    -- changing this may break some sources, so please report if you run into issues
     -- todo: shouldnt this also affect the accept command? should this also be per language?
     context_regex = '[%w_\\-]',
+    -- LSPs can indicate when to show the completion window via trigger characters
+    -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
+    -- always show the window. We block these by default
     blocked_trigger_characters = { ' ', '\n', '\t' },
+    -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
     show_on_insert_on_trigger_character = true,
   },
 
   fuzzy = {
+    -- frencency tracks the most recently/frequently used items and boosts the score of the item
     use_frecency = true,
+    -- proximity bonus boosts the score of items with a value in the buffer
     use_proximity = true,
     max_items = 200,
+    -- controls which sorts to use and in which order, these three are currently the only allowed options
     sorts = { 'label', 'kind', 'score' },
   },
 
   sources = {
+    -- similar to nvim-cmp's sources, but we point directly to the source's lua module
+    -- multiple groups can be provided, where it'll fallback to the next group if the previous
+    -- returns no completion items
     providers = {
       {
         { 'blink.cmp.sources.lsp' },
@@ -123,6 +137,8 @@ local config = {
       max_width = 60,
       max_height = 10,
       order = 'top_down',
+      -- which directions to show the window,
+      -- falling back to the next direction when there's not enough space
       direction_priority = { 'n', 's' },
       -- todo: implement
       preselect = true,
@@ -131,6 +147,9 @@ local config = {
       min_width = 10,
       max_width = 60,
       max_height = 20,
+      -- which directions to show the documentation window,
+      -- for each of the possible autocomplete window directions,
+      -- falling back to the next direction when there's not enough space
       direction_priority = {
         autocomplete_north = { 'e', 'w', 'n', 's' },
         autocomplete_south = { 'e', 'w', 's', 'n' },
@@ -143,10 +162,16 @@ local config = {
 
   highlight = {
     ns = vim.api.nvim_create_namespace('blink_cmp'),
+    -- sets the fallback highlight groups to nvim-cmp's highlight groups
+    -- useful for when your theme doesn't support blink.cmp
+    -- will be removed in a future release, assuming themes add support
     use_nvim_cmp_as_default = false,
   },
 
+  -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+  -- adjusts spacing to ensure icons are aligned
   nerd_font_variant = 'normal',
+
   kind_icons = {
     Text = '󰉿',
     Method = '󰊕',
