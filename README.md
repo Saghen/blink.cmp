@@ -221,6 +221,7 @@ All of the following are planned, but not yet implemented.
 - Significantly less testing and documentation
 - No support for cmdline completions
 - No support for dynamic sources (i.e. per-filetype)
+- No support for ghost text
 
 ## Special Thanks
 
