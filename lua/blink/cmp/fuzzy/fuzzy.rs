@@ -54,6 +54,7 @@ pub fn fuzzy(
     let mut matches = frizbee::match_list(&needle, &haystack_labels, options);
 
     // Sort by scores
+    // TODO: boost exact matches
     let match_scores = matches
         .iter()
         .map(|mtch| {
