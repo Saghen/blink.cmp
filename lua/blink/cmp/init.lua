@@ -37,12 +37,18 @@ cmp.setup = function(opts)
   -- we store the previous items so we can immediately perform fuzzy matching on keystroke
   -- and then update again when the sources return new results
   local last_items = {}
+  local last_context = nil
   local function update_completions(context, items)
-    if items == nil then items = last_items end
+    if items == nil then
+      if last_context == nil or last_context.id ~= context.id then return end
+      items = last_items
+    end
+    last_context = context
     last_items = items
+
     -- we avoid adding 1-4ms to insertion latency by scheduling for later
     vim.schedule(function()
-      local filtered_items = cmp.fuzzy.filter_items(require('blink.cmp.util').get_query(), items)
+      local filtered_items = cmp.fuzzy.filter_items(require('blink.cmp.utils').get_query(), items)
       if #filtered_items > 0 then
         cmp.windows.autocomplete.open_with_items(context, filtered_items)
       else
