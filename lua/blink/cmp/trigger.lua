@@ -85,8 +85,13 @@ function trigger.activate_autocmds()
       local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
       local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
+      local is_on_context_char = char_under_cursor:match(trigger.context_regex) ~= nil
 
       if is_within_bounds or (is_on_trigger and trigger.context ~= nil) then
+        trigger.show()
+      -- check if we've gone 1 char behind the context and we're still on a context char
+      elseif is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
+        trigger.context = nil
         trigger.show()
       elseif config.show_on_insert_on_trigger_character and is_on_trigger and ev.event == 'InsertEnter' then
         trigger.show({ trigger_character = char_under_cursor })
@@ -182,7 +187,8 @@ function helpers.get_context_bounds(regex)
     end_col = end_col + 1
   end
 
-  return { line_number = cursor_line, start_col = start_col, end_col = end_col }
+  -- hack: why do we have to math.min here?
+  return { line_number = cursor_line, start_col = math.min(start_col, end_col), end_col = end_col }
 end
 
 return trigger
