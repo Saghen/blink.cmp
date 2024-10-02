@@ -85,7 +85,17 @@ pub fn fuzzy(
                 matches.sort_by_cached_key(|mtch| Reverse(match_scores[mtch.index]));
             }
             "label" => {
-                matches.sort_by_key(|mtch| haystack[mtch.index_in_haystack].label.clone());
+                matches.sort_by(|a, b| {
+                    let label_a = &haystack[a.index_in_haystack].label;
+                    let label_b = &haystack[b.index_in_haystack].label;
+
+                    // Put anything with an underscore at the end
+                    match (label_a.starts_with('_'), label_b.starts_with('_')) {
+                        (true, false) => std::cmp::Ordering::Greater,
+                        (false, true) => std::cmp::Ordering::Less,
+                        _ => label_a.cmp(label_b),
+                    }
+                });
             }
             _ => {}
         }
