@@ -25,6 +25,7 @@
 --- @field context_regex string
 --- @field event_targets blink.cmp.TriggerEventTargets
 
+local config = require('blink.cmp.config').trigger
 local sources = require('blink.cmp.sources.lib')
 
 --- @class blink.cmp.Trigger
@@ -86,8 +87,8 @@ function trigger.activate_autocmds()
 
       if is_within_bounds or (is_on_trigger and trigger.context ~= nil) then
         trigger.show()
-      -- elseif is_on_trigger and ev.event == 'InsertEnter' then
-      --   trigger.show({ trigger_character = char_under_cursor })
+      elseif config.show_on_insert_on_trigger_character and is_on_trigger and ev.event == 'InsertEnter' then
+        trigger.show({ trigger_character = char_under_cursor })
       else
         trigger.hide()
       end

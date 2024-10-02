@@ -13,6 +13,7 @@
 --- @class blink.cmp.TriggerConfig
 --- @field context_regex string
 --- @field blocked_trigger_characters string[]
+--- @field show_on_insert_on_trigger_character boolean When true, will show the completion window when the cursor comes after a trigger character when entering insert mode
 
 --- @class blink.cmp.SourceConfig
 --- @field providers blink.cmp.SourceProviderConfig[][]
@@ -92,6 +93,7 @@ local config = {
   trigger = {
     context_regex = '[%w_\\-]',
     blocked_trigger_characters = { ' ', '\n', '\t' },
+    show_on_insert_on_trigger_character = true,
   },
   fuzzy = {
     use_frecency = true,
