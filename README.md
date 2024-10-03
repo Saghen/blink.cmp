@@ -191,7 +191,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 **Trigger:** Controls when to request completion items from the sources and provides a context downstream with the current query (i.e. `hello.wo|`, the query would be `wo`) and the treesitter object under the cursor (i.e. for intelligently enabling/disabling sources). It respects trigger characters passed by the LSP (or any other source) and includes it in the context for sending to the LSP.
 
-**Sources:** Provides a common interface for and merges the results of completion, trigger character, resolution of additional information and cancellation. It also provides a compatibility layer to `nvim-cmp`'s sources. Some sources are builtin: `LSP`, `buffer`, `path`, `snippets`
+**Sources:** Provides a common interface for and merges the results of completion, trigger character, resolution of additional information and cancellation. Some sources are builtin: `LSP`, `buffer`, `path`, `snippets`
 
 **Fuzzy:** Rust <-> Lua FFI which performs both filtering and sorting of the items
 
