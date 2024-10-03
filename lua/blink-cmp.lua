@@ -1,0 +1,1 @@
+return require('blink.cmp')
