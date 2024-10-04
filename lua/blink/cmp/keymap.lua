@@ -15,38 +15,8 @@ local snippet_commands = { 'snippet_forward', 'snippet_backward' }
 
 --- @param opts blink.cmp.KeymapConfig
 function keymap.setup(opts)
-  local function handle_key(mode, key)
-    local key_insert_commands = {}
-    local key_snippet_commands = {}
-
-    for command, keys in pairs(opts) do
-      keys = type(keys) == 'string' and { keys } or keys
-      if vim.tbl_contains(keys, key) then
-        if vim.tbl_contains(snippet_commands, command) then
-          table.insert(key_snippet_commands, command)
-        elseif mode == 'i' and vim.tbl_contains(insert_commands, command) then
-          table.insert(key_insert_commands, command)
-        else
-          error('Invalid command in keymap config: ' .. command)
-        end
-      end
-    end
-
-    for _, command in ipairs(key_insert_commands) do
-      local did_run = require('blink.cmp')[command]()
-      if did_run then return end
-    end
-
-    for _, command in ipairs(key_snippet_commands) do
-      local did_run = require('blink.cmp')[command]()
-      if did_run then return end
-    end
-
-    return key
-  end
-
-  local snippet_keys = {}
-  local insert_keys = {}
+  local insert_keys_to_commands = {}
+  local snippet_keys_to_commands = {}
   for command, keys in pairs(opts) do
     local is_snippet_command = vim.tbl_contains(snippet_commands, command)
     local is_insert_command = vim.tbl_contains(insert_commands, command)
@@ -57,16 +27,38 @@ function keymap.setup(opts)
 
     -- add keymaps
     for _, key in ipairs(keys) do
-      insert_keys[key] = true
-      if is_snippet_command then snippet_keys[key] = true end
+      if is_insert_command then
+        if insert_keys_to_commands[key] == nil then insert_keys_to_commands[key] = {} end
+        table.insert(insert_keys_to_commands[key], command)
+      end
+      if is_snippet_command then
+        if snippet_keys_to_commands[key] == nil then snippet_keys_to_commands[key] = {} end
+        table.insert(snippet_keys_to_commands[key], command)
+      end
     end
   end
 
-  for key, _ in pairs(insert_keys) do
-    vim.keymap.set('i', key, function() return handle_key('i', key) end, { expr = true, silent = true })
+  for key, _ in pairs(insert_keys_to_commands) do
+    vim.keymap.set('i', key, function()
+      for _, command in ipairs(insert_keys_to_commands[key] or {}) do
+        local did_run = require('blink.cmp')[command]()
+        if did_run then return end
+      end
+      for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
+        local did_run = require('blink.cmp')[command]()
+        if did_run then return end
+      end
+      return key
+    end, { expr = true, silent = true })
   end
-  for key, _ in pairs(snippet_keys) do
-    vim.keymap.set('s', key, function() return handle_key('s', key) end, { expr = true, silent = true })
+  for key, _ in pairs(snippet_keys_to_commands) do
+    vim.keymap.set('s', key, function()
+      for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
+        local did_run = require('blink.cmp')[command]()
+        if did_run then return end
+      end
+      return key
+    end, { expr = true, silent = true })
   end
 end
 
