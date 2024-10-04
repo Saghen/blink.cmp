@@ -55,7 +55,7 @@ function brackets.add_brackets(filetype, item)
 
   -- if already contains the brackets, conservatively skip adding brackets
   -- todo: won't work for snippets when the brackets_for_filetype is { '{', '}' }
-  if brackets_for_filetype[1] ~= ' ' and text_edit.newText:match('\\' .. brackets_for_filetype[1]) then
+  if brackets_for_filetype[1] ~= ' ' and text_edit.newText:match('[\\' .. brackets_for_filetype[1] .. ']') ~= nil then
     return 'skipped', text_edit, 0
   end
 
@@ -64,12 +64,16 @@ function brackets.add_brackets(filetype, item)
   if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
     local placeholders = brackets.snippets_extract_placeholders(text_edit.newText)
     local last_placeholder_index = math.max(0, unpack(placeholders))
-    text_edit.newText = text_edit.newText .. brackets[1] .. '$' .. tostring(last_placeholder_index + 1) .. brackets[2]
+    text_edit.newText = text_edit.newText
+      .. brackets_for_filetype[1]
+      .. '$'
+      .. tostring(last_placeholder_index + 1)
+      .. brackets_for_filetype[2]
   -- Otherwise, we add as usual
   else
-    text_edit.newText = text_edit.newText .. brackets[1] .. brackets[2]
+    text_edit.newText = text_edit.newText .. brackets_for_filetype[1] .. brackets_for_filetype[2]
   end
-  return 'added', text_edit, -#brackets[2]
+  return 'added', text_edit, -#brackets_for_filetype[2]
 end
 
 --- @param snippet string
@@ -89,7 +93,6 @@ end
 --- @param item blink.cmp.CompletionItem
 --- @param callback fun()
 function brackets.add_brackets_via_semantic_token(filetype, item, callback)
-  vim.print('yo', brackets.should_run_resolution(filetype, 'semantic_token'))
   if not brackets.should_run_resolution(filetype, 'semantic_token') then return callback() end
 
   local text_edit = item.textEdit
@@ -164,7 +167,6 @@ function brackets.should_run_resolution(filetype, resolution_method)
   if vim.tbl_contains(resolution_blocked_filetypes, filetype) then return false end
 
   -- global
-  vim.print(config)
   if not config.enabled then return false end
   if vim.tbl_contains(config.force_allow_filetypes, filetype) then return true end
   return not vim.tbl_contains(config.blocked_filetypes, filetype)
