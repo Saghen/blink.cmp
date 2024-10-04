@@ -10,6 +10,22 @@
 --- @field snippet_forward string | string[]
 --- @field snippet_backward string | string[]
 
+--- @class blink.cmp.AcceptConfig
+--- @field auto_brackets blink.cmp.AutoBracketsConfig
+
+--- @class blink.cmp.AutoBracketsConfig
+--- @field enabled boolean
+--- @field default_brackets string[]
+--- @field override_brackets_for_filetypes table<string, string[] | function(item: blink.cmp.CompletionItem): string[]>
+--- @field force_allow_filetypes string[] Overrides the default blocked filetypes
+--- @field blocked_filetypes string[]
+--- @field kind_resolution blink.cmp.AutoBracketResolutionConfig Synchronously use the kind of the item to determine if brackets should be added
+--- @field semantic_token_resolution blink.cmp.AutoBracketResolutionConfig Asynchronously use semantic token to determine if brackets should be added
+
+--- @class blink.cmp.AutoBracketResolutionConfig
+--- @field enabled boolean
+--- @field blocked_filetypes string[]
+
 --- @class blink.cmp.TriggerConfig
 --- @field context_regex string
 --- @field blocked_trigger_characters string[]
@@ -66,6 +82,8 @@
 --- @field update_delay_ms number Delay before updating the documentation window
 
 --- @class blink.cmp.Config
+--- @field keymap blink.cmp.KeymapConfig
+--- @field accept blink.cmp.AcceptConfig
 --- @field trigger blink.cmp.TriggerConfig
 --- @field fuzzy blink.cmp.FuzzyConfig
 --- @field sources blink.cmp.SourceConfig
@@ -92,6 +110,24 @@ local config = {
 
     snippet_forward = '<Tab>',
     snippet_backward = '<S-Tab>',
+  },
+
+  accept = {
+    auto_brackets = {
+      enabled = false,
+      default_brackets = { '(', ')' },
+      override_brackets_for_filetypes = {},
+      force_allow_filetypes = {},
+      blocked_filetypes = {},
+      kind_resolution = {
+        enabled = true,
+        blocked_filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact', 'vue' },
+      },
+      semantic_token_resolution = {
+        enabled = true,
+        blocked_filetypes = {},
+      },
+    },
   },
 
   trigger = {
@@ -155,7 +191,7 @@ local config = {
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
       auto_show = true,
-      auto_show_delay_ms = 0,
+      auto_show_delay_ms = 500,
       update_delay_ms = 100,
     },
   },
