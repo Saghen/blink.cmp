@@ -48,13 +48,13 @@
                 "c-marshalling-0.2.0" =
                   "sha256-eL6nkZOtuLLQ0r31X7uroUUDYZsWOJ9KNXl4NCVNRuw=";
                 "frizbee-0.1.0" =
-                  "sha256-ksiB8R97z+heM6Ynh3D9Rf+pMhEPqncomgTXT2n5byQ=";
+                  "sha256-gFEek7kMGjFAmX3TP74/bsRnWhQ2WP73n5paTSvZkPM=";
               };
             };
           };
         in {
-          blink-nvim = pkgs.vimUtils.buildVimPlugin {
-            pname = "blink-nvim";
+          blink-cmp = pkgs.vimUtils.buildVimPlugin {
+            pname = "blink-cmp";
             inherit src version;
             preInstall = ''
               mkdir -p target/release
@@ -62,8 +62,9 @@
             '';
 
             meta = {
-              description = "Set of simple, performant neovim plugins";
-              homepage = "https://github.com/saghen/blink.nvim";
+              description =
+                "Performant, batteries-included completion plugin for Neovim ";
+              homepage = "https://github.com/saghen/blink.cmp";
               license = lib.licenses.mit;
               maintainers = with lib.maintainers; [ redxtech ];
             };
