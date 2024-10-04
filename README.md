@@ -5,13 +5,12 @@
 ## Features
 
 - Works out of the box with no additional configuration
-- Simple hackable codebase
 - Updates on every keystroke (0.5-4ms non-blocking, single core)
 - Typo resistant fuzzy with frecency and proximity bonus
 - Extensive LSP support ([tracker](./LSP_TRACKER.md))
-- Snippet support (including `friendly-snippets`)
-- todo: Cmdline support
-- External sources support (todo: including `nvim-cmp` compatibility layer)
+- Native `vim.snippet` support (including `friendly-snippets`)
+- External sources support (currently incompatible with `nvim-cmp` sources)
+- Auto-bracket support based on semantic tokens (experimental, opt-in)
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
 ## Installation
@@ -36,6 +35,9 @@
     -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
     -- adjusts spacing to ensure icons are aligned
     nerd_font_variant = 'normal',
+    
+    -- experimental auto-brackets support
+    -- accept = { auto_brackets = { enabled = true } }
   }
 }
 
@@ -66,6 +68,27 @@
 
     snippet_forward = '<Tab>',
     snippet_backward = '<S-Tab>',
+  },
+
+  accept = {
+    auto_brackets = {
+      enabled = false,
+      default_brackets = { '(', ')' },
+      override_brackets_for_filetypes = {},
+      -- Overrides the default blocked filetypes
+      force_allow_filetypes = {},
+      blocked_filetypes = {},
+      -- Synchronously use the kind of the item to determine if brackets should be added
+      kind_resolution = {
+        enabled = true,
+        blocked_filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact', 'vue' },
+      },
+      -- Asynchronously use semantic token to determine if brackets should be added
+      semantic_token_resolution = {
+        enabled = true,
+        blocked_filetypes = {},
+      },
+    },
   },
 
   trigger = {
