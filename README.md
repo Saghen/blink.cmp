@@ -20,11 +20,15 @@
 ```lua
 {
   'saghen/blink.cmp',
-  -- note: requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
-  build = 'cargo build --release',
-  event = 'InsertEnter',
+  lazy = false, -- lazy loading handled internally
   -- optional: provides snippets for the snippet source
   dependencies = 'rafamadriz/friendly-snippets',
+
+  -- use a release tag to download pre-built binaries
+  tag = 'v0.*',
+  -- OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+  -- build = 'cargo build --release',
+
   opts = {
     highlight = {
       -- sets the fallback highlight groups to nvim-cmp's highlight groups
@@ -40,8 +44,11 @@
     -- accept = { auto_brackets = { enabled = true } }
   }
 }
+```
 
--- note: for LazyVim/distro users, you can disable nvim-cmp via:
+For LazyVim/distro users, you can disable nvim-cmp via:
+
+```lua
 { 'hrsh7th/nvim-cmp', enabled = false }
 ```
 
@@ -231,20 +238,19 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 - Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
 - Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
     - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp)
-- Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus
+- Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
 - Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
-- Uses native snippets versus nvim-cmp's required snippet engine
 
-### Disadvantages
-
-All of the following are planned, but not yet implemented.
+### Planned missing features
 
 - Less customizable across the board wrt trigger, sources, sorting, filtering, and rendering
 - Significantly less testing and documentation
-- No support for cmdline completions
-- No support for dynamic sources (i.e. per-filetype)
-- No support for ghost text
+- Ghost text
+
+### Missing features, not planned
+
+- Cmdline completions
 
 ## Special Thanks
 
