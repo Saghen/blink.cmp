@@ -40,7 +40,7 @@ function sources.listen_on_completions(callback) sources.on_completions_callback
 
 --- @param context blink.cmp.Context
 function sources.request_completions(context)
-  -- a new context means we should refetch everything
+  -- create a new context if the id changed or if we haven't created one yet
   local is_new_context = sources.current_context == nil or context.id ~= sources.current_context.id
   if is_new_context then
     if sources.current_context ~= nil then sources.current_context:destroy() end
@@ -52,8 +52,10 @@ function sources.request_completions(context)
 end
 
 function sources.cancel_completions()
-  if sources.current_context ~= nil then sources.current_context:destroy() end
-  sources.current_context = nil
+  if sources.current_context ~= nil then
+    sources.current_context:destroy()
+    sources.current_context = nil
+  end
 end
 
 --- @param item blink.cmp.CompletionItem

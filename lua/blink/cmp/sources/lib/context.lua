@@ -48,9 +48,7 @@ function sources_context:get_completions(context)
     end
     self.last_sources_group_idx = response.sources_group_idx
 
-    -- todo: when the queued request results in 100% cached content, we end up
-    -- calling the on_completions_callback with the same data, which triggers
-    -- unnecessary fuzzy + render updates
+    -- run the queued request, if it exists
     if self.queued_request_context ~= nil then
       local queued_context = self.queued_request_context
       self.queued_request_context = nil
