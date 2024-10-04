@@ -67,6 +67,7 @@ end
 ---------- Visibility ----------
 
 function autocomplete.open_with_items(context, items)
+  autocomplete.context = context
   autocomplete.items = items
   autocomplete.draw()
 
@@ -77,7 +78,7 @@ function autocomplete.open_with_items(context, items)
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item())
+  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), context)
 end
 
 function autocomplete.open()
@@ -144,7 +145,7 @@ function autocomplete.select_next()
   if current_line == line_count then return end
 
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { current_line + 1, 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item())
+  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end
 
 function autocomplete.select_prev()
@@ -154,7 +155,7 @@ function autocomplete.select_prev()
   if current_line == 1 then return end
 
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { math.max(current_line - 1, 1), 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item())
+  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end

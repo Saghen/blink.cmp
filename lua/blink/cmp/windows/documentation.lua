@@ -2,7 +2,6 @@
 local config = require('blink.cmp.config').windows.documentation
 local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')
-local utils = require('blink.cmp.utils')
 local docs = {}
 
 function docs.setup()
@@ -18,12 +17,19 @@ function docs.setup()
     if autocomplete.win:is_open() then docs.update_position() end
   end)
   if config.auto_show then
-    autocomplete.listen_on_select(function(item)
-      local delay = autocomplete.win:is_open() and config.update_delay_ms or config.auto_show_delay_ms
-      if delay == 0 then
-        return docs.show_item(item)
+    local timer = vim.uv.new_timer()
+    local last_context_id = nil
+    autocomplete.listen_on_select(function(item, context)
+      timer:stop()
+      if docs.win:is_open() or context.id == last_context_id then
+        timer:start(config.update_delay_ms, 0, function()
+          vim.schedule(function() docs.show_item(item) end)
+        end)
       else
-        utils.debounce(docs.show_item, delay)(item)
+        timer:start(config.auto_show_delay_ms, 0, function()
+          last_context_id = context.id
+          vim.schedule(function() docs.show_item(item) end)
+        end)
       end
     end)
   end
