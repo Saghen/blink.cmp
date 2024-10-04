@@ -20,5 +20,8 @@ fn main() {
         .write_all(output.as_bytes())
         .unwrap();
 
+    // delete existing version.txt file created by downloader
+    let _ = std::fs::remove_file("target/release/version.txt");
+
     assert!(rust_output.exists());
 }

@@ -5,67 +5,66 @@ cmp.setup = function(opts)
   local config = require('blink.cmp.config')
   config.merge_with(opts)
 
-  require('blink.cmp.keymap').setup(config.keymap)
-
-  cmp.add_default_highlights()
-  -- todo: do we need to clear first?
-  vim.api.nvim_create_autocmd('ColorScheme', { callback = cmp.add_default_highlights })
-
-  -- STRUCTURE
-  -- trigger -> sources -> fuzzy (filter/sort) -> windows (render)
-
-  -- trigger controls when to show the window and the current context for caching
-  -- TODO: add first_trigger event for setting up the rest of the plugin
-  cmp.trigger = require('blink.cmp.trigger').activate_autocmds()
-
-  -- sources fetch autocomplete items and documentation
-  cmp.sources = require('blink.cmp.sources.lib')
-  cmp.sources.register()
-
-  -- windows render and apply items
-  cmp.windows = {
-    autocomplete = require('blink.cmp.windows.autocomplete').setup(),
-    documentation = require('blink.cmp.windows.documentation').setup(),
-  }
-
-  -- fuzzy combines smith waterman with frecency
-  -- and bonus from proximity words but I'm still working
-  -- on tuning the weights
-  cmp.fuzzy = require('blink.cmp.fuzzy')
-  cmp.fuzzy.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
-
-  -- we store the previous items so we can immediately perform fuzzy matching on keystroke
-  -- and then update again when the sources return new results
-  local last_items = {}
-  local last_context = nil
-  local function update_completions(context, items)
-    if items == nil then
-      if last_context == nil or last_context.id ~= context.id then return end
-      items = last_items
+  require('blink.cmp.fuzzy.download').ensure_downloaded(function(err)
+    if err then
+      vim.notify('Error while downloading blink.cmp pre-built binary: ' .. err, vim.log.levels.ERROR)
+      return
     end
-    last_context = context
-    last_items = items
 
-    -- we avoid adding 1-4ms to insertion latency by scheduling for later
-    vim.schedule(function()
-      local filtered_items = cmp.fuzzy.filter_items(require('blink.cmp.utils').get_query(), items)
-      if #filtered_items > 0 then
-        cmp.windows.autocomplete.open_with_items(context, filtered_items)
-      else
-        cmp.windows.autocomplete.close()
+    require('blink.cmp.keymap').setup(config.keymap)
+
+    cmp.add_default_highlights()
+    -- todo: do we need to clear first?
+    vim.api.nvim_create_autocmd('ColorScheme', { callback = cmp.add_default_highlights })
+
+    -- STRUCTURE
+    -- trigger -> sources -> fuzzy (filter/sort) -> windows (render)
+
+    -- trigger controls when to show the window and the current context for caching
+    -- TODO: add first_trigger event for setting up the rest of the plugin
+    cmp.trigger = require('blink.cmp.trigger').activate_autocmds()
+
+    -- sources fetch autocomplete items and documentation
+    cmp.sources = require('blink.cmp.sources.lib')
+    cmp.sources.register()
+
+    -- windows render and apply items
+    cmp.windows = {
+      autocomplete = require('blink.cmp.windows.autocomplete').setup(),
+      documentation = require('blink.cmp.windows.documentation').setup(),
+    }
+
+    -- fuzzy combines smith waterman with frecency
+    -- and bonus from proximity words but I'm still working
+    -- on tuning the weights
+    --- @param context blink.cmp.Context
+    --- @param items blink.cmp.CompletionItem[] | nil
+    local function update_completions(context, items)
+      if not cmp.fuzzy then
+        cmp.fuzzy = require('blink.cmp.fuzzy')
+        cmp.fuzzy.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
       end
-    end)
-  end
+      -- we avoid adding 1-4ms to insertion latency by scheduling for later
+      vim.schedule(function()
+        local filtered_items = cmp.fuzzy.filter_items_with_cache(cmp.fuzzy.get_query(), context, items)
+        if #filtered_items > 0 then
+          cmp.windows.autocomplete.open_with_items(context, filtered_items)
+        else
+          cmp.windows.autocomplete.close()
+        end
+      end)
+    end
 
-  cmp.trigger.listen_on_show(function(context)
-    update_completions(context)
-    cmp.sources.request_completions(context)
+    cmp.trigger.listen_on_show(function(context)
+      update_completions(context) -- immediately update via cache on keystroke
+      cmp.sources.request_completions(context)
+    end)
+    cmp.trigger.listen_on_hide(function()
+      cmp.sources.cancel_completions()
+      cmp.windows.autocomplete.close()
+    end)
+    cmp.sources.listen_on_completions(update_completions)
   end)
-  cmp.trigger.listen_on_hide(function()
-    cmp.sources.cancel_completions()
-    cmp.windows.autocomplete.close()
-  end)
-  cmp.sources.listen_on_completions(update_completions)
 end
 
 cmp.add_default_highlights = function()
