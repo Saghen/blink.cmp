@@ -1,5 +1,6 @@
 -- todo: track cursor position
 local config = require('blink.cmp.config')
+local autocmp_config = config.windows.autocomplete
 local autocomplete = {
   items = {},
   context = nil,
@@ -12,12 +13,12 @@ local autocomplete = {
 
 function autocomplete.setup()
   autocomplete.win = require('blink.cmp.windows.lib').new({
-    min_width = config.min_width,
-    max_width = config.max_width,
-    max_height = config.max_height,
-    border = config.border,
+    min_width = autocmp_config.min_width,
+    max_width = autocmp_config.max_width,
+    max_height = autocmp_config.max_height,
+    border = autocmp_config.border,
     cursorline = true,
-    winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
+    winhighlight = autocmp_config.winhighlight or 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
     scrolloff = 2,
   })
 

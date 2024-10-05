@@ -82,6 +82,7 @@
 --- @field order "top_down" | "bottom_up"
 --- @field direction_priority ("n" | "s")[]
 --- @field preselect boolean
+--- @field winhighlight string | nil
 
 --- @class blink.cmp.DocumentationDirectionPriorityConfig
 --- @field autocomplete_north ("n" | "s" | "e" | "w")[]
@@ -98,6 +99,7 @@
 --- @field auto_show boolean
 --- @field auto_show_delay_ms number Delay before showing the documentation window
 --- @field update_delay_ms number Delay before updating the documentation window
+--- @field winhighlight string | nil
 
 --- @class blink.cmp.SignatureHelpConfig
 --- @field min_width number
