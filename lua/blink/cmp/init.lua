@@ -84,7 +84,10 @@ cmp.setup_signature_help = function()
     end)
   end)
 
-  signature_trigger.listen_on_hide(function() cmp.windows.signature.close() end)
+  signature_trigger.listen_on_hide(function()
+    cmp.sources.cancel_signature_help()
+    cmp.windows.signature.close()
+  end)
 end
 
 cmp.add_default_highlights = function()
