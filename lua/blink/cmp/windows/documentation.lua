@@ -10,6 +10,7 @@ function docs.setup()
     max_width = config.max_width,
     max_height = config.max_height,
     border = config.border,
+    winhighlight = config.winhighlight or 'Normal:Normal,FloatBorder:FloatBorder,CursorLine:Visual,Search:None',
     wrap = true,
     filetype = 'markdown',
   })
