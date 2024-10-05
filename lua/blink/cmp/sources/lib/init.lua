@@ -24,7 +24,7 @@ end
 --- @return string[]
 function sources.get_trigger_characters()
   local blocked_trigger_characters = {}
-  for _, char in ipairs(config.trigger.blocked_trigger_characters) do
+  for _, char in ipairs(config.trigger.completion.blocked_trigger_characters) do
     blocked_trigger_characters[char] = true
   end
 
