@@ -5,10 +5,10 @@ local win = {}
 --- @field max_width number
 --- @field max_height number
 --- @field cursorline boolean
+--- @field border blink.cmp.WindowBorder
 --- @field wrap boolean
 --- @field filetype string
 --- @field winhighlight string
---- @field padding boolean
 --- @field scrolloff number
 
 --- @class blink.cmp.Window
@@ -25,10 +25,10 @@ function win.new(config)
     max_width = config.max_width or 60,
     max_height = config.max_height or 10,
     cursorline = config.cursorline or false,
+    border = config.border or 'none',
     wrap = config.wrap or false,
     filetype = config.filetype or 'cmp_menu',
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
-    padding = config.padding,
     scrolloff = config.scrolloff or 0,
   }
 
@@ -69,7 +69,7 @@ function win:open()
     col = 1,
     focusable = false,
     zindex = 1001,
-    border = self.config.padding and { ' ', '', '', '', '', '', ' ', ' ' } or { '', '', '', '', '', '', '', '' },
+    border = self.config.border == 'padded' and { ' ', '', '', '', '', '', ' ', ' ' } or self.config.border,
   })
   vim.api.nvim_set_option_value('winhighlight', self.config.winhighlight, { win = self.id })
   vim.api.nvim_set_option_value('wrap', self.config.wrap, { win = self.id })

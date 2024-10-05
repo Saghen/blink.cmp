@@ -2,45 +2,21 @@
 -- (provided by the sources) or anything matching the `context_regex`, we create a new `context`.
 -- This can be used downstream to determine if we should make new requests to the sources or not.
 
---- @class blink.cmp.TriggerBounds
---- @field line string
---- @field line_number number
---- @field start_col number
---- @field end_col number
----
---- @class blink.cmp.Context
---- @field id number
---- @field bufnr number
---- @field cursor number[]
---- @field line string
---- @field bounds blink.cmp.TriggerBounds
---- @field trigger { kind: number, character: string | nil }
----
---- @class blink.cmp.TriggerEventTargets
---- @field on_show fun(context: blink.cmp.Context)
---- @field on_hide fun()
----
---- @class blink.cmp.Trigger
---- @field context blink.cmp.Context | nil
---- @field current_context_id number
---- @field context_regex string
---- @field event_targets blink.cmp.TriggerEventTargets
-
-local config = require('blink.cmp.config').trigger
+local config = require('blink.cmp.config').trigger.completion
 local sources = require('blink.cmp.sources.lib')
+local utils = require('blink.cmp.utils')
 
---- @class blink.cmp.Trigger
 local trigger = {
   current_context_id = -1,
+  --- @type blink.cmp.Context | nil
   context = nil,
-  context_regex = '[%w_\\-]',
-
   event_targets = {
+    --- @type fun(context: blink.cmp.Context)
     on_show = function() end,
+    --- @type fun()
     on_hide = function() end,
   },
 }
-local helpers = {}
 
 function trigger.activate_autocmds()
   local last_char = ''
@@ -55,14 +31,14 @@ function trigger.activate_autocmds()
       if last_char == '' then return end
 
       -- ignore if in a special buffer
-      if helpers.is_special_buffer() then
+      if utils.is_special_buffer() then
         trigger.hide()
       -- character forces a trigger according to the sources, create a fresh context
       elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
         trigger.context = nil
         trigger.show({ trigger_character = last_char })
       -- character is part of the current context OR in an existing context
-      elseif last_char:match(trigger.context_regex) ~= nil then
+      elseif last_char:match(config.context_regex) ~= nil then
         trigger.show()
       -- nothing matches so hide
       else
@@ -85,7 +61,7 @@ function trigger.activate_autocmds()
       local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
       local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
-      local is_on_context_char = char_under_cursor:match(trigger.context_regex) ~= nil
+      local is_on_context_char = char_under_cursor:match(config.context_regex) ~= nil
 
       if is_within_bounds or (is_on_trigger and trigger.context ~= nil) then
         trigger.show()
@@ -107,10 +83,7 @@ function trigger.activate_autocmds()
   return trigger
 end
 
---- @class blink.cmp.TriggerOptions
---- @field trigger_character string|nil
----
---- @param opts blink.cmp.TriggerOptions|nil
+--- @param opts { trigger_character: string } | nil
 function trigger.show(opts)
   opts = opts or {}
 
@@ -122,7 +95,7 @@ function trigger.show(opts)
     bufnr = vim.api.nvim_get_current_buf(),
     cursor = cursor,
     line = vim.api.nvim_buf_get_lines(0, cursor[1] - 1, cursor[1], false)[1],
-    bounds = helpers.get_context_bounds(trigger.context_regex),
+    bounds = trigger.get_context_bounds(config.context_regex),
     trigger = {
       kind = opts.trigger_character and vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter
         or vim.lsp.protocol.CompletionTriggerKind.Invoked,
@@ -133,6 +106,7 @@ function trigger.show(opts)
   trigger.event_targets.on_show(trigger.context)
 end
 
+--- @param callback fun(context: blink.cmp.Context)
 function trigger.listen_on_show(callback) trigger.event_targets.on_show = callback end
 
 function trigger.hide()
@@ -142,9 +116,9 @@ function trigger.hide()
   trigger.event_targets.on_hide()
 end
 
+--- @param callback fun()
 function trigger.listen_on_hide(callback) trigger.event_targets.on_hide = callback end
 
---- @param context blink.cmp.Context | nil
 --- @param cursor number[]
 --- @return boolean
 function trigger.within_query_bounds(cursor)
@@ -155,17 +129,10 @@ function trigger.within_query_bounds(cursor)
   return row == bounds.line_number and col >= bounds.start_col and col <= bounds.end_col
 end
 
------- Helpers ------
-function helpers.is_special_buffer()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-  return buftype ~= ''
-end
-
--- Moves forward and backwards around the cursor looking for word boundaries
+--- Moves forward and backwards around the cursor looking for word boundaries
 --- @param regex string
---- @return blink.cmp.TriggerBounds
-function helpers.get_context_bounds(regex)
+--- @return blink.cmp.ContextBounds
+function trigger.get_context_bounds(regex)
   local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
 

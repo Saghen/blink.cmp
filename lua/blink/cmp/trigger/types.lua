@@ -1,0 +1,22 @@
+--- @class blink.cmp.ContextBounds
+--- @field line string
+--- @field line_number number
+--- @field start_col number
+--- @field end_col number
+
+--- @class blink.cmp.Context
+--- @field id number
+--- @field bufnr number
+--- @field cursor number[]
+--- @field line string
+--- @field bounds blink.cmp.ContextBounds
+--- @field trigger { kind: number, character: string | nil }
+
+--- @class blink.cmp.SignatureHelpContext
+--- @field id number
+--- @field bufnr number
+--- @field cursor number[]
+--- @field line string
+--- @field start_col number
+--- @field is_retrigger boolean
+--- @field active_signature_help lsp.SignatureHelp | nil

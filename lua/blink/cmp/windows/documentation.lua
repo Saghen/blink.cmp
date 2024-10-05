@@ -6,11 +6,12 @@ local docs = {}
 
 function docs.setup()
   docs.win = require('blink.cmp.windows.lib').new({
-    min_width = 10,
-    max_height = 20,
+    min_width = config.min_width,
+    max_width = config.max_width,
+    max_height = config.max_height,
+    border = config.border,
     wrap = true,
     filetype = 'markdown',
-    padding = true,
   })
 
   autocomplete.listen_on_position_update(function()
@@ -38,7 +39,6 @@ function docs.setup()
   return docs
 end
 
--- todo: debounce and only update if the item changed
 function docs.show_item(item)
   if item == nil then
     docs.win:close()

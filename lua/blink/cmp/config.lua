@@ -20,16 +20,29 @@
 --- @field force_allow_filetypes string[] Overrides the default blocked filetypes
 --- @field blocked_filetypes string[]
 --- @field kind_resolution blink.cmp.AutoBracketResolutionConfig Synchronously use the kind of the item to determine if brackets should be added
---- @field semantic_token_resolution blink.cmp.AutoBracketResolutionConfig Asynchronously use semantic token to determine if brackets should be added
+--- @field semantic_token_resolution blink.cmp.AutoBracketSemanticTokenResolutionConfig Asynchronously use semantic token to determine if brackets should be added
 
 --- @class blink.cmp.AutoBracketResolutionConfig
 --- @field enabled boolean
 --- @field blocked_filetypes string[]
+---
+--- @class blink.cmp.AutoBracketSemanticTokenResolutionConfig : blink.cmp.AutoBracketResolutionConfig
+--- @field timeout_ms number How long to wait for semantic tokens to return before assuming no brackets should be added
 
---- @class blink.cmp.TriggerConfig
+--- @class blink.cmp.CompletionTriggerConfig
 --- @field context_regex string
 --- @field blocked_trigger_characters string[]
 --- @field show_on_insert_on_trigger_character boolean When true, will show the completion window when the cursor comes after a trigger character when entering insert mode
+---
+--- @class blink.cmp.SignatureHelpTriggerConfig
+--- @field enabled boolean
+--- @field blocked_trigger_characters string[]
+--- @field blocked_retrigger_characters string[]
+--- @field show_on_insert_on_trigger_character boolean When true, will show the signature help window when the cursor comes after a trigger character when entering insert mode
+---
+--- @class blink.cmp.TriggerConfig
+--- @field completion blink.cmp.CompletionTriggerConfig
+--- @field signature_help blink.cmp.SignatureHelpTriggerConfig
 
 --- @class blink.cmp.SourceConfig
 --- @field providers blink.cmp.SourceProviderConfig[][]
@@ -55,6 +68,7 @@
 --- @class blink.cmp.WindowConfig
 --- @field autocomplete blink.cmp.AutocompleteConfig
 --- @field documentation blink.cmp.DocumentationConfig
+--- @field signature_help blink.cmp.SignatureHelpConfig
 
 --- @class blink.cmp.HighlightConfig
 --- @field ns number
@@ -64,6 +78,7 @@
 --- @field min_width number
 --- @field max_width number
 --- @field max_height number
+--- @field border blink.cmp.WindowBorder
 --- @field order "top_down" | "bottom_up"
 --- @field direction_priority ("n" | "s")[]
 --- @field preselect boolean
@@ -72,14 +87,23 @@
 --- @field autocomplete_north ("n" | "s" | "e" | "w")[]
 --- @field autocomplete_south ("n" | "s" | "e" | "w")[]
 ---
+--- @alias blink.cmp.WindowBorder 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | 'none'
+---
 --- @class blink.cmp.DocumentationConfig
 --- @field min_width number
 --- @field max_width number
 --- @field max_height number
+--- @field border blink.cmp.WindowBorder
 --- @field direction_priority blink.cmp.DocumentationDirectionPriorityConfig
 --- @field auto_show boolean
 --- @field auto_show_delay_ms number Delay before showing the documentation window
 --- @field update_delay_ms number Delay before updating the documentation window
+
+--- @class blink.cmp.SignatureHelpConfig
+--- @field min_width number
+--- @field max_width number
+--- @field max_height number
+--- @field border blink.cmp.WindowBorder
 
 --- @class blink.cmp.Config
 --- @field keymap blink.cmp.KeymapConfig
@@ -126,21 +150,32 @@ local config = {
       semantic_token_resolution = {
         enabled = true,
         blocked_filetypes = {},
+        timeout_ms = 400,
       },
     },
   },
 
   trigger = {
-    -- regex used to get the text when fuzzy matching
-    -- changing this may break some sources, so please report if you run into issues
-    -- todo: shouldnt this also affect the accept command? should this also be per language?
-    context_regex = '[%w_\\-]',
-    -- LSPs can indicate when to show the completion window via trigger characters
-    -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
-    -- always show the window. We block these by default
-    blocked_trigger_characters = { ' ', '\n', '\t' },
-    -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
-    show_on_insert_on_trigger_character = true,
+    completion = {
+      -- regex used to get the text when fuzzy matching
+      -- changing this may break some sources, so please report if you run into issues
+      -- todo: shouldnt this also affect the accept command? should this also be per language?
+      context_regex = '[%w_\\-]',
+      -- LSPs can indicate when to show the completion window via trigger characters
+      -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
+      -- always show the window. We block these by default
+      blocked_trigger_characters = { ' ', '\n', '\t' },
+      -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
+      show_on_insert_on_trigger_character = true,
+    },
+
+    signature_help = {
+      enabled = false,
+      blocked_trigger_characters = {},
+      blocked_retrigger_characters = {},
+      -- when true, will show the signature help window when the cursor comes after a trigger character when entering insert mode
+      show_on_insert_on_trigger_character = true,
+    },
   },
 
   fuzzy = {
@@ -172,10 +207,12 @@ local config = {
       min_width = 30,
       max_width = 60,
       max_height = 10,
+      border = 'none',
+      -- todo: implement
       order = 'top_down',
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
-      direction_priority = { 'n', 's' },
+      direction_priority = { 's', 'n' },
       -- todo: implement
       preselect = true,
     },
@@ -183,6 +220,7 @@ local config = {
       min_width = 10,
       max_width = 60,
       max_height = 20,
+      border = 'padded',
       -- which directions to show the documentation window,
       -- for each of the possible autocomplete window directions,
       -- falling back to the next direction when there's not enough space
@@ -193,6 +231,12 @@ local config = {
       auto_show = true,
       auto_show_delay_ms = 500,
       update_delay_ms = 100,
+    },
+    signature_help = {
+      min_width = 1,
+      max_width = 100,
+      max_height = 10,
+      border = 'padded',
     },
   },
 

@@ -68,8 +68,8 @@ end
 ---@param path string
 function scan.load_package_json(path)
   local file = path .. '/package.json'
+  -- todo: ideally this is async, although it takes 0.5ms on my system so it might not matter
   local data = utils.read_file(file)
-
   if not data then return end
 
   local pkg = vim.json.decode(data)

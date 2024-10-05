@@ -16,6 +16,8 @@ function lsp:has_capability(capability)
   return false
 end
 
+--- Completion ---
+
 function lsp:get_trigger_characters()
   local clients = vim.lsp.get_clients({ bufnr = 0 })
   local trigger_characters = {}
@@ -141,6 +143,8 @@ function lsp:get_completions(context, callback)
   end)
 end
 
+--- Resolve ---
+
 function lsp:resolve(item, callback)
   local client = vim.lsp.get_client_by_id(item.client_id)
   if client == nil then
@@ -153,6 +157,54 @@ function lsp:resolve(item, callback)
     callback(resolved_item)
   end)
   if request_id ~= nil then return function() client.cancel_request(request_id) end end
+end
+
+--- Signature help ---
+
+function lsp:get_signature_help_trigger_characters()
+  local clients = vim.lsp.get_clients({ bufnr = 0 })
+  local trigger_characters = {}
+  local retrigger_characters = {}
+
+  for _, client in pairs(clients) do
+    local signature_help_provider = client.server_capabilities.signatureHelpProvider
+    if signature_help_provider and signature_help_provider.triggerCharacters then
+      for _, trigger_character in pairs(signature_help_provider.triggerCharacters) do
+        table.insert(trigger_characters, trigger_character)
+      end
+    end
+    if signature_help_provider and signature_help_provider.retriggerCharacters then
+      for _, retrigger_character in pairs(signature_help_provider.retriggerCharacters) do
+        table.insert(retrigger_characters, retrigger_character)
+      end
+    end
+  end
+
+  return { trigger_characters = trigger_characters, retrigger_characters = retrigger_characters }
+end
+
+function lsp:get_signature_help(context, callback)
+  local params = vim.lsp.util.make_position_params()
+  params.context = {
+    triggerKind = context.trigger.kind,
+    triggerCharacter = context.trigger.character,
+    isRetrigger = context.is_retrigger,
+    activeSignatureHelp = context.active_signature_help,
+  }
+
+  -- otherwise, we call all clients
+  return vim.lsp.buf_request_all(0, 'textDocument/signatureHelp', params, function(result)
+    local signature_helps = {}
+    for client_id, res in pairs(result) do
+      local signature_help = res.result
+      if signature_help ~= nil then
+        signature_help.client_id = client_id
+        table.insert(signature_helps, signature_help)
+      end
+    end
+    -- todo: pick intelligently
+    callback(signature_helps[1])
+  end)
 end
 
 return lsp

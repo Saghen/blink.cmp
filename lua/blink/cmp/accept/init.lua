@@ -44,12 +44,14 @@ local function accept(item)
 
   -- Check semantic tokens for brackets, if needed, and apply additional text edits
   if brackets_status == 'check_semantic_token' then
-    brackets_lib.add_brackets_via_semantic_token(
-      vim.bo.filetype,
-      item,
-      function() text_edits_lib.apply_additional_text_edits(item) end
-    )
+    -- todo: since we apply the additional text edits after, auto imported functions will not
+    -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
+    brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
+      require('blink.cmp.trigger.signature').show_if_on_trigger_character()
+      text_edits_lib.apply_additional_text_edits(item)
+    end)
   else
+    require('blink.cmp.trigger.signature').show_if_on_trigger_character()
     text_edits_lib.apply_additional_text_edits(item)
   end
 

@@ -118,9 +118,8 @@ function brackets.add_brackets_via_semantic_token(filetype, item, callback)
     -- cancel if it's been too long, or if the cursor moved
     local ms_since_call = (vim.uv.hrtime() - start_time) / 1000000
     local cursor_after_call = vim.api.nvim_win_get_cursor(0)
-    vim.print('semanticTokens: ' .. ms_since_call .. 'ms')
     if
-      ms_since_call > 100
+      ms_since_call > config.semantic_token_resolution.timeout_ms
       or cursor_before_call[1] ~= cursor_after_call[1]
       or cursor_before_call[2] ~= cursor_after_call[2]
     then

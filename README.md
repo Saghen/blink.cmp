@@ -11,6 +11,7 @@
 - Native `vim.snippet` support (including `friendly-snippets`)
 - External sources support (currently incompatible with `nvim-cmp` sources)
 - Auto-bracket support based on semantic tokens (experimental, opt-in)
+- Signature help (experimental, opt-in)
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
 ## Installation
@@ -42,6 +43,9 @@
     
     -- experimental auto-brackets support
     -- accept = { auto_brackets = { enabled = true } }
+    
+    -- experimental signature help support
+    -- trigger = { signature_help = { enabled = true } }
   }
 }
 ```
@@ -99,16 +103,26 @@ For LazyVim/distro users, you can disable nvim-cmp via:
   },
 
   trigger = {
-    -- regex used to get the text when fuzzy matching
-    -- changing this may break some sources, so please report if you run into issues
-    -- todo: shouldnt this also affect the accept command? should this also be per language?
-    context_regex = '[%w_\\-]',
-    -- LSPs can indicate when to show the completion window via trigger characters
-    -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
-    -- always show the window. We block these by default
-    blocked_trigger_characters = { ' ', '\n', '\t' },
-    -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
-    show_on_insert_on_trigger_character = true,
+    completion = {
+      -- regex used to get the text when fuzzy matching
+      -- changing this may break some sources, so please report if you run into issues
+      -- todo: shouldnt this also affect the accept command? should this also be per language?
+      context_regex = '[%w_\\-]',
+      -- LSPs can indicate when to show the completion window via trigger characters
+      -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
+      -- always show the window. We block these by default
+      blocked_trigger_characters = { ' ', '\n', '\t' },
+      -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
+      show_on_insert_on_trigger_character = true,
+    },
+
+    signature_help = {
+      enabled = false,
+      blocked_trigger_characters = {},
+      blocked_retrigger_characters = {},
+      -- when true, will show the signature help window when the cursor comes after a trigger character when entering insert mode
+      show_on_insert_on_trigger_character = true,
+    },
   },
 
   fuzzy = {
@@ -140,17 +154,16 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       min_width = 30,
       max_width = 60,
       max_height = 10,
-      order = 'top_down',
+      border = 'none',
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
-      direction_priority = { 'n', 's' },
-      -- todo: implement
-      preselect = true,
+      direction_priority = { 's', 'n' },
     },
     documentation = {
       min_width = 10,
       max_width = 60,
       max_height = 20,
+      border = 'padded',
       -- which directions to show the documentation window,
       -- for each of the possible autocomplete window directions,
       -- falling back to the next direction when there's not enough space
@@ -159,8 +172,14 @@ For LazyVim/distro users, you can disable nvim-cmp via:
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
       auto_show = true,
-      auto_show_delay_ms = 0,
+      auto_show_delay_ms = 500,
       update_delay_ms = 100,
+    },
+    signature_help = {
+      min_width = 1,
+      max_width = 100,
+      max_height = 10,
+      border = 'padded',
     },
   },
 
@@ -247,6 +266,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 - Less customizable across the board wrt trigger, sources, sorting, filtering, and rendering
 - Significantly less testing and documentation
 - Ghost text
+- Matched character highlighting
 
 ### Missing features, not planned
 

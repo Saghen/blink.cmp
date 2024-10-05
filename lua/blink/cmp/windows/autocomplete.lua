@@ -4,7 +4,7 @@ local autocomplete = {
   items = {},
   context = nil,
   event_targets = {
-    on_position_update = function() end,
+    on_position_update = {},
     on_select = function() end,
     on_close = function() end,
   },
@@ -12,6 +12,10 @@ local autocomplete = {
 
 function autocomplete.setup()
   autocomplete.win = require('blink.cmp.windows.lib').new({
+    min_width = config.min_width,
+    max_width = config.max_width,
+    max_height = config.max_height,
+    border = config.border,
     cursorline = true,
     winhighlight = 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
     scrolloff = 2,
@@ -93,6 +97,8 @@ function autocomplete.close()
 end
 function autocomplete.listen_on_close(callback) autocomplete.event_targets.on_close = callback end
 
+--- @param context blink.cmp.Context
+--- TODO: Don't switch directions if the context is the same
 function autocomplete.update_position(context)
   local win = autocomplete.win
   if not win:is_open() then return end
@@ -117,12 +123,12 @@ function autocomplete.update_position(context)
   local is_space_above = cursor_row - screen_scroll_range.start_line > height
 
   -- default to the user's preference but attempt to use the other options
-  local row = config.windows.autocomplete.direction_priority[1] == 'n' and 1 or -height
+  local row = config.windows.autocomplete.direction_priority[1] == 's' and 1 or -height
   for _, direction in ipairs(config.windows.autocomplete.direction_priority) do
-    if direction == 'n' and is_space_below then
+    if direction == 's' and is_space_below then
       row = 1
       break
-    elseif direction == 's' and is_space_above then
+    elseif direction == 'n' and is_space_above then
       row = -height
       break
     end
@@ -130,10 +136,14 @@ function autocomplete.update_position(context)
 
   vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col })
 
-  autocomplete.event_targets.on_position_update()
+  for _, callback in ipairs(autocomplete.event_targets.on_position_update) do
+    callback()
+  end
 end
 
-function autocomplete.listen_on_position_update(callback) autocomplete.event_targets.on_position_update = callback end
+function autocomplete.listen_on_position_update(callback)
+  table.insert(autocomplete.event_targets.on_position_update, callback)
+end
 
 ---------- Selection ----------
 

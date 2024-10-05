@@ -9,11 +9,12 @@ function source.new(config)
   --- @type blink.cmp.Source
   self.module = require(config[1]).new(config.opts or {})
   self.config = config
-
   self.last_response = nil
 
   return self
 end
+
+--- Completion ---
 
 --- @return string[]
 function source:get_trigger_characters()
@@ -65,6 +66,8 @@ function source:should_show_completions(response)
   return self.module:should_show_completions(response)
 end
 
+--- Resolve ---
+
 --- @param item blink.cmp.CompletionItem
 --- @return blink.cmp.Task
 function source:resolve(item)
@@ -72,6 +75,27 @@ function source:resolve(item)
     if self.module.resolve == nil then return resolve(nil) end
     return self.module:resolve(item, function(resolved_item)
       vim.schedule(function() resolve(resolved_item) end)
+    end)
+  end)
+end
+
+--- Signature help ---
+
+--- @return { trigger_characters: string[], retrigger_characters: string[] }
+function source:get_signature_help_trigger_characters()
+  if self.module.get_signature_help_trigger_characters == nil then
+    return { trigger_characters = {}, retrigger_characters = {} }
+  end
+  return self.module:get_signature_help_trigger_characters()
+end
+
+--- @param context blink.cmp.SignatureHelpContext
+--- @return blink.cmp.Task
+function source:get_signature_help(context)
+  return async.task.new(function(resolve)
+    if self.module.get_signature_help == nil then return resolve(nil) end
+    return self.module:get_signature_help(context, function(signature_help)
+      vim.schedule(function() resolve(signature_help) end)
     end)
   end)
 end

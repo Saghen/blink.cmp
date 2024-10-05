@@ -11,24 +11,22 @@ cmp.setup = function(opts)
       return
     end
 
-    require('blink.cmp.keymap').setup(config.keymap)
-
     cmp.add_default_highlights()
-    -- todo: do we need to clear first?
-    vim.api.nvim_create_autocmd('ColorScheme', { callback = cmp.add_default_highlights })
+
+    require('blink.cmp.keymap').setup(config.keymap)
 
     -- STRUCTURE
     -- trigger -> sources -> fuzzy (filter/sort) -> windows (render)
 
     -- trigger controls when to show the window and the current context for caching
     -- TODO: add first_trigger event for setting up the rest of the plugin
-    cmp.trigger = require('blink.cmp.trigger').activate_autocmds()
+    cmp.trigger = require('blink.cmp.trigger.completion').activate_autocmds()
 
-    -- sources fetch autocomplete items and documentation
+    -- sources fetch autocomplete items, documentation and signature help
     cmp.sources = require('blink.cmp.sources.lib')
     cmp.sources.register()
 
-    -- windows render and apply items
+    -- windows render and apply completion items and signature help
     cmp.windows = {
       autocomplete = require('blink.cmp.windows.autocomplete').setup(),
       documentation = require('blink.cmp.windows.documentation').setup(),
@@ -64,7 +62,29 @@ cmp.setup = function(opts)
       cmp.windows.autocomplete.close()
     end)
     cmp.sources.listen_on_completions(update_completions)
+
+    -- setup signature help if enabled
+    if config.trigger.signature_help.enabled then cmp.setup_signature_help() end
   end)
+end
+
+cmp.setup_signature_help = function()
+  local signature_trigger = require('blink.cmp.trigger.signature').activate_autocmds()
+  local signature_window = require('blink.cmp.windows.signature').setup()
+
+  signature_trigger.listen_on_show(function(context)
+    cmp.sources.cancel_signature_help()
+    cmp.sources.get_signature_help(context, function(signature_help)
+      if signature_help ~= nil then
+        signature_trigger.set_active_signature_help(signature_help)
+        signature_window.open_with_signature_help(context, signature_help)
+      else
+        signature_trigger.hide()
+      end
+    end)
+  end)
+
+  signature_trigger.listen_on_hide(function() cmp.windows.signature.close() end)
 end
 
 cmp.add_default_highlights = function()
@@ -79,6 +99,7 @@ cmp.add_default_highlights = function()
   set_hl('BlinkCmpLabelDeprecated', { link = use_nvim_cmp and 'CmpItemAbbrDeprecated' or 'Comment' })
   set_hl('BlinkCmpLabelMatch', { link = use_nvim_cmp and 'CmpItemAbbrMatch' or 'Pmenu' })
   set_hl('BlinkCmpKind', { link = use_nvim_cmp and 'CmpItemKind' or 'Special' })
+  set_hl('BlinkCmpSignatureHelpActiveParameter', { link = 'LspSignatureActiveParameter' })
   for _, kind in pairs(vim.lsp.protocol.CompletionItemKind) do
     set_hl('BlinkCmpKind' .. kind, { link = use_nvim_cmp and 'CmpItemKind' .. kind or 'BlinkCmpItemKind' })
   end

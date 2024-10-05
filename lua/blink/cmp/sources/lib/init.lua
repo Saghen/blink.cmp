@@ -1,3 +1,4 @@
+local async = require('blink.cmp.sources.lib.async')
 local config = require('blink.cmp.config')
 local sources = {
   current_context = nil,
@@ -17,6 +18,8 @@ function sources.register()
     table.insert(sources.sources_groups, group)
   end
 end
+
+--- Completion ---
 
 --- @return string[]
 function sources.get_trigger_characters()
@@ -58,6 +61,8 @@ function sources.cancel_completions()
   end
 end
 
+--- Resolve ---
+
 --- @param item blink.cmp.CompletionItem
 --- @param callback fun(resolved_item: blink.cmp.CompletionItem | nil)
 --- @return fun(): nil Cancelation function
@@ -81,6 +86,60 @@ function sources.resolve(item, callback)
     vim.print('failed to resolve item with error: ' .. err)
     callback(nil)
   end)
+end
+
+--- Signature help ---
+
+--- @return { trigger_characters: string[], retrigger_characters: string[] }
+function sources.get_signature_help_trigger_characters()
+  local blocked_trigger_characters = {}
+  local blocked_retrigger_characters = {}
+  for _, char in ipairs(config.trigger.signature_help.blocked_trigger_characters) do
+    blocked_trigger_characters[char] = true
+  end
+  for _, char in ipairs(config.trigger.signature_help.blocked_retrigger_characters) do
+    blocked_retrigger_characters[char] = true
+  end
+
+  local trigger_characters = {}
+  local retrigger_characters = {}
+
+  -- todo: should this be all source groups?
+  for _, source in ipairs(sources.sources_groups[1]) do
+    local res = source:get_signature_help_trigger_characters()
+    for _, char in ipairs(res.trigger_characters) do
+      if not blocked_trigger_characters[char] then table.insert(trigger_characters, char) end
+    end
+    for _, char in ipairs(res.retrigger_characters) do
+      if not blocked_retrigger_characters[char] then table.insert(retrigger_characters, char) end
+    end
+  end
+  return { trigger_characters = trigger_characters, retrigger_characters = retrigger_characters }
+end
+
+--- @param context blink.cmp.SignatureHelpContext
+--- @param callback fun(signature_helps: lsp.SignatureHelp)
+function sources.get_signature_help(context, callback)
+  local tasks = {}
+  for _, source in ipairs(sources.sources_groups[1]) do
+    table.insert(tasks, source:get_signature_help(context))
+  end
+  sources.current_signature_help = async.task.await_all(tasks):map(function(tasks_results)
+    local signature_helps = {}
+    for _, task_result in ipairs(tasks_results) do
+      if task_result.status == async.STATUS.COMPLETED and task_result.result ~= nil then
+        table.insert(signature_helps, task_result.result)
+      end
+    end
+    callback(signature_helps[1])
+  end)
+end
+
+function sources.cancel_signature_help()
+  if sources.current_signature_help ~= nil then
+    sources.current_signature_help:cancel()
+    sources.current_signature_help = nil
+  end
 end
 
 return sources
