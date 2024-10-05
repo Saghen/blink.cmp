@@ -86,7 +86,7 @@ cmp.setup_signature_help = function()
 
   signature_trigger.listen_on_hide(function()
     cmp.sources.cancel_signature_help()
-    cmp.windows.signature.close()
+    signature_window.close()
   end)
 end
 
