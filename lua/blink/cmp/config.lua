@@ -82,13 +82,14 @@
 --- @field order "top_down" | "bottom_up"
 --- @field direction_priority ("n" | "s")[]
 --- @field preselect boolean
---- @field winhighlight string | nil
+--- @field winhighlight string
+--- @field scrolloff number
 
 --- @class blink.cmp.DocumentationDirectionPriorityConfig
 --- @field autocomplete_north ("n" | "s" | "e" | "w")[]
 --- @field autocomplete_south ("n" | "s" | "e" | "w")[]
 ---
---- @alias blink.cmp.WindowBorder 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | 'none'
+--- @alias blink.cmp.WindowBorder 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | 'none' | string[]
 ---
 --- @class blink.cmp.DocumentationConfig
 --- @field min_width number
@@ -99,13 +100,14 @@
 --- @field auto_show boolean
 --- @field auto_show_delay_ms number Delay before showing the documentation window
 --- @field update_delay_ms number Delay before updating the documentation window
---- @field winhighlight string | nil
+--- @field winhighlight string
 
 --- @class blink.cmp.SignatureHelpConfig
 --- @field min_width number
 --- @field max_width number
 --- @field max_height number
 --- @field border blink.cmp.WindowBorder
+--- @field winhighlight string
 
 --- @class blink.cmp.Config
 --- @field keymap blink.cmp.KeymapConfig
@@ -210,6 +212,8 @@ local config = {
       max_width = 60,
       max_height = 10,
       border = 'none',
+      winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
+      scrolloff = 2,
       -- todo: implement
       order = 'top_down',
       -- which directions to show the window,
@@ -223,6 +227,7 @@ local config = {
       max_width = 60,
       max_height = 20,
       border = 'padded',
+      winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
       -- which directions to show the documentation window,
       -- for each of the possible autocomplete window directions,
       -- falling back to the next direction when there's not enough space
@@ -239,6 +244,7 @@ local config = {
       max_width = 100,
       max_height = 10,
       border = 'padded',
+      winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
     },
   },
 
