@@ -57,6 +57,28 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 ```
 
 <details>
+<summary>Highlight groups</summary>
+
+| Group | Default | Description |
+| ----- | ------- | ----------- |
+| `BlinkCmpMenu` | Pmenu | The completion menu window |
+| `BlinkCmpMenuBorder` | Pmenu | The completion menu window border |
+| `BlinkCmpMenuSelection` | PmenuSel | The completion menu window selected item |
+| `BlinkCmpLabel` | Pmenu | Label of the completion item |
+| `BlinkCmpLabelDeprecated` | Comment | Deprecated label of the completion item |
+| `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
+| `BlinkCmpKind` | Special | Kind icon/text of the completion item |
+| `BlinkCmpKind<kind>` | Special | Kind icon/text of the completion item |
+| `BlinkCmpDoc` | NormalFloat | The documentation window |
+| `BlinkCmpDocBorder` | FloatBorder | The documentation window border |
+| `BlinkCmpDocCursorLine` | Visual | The documentation window cursor line |
+| `BlinkCmpSignatureHelp` | NormalFloat | The signature help window |
+| `BlinkCmpSignatureHelpBorder` | FloatBorder | The signature help window border |
+| `BlinkCmpSignatureHelpActiveParameter` | LspSignatureActiveParameter | Active parameter of the signature help |
+
+</details>
+
+<details>
 <summary>Default configuration</summary>
 
 <!-- config:start -->
