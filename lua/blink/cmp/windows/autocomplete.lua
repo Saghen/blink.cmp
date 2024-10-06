@@ -17,9 +17,9 @@ function autocomplete.setup()
     max_width = autocmp_config.max_width,
     max_height = autocmp_config.max_height,
     border = autocmp_config.border,
+    winhighlight = autocmp_config.winhighlight,
     cursorline = true,
-    winhighlight = autocmp_config.winhighlight or 'Normal:Pmenu,FloatBorder:Pmenu,CursorLine:PmenuSel,Search:None',
-    scrolloff = 2,
+    scrolloff = autocmp_config.scrolloff,
   })
 
   -- Setting highlights is slow and we update on every keystroke so we instead use a decoration provider
@@ -107,7 +107,7 @@ function autocomplete.update_position(context)
 
   win:update_size()
 
-  local height = vim.api.nvim_win_get_height(winnr)
+  local height = win:get_height()
   local screen_height = vim.api.nvim_win_get_height(0)
   local screen_scroll_range = win.get_screen_scroll_range()
 

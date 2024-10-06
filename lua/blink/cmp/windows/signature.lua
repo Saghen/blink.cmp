@@ -101,26 +101,18 @@ function signature.update_position(context)
   local autocomplete_win_is_up = autocomplete_win_config and autocomplete_win_config.row - cursor_screen_row < 0
   local direction = autocomplete_win_is_up and 's' or 'n'
 
-  local height = vim.api.nvim_win_get_height(winnr)
+  local height = signature.win:get_height()
   local screen_height = vim.api.nvim_win_get_height(0)
   local screen_scroll_range = signature.win.get_screen_scroll_range()
 
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local cursor_row = cursor[1]
-  local cursor_col = cursor[2]
-
-  -- place the window at the start col of the current text we're fuzzy matching against
-  -- so the window doesnt move around as we type
-  local col = context.start_col - cursor_col - 1
-
   -- detect if there's space above/below the cursor
-  local is_space_below = autocomplete_win_is_up ~= false
-    and screen_height - cursor_row - screen_scroll_range.start_line > height
-  local is_space_above = not autocomplete_win_is_up and cursor_row - screen_scroll_range.start_line > height
+  local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
+  local is_space_below = screen_height - cursor_row - screen_scroll_range.start_line > height
+  local is_space_above = cursor_row - screen_scroll_range.start_line > height
 
   -- default to the user's preference but attempt to use the other options
   local row = direction == 's' and 1 or -height
-  vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col })
+  vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = -1 })
 end
 
 return signature

@@ -110,8 +110,8 @@ function docs.update_position()
   local direction_priority = autocomplete_win_is_up and config.direction_priority.autocomplete_north
     or config.direction_priority.autocomplete_south
 
-  local height = vim.api.nvim_win_get_height(winnr)
-  local width = vim.api.nvim_win_get_width(winnr)
+  local height = docs.win:get_height()
+  local width = docs.win:get_width()
 
   local space_above = autocomplete_win_config.row - 1 > height
   local space_below = screen_height - autocomplete_win_config.height - autocomplete_win_config.row > height

@@ -105,11 +105,53 @@ function win:update_size()
 end
 
 -- todo: fix nvim_win_text_height
+-- @return number
 function win:get_content_height()
   if not self:is_open() then return 0 end
   return vim.api.nvim_win_text_height(self:get_win(), {}).all
 end
 
+--- @return { vertical: number, horizontal: number }
+function win:get_border_size()
+  if not self:is_open() then return { vertical = 0, horizontal = 0 } end
+
+  local border = self.config.border
+  if border == 'none' then
+    return { vertical = 0, horizontal = 0 }
+  elseif border == 'padded' then
+    return { vertical = 0, horizontal = 1 }
+  elseif border == 'shadow' then
+    return { vertical = 1, horizontal = 1 }
+  elseif type(border) == 'string' then
+    return { vertical = 2, horizontal = 2 }
+  elseif type(border) == 'table' and border ~= nil then
+    -- borders can be a table of strings and act differently with different # of chars
+    -- so we normalize it: https://neovim.io/doc/user/api.html#nvim_open_win()
+    -- based on nvim-cmp
+    local resolved_border = {}
+    while #resolved_border <= 8 do
+      for _, b in ipairs(border) do
+        table.insert(resolved_border, type(b) == 'string' and b or b[1])
+      end
+    end
+
+    local top = resolved_border[2] == '' and 0 or 1
+    local bottom = resolved_border[6] == '' and 0 or 1
+    local left = resolved_border[8] == '' and 0 or 1
+    local right = resolved_border[4] == '' and 0 or 1
+    return { vertical = top + bottom, horizontal = left + right }
+  end
+
+  return { vertical = 0, horizontal = 0 }
+end
+
+--- @return number
+function win:get_height()
+  if not self:is_open() then return 0 end
+  return vim.api.nvim_win_get_height(self:get_win()) + self:get_border_size().vertical
+end
+
+--- @return number
 function win:get_content_width()
   if not self:is_open() then return 0 end
   local max_width = 0
@@ -119,6 +161,13 @@ function win:get_content_width()
   return max_width
 end
 
+--- @return number
+function win:get_width()
+  if not self:is_open() then return 0 end
+  return vim.api.nvim_win_get_width(self:get_win()) + self:get_border_size().horizontal
+end
+
+--- @return { bufnr: number, start_line: number, end_line: number, horizontal_offset: number }
 function win.get_screen_scroll_range()
   local bufnr = vim.api.nvim_win_get_buf(0)
   local line_count = vim.api.nvim_buf_line_count(bufnr)
