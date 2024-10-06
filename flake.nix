@@ -70,7 +70,7 @@
             };
           };
 
-          default = self'.packages.blink-nvim;
+          default = self'.packages.blink-cmp;
         };
 
         # define the default dev environment
