@@ -5,7 +5,7 @@
 
 -- TODO: ensure this always calls *after* the completion trigger to avoid increasing latency
 
-local config = require('blink.cmp.config').trigger
+local config = require('blink.cmp.config').trigger.signature_help
 local sources = require('blink.cmp.sources.lib')
 local utils = require('blink.cmp.utils')
 
