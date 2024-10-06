@@ -176,7 +176,8 @@ function autocomplete.draw()
     )
   end
 
-  local max_line_length = renderer.get_max_length(arr_of_components)
+  local max_line_length =
+    math.min(autocmp_config.max_width, math.max(autocmp_config.min_width, renderer.get_max_length(arr_of_components)))
   autocomplete.rendered_items = vim.tbl_map(
     function(component) return renderer.render(component, max_line_length) end,
     arr_of_components
