@@ -5,18 +5,7 @@ local brackets_lib = require('blink.cmp.accept.brackets')
 --- @param item blink.cmp.CompletionItem
 local function accept(item)
   item = vim.deepcopy(item)
-
-  -- Adjust the position of the text edit to be the current cursor position
-  -- since the data might be outdated. We compare the cursor column position
-  -- from when the items were fetched versus the current.
-  -- hack: figure out a better way
-  if item.textEdit ~= nil then
-    local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
-    item.textEdit.range['end'].character = item.textEdit.range['end'].character + offset
-  -- No text edit so we fallback to our own resolution
-  else
-    item.textEdit = text_edits_lib.guess_text_edit(vim.api.nvim_get_current_buf(), item)
-  end
+  item.textEdit = text_edits_lib.get_from_item(item)
 
   -- Add brackets to the text edit if needed
   local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(vim.bo.filetype, item)

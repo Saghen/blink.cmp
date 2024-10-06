@@ -39,22 +39,28 @@ local brackets = {
 --- @param item blink.cmp.CompletionItem
 --- @return 'added' | 'check_semantic_token' | 'skipped', lsp.TextEdit | lsp.InsertReplaceEdit, number
 function brackets.add_brackets(filetype, item)
-  if not brackets.should_run_resolution(filetype, 'kind') then return 'check_semantic_token', item.textEdit, 0 end
+  local text_edit = item.textEdit
+  assert(text_edit ~= nil, 'Got nil text edit while adding brackets via kind')
+  local brackets_for_filetype = brackets.get_for_filetype(filetype, item)
 
+  -- if there's already the correct brackets in front, skip but indicate the cursor should move in front of the bracket
+  -- TODO: what if the brackets_for_filetype[1] == '' or ' ' (haskell/ocaml)?
+  if brackets.has_brackets_in_front(text_edit, brackets_for_filetype[1]) then
+    return 'skipped', text_edit, #brackets_for_filetype[1]
+  end
+  -- check if configuration incidates we should skip
+  if not brackets.should_run_resolution(filetype, 'kind') then return 'check_semantic_token', text_edit, 0 end
   -- not a function, skip
   if
     item.kind ~= vim.lsp.protocol.CompletionItemKind.Function
     and item.kind ~= vim.lsp.protocol.CompletionItemKind.Method
   then
-    return 'check_semantic_token', item.textEdit, 0
+    return 'check_semantic_token', text_edit, 0
   end
 
-  local brackets_for_filetype = brackets.get_for_filetype(filetype, item)
-  local text_edit = item.textEdit
-  assert(text_edit ~= nil, 'Got nil text edit while adding brackets via kind')
-
-  -- if already contains the brackets, conservatively skip adding brackets
+  -- if the item already contains the brackets, conservatively skip adding brackets
   -- todo: won't work for snippets when the brackets_for_filetype is { '{', '}' }
+  -- I've never seen a language like that though
   if brackets_for_filetype[1] ~= ' ' and text_edit.newText:match('[\\' .. brackets_for_filetype[1] .. ']') ~= nil then
     return 'skipped', text_edit, 0
   end
@@ -169,6 +175,15 @@ function brackets.should_run_resolution(filetype, resolution_method)
   if not config.enabled then return false end
   if vim.tbl_contains(config.force_allow_filetypes, filetype) then return true end
   return not vim.tbl_contains(config.blocked_filetypes, filetype)
+end
+
+--- @param text_edit lsp.TextEdit | lsp.InsertReplaceEdit
+--- @param bracket string
+--- @return boolean
+function brackets.has_brackets_in_front(text_edit, bracket)
+  local line = vim.api.nvim_get_current_line()
+  local col = text_edit.range['end'].character + 1
+  return line:sub(col, col) == bracket
 end
 
 return brackets

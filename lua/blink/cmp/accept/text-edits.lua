@@ -1,4 +1,21 @@
+local utils = require('blink.cmp.utils')
 local text_edits = {}
+
+function text_edits.get_from_item(item)
+  -- Adjust the position of the text edit to be the current cursor position
+  -- since the data might be outdated. We compare the cursor column position
+  -- from when the items were fetched versus the current.
+  -- hack: is there a better way?
+  if item.textEdit ~= nil then
+    local text_edit = utils.shallow_copy(item.textEdit)
+    local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
+    text_edit.range['end'].character = text_edit.range['end'].character + offset
+    return text_edit
+  end
+
+  -- No text edit so we fallback to our own resolution
+  return text_edits.guess_text_edit(vim.api.nvim_get_current_buf(), item)
+end
 
 function text_edits.apply_text_edits(client_id, edits)
   local client = vim.lsp.get_client_by_id(client_id)
