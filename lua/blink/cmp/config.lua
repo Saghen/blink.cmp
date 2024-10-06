@@ -84,6 +84,7 @@
 --- @field preselect boolean
 --- @field winhighlight string
 --- @field scrolloff number
+--- @field draw 'simple' | 'reversed' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
 
 --- @class blink.cmp.DocumentationDirectionPriorityConfig
 --- @field autocomplete_north ("n" | "s" | "e" | "w")[]
@@ -213,6 +214,7 @@ local config = {
       max_height = 10,
       border = 'none',
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
+      -- keep the cursor X lines away from the top/bottom of the window
       scrolloff = 2,
       -- todo: implement
       order = 'top_down',
@@ -221,6 +223,11 @@ local config = {
       direction_priority = { 's', 'n' },
       -- todo: implement
       preselect = true,
+      -- Controls how the completion items are rendered on the popup window
+      -- 'simple' will render the item's kind icon the left alongside the label
+      -- 'reversed' will render the label on the left and the kind icon + name on the right
+      -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
+      draw = 'simple',
     },
     documentation = {
       min_width = 10,

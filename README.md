@@ -155,15 +155,24 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       max_width = 60,
       max_height = 10,
       border = 'none',
+      winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
+      -- keep the cursor X lines away from the top/bottom of the window
+      scrolloff = 2,
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 's', 'n' },
+      -- Controls how the completion items are rendered on the popup window
+      -- 'simple' will render the item's kind icon the left alongside the label
+      -- 'reversed' will render the label on the left and the kind icon + name on the right
+      -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
+      draw = 'simple',
     },
     documentation = {
       min_width = 10,
       max_width = 60,
       max_height = 20,
       border = 'padded',
+      winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
       -- which directions to show the documentation window,
       -- for each of the possible autocomplete window directions,
       -- falling back to the next direction when there's not enough space
@@ -180,6 +189,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       max_width = 100,
       max_height = 10,
       border = 'padded',
+      winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
     },
   },
 
@@ -260,10 +270,11 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 - Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
 - Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
+- Built-in auto bracket and signature help support
 
 ### Planned missing features
 
-- Less customizable across the board wrt trigger, sources, sorting, filtering, and rendering
+- Less customizable with regards to trigger, sources, sorting, filtering
 - Significantly less testing and documentation
 - Ghost text
 - Matched character highlighting

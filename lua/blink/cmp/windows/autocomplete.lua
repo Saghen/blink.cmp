@@ -1,5 +1,12 @@
+--- @class blink.cmp.CompletionRenderContext
+--- @field item blink.cmp.CompletionItem
+--- @field kind string
+--- @field kind_icon string
+--- @field icon_gap string
+
 -- todo: track cursor position
 local config = require('blink.cmp.config')
+local renderer = require('blink.cmp.windows.lib.render')
 local autocmp_config = config.windows.autocomplete
 local autocomplete = {
   items = {},
@@ -30,32 +37,9 @@ function autocomplete.setup()
       return autocomplete.win:get_win() == winnr and bufnr == autocomplete.win:get_buf()
     end,
     on_line = function(_, _, bufnr, line_number)
-      local item = autocomplete.items[line_number + 1]
-      if item == nil then return end
-      local line_text = vim.api.nvim_buf_get_lines(bufnr, line_number, line_number + 1, false)[1]
-
-      local kind = vim.lsp.protocol.CompletionItemKind[item.kind] or 'Unknown'
-      local kind_hl = 'BlinkCmpKind' .. kind
-
-      -- todo: handle .labelDetails and others
-      vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, line_number, 0, {
-        end_col = 4,
-        hl_group = kind_hl,
-        hl_mode = 'combine',
-        hl_eol = true,
-        ephemeral = true,
-      })
-
-      -- todo: use vim.lsp.protocol.CompletionItemTag
-      if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then
-        -- todo: why 7?
-        vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, line_number, 7, {
-          end_col = #line_text - 1,
-          hl_group = 'BlinkCmpLabelDeprecated',
-          hl_mode = 'combine',
-          ephemeral = true,
-        })
-      end
+      local rendered_item = autocomplete.rendered_items[line_number + 1]
+      if rendered_item == nil then return end
+      renderer.draw_highlights(rendered_item, bufnr, config.highlight.ns, line_number)
     end,
   })
 
@@ -174,42 +158,68 @@ function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_s
 ---------- Rendering ----------
 
 function autocomplete.draw()
-  local max_line_width = 0
+  local draw_fn = autocomplete.get_draw_fn()
+  local icon_gap = config.nerd_font_variant == 'mono' and ' ' or '  '
+  local arr_of_components = {}
   for _, item in ipairs(autocomplete.items) do
-    max_line_width = math.max(max_line_width, autocomplete.get_item_max_length(item))
-  end
-  local target_width =
-    math.max(math.min(max_line_width, autocomplete.win.config.max_width), autocomplete.win.config.min_width)
+    local kind = vim.lsp.protocol.CompletionItemKind[item.kind] or 'Unknown'
+    local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
 
-  local lines = {}
-  for _, item in ipairs(autocomplete.items) do
-    table.insert(lines, autocomplete.draw_item(item, target_width))
+    table.insert(
+      arr_of_components,
+      draw_fn({
+        item = item,
+        kind = kind,
+        kind_icon = kind_icon,
+        icon_gap = icon_gap,
+      })
+    )
   end
 
+  local max_line_length = renderer.get_max_length(arr_of_components)
+  autocomplete.rendered_items = vim.tbl_map(
+    function(component) return renderer.render(component, max_line_length) end,
+    arr_of_components
+  )
+
+  local lines = vim.tbl_map(function(rendered) return rendered.text end, autocomplete.rendered_items)
   local bufnr = autocomplete.win:get_buf()
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
 end
 
-function autocomplete.get_item_max_length(item)
-  local icon_width = 4
-  local label_width = vim.api.nvim_strwidth(autocomplete.get_label(item))
-  return icon_width + label_width
+function autocomplete.get_draw_fn()
+  if type(autocmp_config.draw) == 'function' then
+    return autocmp_config.draw
+  elseif autocmp_config.draw == 'simple' then
+    return autocomplete.render_item_simple
+  elseif autocmp_config.draw == 'reversed' then
+    return autocomplete.render_item_reversed
+  end
+  error('Invalid autocomplete window draw config')
 end
 
-function autocomplete.draw_item(item, max_length)
-  local kind = vim.lsp.protocol.CompletionItemKind[item.kind] or 'Unknown'
-  local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
-
-  -- get line text
-  local label = autocomplete.get_label(item)
-  local other_content_length = 5
-  local abbr = string.sub(label, 1, max_length - other_content_length)
-
-  return string.format(' %s%s%s ', kind_icon, config.nerd_font_variant == 'mono' and ' ' or '  ', abbr)
+--- @param ctx blink.cmp.CompletionRenderContext
+--- @return blink.cmp.Component[]
+function autocomplete.render_item_simple(ctx)
+  return {
+    { ' ', ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    { ctx.item.label, fill = true, hl_group = ctx.item.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
+  }
 end
 
-function autocomplete.get_label(item) return item.label end
+--- @param ctx blink.cmp.CompletionRenderContext
+--- @return blink.cmp.Component[]
+function autocomplete.render_item_reversed(ctx)
+  return {
+    {
+      ' ' .. ctx.item.label,
+      fill = true,
+      hl_group = ctx.item.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+    },
+    { ' ', ctx.kind_icon, ctx.icon_gap, ctx.kind .. ' ', hl_group = 'BlinkCmpKind' .. ctx.kind },
+  }
+end
 
 function autocomplete.get_selected_item()
   if not autocomplete.win:is_open() then return end
