@@ -5,19 +5,18 @@
 --- @param extended_filetypes table<string, string[]>
 --- @param ignored_filetypes string[]
 
---- @class blink.cmp.SnippetsSource : blink.cmp.Source
---- @field cache table<string, blink.cmp.CompletionItem[]>
 local snippets = {}
 
 --- @param opts blink.cmp.SnippetsOpts
 function snippets.new(opts)
   local self = setmetatable({}, { __index = snippets })
+  --- @type table<string, blink.cmp.CompletionItem[]>
   self.cache = {}
   self.registry = require('blink.cmp.sources.snippets.registry').new(opts)
   return self
 end
 
-function snippets:get_completions(context, callback)
+function snippets:get_completions(_, callback)
   local filetype = vim.bo.filetype
   if vim.tbl_contains(self.registry.config.ignored_filetypes, filetype) then return callback() end
 

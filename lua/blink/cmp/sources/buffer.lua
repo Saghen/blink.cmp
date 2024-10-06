@@ -64,7 +64,7 @@ end
 --- @class blink.cmp.Source
 local buffer = {}
 
-function buffer.new(config) return setmetatable(config, { __index = buffer }) end
+function buffer.new() return setmetatable({}, { __index = buffer }) end
 
 function buffer:get_completions(_, callback)
   local transformed_callback = function(items)

@@ -102,7 +102,6 @@ cmp.add_default_highlights = function()
   set_hl('BlinkCmpLabelDeprecated', { link = use_nvim_cmp and 'CmpItemAbbrDeprecated' or 'Comment' })
   set_hl('BlinkCmpLabelMatch', { link = use_nvim_cmp and 'CmpItemAbbrMatch' or 'Pmenu' })
   set_hl('BlinkCmpKind', { link = use_nvim_cmp and 'CmpItemKind' or 'Special' })
-  set_hl('BlinkCmpSignatureHelpActiveParameter', { link = 'LspSignatureActiveParameter' })
 
   set_hl('BlinkCmpMenu', { link = 'Pmenu' })
   set_hl('BlinkCmpMenuBorder', { link = 'Pmenu' })
@@ -114,6 +113,7 @@ cmp.add_default_highlights = function()
 
   set_hl('BlinkCmpSignatureHelp', { link = 'NormalFloat' })
   set_hl('BlinkCmpSignatureHelpBorder', { link = 'FloatBorder' })
+  set_hl('BlinkCmpSignatureHelpActiveParameter', { link = 'LspSignatureActiveParameter' })
 
   for _, kind in pairs(vim.lsp.protocol.CompletionItemKind) do
     set_hl('BlinkCmpKind' .. kind, { link = use_nvim_cmp and 'CmpItemKind' .. kind or 'BlinkCmpItemKind' })

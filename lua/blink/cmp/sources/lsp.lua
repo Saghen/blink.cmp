@@ -1,7 +1,7 @@
 --- @class blink.cmp.Source
 local lsp = {}
 
-function lsp.new(config) return setmetatable(config, { __index = lsp }) end
+function lsp.new() return setmetatable({}, { __index = lsp }) end
 
 ---@param capability string|table|nil Server capability (possibly nested
 ---   supplied via table) to check.
