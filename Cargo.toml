@@ -19,6 +19,3 @@ heed = "0.20.3"
 
 [build-dependencies]
 generator = { git = "https://github.com/distil/rust_lua_ffi" }
-
-[dev-dependencies]
-nucleo = "0.5.0"
