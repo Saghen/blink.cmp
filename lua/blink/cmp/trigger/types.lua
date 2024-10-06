@@ -17,6 +17,5 @@
 --- @field bufnr number
 --- @field cursor number[]
 --- @field line string
---- @field start_col number
 --- @field is_retrigger boolean
 --- @field active_signature_help lsp.SignatureHelp | nil

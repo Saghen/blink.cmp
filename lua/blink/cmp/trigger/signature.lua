@@ -30,7 +30,7 @@ function trigger.activate_autocmds()
   -- decide if we should show the completion window
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
-      -- character deleted so let cursormoved handle it
+      -- no characters added so let cursormoved handle it
       if #last_chars == 0 then return end
 
       local res = sources.get_signature_help_trigger_characters()
@@ -44,11 +44,11 @@ function trigger.activate_autocmds()
           break
         -- character forces a trigger according to the sources, refresh the existing context if it exists
         elseif vim.tbl_contains(trigger_characters, last_char) then
-          trigger.show({ trigger_character = last_char, is_retrigger = trigger.context ~= nil })
+          trigger.show({ trigger_character = last_char })
           break
         -- character forces a re-trigger according to the sources, show if we have a context
         elseif vim.tbl_contains(retrigger_characters, last_char) and trigger.context ~= nil then
-          trigger.show({ is_retrigger = true })
+          trigger.show()
           break
         end
       end
@@ -61,7 +61,7 @@ function trigger.activate_autocmds()
   -- todo: should show if cursor is on trigger character
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
-      -- text changed so let textchanged handle it
+      -- characters added so let textchanged handle it
       if #last_chars ~= 0 then return end
 
       local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
@@ -88,13 +88,11 @@ function trigger.show_if_on_trigger_character()
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
   local is_on_trigger =
     vim.tbl_contains(sources.get_signature_help_trigger_characters().trigger_characters, char_under_cursor)
-  if is_on_trigger then
-    trigger.show({ trigger_character = char_under_cursor, is_retrigger = trigger.context ~= nil })
-  end
+  if is_on_trigger then trigger.show({ trigger_character = char_under_cursor }) end
   return is_on_trigger
 end
 
---- @param opts { trigger_character: string, is_retrigger: boolean } | nil
+--- @param opts { trigger_character: string } | nil
 function trigger.show(opts)
   opts = opts or {}
 
@@ -106,7 +104,6 @@ function trigger.show(opts)
     bufnr = vim.api.nvim_get_current_buf(),
     cursor = cursor,
     line = vim.api.nvim_buf_get_lines(0, cursor[1] - 1, cursor[1], false)[1],
-    start_col = trigger.context and trigger.context.start_col or cursor[2],
     trigger = {
       kind = opts.trigger_character and vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter
         or vim.lsp.protocol.CompletionTriggerKind.Invoked,

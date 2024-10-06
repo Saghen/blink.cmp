@@ -124,8 +124,8 @@ function autocomplete.update_position(context)
   local is_space_above = cursor_row - screen_scroll_range.start_line > height
 
   -- default to the user's preference but attempt to use the other options
-  local row = config.windows.autocomplete.direction_priority[1] == 's' and 1 or -height
-  for _, direction in ipairs(config.windows.autocomplete.direction_priority) do
+  local row = autocmp_config.direction_priority[1] == 's' and 1 or -height
+  for _, direction in ipairs(autocmp_config.direction_priority) do
     if direction == 's' and is_space_below then
       row = 1
       break

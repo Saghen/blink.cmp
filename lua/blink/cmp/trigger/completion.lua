@@ -27,7 +27,7 @@ function trigger.activate_autocmds()
   -- decide if we should show the completion window
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
-      -- character deleted so let cursormoved handle it
+      -- no characters added so let cursormoved handle it
       if last_char == '' then return end
 
       -- ignore if in a special buffer
@@ -53,7 +53,7 @@ function trigger.activate_autocmds()
   -- todo: should show if cursor is on trigger character
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
-      -- text changed so let textchanged handle it
+      -- characters added so let textchanged handle it
       if last_char ~= '' then return end
 
       local is_within_bounds = trigger.within_query_bounds(vim.api.nvim_win_get_cursor(0))
