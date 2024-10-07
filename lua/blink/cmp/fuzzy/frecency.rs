@@ -39,11 +39,10 @@ impl FrecencyTracker {
         let db = env.create_database(&mut wtxn, None).unwrap();
 
         let access_thresholds = [
-            (1., 1000 * 60 * 2),             // 2 minutes
-            (0.5, 1000 * 60 * 5),            // 5 minutes
-            (0.2, 1000 * 60 * 30),           // 2 hours
-            (0.1, 1000 * 60 * 60 * 24),      // 1 day
-            (0.05, 1000 * 60 * 60 * 24 * 7), // 1 week
+            (1., 1000 * 60 * 2),            // 2 minutes
+            (0.5, 1000 * 60 * 60),          // 1 hour
+            (0.2, 1000 * 60 * 60 * 24),     // 1 day
+            (0.1, 1000 * 60 * 60 * 24 * 7), // 1 week
         ]
         .to_vec();
 
@@ -73,7 +72,7 @@ impl FrecencyTracker {
 
     pub fn access(&mut self, item: &LspItem) -> Result<(), heed::Error> {
         let mut wtxn = self.env.write_txn()?;
-        let mut accesses = self.get_accesses(item).unwrap_or_else(Vec::new);
+        let mut accesses = self.get_accesses(item).unwrap_or_default();
         accesses.push(self.get_now());
         self.db
             .put(&mut wtxn, &CompletionItemKey::from(item), &accesses)?;
@@ -82,7 +81,7 @@ impl FrecencyTracker {
     }
 
     pub fn get_score(&self, item: &LspItem) -> i64 {
-        let accesses = self.get_accesses(item).unwrap_or_else(Vec::new);
+        let accesses = self.get_accesses(item).unwrap_or_default();
         let now = self.get_now();
         let mut score = 0.0;
         'outer: for access in &accesses {
@@ -90,10 +89,10 @@ impl FrecencyTracker {
             for (rank, threshold_duration_since) in &self.access_thresholds {
                 if duration_since < *threshold_duration_since {
                     score += rank;
+                    continue 'outer;
                 }
-                continue 'outer;
             }
         }
-        (score * accesses.len() as f64).min(4.) as i64
+        score.min(4.) as i64
     }
 }
