@@ -14,6 +14,12 @@
 - Signature help (experimental, opt-in)
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
+## Requirements
+
+- Neovim 0.10+
+- curl
+- git
+
 ## Installation
 
 `lazy.nvim`
@@ -129,7 +135,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- regex used to get the text when fuzzy matching
       -- changing this may break some sources, so please report if you run into issues
       -- todo: shouldnt this also affect the accept command? should this also be per language?
-      context_regex = '[%w_\\-]',
+      keyword_regex = '[%w_\\-]',
       -- LSPs can indicate when to show the completion window via trigger characters
       -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
       -- always show the window. We block these by default
@@ -161,6 +167,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     -- similar to nvim-cmp's sources, but we point directly to the source's lua module
     -- multiple groups can be provided, where it'll fallback to the next group if the previous
     -- returns no completion items
+    -- WARN: This API will have breaking changes during the beta
     providers = {
       {
         { 'blink.cmp.sources.lsp' },
@@ -169,6 +176,42 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       },
       { { 'blink.cmp.sources.buffer' } },
     },
+    -- FOR REF: full example
+    providers = {
+      { 
+        -- all of these properties work on every source
+        {
+            'blink.cmp.sources.lsp',
+            keyword_length = 0,
+            score_offset = 0,
+            trigger_characters = { 'f', 'o', 'o' },
+            opts = {},
+        }, 
+        -- the follow two sources have additional options
+        { 
+          'blink.cmp.sources.path', 
+          opts = {
+            trailing_slash = false,
+            label_trailing_slash = true,
+            get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,
+            show_hidden_files_by_default = true,
+          }
+        },
+        {
+          'blink.cmp.sources.snippets',
+          score_offset = -3,
+          -- similar to https://github.com/garymjr/nvim-snippets
+          opts = {
+            friendly_snippets = true,
+            search_paths = { vim.fn.stdpath('config') .. '/snippets' },
+            global_snippets = { 'all' },
+            extended_filetypes = {},
+            ignored_filetypes = {},
+          },
+        },
+      },
+      { { 'blink.cmp.sources.buffer' } }
+    }
   },
 
   windows = {
