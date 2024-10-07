@@ -288,7 +288,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 - Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
 - Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
-    - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp)
+    - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp) or the more recent [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim)
 - Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
 - Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
