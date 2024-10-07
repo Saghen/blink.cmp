@@ -1,8 +1,8 @@
 local lib = {}
 
 --- @param path_regex vim.regex
---- @param get_cwd fun(context: blink.cmp.CompletionContext): string
---- @param context blink.cmp.CompletionContext
+--- @param get_cwd fun(context: blink.cmp.Context): string
+--- @param context blink.cmp.Context
 function lib.dirname(path_regex, get_cwd, context)
   local line_before_cursor = context.line:sub(1, context.cursor[2])
   local s = path_regex:match_str(line_before_cursor)
@@ -34,7 +34,7 @@ function lib.dirname(path_regex, get_cwd, context)
     -- Ignore math calculation
     accept = accept and not prefix:match('[%d%)]%s*/$')
     -- Ignore / comment
-    accept = accept and (not prefix:match('^[%s/]*$') or not self:_is_slash_comment())
+    accept = accept and (not prefix:match('^[%s/]*$') or not lib.is_slash_comment())
     if accept then return vim.fn.resolve('/' .. dirname) end
   end
   return nil
@@ -55,7 +55,7 @@ function lib.candidates(dirname, include_hidden, opts)
     end)
 end
 
-function lib.is_slash_comment(_)
+function lib.is_slash_comment()
   local commentstring = vim.bo.commentstring or ''
   local no_filetype = vim.bo.filetype == ''
   local is_slash_comment = false
