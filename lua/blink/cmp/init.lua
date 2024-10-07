@@ -75,7 +75,7 @@ cmp.setup_signature_help = function()
   signature_trigger.listen_on_show(function(context)
     cmp.sources.cancel_signature_help()
     cmp.sources.get_signature_help(context, function(signature_help)
-      if signature_help ~= nil then
+      if signature_help ~= nil and signature_trigger.context.id == context.id then
         signature_trigger.set_active_signature_help(signature_help)
         signature_window.open_with_signature_help(context, signature_help)
       else
@@ -83,11 +83,7 @@ cmp.setup_signature_help = function()
       end
     end)
   end)
-
-  signature_trigger.listen_on_hide(function()
-    cmp.sources.cancel_signature_help()
-    signature_window.close()
-  end)
+  signature_trigger.listen_on_hide(function() signature_window.close() end)
 end
 
 cmp.add_default_highlights = function()
