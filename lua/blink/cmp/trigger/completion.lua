@@ -60,6 +60,7 @@ function trigger.activate_autocmds()
       local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
       local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
+        and not vim.tbl_contains(config.show_on_insert_blocked_trigger_characters, char_under_cursor)
       local is_on_context_char = char_under_cursor:match(config.keyword_regex) ~= nil
 
       if is_within_bounds or (is_on_trigger and trigger.context ~= nil) then

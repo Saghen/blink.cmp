@@ -5,6 +5,7 @@
 --- @param extended_filetypes table<string, string[]>
 --- @param ignored_filetypes string[]
 
+local utils = require('blink.cmp.utils')
 local snippets = {}
 
 --- @param opts blink.cmp.SnippetsOpts
@@ -32,10 +33,11 @@ function snippets:get_completions(_, callback)
     end
   end
 
+  local copied_items = vim.tbl_map(function(item) return utils.shallow_copy(item) end, self.cache[filetype])
   callback({
     is_incomplete_forward = false,
     is_incomplete_backward = false,
-    items = self.cache[filetype],
+    items = copied_items,
   })
 end
 
