@@ -1,5 +1,5 @@
--- todo: check if brackets are already added before adding them
--- including support for edge cases like <>() for typescript
+-- todo: support for edge cases like <>() for typescript when checking
+-- if brackets are already added
 
 local config = require('blink.cmp.config').accept.auto_brackets
 local brackets = {

@@ -50,7 +50,6 @@ function trigger.activate_autocmds()
   })
 
   -- check if we've moved outside of the context by diffing against the query boundary
-  -- todo: should show if cursor is on trigger character
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
       -- characters added so let textchanged handle it

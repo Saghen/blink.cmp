@@ -1,4 +1,3 @@
--- todo: track cmp_win position
 local config = require('blink.cmp.config').windows.signature_help
 local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')

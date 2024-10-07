@@ -3,8 +3,8 @@
 --- @field kind string
 --- @field kind_icon string
 --- @field icon_gap string
+--- @field deprecated boolean
 
--- todo: track cursor position
 local config = require('blink.cmp.config')
 local renderer = require('blink.cmp.windows.lib.render')
 local autocmp_config = config.windows.autocomplete
@@ -172,6 +172,7 @@ function autocomplete.draw()
         kind = kind,
         kind_icon = kind_icon,
         icon_gap = icon_gap,
+        deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)),
       })
     )
   end
@@ -205,7 +206,7 @@ end
 function autocomplete.render_item_simple(ctx)
   return {
     { ' ', ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
-    { ctx.item.label, fill = true, hl_group = ctx.item.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
+    { ctx.item.label, fill = true, hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
   }
 end
 
@@ -216,7 +217,7 @@ function autocomplete.render_item_reversed(ctx)
     {
       ' ' .. ctx.item.label,
       fill = true,
-      hl_group = ctx.item.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+      hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
     },
     { ' ', ctx.kind_icon, ctx.icon_gap, ctx.kind .. ' ', hl_group = 'BlinkCmpKind' .. ctx.kind },
   }
