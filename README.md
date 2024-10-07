@@ -347,6 +347,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 - Ghost text
 - Matched character highlighting
 - Cmdline completions
+- Windows support (You may temporarily build from source as outlined in the [installation](#installation) section)
 
 
 ## Special Thanks
