@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "frizbee"
 version = "0.1.0"
-source = "git+https://github.com/saghen/frizbee#3e7d32108229f220bb25e3416e36ffc8c2750166"
+source = "git+https://github.com/saghen/frizbee#1773ea4bbba2b703150166654296a8f4dd1e7adc"
 dependencies = [
  "memchr",
  "smith_waterman_macro",
@@ -294,7 +294,7 @@ checksum = "3444646e286606587e49f3bcf1679b8cef1dc2c5ecc29ddacaffc305180d464b"
 dependencies = [
  "phf_generator",
  "phf_shared",
- "proc-macro2 1.0.86",
+ "proc-macro2 1.0.87",
  "quote 1.0.37",
  "syn 2.0.79",
 ]
@@ -319,9 +319,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77"
+checksum = "b3e4daa0dcf6feba26f985457cdf104d4b4256fc5a09547140f3631bb076b19a"
 dependencies = [
  "unicode-ident",
 ]
@@ -347,7 +347,7 @@ version = "1.0.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5b9d34b8991d19d98081b46eacdd8eb58c6f2b201139f7c5f643cc155a633af"
 dependencies = [
- "proc-macro2 1.0.86",
+ "proc-macro2 1.0.87",
 ]
 
 [[package]]
@@ -415,7 +415,7 @@ version = "1.0.210"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "243902eda00fad750862fc144cea25caca5e20d615af0a81bee94ca738f1df1f"
 dependencies = [
- "proc-macro2 1.0.86",
+ "proc-macro2 1.0.87",
  "quote 1.0.37",
  "syn 2.0.79",
 ]
@@ -447,9 +447,9 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 [[package]]
 name = "smith_waterman_macro"
 version = "0.1.0"
-source = "git+https://github.com/saghen/frizbee#3e7d32108229f220bb25e3416e36ffc8c2750166"
+source = "git+https://github.com/saghen/frizbee#1773ea4bbba2b703150166654296a8f4dd1e7adc"
 dependencies = [
- "proc-macro2 1.0.86",
+ "proc-macro2 1.0.87",
  "quote 1.0.37",
  "syn 1.0.109",
 ]
@@ -471,7 +471,7 @@ version = "1.0.109"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "72b64191b275b66ffe2469e8af2c1cfe3bafa67b529ead792a6d0160888b4237"
 dependencies = [
- "proc-macro2 1.0.86",
+ "proc-macro2 1.0.87",
  "quote 1.0.37",
  "unicode-ident",
 ]
@@ -482,7 +482,7 @@ version = "2.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "89132cd0bf050864e1d38dc3bbc07a0eb8e7530af26344d3d2bbbef83499f590"
 dependencies = [
- "proc-macro2 1.0.86",
+ "proc-macro2 1.0.87",
  "quote 1.0.37",
  "unicode-ident",
 ]
