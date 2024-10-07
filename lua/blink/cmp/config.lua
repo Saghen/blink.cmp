@@ -11,6 +11,7 @@
 --- @field snippet_backward string | string[]
 
 --- @class blink.cmp.AcceptConfig
+--- @field create_undo_point boolean Create an undo point when accepting a completion item
 --- @field auto_brackets blink.cmp.AutoBracketsConfig
 
 --- @class blink.cmp.AutoBracketsConfig
@@ -33,6 +34,7 @@
 --- @field keyword_regex string
 --- @field blocked_trigger_characters string[]
 --- @field show_on_insert_on_trigger_character boolean When true, will show the completion window when the cursor comes after a trigger character when entering insert mode
+--- @field show_on_insert_blocked_trigger_characters string[] List of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
 ---
 --- @class blink.cmp.SignatureHelpTriggerConfig
 --- @field enabled boolean
@@ -142,6 +144,7 @@ local config = {
   },
 
   accept = {
+    create_undo_point = true,
     auto_brackets = {
       enabled = false,
       default_brackets = { '(', ')' },
@@ -172,6 +175,8 @@ local config = {
       blocked_trigger_characters = { ' ', '\n', '\t' },
       -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_on_trigger_character = true,
+      -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
+      show_on_insert_blocked_trigger_characters = { "'", '"' },
     },
 
     signature_help = {
@@ -201,7 +206,7 @@ local config = {
       {
         { 'blink.cmp.sources.lsp' },
         { 'blink.cmp.sources.path' },
-        { 'blink.cmp.sources.snippets', score_offset = -3 },
+        { 'blink.cmp.sources.snippets', score_offset = -2 },
       },
       { { 'blink.cmp.sources.buffer' } },
     },

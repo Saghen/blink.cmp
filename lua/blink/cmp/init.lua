@@ -136,7 +136,9 @@ cmp.accept = function()
   if item == nil then return end
 
   -- create an undo point
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
+  if require('blink.cmp.config').accept.create_undo_point then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
+  end
 
   vim.schedule(function() require('blink.cmp.accept')(item) end)
   return true

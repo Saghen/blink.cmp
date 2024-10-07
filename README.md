@@ -110,6 +110,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
   },
 
   accept = {
+    create_undo_point = true,
     auto_brackets = {
       enabled = false,
       default_brackets = { '(', ')' },
