@@ -57,7 +57,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 ```
 
 <details>
-<summary>Highlight groups</summary>
+<summary><strong>Highlight groups</strong></summary>
 
 | Group | Default | Description |
 | ----- | ------- | ----------- |
@@ -79,7 +79,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 </details>
 
 <details>
-<summary>Default configuration</summary>
+<summary><strong>Default configuration</strong></summary>
 
 <!-- config:start -->
 
