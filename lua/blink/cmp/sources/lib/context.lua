@@ -95,7 +95,7 @@ function sources_context:get_completions_for_group(sources_group_idx, sources_gr
           --- @type blink.cmp.CompletionResponse
           local response = task_result.result
           response.items = source:filter_completions(response)
-          if source:should_show_completions(response) then vim.list_extend(items, response.items) end
+          if source:should_show_completions(context, response) then vim.list_extend(items, response.items) end
         end
       end
       return { sources_group_idx = sources_group_idx, is_cached = is_cached, items = items }

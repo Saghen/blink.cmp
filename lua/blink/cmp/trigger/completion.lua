@@ -1,5 +1,5 @@
 -- Handles hiding and showing the completion window. When a user types a trigger character
--- (provided by the sources) or anything matching the `context_regex`, we create a new `context`.
+-- (provided by the sources) or anything matching the `keyword_regex`, we create a new `context`.
 -- This can be used downstream to determine if we should make new requests to the sources or not.
 
 local config = require('blink.cmp.config').trigger.completion
@@ -38,7 +38,7 @@ function trigger.activate_autocmds()
         trigger.context = nil
         trigger.show({ trigger_character = last_char })
       -- character is part of the current context OR in an existing context
-      elseif last_char:match(config.context_regex) ~= nil then
+      elseif last_char:match(config.keyword_regex) ~= nil then
         trigger.show()
       -- nothing matches so hide
       else
@@ -60,7 +60,7 @@ function trigger.activate_autocmds()
       local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
       local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
-      local is_on_context_char = char_under_cursor:match(config.context_regex) ~= nil
+      local is_on_context_char = char_under_cursor:match(config.keyword_regex) ~= nil
 
       if is_within_bounds or (is_on_trigger and trigger.context ~= nil) then
         trigger.show()
@@ -94,7 +94,7 @@ function trigger.show(opts)
     bufnr = vim.api.nvim_get_current_buf(),
     cursor = cursor,
     line = vim.api.nvim_buf_get_lines(0, cursor[1] - 1, cursor[1], false)[1],
-    bounds = trigger.get_context_bounds(config.context_regex),
+    bounds = trigger.get_context_bounds(config.keyword_regex),
     trigger = {
       kind = opts.trigger_character and vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter
         or vim.lsp.protocol.CompletionTriggerKind.Invoked,

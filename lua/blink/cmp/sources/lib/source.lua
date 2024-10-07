@@ -18,8 +18,10 @@ end
 
 --- @return string[]
 function source:get_trigger_characters()
-  if self.module.get_trigger_characters == nil then return {} end
-  return self.module:get_trigger_characters()
+  if self.module.get_trigger_characters == nil then return self.config.trigger_characters or {} end
+  local trigger_characters = self.module:get_trigger_characters()
+  vim.list_extend(trigger_characters, self.config.trigger_characters or {})
+  return trigger_characters
 end
 
 --- @param context blink.cmp.Context
@@ -59,11 +61,17 @@ function source:filter_completions(response)
   return self.module:filter_completions(response)
 end
 
+--- @param context blink.cmp.Context
 --- @param response blink.cmp.CompletionResponse
 --- @return boolean
-function source:should_show_completions(response)
+function source:should_show_completions(context, response)
+  -- if keyword length is configured, check if the context is long enough
+  local min_keyword_length = self.config.keyword_length or 0
+  local current_keyword_length = context.bounds.end_col - context.bounds.start_col
+  if self.config.keyword_length ~= nil and current_keyword_length < min_keyword_length then return false end
+
   if self.module.should_show_completions == nil then return true end
-  return self.module:should_show_completions(response)
+  return self.module:should_show_completions(context, response)
 end
 
 --- Resolve ---

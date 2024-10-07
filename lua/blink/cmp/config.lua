@@ -30,7 +30,7 @@
 --- @field timeout_ms number How long to wait for semantic tokens to return before assuming no brackets should be added
 
 --- @class blink.cmp.CompletionTriggerConfig
---- @field context_regex string
+--- @field keyword_regex string
 --- @field blocked_trigger_characters string[]
 --- @field show_on_insert_on_trigger_character boolean When true, will show the completion window when the cursor comes after a trigger character when entering insert mode
 ---
@@ -165,7 +165,7 @@ local config = {
       -- regex used to get the text when fuzzy matching
       -- changing this may break some sources, so please report if you run into issues
       -- todo: shouldnt this also affect the accept command? should this also be per language?
-      context_regex = '[%w_\\-]',
+      keyword_regex = '[%w_\\-]',
       -- LSPs can indicate when to show the completion window via trigger characters
       -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
       -- always show the window. We block these by default
