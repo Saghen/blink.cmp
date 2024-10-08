@@ -1,11 +1,10 @@
 --- @class blink.cmp.SnippetsOpts
---- @param friendly_snippets boolean
---- @param search_paths string[]
---- @param global_snippets string[]
---- @param extended_filetypes table<string, string[]>
---- @param ignored_filetypes string[]
+--- @field friendly_snippets boolean
+--- @field search_paths string[]
+--- @field global_snippets string[]
+--- @field extended_filetypes table<string, string[]>
+--- @field ignored_filetypes string[]
 
-local utils = require('blink.cmp.utils')
 local snippets = {}
 
 --- @param opts blink.cmp.SnippetsOpts
