@@ -25,7 +25,7 @@ function keymap.setup(opts)
     -- convert string to string[] for consistency
     if type(keys) == 'string' then keys = { keys } end
 
-    -- add keymaps
+    -- reverse the command -> key[] mapping into key -> command[]
     for _, key in ipairs(keys) do
       if is_insert_command then
         if insert_keys_to_commands[key] == nil then insert_keys_to_commands[key] = {} end
@@ -38,28 +38,46 @@ function keymap.setup(opts)
     end
   end
 
-  for key, _ in pairs(insert_keys_to_commands) do
-    vim.keymap.set('i', key, function()
-      for _, command in ipairs(insert_keys_to_commands[key] or {}) do
-        local did_run = require('blink.cmp')[command]()
-        if did_run then return end
-      end
-      for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
-        local did_run = require('blink.cmp')[command]()
-        if did_run then return end
-      end
-      return key
-    end, { expr = true, silent = true })
+  -- apply keymaps
+  -- we set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
+  -- from overriding our mappings
+  local set_buffer_keymap = function()
+    for key, _ in pairs(insert_keys_to_commands) do
+      vim.api.nvim_buf_set_keymap(0, 'i', key, '', {
+        callback = function()
+          for _, command in ipairs(insert_keys_to_commands[key] or {}) do
+            local did_run = require('blink.cmp')[command]()
+            if did_run then return end
+          end
+          for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
+            local did_run = require('blink.cmp')[command]()
+            if did_run then return end
+          end
+          return key
+        end,
+        expr = true,
+        silent = true,
+        noremap = true,
+      })
+    end
+    for key, _ in pairs(snippet_keys_to_commands) do
+      vim.api.nvim_buf_set_keymap(0, 's', key, '', {
+        callback = function()
+          for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
+            local did_run = require('blink.cmp')[command]()
+            if did_run then return end
+          end
+          return key
+        end,
+        expr = true,
+        silent = true,
+        noremap = true,
+      })
+    end
   end
-  for key, _ in pairs(snippet_keys_to_commands) do
-    vim.keymap.set('s', key, function()
-      for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
-        local did_run = require('blink.cmp')[command]()
-        if did_run then return end
-      end
-      return key
-    end, { expr = true, silent = true })
-  end
+
+  set_buffer_keymap() -- apply immediately since the plugin starts asynchronously
+  vim.api.nvim_create_autocmd('BufEnter', { callback = set_buffer_keymap })
 end
 
 return keymap
