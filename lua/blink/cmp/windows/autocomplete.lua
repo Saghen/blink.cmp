@@ -185,7 +185,16 @@ function autocomplete.draw()
   local arr_of_components = {}
   for _, item in ipairs(autocomplete.items) do
     local kind = vim.lsp.protocol.CompletionItemKind[item.kind] or 'Unknown'
-    local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
+    local kind_icon
+
+    -- Use mini.icons if configured
+    if config.use_mini_icons then
+      local icon_info = require("mini.icons").get("lsp", kind:lower())
+      kind_icon = icon_info or ''
+    else
+      -- Fallback to predefined kind icons
+      kind_icon = config.kind_icons[kind] or config.kind_icons.Field
+    end
 
     table.insert(
       arr_of_components,

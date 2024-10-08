@@ -9,6 +9,7 @@
 --- @field scroll_documentation_down string | string[]
 --- @field snippet_forward string | string[]
 --- @field snippet_backward string | string[]
+--- @field use_mini_icons boolean Tries to use mini.icons instead of default
 
 --- @class blink.cmp.AcceptConfig
 --- @field create_undo_point boolean Create an undo point when accepting a completion item
@@ -132,6 +133,7 @@
 local config = {
   -- for keymap, all values may be string | string[]
   -- use an empty table to disable a keymap
+  use_mini_icons = false,
   keymap = {
     show = '<C-space>',
     hide = '<C-e>',
