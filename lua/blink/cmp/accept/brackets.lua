@@ -107,6 +107,9 @@ function brackets.add_brackets_via_semantic_token(filetype, item, callback)
   if client == nil then return callback() end
 
   local start_time = vim.uv.hrtime()
+  if not (client.server_capabilities.semanticTokensProvider and client.server_capabilities.semanticTokensProvider.legend) then
+    return callback()
+  end
   local numToTokenType = client.server_capabilities.semanticTokensProvider.legend.tokenTypes
   local params = {
     textDocument = vim.lsp.util.make_text_document_params(),
