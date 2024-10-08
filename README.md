@@ -99,8 +99,8 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     show = '<C-space>',
     hide = '<C-e>',
     accept = '<Tab>',
-    select_prev = { '<Up>', '<C-j>' },
-    select_next = { '<Down>', '<C-k>' },
+    select_prev = { '<Up>', '<C-k>' },
+    select_next = { '<Down>', '<C-j>' },
 
     show_documentation = {},
     hide_documentation = {},
