@@ -103,22 +103,21 @@ function registry:get_global_snippets()
 end
 
 --- @param snippet blink.cmp.Snippet
---- @param filetype string
---- @param include_documentation boolean
 --- @return blink.cmp.CompletionItem
 function registry:snippet_to_completion_item(snippet)
+  local body = type(snippet.body) == 'string' and snippet.body or table.concat(snippet.body, '\n')
   return {
     kind = vim.lsp.protocol.CompletionItemKind.Snippet,
     label = snippet.prefix,
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
-    insertText = type(snippet.body) == 'string' and snippet.body or table.concat(snippet.body, '\n'),
+    insertText = self:parse_body(body),
     description = snippet.description,
   }
 end
 
 --- @param snippet string
 --- @return string
-function registry:preview(snippet)
+function registry:parse_body(snippet)
   local parse = utils.safe_parse(self:expand_vars(snippet))
   return parse and tostring(parse) or snippet
 end

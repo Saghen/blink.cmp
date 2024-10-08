@@ -29,27 +29,24 @@ function snippets:get_completions(_, callback)
 
     self.cache[filetype] = {}
     for _, snippet in pairs(snips) do
-      table.insert(self.cache[filetype], self.registry:snippet_to_completion_item(snippet))
+      table.insert(self.cache[filetype], snippet)
     end
   end
 
-  local copied_items = vim.tbl_map(function(item) return utils.shallow_copy(item) end, self.cache[filetype])
+  local items = vim.tbl_map(
+    function(item) return self.registry:snippet_to_completion_item(item) end,
+    self.cache[filetype]
+  )
   callback({
     is_incomplete_forward = false,
     is_incomplete_backward = false,
-    items = copied_items,
+    items = items,
   })
 end
 
 function snippets:resolve(item, callback)
   -- TODO: ideally context is passed with the filetype
-  local documentation = '```'
-    .. vim.bo.filetype
-    .. '\n'
-    .. self.registry:preview(item.insertText)
-    .. '```'
-    .. '\n---\n'
-    .. item.description
+  local documentation = '```' .. vim.bo.filetype .. '\n' .. item.insertText .. '```' .. '\n---\n' .. item.description
 
   local resolved_item = vim.deepcopy(item)
   resolved_item.documentation = {
