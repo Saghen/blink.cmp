@@ -49,15 +49,14 @@ function text_edits.guess_text_edit(bufnr, item)
   -- Search forward/backward for the start/end of the word
   local start_col = current_col
   while start_col > 1 do
-    local char = line:sub(start_col, start_col)
-    if char:match('[%w_\\-]') == nil then
-      start_col = start_col + 1
-      break
-    end
+    local char = line:sub(start_col - 1, start_col - 1)
+    if char:match('[%w_\\-]') == nil then break end
     start_col = start_col - 1
   end
 
-  -- todo: dont search forward since LSPs dont typically do this so it will be inconsistent
+  -- todo: optionally dont search forward since LSPs dont typically do this with textEdits
+  -- so this will lead to inconsistent behavior
+  -- OR add support on textEdits
   local end_col = current_col
   while end_col < #line do
     local char = line:sub(end_col + 1, end_col + 1)
