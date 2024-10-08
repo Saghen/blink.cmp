@@ -105,7 +105,7 @@ function autocomplete.update_position(context)
 
   -- detect if there's space above/below the cursor
   -- todo: should pick the largest space if both are false and limit height of the window
-  local is_space_below = screen_height - (cursor_row - screen_scroll_range.start_line) >= height
+  local is_space_below = screen_height - (cursor_row - screen_scroll_range.start_line) > height
   local is_space_above = cursor_row - screen_scroll_range.start_line > height
 
   -- default to the user's preference but attempt to use the other options
