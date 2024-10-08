@@ -63,10 +63,14 @@ function trigger.activate_autocmds()
         and not vim.tbl_contains(config.show_on_insert_blocked_trigger_characters, char_under_cursor)
       local is_on_context_char = char_under_cursor:match(config.keyword_regex) ~= nil
 
-      if is_within_bounds or (is_on_trigger and trigger.context ~= nil) then
+      if is_within_bounds then
         trigger.show()
-      -- check if we've gone 1 char behind the context and we're still on a context char
-      elseif is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
+      elseif
+        -- check if we've gone 1 char behind the context and we're still on a context char
+        (is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1)
+        -- or if we've moved onto a trigger character
+        or (is_on_trigger and trigger.context ~= nil)
+      then
         trigger.context = nil
         trigger.show()
       elseif config.show_on_insert_on_trigger_character and is_on_trigger and ev.event == 'InsertEnter' then
