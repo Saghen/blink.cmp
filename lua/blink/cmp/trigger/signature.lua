@@ -14,10 +14,10 @@ local trigger = {
   --- @type blink.cmp.SignatureHelpContext | nil
   context = nil,
   event_targets = {
-    --- @type fun(context: blink.cmp.SignatureHelpContext)
-    on_show = function() end,
-    --- @type fun()
-    on_hide = function() end,
+    --- @type table<fun(context: blink.cmp.SignatureHelpContext)>
+    on_show = {},
+    --- @type table<fun()>
+    on_hide = {},
   },
 }
 
@@ -112,7 +112,7 @@ function trigger.show(opts)
     active_signature_help = trigger.context and trigger.context.active_signature_help or nil,
   }
 
-  trigger.event_targets.on_show(trigger.context)
+  vim.iter(trigger.event_targets.on_show):each(function(callback) callback(trigger.context) end)
 end
 
 function trigger.listen_on_show(callback) trigger.event_targets.on_show = callback end
@@ -121,10 +121,10 @@ function trigger.hide()
   if not trigger.context then return end
 
   trigger.context = nil
-  trigger.event_targets.on_hide()
+  vim.iter(trigger.event_targets.on_hide):each(function(callback) callback() end)
 end
 
-function trigger.listen_on_hide(callback) trigger.event_targets.on_hide = callback end
+function trigger.listen_on_hide(callback) table.insert(trigger.event_targets.on_hide, callback) end
 
 function trigger.set_active_signature_help(signature_help)
   if not trigger.context then return end

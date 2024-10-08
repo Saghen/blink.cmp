@@ -53,12 +53,12 @@
     -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
     -- adjusts spacing to ensure icons are aligned
     nerd_font_variant = 'normal',
-    
+
     -- experimental auto-brackets support
-    -- accept = { auto_brackets = { enabled = true } }
-    
+    -- accept = { auto_brackets = { enabled = true } },
+
     -- experimental signature help support
-    -- trigger = { signature_help = { enabled = true } }
+    -- trigger = { signature_help = { enabled = true } },
   }
 }
 ```
@@ -197,7 +197,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     },
     -- FOR REF: full example
     providers = {
-      { 
+      {
         -- all of these properties work on every source
         {
             'blink.cmp.sources.lsp',
@@ -205,10 +205,10 @@ For LazyVim/distro users, you can disable nvim-cmp via:
             score_offset = 0,
             trigger_characters = { 'f', 'o', 'o' },
             opts = {},
-        }, 
+        },
         -- the follow two sources have additional options
-        { 
-          'blink.cmp.sources.path', 
+        {
+          'blink.cmp.sources.path',
           opts = {
             trailing_slash = false,
             label_trailing_slash = true,
@@ -348,9 +348,9 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 &nbsp;&nbsp;&nbsp;&nbsp;**Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (todo: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
 
-&nbsp;&nbsp;&nbsp;&nbsp;**Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking presedence over the LSP source. The paramaters here still need to be tuned, so please let me know if you find some magical parameters!
+&nbsp;&nbsp;&nbsp;&nbsp;**Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking precedence over the LSP source. The parameters here still need to be tuned, so please let me know if you find some magical parameters!
 
-**Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overriden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
+**Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overridden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
 
 ## Compared to nvim-cmp
 

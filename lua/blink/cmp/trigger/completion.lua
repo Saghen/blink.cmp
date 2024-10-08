@@ -11,10 +11,10 @@ local trigger = {
   --- @type blink.cmp.Context | nil
   context = nil,
   event_targets = {
-    --- @type fun(context: blink.cmp.Context)
-    on_show = function() end,
-    --- @type fun()
-    on_hide = function() end,
+    --- @type table<fun(context: blink.cmp.Context)>
+    on_show = {},
+    --- @type table<fun()>
+    on_hide = {},
   },
 }
 
@@ -144,21 +144,22 @@ function trigger.show(opts)
     },
   }
 
-  trigger.event_targets.on_show(trigger.context)
+  vim.iter(trigger.event_targets.on_show):each(function(callback) callback(trigger.context) end)
 end
 
 --- @param callback fun(context: blink.cmp.Context)
-function trigger.listen_on_show(callback) trigger.event_targets.on_show = callback end
+function trigger.listen_on_show(callback) table.insert(trigger.event_targets.on_show, callback) end
 
 function trigger.hide()
   if not trigger.context then return end
 
   trigger.context = nil
-  trigger.event_targets.on_hide()
+
+  vim.iter(trigger.event_targets.on_hide):each(function(callback) callback() end)
 end
 
 --- @param callback fun()
-function trigger.listen_on_hide(callback) trigger.event_targets.on_hide = callback end
+function trigger.listen_on_hide(callback) table.insert(trigger.event_targets.on_hide, callback) end
 
 --- @param cursor number[]
 --- @return boolean

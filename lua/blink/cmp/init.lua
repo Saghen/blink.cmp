@@ -129,6 +129,12 @@ cmp.hide = function()
   return true
 end
 
+--- @param callback fun(context: blink.cmp.Context)
+cmp.on_show = function(callback) cmp.trigger.listen_on_show(callback) end
+
+--- @param callback fun()
+cmp.on_hide = function(callback) cmp.trigger.listen_on_hide(callback) end
+
 cmp.accept = function()
   local item = cmp.windows.autocomplete.get_selected_item()
   if item == nil then return end
