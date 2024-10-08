@@ -234,6 +234,13 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- 'reversed' will render the label on the left and the kind icon + name on the right
       -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
       draw = 'simple',
+      -- Controls the cycling behavior when reaching the beginning or end of the completion list.
+      cycle = {
+        -- When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.
+        from_bottom = true,
+        -- When `true`, calling `select_prev` at the *top* of the completion list will select the *last* completion item.
+        from_top = true
+      },
     },
     documentation = {
       min_width = 10,

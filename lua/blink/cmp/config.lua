@@ -87,6 +87,11 @@
 --- @field winhighlight string
 --- @field scrolloff number
 --- @field draw 'simple' | 'reversed' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
+--- @field cycle blink.cmp.AutocompleteConfig.CycleConfig
+
+--- @class blink.cmp.AutocompleteConfig.CycleConfig
+--- @field from_bottom boolean When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.
+--- @field from_top boolean When `true`, calling `select_prev` at the *top* of the completion list will select the *last* completion item.
 
 --- @class blink.cmp.DocumentationDirectionPriorityConfig
 --- @field autocomplete_north ("n" | "s" | "e" | "w")[]
@@ -233,6 +238,10 @@ local config = {
       -- 'reversed' will render the label on the left and the kind icon + name on the right
       -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
       draw = 'simple',
+      cycle = {
+        from_bottom = true,
+        from_top = true,
+      },
     },
     documentation = {
       min_width = 10,
