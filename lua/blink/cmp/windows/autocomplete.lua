@@ -138,20 +138,41 @@ function autocomplete.select_next()
 
   local current_line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
   local line_count = vim.api.nvim_buf_line_count(autocomplete.win:get_buf())
-  if current_line == line_count then return end
+  local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
+  local is_last_completion = current_line == line_count
 
-  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { current_line + 1, 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  -- at the end of completion list and the config is not enabled: do nothing
+  if is_last_completion and not cycle_from_bottom then return end
+  if is_last_completion then
+    -- at the end of completion list and the config is enabled: cycle back to first completion
+    vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
+    autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  else
+    -- select next completion
+    vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { current_line + 1, 0 })
+    autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  end
 end
 
 function autocomplete.select_prev()
   if not autocomplete.win:is_open() then return end
 
   local current_line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
-  if current_line == 1 then return end
+  local line_count = vim.api.nvim_buf_line_count(autocomplete.win:get_buf())
+  local cycle_from_top = config.windows.autocomplete.cycle.from_top
+  local is_first_completion = current_line == 1
 
-  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { math.max(current_line - 1, 1), 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  -- at the beginning of completion list and the config is not enabled: do nothing
+  if is_first_completion and not cycle_from_top then return end
+  if is_first_completion then
+    -- at the beginning of completion list and the config is enabled: cycle back to last completion
+    vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line_count, 0 })
+    autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  else
+    -- select previous completion
+    vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { math.max(current_line - 1, 1), 0 })
+    autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  end
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end
