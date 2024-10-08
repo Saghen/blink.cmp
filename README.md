@@ -164,6 +164,17 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     max_items = 200,
     -- controls which sorts to use and in which order, these three are currently the only allowed options
     sorts = { 'label', 'kind', 'score' },
+
+    prebuiltBinaries = {
+      -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
+      -- you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
+      download = true,
+      -- When downloading a prebuilt binary force the downloader to resolve this version. If this is uset
+      -- then the downloader will attempt to infer the version from the checked out git tag (if any).
+      --
+      -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
+      forceVersion = nil,
+    },
   },
 
   sources = {
