@@ -69,7 +69,7 @@ function sources_context:get_completions_for_group(sources_group_idx, sources_gr
       and vim.tbl_contains(source:get_trigger_characters(), context.trigger.character)
 
     -- The TriggerForIncompleteCompletions kind is handled by the source itself
-    local source_context = vim.fn.deepcopy(context)
+    local source_context = require('blink.cmp.utils').shallow_copy(context)
     source_context.trigger = trigger_character
         and { kind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter, character = context.trigger.character }
       or { kind = vim.lsp.protocol.CompletionTriggerKind.Invoked }
