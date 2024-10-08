@@ -61,11 +61,16 @@
 --- @field enabled boolean
 --- @field priority number
 
+--- @class blink.cmp.PrebuiltBinariesConfig
+--- @field download boolean
+--- @field forceVersion string | nil
+
 --- @class blink.cmp.FuzzyConfig
 --- @field use_frecency boolean
 --- @field use_proximity boolean
 --- @field max_items number
 --- @field sorts ("label" | "kind" | "score")[]
+--- @field prebuiltBinaries blink.cmp.PrebuiltBinariesConfig
 
 --- @class blink.cmp.WindowConfig
 --- @field autocomplete blink.cmp.AutocompleteConfig
@@ -201,6 +206,16 @@ local config = {
     max_items = 200,
     -- controls which sorts to use and in which order, these three are currently the only allowed options
     sorts = { 'label', 'kind', 'score' },
+    prebuiltBinaries = {
+      -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
+      -- you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
+      download = true,
+      -- When downloading a prebuilt binary force the downloader to resolve this version. If this is uset
+      -- then the downloader will attempt to infer the version from the checked out git tag (if any).
+      --
+      -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
+      forceVersion = nil,
+    },
   },
 
   sources = {
