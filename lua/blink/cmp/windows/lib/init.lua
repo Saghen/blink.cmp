@@ -81,6 +81,10 @@ function win:open()
   vim.api.nvim_set_option_value('scrolloff', self.config.scrolloff, { win = self.id })
 end
 
+function win:set_option_values(option, value)
+  vim.api.nvim_set_option_value(option, value, { win = self.id })
+end
+
 function win:close()
   if self.id ~= nil then
     vim.api.nvim_win_close(self.id, true)

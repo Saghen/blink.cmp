@@ -13,6 +13,7 @@
 --- @class blink.cmp.AcceptConfig
 --- @field create_undo_point boolean Create an undo point when accepting a completion item
 --- @field auto_brackets blink.cmp.AutoBracketsConfig
+--- @field preselect boolean Is the first item selected when the completion menu appear
 
 --- @class blink.cmp.AutoBracketsConfig
 --- @field enabled boolean
