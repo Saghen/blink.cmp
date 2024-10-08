@@ -100,6 +100,9 @@ function docs.update_position()
   local autocomplete_winnr = autocomplete.win:get_win()
   if not autocomplete_winnr then return end
   local autocomplete_win_config = vim.api.nvim_win_get_config(autocomplete_winnr)
+  local autocomplete_win_width = autocomplete.win:get_width()
+  local autocomplete_win_height = autocomplete.win:get_height()
+  local autocomplete_border_size = autocomplete.win:get_border_size()
 
   local screen_width = vim.api.nvim_win_get_width(0)
   local screen_height = vim.api.nvim_win_get_height(0)
@@ -113,9 +116,9 @@ function docs.update_position()
   local width = docs.win:get_width()
 
   local space_above = autocomplete_win_config.row - 1 > height
-  local space_below = screen_height - autocomplete_win_config.height - autocomplete_win_config.row > height
+  local space_below = screen_height - autocomplete_win_height - autocomplete_win_config.row > height
   local space_left = autocomplete_win_config.col > width
-  local space_right = screen_width - autocomplete_win_config.width - autocomplete_win_config.col > width
+  local space_right = screen_width - autocomplete_win_width - autocomplete_win_config.col > width
 
   local function set_config(opts)
     vim.api.nvim_win_set_config(winnr, { relative = 'win', win = autocomplete_winnr, row = opts.row, col = opts.col })
@@ -123,23 +126,32 @@ function docs.update_position()
   for _, direction in ipairs(direction_priority) do
     if direction == 'n' and space_above then
       if autocomplete_win_is_up then
-        set_config({ row = -height, col = 0 })
+        set_config({ row = -height - autocomplete_border_size.top, col = -autocomplete_border_size.left })
       else
-        set_config({ row = -1 - height, col = 0 })
+        set_config({ row = -1 - height - autocomplete_border_size.top, col = -autocomplete_border_size.left })
       end
       return
     elseif direction == 's' and space_below then
       if autocomplete_win_is_up then
-        set_config({ row = 1 + autocomplete_win_config.height, col = 0 })
+        set_config({
+          row = 1 + autocomplete_win_height - autocomplete_border_size.top,
+          col = -autocomplete_border_size.left,
+        })
       else
-        set_config({ row = autocomplete_win_config.height, col = 0 })
+        set_config({
+          row = autocomplete_win_height - autocomplete_border_size.top,
+          col = -autocomplete_border_size.left,
+        })
       end
       return
     elseif direction == 'e' and space_right then
-      set_config({ row = 0, col = autocomplete_win_config.width })
+      set_config({
+        row = -autocomplete_border_size.top,
+        col = autocomplete_win_config.width + autocomplete_border_size.left,
+      })
       return
     elseif direction == 'w' and space_left then
-      set_config({ row = 0, col = -1 - width })
+      set_config({ row = -autocomplete_border_size.top, col = -width - autocomplete_border_size.left })
       return
     end
   end

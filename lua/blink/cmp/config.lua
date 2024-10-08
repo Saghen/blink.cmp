@@ -62,11 +62,16 @@
 --- @field enabled boolean
 --- @field priority number
 
+--- @class blink.cmp.PrebuiltBinariesConfig
+--- @field download boolean
+--- @field forceVersion string | nil
+
 --- @class blink.cmp.FuzzyConfig
 --- @field use_frecency boolean
 --- @field use_proximity boolean
 --- @field max_items number
 --- @field sorts ("label" | "kind" | "score")[]
+--- @field prebuiltBinaries blink.cmp.PrebuiltBinariesConfig
 
 --- @class blink.cmp.WindowConfig
 --- @field autocomplete blink.cmp.AutocompleteConfig
@@ -88,6 +93,11 @@
 --- @field winhighlight string
 --- @field scrolloff number
 --- @field draw 'simple' | 'reversed' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
+--- @field cycle blink.cmp.AutocompleteConfig.CycleConfig
+
+--- @class blink.cmp.AutocompleteConfig.CycleConfig
+--- @field from_bottom boolean When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.
+--- @field from_top boolean When `true`, calling `select_prev` at the *top* of the completion list will select the *last* completion item.
 
 --- @class blink.cmp.DocumentationDirectionPriorityConfig
 --- @field autocomplete_north ("n" | "s" | "e" | "w")[]
@@ -132,8 +142,8 @@ local config = {
     show = '<C-space>',
     hide = '<C-e>',
     accept = '<Tab>',
-    select_prev = { '<Up>', '<C-j>' },
-    select_next = { '<Down>', '<C-k>' },
+    select_prev = { '<Up>', '<C-k>' },
+    select_next = { '<Down>', '<C-j>' },
 
     show_documentation = {},
     hide_documentation = {},
@@ -197,6 +207,16 @@ local config = {
     max_items = 200,
     -- controls which sorts to use and in which order, these three are currently the only allowed options
     sorts = { 'label', 'kind', 'score' },
+    prebuiltBinaries = {
+      -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
+      -- you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
+      download = true,
+      -- When downloading a prebuilt binary force the downloader to resolve this version. If this is uset
+      -- then the downloader will attempt to infer the version from the checked out git tag (if any).
+      --
+      -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
+      forceVersion = nil,
+    },
   },
 
   sources = {
@@ -234,6 +254,10 @@ local config = {
       -- 'reversed' will render the label on the left and the kind icon + name on the right
       -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
       draw = 'simple',
+      cycle = {
+        from_bottom = true,
+        from_top = true,
+      },
     },
     documentation = {
       min_width = 10,

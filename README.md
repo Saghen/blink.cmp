@@ -99,8 +99,8 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     show = '<C-space>',
     hide = '<C-e>',
     accept = '<Tab>',
-    select_prev = { '<Up>', '<C-j>' },
-    select_next = { '<Down>', '<C-k>' },
+    select_prev = { '<Up>', '<C-k>' },
+    select_next = { '<Down>', '<C-j>' },
 
     show_documentation = {},
     hide_documentation = {},
@@ -164,6 +164,17 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     max_items = 200,
     -- controls which sorts to use and in which order, these three are currently the only allowed options
     sorts = { 'label', 'kind', 'score' },
+
+    prebuiltBinaries = {
+      -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
+      -- you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
+      download = true,
+      -- When downloading a prebuilt binary force the downloader to resolve this version. If this is uset
+      -- then the downloader will attempt to infer the version from the checked out git tag (if any).
+      --
+      -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
+      forceVersion = nil,
+    },
   },
 
   sources = {
@@ -234,6 +245,13 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- 'reversed' will render the label on the left and the kind icon + name on the right
       -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
       draw = 'simple',
+      -- Controls the cycling behavior when reaching the beginning or end of the completion list.
+      cycle = {
+        -- When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.
+        from_bottom = true,
+        -- When `true`, calling `select_prev` at the *top* of the completion list will select the *last* completion item.
+        from_top = true
+      },
     },
     documentation = {
       min_width = 10,

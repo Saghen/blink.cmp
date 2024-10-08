@@ -108,7 +108,7 @@ function autocomplete.update_position(context)
 
   -- detect if there's space above/below the cursor
   -- todo: should pick the largest space if both are false and limit height of the window
-  local is_space_below = screen_height - (cursor_row - screen_scroll_range.start_line) >= height
+  local is_space_below = screen_height - (cursor_row - screen_scroll_range.start_line) > height
   local is_space_above = cursor_row - screen_scroll_range.start_line > height
 
   -- default to the user's preference but attempt to use the other options
@@ -139,15 +139,17 @@ end
 function autocomplete.select_next()
   if not autocomplete.win:is_open() then return end
 
+  local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
   local l = #autocomplete.items
   if autocomplete.selected_index == l then
+    -- at the end of completion list and the config is not enabled: do nothing
+    if not cycle_from_bottom then return end
     autocomplete.selected_index = 1
   else
     autocomplete.selected_index = autocomplete.selected_index + 1
   end
 
   autocomplete.win:set_option_values('cursorline', true)
-
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { autocomplete.selected_index, 0 })
   autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end
@@ -155,15 +157,16 @@ end
 function autocomplete.select_prev()
   if not autocomplete.win:is_open() then return end
 
+  local cycle_from_top = config.windows.autocomplete.cycle.from_top
   local l = #autocomplete.items
   if autocomplete.selected_index <= 1 then
+    if not cycle_from_top then return end
     autocomplete.selected_index = l
   else
     autocomplete.selected_index = autocomplete.selected_index - 1
   end
 
   autocomplete.win:set_option_values('cursorline', true)
-
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { autocomplete.selected_index, 0 })
   autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end

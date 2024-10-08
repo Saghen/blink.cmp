@@ -115,19 +115,19 @@ function win:get_content_height()
   return vim.api.nvim_win_text_height(self:get_win(), {}).all
 end
 
---- @return { vertical: number, horizontal: number }
+--- @return { vertical: number, horizontal: number, left: number, right: number, top: number, bottom: number }
 function win:get_border_size()
-  if not self:is_open() then return { vertical = 0, horizontal = 0 } end
+  if not self:is_open() then return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 } end
 
   local border = self.config.border
   if border == 'none' then
-    return { vertical = 0, horizontal = 0 }
+    return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
   elseif border == 'padded' then
-    return { vertical = 0, horizontal = 1 }
+    return { vertical = 0, horizontal = 1, left = 1, right = 0, top = 0, bottom = 0 }
   elseif border == 'shadow' then
-    return { vertical = 1, horizontal = 1 }
+    return { vertical = 1, horizontal = 1, left = 0, right = 1, top = 0, bottom = 1 }
   elseif type(border) == 'string' then
-    return { vertical = 2, horizontal = 2 }
+    return { vertical = 2, horizontal = 2, left = 1, right = 1, top = 1, bottom = 1 }
   elseif type(border) == 'table' and border ~= nil then
     -- borders can be a table of strings and act differently with different # of chars
     -- so we normalize it: https://neovim.io/doc/user/api.html#nvim_open_win()
@@ -143,10 +143,10 @@ function win:get_border_size()
     local bottom = resolved_border[6] == '' and 0 or 1
     local left = resolved_border[8] == '' and 0 or 1
     local right = resolved_border[4] == '' and 0 or 1
-    return { vertical = top + bottom, horizontal = left + right }
+    return { vertical = top + bottom, horizontal = left + right, left = left, right = right, top = top, bottom = bottom }
   end
 
-  return { vertical = 0, horizontal = 0 }
+  return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
 end
 
 --- @return number

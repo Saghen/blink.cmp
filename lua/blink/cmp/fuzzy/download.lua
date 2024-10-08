@@ -1,3 +1,5 @@
+local download_config = require('blink.cmp.config').fuzzy.prebuiltBinaries
+
 local download = {}
 
 --- @return string
@@ -17,28 +19,34 @@ function download.ensure_downloaded(callback)
     vim.schedule(function() callback(err) end)
   end
 
+  if not download_config.download then return cb() end
+
   download.get_git_tag(function(git_version_err, git_version)
     if git_version_err then return cb(git_version_err) end
 
     download.get_downloaded_version(function(version_err, version)
       download.is_downloaded(function(downloaded)
+        local target_version = download_config.forceVersion or git_version
+
         -- not built locally, not a git tag, error
-        if not downloaded and not git_version then
+        if not downloaded and not target_version then
           return cb(
-            "Can't download from github due to not being on a git tag but found no built version of the library. Either run cargo build --release via your package manager or switch to a git tag. See the README for more info."
+            "Can't download from github due to not being on a git tag and no native_download.version set, but found no built version of the library. "
+              .. 'Either run `cargo build --release` via your package manager, switch to a git tag, or set `native_download.version` in config. '
+              .. 'See the README for more info.'
           )
         end
         -- built locally, ignore
         if downloaded and (version_err or version == nil) then return cb() end
         -- already downloaded and the correct version
-        if version == git_version and downloaded then return cb() end
+        if version == target_version and downloaded then return cb() end
         -- unknown state
-        if not git_version then return cb('Unknown error while getting pre-built binary. Consider re-installing') end
+        if not target_version then return cb('Unknown error while getting pre-built binary. Consider re-installing') end
 
         -- download from github and set version
-        download.from_github(git_version, function(download_err)
+        download.from_github(target_version, function(download_err)
           if download_err then return cb(download_err) end
-          download.set_downloaded_version(git_version, function(set_err)
+          download.set_downloaded_version(target_version, function(set_err)
             if set_err then return cb(set_err) end
             cb()
           end)

@@ -29,6 +29,9 @@ end
 function path:get_trigger_characters() return { '/', '.' } end
 
 function path:get_completions(context, callback)
+  -- we use libuv, but the rest of the library expects to be synchronous
+  callback = vim.schedule_wrap(callback)
+
   local lib = require('blink.cmp.sources.path.lib')
 
   local dirname = lib.dirname(PATH_REGEX, self.opts.get_cwd, context)
