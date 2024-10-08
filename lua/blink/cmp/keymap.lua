@@ -58,6 +58,7 @@ function keymap.setup(opts)
         expr = true,
         silent = true,
         noremap = true,
+        replace_keycodes = true,
       })
     end
     for key, _ in pairs(snippet_keys_to_commands) do
@@ -72,6 +73,7 @@ function keymap.setup(opts)
         expr = true,
         silent = true,
         noremap = true,
+        replace_keycodes = true,
       })
     end
   end
