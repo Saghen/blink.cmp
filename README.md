@@ -1,3 +1,6 @@
+> [!WARNING]
+> This plugin is _beta_ quality. Expect breaking changes and many bugs
+
 # Blink Completion (blink.cmp)
 
 **blink.cmp** is a completion plugin with support for LSPs and external sources while updating on every keystroke with minimal overhead (0.5-4ms async). It achieves this by writing the fuzzy searching in SIMD to easily handle >20k items. It provides extensibility via hooks into the trigger, sources and rendering pipeline. Plenty of work has been put into making each stage of the pipeline as intelligent as possible, such as frecency and proximity bonus on fuzzy matching, and this work is on-going.
