@@ -49,11 +49,6 @@ function keymap.setup(opts)
           local did_run = require('blink.cmp')[command]()
           if did_run then return end
         end
-        for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
-          local did_run = require('blink.cmp')[command]()
-          if did_run then return end
-        end
-
         return keymap.run_non_blink_keymap('i', key)
       end)
     end
@@ -67,6 +62,14 @@ function keymap.setup(opts)
         end
 
         return keymap.run_non_blink_keymap('s', key)
+      end)
+      keymap.set('i', key, function()
+        for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
+          local did_run = require('blink.cmp')[command]()
+          if did_run then return end
+        end
+
+        return keymap.run_non_blink_keymap('i', key)
       end)
     end
   end
