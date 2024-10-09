@@ -248,10 +248,6 @@ local config = {
       direction_priority = { 's', 'n' },
       -- done: :)
       preselect = true,
-      cycle = {
-        from_bottom = true,
-        from_top = true,
-      }
       -- Controls how the completion items are rendered on the popup window
       -- 'simple' will render the item's kind icon the left alongside the label
       -- 'reversed' will render the label on the left and the kind icon + name on the right
