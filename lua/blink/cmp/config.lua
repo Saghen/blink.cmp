@@ -89,6 +89,7 @@
 --- @field order? "top_down" | "bottom_up"
 --- @field direction_priority? ("n" | "s")[]
 --- @field preselect? boolean
+--- @field auto_insert? boolean
 --- @field winhighlight? string
 --- @field scrolloff? number
 --- @field draw? 'simple' | 'reversed' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
@@ -248,6 +249,8 @@ local config = {
       direction_priority = { 's', 'n' },
       -- whether to preselect the first item in the completion list
       preselect = true,
+      -- Whether to insert the completion items automatically when selecting them. Requires `preselect = false`
+      auto_insert = true,
       -- Controls how the completion items are rendered on the popup window
       -- 'simple' will render the item's kind icon the left alongside the label
       -- 'reversed' will render the label on the left and the kind icon + name on the right

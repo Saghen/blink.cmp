@@ -128,6 +128,8 @@ cmp.hide = function()
 end
 
 cmp.accept = function()
+  require('blink.cmp.trigger.completion').triggered_by = 'accept'
+
   local item = cmp.windows.autocomplete.get_selected_item()
   if item == nil then return end
 
@@ -141,12 +143,16 @@ cmp.accept = function()
 end
 
 cmp.select_prev = function()
+  require('blink.cmp.trigger.completion').triggered_by = 'select'
+
   if not cmp.windows.autocomplete.win:is_open() then return end
   vim.schedule(cmp.windows.autocomplete.select_prev)
   return true
 end
 
 cmp.select_next = function()
+  require('blink.cmp.trigger.completion').triggered_by = 'select'
+
   if not cmp.windows.autocomplete.win:is_open() then return end
   vim.schedule(cmp.windows.autocomplete.select_next)
   return true

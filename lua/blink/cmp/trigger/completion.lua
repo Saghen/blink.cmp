@@ -16,6 +16,8 @@ local trigger = {
     --- @type fun()
     on_hide = function() end,
   },
+  --- @type "select" | "accept" | nil
+  triggered_by = nil,
 }
 
 function trigger.activate_autocmds()
@@ -30,22 +32,26 @@ function trigger.activate_autocmds()
       -- no characters added so let cursormoved handle it
       if last_char == '' then return end
 
-      -- ignore if in a special buffer
-      if utils.is_special_buffer() then
-        trigger.hide()
-      -- character forces a trigger according to the sources, create a fresh context
-      elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
-        trigger.context = nil
-        trigger.show({ trigger_character = last_char })
-      -- character is part of the current context OR in an existing context
-      elseif last_char:match(config.keyword_regex) ~= nil then
-        trigger.show()
-      -- nothing matches so hide
-      else
-        trigger.hide()
+      if trigger.triggered_by ~= 'select' then
+        -- ignore if in a special buffer
+        if utils.is_special_buffer() then
+          trigger.hide()
+        -- character forces a trigger according to the sources, create a fresh context
+        elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
+          trigger.context = nil
+          trigger.triggered_by = nil
+          trigger.show({ trigger_character = last_char })
+        -- character is part of the current context OR in an existing context
+        elseif last_char:match(config.keyword_regex) ~= nil then
+          trigger.show()
+        -- nothing matches so hide
+        else
+          trigger.hide()
+        end
       end
 
       last_char = ''
+      trigger.triggered_by = nil
     end,
   })
 
@@ -72,6 +78,7 @@ function trigger.activate_autocmds()
         or (is_on_trigger and trigger.context ~= nil)
       then
         trigger.context = nil
+        trigger.triggered_by = nil
         trigger.show()
       elseif config.show_on_insert_on_trigger_character and is_on_trigger and ev.event == 'InsertEnter' then
         trigger.show({ trigger_character = char_under_cursor })
@@ -128,6 +135,7 @@ function trigger.hide()
   if not trigger.context then return end
 
   trigger.context = nil
+  trigger.triggered_by = nil
   trigger.event_targets.on_hide()
 end
 

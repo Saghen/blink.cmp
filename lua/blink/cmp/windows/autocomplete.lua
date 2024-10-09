@@ -137,10 +137,19 @@ end
 
 ---------- Selection ----------
 
+--- @param n number
+local function delete_last_n_chars(n)
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  col = col - n
+  if col < 0 then col = 0 end
+  vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col + n, { '' })
+end
+
 function autocomplete.select_next()
   if not autocomplete.win:is_open() then return end
 
   local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
+  local auto_insert = config.trigger.completion.auto_insert
   local l = #autocomplete.items
   local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
   -- We need to ajust the disconnect between the line position
@@ -154,16 +163,31 @@ function autocomplete.select_next()
     line = line + 1
   end
 
-  autocomplete.set_has_selected(true)
+  local original_context =
+    autocomplete.context.line:sub(autocomplete.context.bounds.start_col, autocomplete.context.bounds.end_col)
+  local already_selected = autocomplete.has_selected
+  local prev_selected_item = autocomplete.get_selected_item()
 
+  autocomplete.set_has_selected(true)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+
+  local selected_item = autocomplete.get_selected_item()
+
+  if auto_insert and prev_selected_item ~= nil and already_selected then
+    delete_last_n_chars(#prev_selected_item.label)
+  elseif auto_insert and not already_selected then
+    delete_last_n_chars(#original_context)
+  end
+  if selected_item ~= nil and auto_insert then vim.api.nvim_feedkeys(selected_item.label, 'int', true) end
+
+  autocomplete.event_targets.on_select(selected_item, autocomplete.context)
 end
 
 function autocomplete.select_prev()
   if not autocomplete.win:is_open() then return end
 
   local cycle_from_top = config.windows.autocomplete.cycle.from_top
+  local auto_insert = config.windows.autocomplete.auto_insert
   local l = #autocomplete.items
   local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
   if line <= 1 then
@@ -173,9 +197,23 @@ function autocomplete.select_prev()
     line = line - 1
   end
 
-  autocomplete.set_has_selected(true)
+  local original_context =
+    autocomplete.context.line:sub(autocomplete.context.bounds.start_col, autocomplete.context.bounds.end_col)
+  local already_selected = autocomplete.has_selected
+  local prev_selected_item = autocomplete.get_selected_item()
 
+  autocomplete.set_has_selected(true)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
+
+  local selected_item = autocomplete.get_selected_item()
+
+  if auto_insert and prev_selected_item ~= nil and already_selected then
+    delete_last_n_chars(#prev_selected_item.label)
+  elseif auto_insert and not already_selected then
+    delete_last_n_chars(#original_context)
+  end
+  if selected_item ~= nil and auto_insert then vim.api.nvim_feedkeys(selected_item.label, 'int', true) end
+
   autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end
 
