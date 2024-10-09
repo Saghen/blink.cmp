@@ -37,7 +37,7 @@ local function words_to_items(words)
   for _, word in ipairs(words) do
     table.insert(items, {
       label = word,
-      kind = vim.lsp.protocol.CompletionItemKind.Text,
+      kind = require('blink.cmp.types').CompletionItemKind.Text,
       insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
       insertText = word,
     })

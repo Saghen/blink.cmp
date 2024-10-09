@@ -73,9 +73,10 @@ end
 --- @return blink.cmp.CompletionItem[]
 function lib.entry_to_completion_item(entry, dirname, opts)
   local is_dir = entry.type == 'directory'
+  local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
   return {
     label = (opts.label_trailing_slash and is_dir) and entry.name .. '/' or entry.name,
-    kind = is_dir and vim.lsp.protocol.CompletionItemKind.Folder or vim.lsp.protocol.CompletionItemKind.File,
+    kind = is_dir and CompletionItemKind.Folder or CompletionItemKind.File,
     insertText = is_dir and entry.name .. '/' or entry.name,
     word = opts.trailing_slash and entry.name or nil,
     data = { path = entry.name, full_path = dirname .. '/' .. entry.name, type = entry.type, stat = entry.stat },

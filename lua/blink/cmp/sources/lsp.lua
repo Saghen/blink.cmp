@@ -118,7 +118,7 @@ function lsp:get_completions(context, callback)
       for _, item in ipairs(response.items) do
         -- todo: terraform lsp doesn't return a .kind in situations like `toset`, is there a default value we need to grab?
         -- it doesn't seem to return itemDefaults either
-        item.kind = item.kind or vim.lsp.protocol.CompletionItemKind.Text
+        item.kind = item.kind or require('blink.cmp.types').CompletionItemKind.Text
         item.client_id = client_id
 
         -- todo: make configurable
