@@ -84,6 +84,17 @@ function trigger.activate_autocmds()
   -- definitely leaving the context
   vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufLeave' }, { callback = trigger.hide })
 
+  -- trigger InsertLeave autocommand when exiting insert mode with ctrl+c
+  local ctrl_c = vim.api.nvim_replace_termcodes('<C-c>', true, true, true)
+  vim.on_key(function(key)
+    if key == ctrl_c then
+      vim.schedule(function()
+        local mode = vim.api.nvim_get_mode().mode
+        if mode ~= 'i' then trigger.hide() end
+      end)
+    end
+  end)
+
   return trigger
 end
 
