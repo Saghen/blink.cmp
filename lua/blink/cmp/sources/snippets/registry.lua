@@ -110,7 +110,7 @@ function registry:snippet_to_completion_item(snippet)
     kind = require('blink.cmp.types').CompletionItemKind.Snippet,
     label = snippet.prefix,
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
-    insertText = self:parse_body(body),
+    insertText = self:expand_vars(body),
     description = snippet.description,
   }
 end
