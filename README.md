@@ -154,6 +154,11 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- when true, will show the signature help window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_on_trigger_character = true,
     },
+    cycle = {
+        from_bottom = true,
+        from_top = true,
+    },
+    preselect = true,
   },
 
   fuzzy = {
