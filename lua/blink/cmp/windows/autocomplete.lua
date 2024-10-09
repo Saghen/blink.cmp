@@ -10,7 +10,7 @@ local renderer = require('blink.cmp.windows.lib.render')
 local autocmp_config = config.windows.autocomplete
 local autocomplete = {
   items = {},
-  selected_index = 0,
+  has_selected = nil,
   context = nil,
   event_targets = {
     on_position_update = {},
@@ -59,11 +59,11 @@ end
 function autocomplete.open_with_items(context, items)
   autocomplete.context = context
   autocomplete.items = items
-  autocomplete.selected_index = config.accept.preselect and 1 or 0
+  autocomplete.has_selected = autocmp_config.preselect
   autocomplete.draw()
 
   autocomplete.win:open()
-  
+
   autocomplete.context = context
   autocomplete.update_position(context)
 
@@ -74,13 +74,14 @@ end
 
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
-  autocomplete.selected_index = config.accept.preselect and 1 or 0
+  autocomplete.has_selected = autocmp_config.preselect
   autocomplete.win:open()
 end
 
 function autocomplete.close()
   if not autocomplete.win:is_open() then return end
   autocomplete.win:close()
+  autocomplete.has_selected = autocmp_config.preselect
   autocomplete.event_targets.on_close()
 end
 function autocomplete.listen_on_close(callback) autocomplete.event_targets.on_close = callback end
@@ -141,16 +142,19 @@ function autocomplete.select_next()
 
   local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
   local l = #autocomplete.items
-  if autocomplete.selected_index == l then
+  local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
+  if line == l then
     -- at the end of completion list and the config is not enabled: do nothing
     if not cycle_from_bottom then return end
-    autocomplete.selected_index = 1
+    line = 1
   else
-    autocomplete.selected_index = autocomplete.selected_index + 1
+    line = line + 1
   end
 
+  autocomplete.set_has_selected(true)
+
   autocomplete.win:set_option_values('cursorline', true)
-  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { autocomplete.selected_index, 0 })
+  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
   autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end
 
@@ -159,21 +163,30 @@ function autocomplete.select_prev()
 
   local cycle_from_top = config.windows.autocomplete.cycle.from_top
   local l = #autocomplete.items
-  if autocomplete.selected_index <= 1 then
+  local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
+  if line <= 1 then
     if not cycle_from_top then return end
-    autocomplete.selected_index = l
+    line = l
   else
-    autocomplete.selected_index = autocomplete.selected_index - 1
+    line = line - 1
   end
 
+  autocomplete.set_has_selected(true)
+
   autocomplete.win:set_option_values('cursorline', true)
-  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { autocomplete.selected_index, 0 })
+  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
   autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end
 
 ---------- Rendering ----------
+
+function autocomplete.set_has_selected(selected)
+  if not autocomplete.win:is_open() then return end
+  autocomplete.has_selected = selected
+  autocomplete.win:set_option_values('cursorline', selected)
+end
 
 function autocomplete.draw()
   local draw_fn = autocomplete.get_draw_fn()
@@ -243,8 +256,9 @@ end
 
 function autocomplete.get_selected_item()
   if not autocomplete.win:is_open() then return end
-  if autocomplete.selected_index == 0 then return end
-  return autocomplete.items[autocomplete.selected_index]
+  if autocomplete.has_selected then return end
+  local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
+  return autocomplete.items[line]
 end
 
 return autocomplete
