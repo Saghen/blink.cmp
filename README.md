@@ -53,12 +53,12 @@
     -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
     -- adjusts spacing to ensure icons are aligned
     nerd_font_variant = 'normal',
-
+    
     -- experimental auto-brackets support
-    -- accept = { auto_brackets = { enabled = true } },
-
+    -- accept = { auto_brackets = { enabled = true } }
+    
     -- experimental signature help support
-    -- trigger = { signature_help = { enabled = true } },
+    -- trigger = { signature_help = { enabled = true } }
   }
 }
 ```
@@ -197,7 +197,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     },
     -- FOR REF: full example
     providers = {
-      {
+      { 
         -- all of these properties work on every source
         {
             'blink.cmp.sources.lsp',
@@ -205,10 +205,10 @@ For LazyVim/distro users, you can disable nvim-cmp via:
             score_offset = 0,
             trigger_characters = { 'f', 'o', 'o' },
             opts = {},
-        },
+        }, 
         -- the follow two sources have additional options
-        {
-          'blink.cmp.sources.path',
+        { 
+          'blink.cmp.sources.path', 
           opts = {
             trailing_slash = false,
             label_trailing_slash = true,
