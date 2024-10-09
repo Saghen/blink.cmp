@@ -256,7 +256,7 @@ end
 
 function autocomplete.get_selected_item()
   if not autocomplete.win:is_open() then return end
-  if autocomplete.has_selected then return end
+  if not autocomplete.has_selected then return end
   local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
   return autocomplete.items[line]
 end
