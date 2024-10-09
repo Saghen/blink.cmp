@@ -141,8 +141,8 @@ local config = {
     show = '<C-space>',
     hide = '<C-e>',
     accept = '<Tab>',
-    select_prev = { '<Up>', '<C-k>' },
-    select_next = { '<Down>', '<C-j>' },
+    select_prev = { '<Up>', '<C-p>' },
+    select_next = { '<Down>', '<C-n>' },
 
     show_documentation = {},
     hide_documentation = {},
