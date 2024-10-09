@@ -59,13 +59,13 @@ end
 function autocomplete.open_with_items(context, items)
   autocomplete.context = context
   autocomplete.items = items
-  autocomplete.has_selected = autocmp_config.preselect
   autocomplete.draw()
 
   autocomplete.win:open()
 
   autocomplete.context = context
   autocomplete.update_position(context)
+  autocomplete.set_has_selected(autocmp_config.preselect)
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
@@ -74,8 +74,8 @@ end
 
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
-  autocomplete.has_selected = autocmp_config.preselect
   autocomplete.win:open()
+  autocomplete.set_has_selected(autocmp_config.preselect)
 end
 
 function autocomplete.close()
@@ -143,6 +143,9 @@ function autocomplete.select_next()
   local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
   local l = #autocomplete.items
   local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
+  -- We need to ajust the disconnect between the line position
+  -- on the window and the selected item
+  if not autocomplete.has_selected then line = line - 1 end
   if line == l then
     -- at the end of completion list and the config is not enabled: do nothing
     if not cycle_from_bottom then return end
