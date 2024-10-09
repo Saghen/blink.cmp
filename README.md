@@ -156,11 +156,6 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- when true, will show the signature help window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_on_trigger_character = true,
     },
-    cycle = {
-        from_bottom = true,
-        from_top = true,
-    },
-    preselect = true,
   },
 
   fuzzy = {
@@ -247,6 +242,8 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 's', 'n' },
+      -- whether to preselect the first item in the completion list
+      preselect = true,
       -- Controls how the completion items are rendered on the popup window
       -- 'simple' will render the item's kind icon the left alongside the label
       -- 'reversed' will render the label on the left and the kind icon + name on the right

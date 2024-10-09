@@ -156,7 +156,6 @@ function autocomplete.select_next()
 
   autocomplete.set_has_selected(true)
 
-  autocomplete.win:set_option_values('cursorline', true)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
   autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end
@@ -176,7 +175,6 @@ function autocomplete.select_prev()
 
   autocomplete.set_has_selected(true)
 
-  autocomplete.win:set_option_values('cursorline', true)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
   autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
 end
