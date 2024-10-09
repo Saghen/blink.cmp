@@ -147,7 +147,7 @@ end
 
 function lsp:resolve(item, callback)
   local client = vim.lsp.get_client_by_id(item.client_id)
-  if client == nil then
+  if client == nil or not client.server_capabilities.completionProvider.resolveProvider then
     callback(item)
     return
   end
