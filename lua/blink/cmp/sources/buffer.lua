@@ -4,6 +4,7 @@
 
 local uv = vim.uv
 
+---@return string
 local function get_buf_text()
   local bufnr = vim.api.nvim_get_current_buf()
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
@@ -45,6 +46,8 @@ local function words_to_items(words)
   return items
 end
 
+--- @param buf_text string
+--- @param callback fun(items: blink.cmp.CompletionItem[])
 local function run_sync(buf_text, callback) callback(words_to_items(require('blink.cmp.fuzzy').get_words(buf_text))) end
 
 local function run_async(buf_text, callback)
