@@ -163,8 +163,11 @@ function autocomplete.select_next()
     line = line + 1
   end
 
-  local original_context =
-    autocomplete.context.line:sub(autocomplete.context.bounds.start_col, autocomplete.context.bounds.end_col)
+  local context = autocomplete.context
+  local original_context = ''
+  if context.bounds.start_col ~= context.bounds.end_col then
+    original_context = context.line:sub(context.bounds.start_col, context.bounds.end_col)
+  end
   local already_selected = autocomplete.has_selected
   local prev_selected_item = autocomplete.get_selected_item()
 
@@ -180,7 +183,7 @@ function autocomplete.select_next()
   end
   if selected_item ~= nil and auto_insert then vim.api.nvim_feedkeys(selected_item.label, 'int', true) end
 
-  autocomplete.event_targets.on_select(selected_item, autocomplete.context)
+  autocomplete.event_targets.on_select(selected_item, context)
 end
 
 function autocomplete.select_prev()
@@ -197,8 +200,11 @@ function autocomplete.select_prev()
     line = line - 1
   end
 
-  local original_context =
-    autocomplete.context.line:sub(autocomplete.context.bounds.start_col, autocomplete.context.bounds.end_col)
+  local context = autocomplete.context
+  local original_context = ''
+  if context.bounds.start_col ~= context.bounds.end_col then
+    original_context = context.line:sub(context.bounds.start_col, context.bounds.end_col)
+  end
   local already_selected = autocomplete.has_selected
   local prev_selected_item = autocomplete.get_selected_item()
 
@@ -214,7 +220,7 @@ function autocomplete.select_prev()
   end
   if selected_item ~= nil and auto_insert then vim.api.nvim_feedkeys(selected_item.label, 'int', true) end
 
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  autocomplete.event_targets.on_select(selected_item, context)
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end
