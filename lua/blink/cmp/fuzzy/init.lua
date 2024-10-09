@@ -1,29 +1,42 @@
 local config = require('blink.cmp.config').fuzzy
 
 local fuzzy = {
+  ---@type blink.cmp.Context?
+  last_context = nil,
+  ---@type blink.cmp.CompletionItem[]?
+  last_items = nil,
   rust = require('blink.cmp.fuzzy.ffi'),
 }
 
+---@param db_path string
 function fuzzy.init_db(db_path)
   fuzzy.rust.init_db(db_path)
 
   vim.api.nvim_create_autocmd('VimLeavePre', {
-    callback = function() fuzzy.rust.destroy_db() end,
+    callback = fuzzy.rust.destroy_db,
   })
 
   return fuzzy
 end
 
+---@param item blink.cmp.CompletionItem
 function fuzzy.access(item) fuzzy.rust.access(item) end
 
+---@param lines string
 function fuzzy.get_words(lines) return fuzzy.rust.get_words(lines) end
 
+---@param needle string
+---@param items blink.cmp.CompletionItem[]?
+---@return blink.cmp.CompletionItem[]
 function fuzzy.filter_items(needle, items)
   -- convert to table of strings
   local haystack_labels = {}
   local haystack_score_offsets = {}
   local haystack_kinds = {}
   local haystack_sources = {}
+
+  items = items or {}
+
   for _, item in ipairs(items) do
     table.insert(haystack_labels, item.label)
     table.insert(haystack_score_offsets, item.score_offset or 0)
@@ -60,6 +73,9 @@ function fuzzy.filter_items(needle, items)
   return filtered_items
 end
 
+---@param needle string
+---@param context blink.cmp.Context
+---@param items blink.cmp.CompletionItem[]?
 function fuzzy.filter_items_with_cache(needle, context, items)
   if items == nil then
     if fuzzy.last_context == nil or fuzzy.last_context.id ~= context.id then return {} end
