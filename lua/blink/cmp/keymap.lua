@@ -97,7 +97,9 @@ function keymap.run_non_blink_keymap(mode, key)
   -- and is quite complex. we should look to see if we can simplify their logic
   -- https://github.com/hrsh7th/nvim-cmp/blob/ae644feb7b67bf1ce4260c231d1d4300b19c6f30/lua/cmp/utils/keymap.lua
   if type(mapping.callback) == 'function' then
-    return mapping.callback()
+    local expr = mapping.callback()
+    if mapping.replace_keycodes then expr = vim.api.nvim_replace_termcodes(expr, true, true, true) end
+    if mapping.expr then return expr end
   elseif mapping.rhs then
     return vim.api.nvim_eval(vim.api.nvim_replace_termcodes(mapping.rhs, true, true, true))
   end
