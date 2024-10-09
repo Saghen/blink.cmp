@@ -31,8 +31,8 @@ function download.ensure_downloaded(callback)
         -- not built locally, not a git tag, error
         if not downloaded and not target_version then
           return cb(
-            "Can't download from github due to not being on a git tag and no native_download.version set, but found no built version of the library. "
-              .. 'Either run `cargo build --release` via your package manager, switch to a git tag, or set `native_download.version` in config. '
+            "Can't download from github due to not being on a git tag and no fuzzy.prebuiltBinaries.forceVersion set, but found no built version of the library. "
+              .. 'Either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuiltBinaries.forceVersion` in config. '
               .. 'See the README for more info.'
           )
         end
