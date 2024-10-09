@@ -151,10 +151,10 @@ local function select(line)
 
   local context = autocomplete.context
   local original_context = ''
-  if context.trigger.kind ~= vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter then
+  if context.bounds.start_col ~= context.cursor[2] then
     original_context = context.line:sub(context.bounds.start_col, context.cursor[2])
   end
-  local already_selected = autocomplete.has_selected
+  local has_already_selected = autocomplete.has_selected
   local prev_selected_item = autocomplete.get_selected_item()
 
   autocomplete.set_has_selected(true)
@@ -162,12 +162,14 @@ local function select(line)
 
   local selected_item = autocomplete.get_selected_item()
 
-  if auto_insert and prev_selected_item ~= nil and already_selected then
-    delete_last_n_chars(#prev_selected_item.label)
-  elseif auto_insert and not already_selected then
-    delete_last_n_chars(#original_context)
+  if auto_insert then
+    if prev_selected_item ~= nil and has_already_selected then
+      delete_last_n_chars(#prev_selected_item.label)
+    elseif not has_already_selected then
+      delete_last_n_chars(#original_context)
+    end
+    if selected_item ~= nil then vim.api.nvim_feedkeys(selected_item.label, 'int', true) end
   end
-  if selected_item ~= nil and auto_insert then vim.api.nvim_feedkeys(selected_item.label, 'int', true) end
 
   autocomplete.event_targets.on_select(selected_item, context)
 end
