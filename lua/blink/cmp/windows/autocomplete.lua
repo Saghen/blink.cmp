@@ -145,28 +145,14 @@ local function delete_last_n_chars(n)
   vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col + n, { '' })
 end
 
-function autocomplete.select_next()
-  if not autocomplete.win:is_open() then return end
-
-  local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
-  local auto_insert = config.trigger.completion.auto_insert
-  local l = #autocomplete.items
-  local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
-  -- We need to ajust the disconnect between the line position
-  -- on the window and the selected item
-  if not autocomplete.has_selected then line = line - 1 end
-  if line == l then
-    -- at the end of completion list and the config is not enabled: do nothing
-    if not cycle_from_bottom then return end
-    line = 1
-  else
-    line = line + 1
-  end
+--- @param line number
+local function select(line)
+  local auto_insert = config.windows.autocomplete.auto_insert
 
   local context = autocomplete.context
   local original_context = ''
-  if context.bounds.start_col ~= context.bounds.end_col then
-    original_context = context.line:sub(context.bounds.start_col, context.bounds.end_col)
+  if context.trigger.kind ~= vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter then
+    original_context = context.line:sub(context.bounds.start_col, context.cursor[2])
   end
   local already_selected = autocomplete.has_selected
   local prev_selected_item = autocomplete.get_selected_item()
@@ -186,11 +172,30 @@ function autocomplete.select_next()
   autocomplete.event_targets.on_select(selected_item, context)
 end
 
+function autocomplete.select_next()
+  if not autocomplete.win:is_open() then return end
+
+  local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
+  local l = #autocomplete.items
+  local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
+  -- We need to ajust the disconnect between the line position
+  -- on the window and the selected item
+  if not autocomplete.has_selected then line = line - 1 end
+  if line == l then
+    -- at the end of completion list and the config is not enabled: do nothing
+    if not cycle_from_bottom then return end
+    line = 1
+  else
+    line = line + 1
+  end
+
+  select(line)
+end
+
 function autocomplete.select_prev()
   if not autocomplete.win:is_open() then return end
 
   local cycle_from_top = config.windows.autocomplete.cycle.from_top
-  local auto_insert = config.windows.autocomplete.auto_insert
   local l = #autocomplete.items
   local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
   if line <= 1 then
@@ -200,27 +205,7 @@ function autocomplete.select_prev()
     line = line - 1
   end
 
-  local context = autocomplete.context
-  local original_context = ''
-  if context.bounds.start_col ~= context.bounds.end_col then
-    original_context = context.line:sub(context.bounds.start_col, context.bounds.end_col)
-  end
-  local already_selected = autocomplete.has_selected
-  local prev_selected_item = autocomplete.get_selected_item()
-
-  autocomplete.set_has_selected(true)
-  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
-
-  local selected_item = autocomplete.get_selected_item()
-
-  if auto_insert and prev_selected_item ~= nil and already_selected then
-    delete_last_n_chars(#prev_selected_item.label)
-  elseif auto_insert and not already_selected then
-    delete_last_n_chars(#original_context)
-  end
-  if selected_item ~= nil and auto_insert then vim.api.nvim_feedkeys(selected_item.label, 'int', true) end
-
-  autocomplete.event_targets.on_select(selected_item, context)
+  select(line)
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end
