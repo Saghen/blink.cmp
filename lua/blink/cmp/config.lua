@@ -144,8 +144,8 @@ local config = {
     select_prev = { '<Up>', '<C-p>' },
     select_next = { '<Down>', '<C-n>' },
 
-    show_documentation = {},
-    hide_documentation = {},
+    show_documentation = '<C-space>',
+    hide_documentation = '<C-space>',
     scroll_documentation_up = '<C-b>',
     scroll_documentation_down = '<C-f>',
 
@@ -271,7 +271,7 @@ local config = {
         autocomplete_north = { 'e', 'w', 'n', 's' },
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
-      auto_show = true,
+      auto_show = false,
       auto_show_delay_ms = 500,
       update_delay_ms = 100,
     },
