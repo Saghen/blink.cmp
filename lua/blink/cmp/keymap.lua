@@ -1,3 +1,4 @@
+local utils = require('blink.cmp.utils')
 local keymap = {}
 
 local insert_commands = {
@@ -41,41 +42,49 @@ function keymap.setup(opts)
   -- apply keymaps
   -- we set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
   -- from overriding our mappings
-  local set_buffer_keymap = function()
-    -- insert mode
-    for key, _ in pairs(insert_keys_to_commands) do
-      keymap.set('i', key, function()
-        for _, command in ipairs(insert_keys_to_commands[key] or {}) do
-          local did_run = require('blink.cmp')[command]()
-          if did_run then return end
-        end
-        for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
-          local did_run = require('blink.cmp')[command]()
-          if did_run then return end
-        end
+  keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands) -- apply immediately since the plugin starts asynchronously
+  vim.api.nvim_create_autocmd('BufEnter', {
+    callback = function() keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands) end,
+  })
+end
 
-        return keymap.run_non_blink_keymap('i', key)
-      end)
-    end
+--- Applies the keymaps to the current buffer
+--- @param insert_keys_to_commands table<string, string[]>
+--- @param snippet_keys_to_commands table<string, string[]>
+function keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands)
+  -- insert mode: uses both snippet and insert commands
+  for _, key in ipairs(utils.union_keys(insert_keys_to_commands, snippet_keys_to_commands)) do
+    keymap.set('i', key, function()
+      for _, command in ipairs(insert_keys_to_commands[key] or {}) do
+        local did_run = require('blink.cmp')[command]()
+        if did_run then return end
+      end
+      for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
+        local did_run = require('blink.cmp')[command]()
+        if did_run then return end
+      end
 
-    -- snippet mode
-    for key, _ in pairs(snippet_keys_to_commands) do
-      keymap.set('s', key, function()
-        for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
-          local did_run = require('blink.cmp')[command]()
-          if did_run then return end
-        end
-
-        return keymap.run_non_blink_keymap('s', key)
-      end)
-    end
+      return keymap.run_non_blink_keymap('i', key)
+    end)
   end
 
-  set_buffer_keymap() -- apply immediately since the plugin starts asynchronously
-  vim.api.nvim_create_autocmd('BufEnter', { callback = set_buffer_keymap })
+  -- snippet mode
+  for key, _ in pairs(snippet_keys_to_commands) do
+    keymap.set('s', key, function()
+      for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
+        local did_run = require('blink.cmp')[command]()
+        if did_run then return end
+      end
+
+      return keymap.run_non_blink_keymap('s', key)
+    end)
+  end
 end
 
 --- Gets the first non blink.cmp keymap for the given mode and key
+--- @param mode string
+--- @param key string
+--- @return vim.api.keyset.keymap | nil
 function keymap.get_non_blink_mapping_for_key(mode, key)
   local normalized_key = vim.api.nvim_replace_termcodes(key, true, true, true)
 
@@ -90,6 +99,9 @@ function keymap.get_non_blink_mapping_for_key(mode, key)
 end
 
 --- Runs the first non blink.cmp keymap for the given mode and key
+--- @param mode string
+--- @param key string
+--- @return string | nil
 function keymap.run_non_blink_keymap(mode, key)
   local mapping = keymap.get_non_blink_mapping_for_key(mode, key) or {}
 
@@ -100,6 +112,7 @@ function keymap.run_non_blink_keymap(mode, key)
     local expr = mapping.callback()
     if mapping.replace_keycodes then expr = vim.api.nvim_replace_termcodes(expr, true, true, true) end
     if mapping.expr then return expr end
+    return
   elseif mapping.rhs then
     return vim.api.nvim_eval(vim.api.nvim_replace_termcodes(mapping.rhs, true, true, true))
   end
@@ -108,6 +121,9 @@ function keymap.run_non_blink_keymap(mode, key)
   return vim.api.nvim_replace_termcodes(key, true, true, true)
 end
 
+--- @param mode string
+--- @param key string
+--- @param callback fun(): string | nil
 function keymap.set(mode, key, callback)
   vim.api.nvim_buf_set_keymap(0, mode, key, '', {
     callback = callback,
