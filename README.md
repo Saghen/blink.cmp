@@ -50,10 +50,10 @@
     -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
     -- adjusts spacing to ensure icons are aligned
     nerd_font_variant = 'normal',
-
+    
     -- experimental auto-brackets support
     -- accept = { auto_brackets = { enabled = true } }
-
+    
     -- experimental signature help support
     -- trigger = { signature_help = { enabled = true } }
   }
@@ -69,22 +69,22 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 <details>
 <summary><strong>Highlight groups</strong></summary>
 
-| Group                                  | Default                     | Description                                                               |
-| -------------------------------------- | --------------------------- | ------------------------------------------------------------------------- |
-| `BlinkCmpMenu`                         | Pmenu                       | The completion menu window                                                |
-| `BlinkCmpMenuBorder`                   | Pmenu                       | The completion menu window border                                         |
-| `BlinkCmpMenuSelection`                | PmenuSel                    | The completion menu window selected item                                  |
-| `BlinkCmpLabel`                        | Pmenu                       | Label of the completion item                                              |
-| `BlinkCmpLabelDeprecated`              | Comment                     | Deprecated label of the completion item                                   |
-| `BlinkCmpLabelMatch`                   | Pmenu                       | (Currently unused) Label of the completion item when it matches the query |
-| `BlinkCmpKind`                         | Special                     | Kind icon/text of the completion item                                     |
-| `BlinkCmpKind<kind>`                   | Special                     | Kind icon/text of the completion item                                     |
-| `BlinkCmpDoc`                          | NormalFloat                 | The documentation window                                                  |
-| `BlinkCmpDocBorder`                    | FloatBorder                 | The documentation window border                                           |
-| `BlinkCmpDocCursorLine`                | Visual                      | The documentation window cursor line                                      |
-| `BlinkCmpSignatureHelp`                | NormalFloat                 | The signature help window                                                 |
-| `BlinkCmpSignatureHelpBorder`          | FloatBorder                 | The signature help window border                                          |
-| `BlinkCmpSignatureHelpActiveParameter` | LspSignatureActiveParameter | Active parameter of the signature help                                    |
+| Group | Default | Description |
+| ----- | ------- | ----------- |
+| `BlinkCmpMenu` | Pmenu | The completion menu window |
+| `BlinkCmpMenuBorder` | Pmenu | The completion menu window border |
+| `BlinkCmpMenuSelection` | PmenuSel | The completion menu window selected item |
+| `BlinkCmpLabel` | Pmenu | Label of the completion item |
+| `BlinkCmpLabelDeprecated` | Comment | Deprecated label of the completion item |
+| `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
+| `BlinkCmpKind` | Special | Kind icon/text of the completion item |
+| `BlinkCmpKind<kind>` | Special | Kind icon/text of the completion item |
+| `BlinkCmpDoc` | NormalFloat | The documentation window |
+| `BlinkCmpDocBorder` | FloatBorder | The documentation window border |
+| `BlinkCmpDocCursorLine` | Visual | The documentation window cursor line |
+| `BlinkCmpSignatureHelp` | NormalFloat | The signature help window |
+| `BlinkCmpSignatureHelpBorder` | FloatBorder | The signature help window border |
+| `BlinkCmpSignatureHelpActiveParameter` | LspSignatureActiveParameter | Active parameter of the signature help |
 
 </details>
 
@@ -194,7 +194,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     },
     -- FOR REF: full example
     providers = {
-      {
+      { 
         -- all of these properties work on every source
         {
             'blink.cmp.sources.lsp',
@@ -202,10 +202,10 @@ For LazyVim/distro users, you can disable nvim-cmp via:
             score_offset = 0,
             trigger_characters = { 'f', 'o', 'o' },
             opts = {},
-        },
+        }, 
         -- the follow two sources have additional options
-        {
-          'blink.cmp.sources.path',
+        { 
+          'blink.cmp.sources.path', 
           opts = {
             trailing_slash = false,
             label_trailing_slash = true,
@@ -358,8 +358,8 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 - Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
 - Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
-  - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp) or the more recent [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim)
-- Boosts completion item score via frecency _and_ proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
+    - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp) or the more recent [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim)
+- Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
 - Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
 - Built-in auto bracket and signature help support
@@ -372,6 +372,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 - Matched character highlighting
 - Cmdline completions
 - Windows support (You may temporarily build from source as outlined in the [installation](#installation) section)
+
 
 ## Special Thanks
 
