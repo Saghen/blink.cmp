@@ -118,12 +118,14 @@ end
 ------- Public API -------
 
 cmp.show = function()
-  vim.schedule(function() cmp.trigger.show() end)
+  if cmp.windows.autocomplete.win:is_open() then return end
+  vim.schedule(cmp.trigger.show)
   return true
 end
 
 cmp.hide = function()
-  vim.schedule(function() cmp.trigger.hide() end)
+  if not cmp.windows.autocomplete.win:is_open() then return end
+  vim.schedule(cmp.trigger.hide)
   return true
 end
 
