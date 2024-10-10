@@ -41,16 +41,7 @@ local function get_shared_lib_extension()
     end
 end
 
-local function get_shared_lib_prefix()
-    local os = jit.os:lower()
-    if os == 'windows' then
-        return ''
-    else
-        return 'lib'
-    end
-end
-
 $(cat "$(pwd)/lua/blink/cmp/fuzzy/ffi.lua")
 " > "$(pwd)/lua/blink/cmp/fuzzy/ffi.lua"
 
-sed -i "s/ffi\.load.'blink-cmp-fuzzy'./ffi.load(debug.getinfo(1).source:match('@?(.*\/)') .. '..\/..\/..\/..\/target\/release\/' .. get_shared_lib_prefix() .. 'blink_cmp_fuzzy\' .. get_shared_lib_extension())/" "$(pwd)/lua/blink/cmp/fuzzy/ffi.lua"
+sed -i "s|ffi\.load('blink-cmp-fuzzy').|local ok, rust = pcall(function() return ffi.load(debug.getinfo(1).source:match('@?(.*/)') .. '../../../../target/release/libblink_cmp_fuzzy' .. get_shared_lib_extension()) end)\nif not ok then\n    rust = ffi.load(debug.getinfo(1).source:match('@?(.*/)') .. '../../../../target/release/blink_cmp_fuzzy' .. get_shared_lib_extension())\nend|" "$(pwd)/lua/blink/cmp/fuzzy/ffi.lua"

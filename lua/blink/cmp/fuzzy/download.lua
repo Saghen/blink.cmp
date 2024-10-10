@@ -9,18 +9,8 @@ function download.get_lib_extension()
   return '.so'
 end
 
---- @return string
-function download.get_lib_prefix()
-  if jit.os:lower() == 'windows' then return '' end
-  return 'lib'
-end
-
 local root_dir = debug.getinfo(1).source:match('@?(.*/)')
-local lib_path = root_dir
-  .. '../../../../target/release/'
-  .. download.get_lib_prefix()
-  .. 'blink_cmp_fuzzy'
-  .. download.get_lib_extension()
+local lib_path = root_dir .. '../../../../target/release/libblink_cmp_fuzzy' .. download.get_lib_extension()
 local version_path = root_dir .. '../../../../target/release/version.txt'
 
 --- @param callback fun(err: string | nil)
@@ -68,7 +58,14 @@ end
 
 --- @param cb fun(downloaded: boolean)
 function download.is_downloaded(cb)
-  return vim.uv.fs_stat(lib_path, function(err) cb(not err) end)
+  vim.uv.fs_stat(lib_path, function(err)
+    if not err then
+      cb(true)
+    else
+      -- If not found, check without 'lib' prefix
+      vim.uv.fs_stat(string.gsub(lib_path, 'lib', ''), function(error) cb(not error) end)
+    end
+  end)
 end
 
 --- @param cb fun(err: string | nil, tag: string | nil)
