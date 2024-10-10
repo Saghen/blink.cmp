@@ -110,11 +110,13 @@ function keymap.run_non_blink_keymap(mode, key)
   -- https://github.com/hrsh7th/nvim-cmp/blob/ae644feb7b67bf1ce4260c231d1d4300b19c6f30/lua/cmp/utils/keymap.lua
   if type(mapping.callback) == 'function' then
     local expr = mapping.callback()
-    if mapping.replace_keycodes then expr = vim.api.nvim_replace_termcodes(expr, true, true, true) end
-    if mapping.expr then return expr end
+    if mapping.replace_keycodes == 1 then expr = vim.api.nvim_replace_termcodes(expr, true, true, true) end
+    if mapping.expr == 1 then return expr end
     return
   elseif mapping.rhs then
-    return vim.api.nvim_eval(vim.api.nvim_replace_termcodes(mapping.rhs, true, true, true))
+    local rhs = vim.api.nvim_replace_termcodes(mapping.rhs, true, true, true)
+    if mapping.expr == 1 then rhs = vim.api.nvim_eval(rhs) end
+    return rhs
   end
 
   -- pass the key along as usual
