@@ -22,10 +22,11 @@ function nvim_cmp:get_completions(ctx, callback)
   local function transformed_callback(candidates)
     if not candidates then return false end
     -- todo: how to if know is_incomplete_forward and is_incomplete_backward?
+    local is_incomplete = candidates.isIncomplete or false
     callback({
       context = ctx,
-      is_incomplete_forward = false,
-      is_incomplete_backward = false,
+      is_incomplete_forward = is_incomplete,
+      is_incomplete_backward = is_incomplete,
       items = candidates,
     })
   end
