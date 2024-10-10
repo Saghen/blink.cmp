@@ -58,7 +58,14 @@ end
 
 --- @param cb fun(downloaded: boolean)
 function download.is_downloaded(cb)
-  return vim.uv.fs_stat(lib_path, function(err) cb(not err) end)
+  vim.uv.fs_stat(lib_path, function(err)
+    if not err then
+      cb(true)
+    else
+      -- If not found, check without 'lib' prefix
+      vim.uv.fs_stat(string.gsub(lib_path, 'libblink_cmp_fuzzy', 'blink_cmp_fuzzy'), function(error) cb(not error) end)
+    end
+  end)
 end
 
 --- @param cb fun(err: string | nil, tag: string | nil)

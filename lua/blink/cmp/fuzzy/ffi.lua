@@ -19,40 +19,24 @@ end
 
 
 
+
+typedef struct {
+    const int32_t *ptr;
+} blink_cmp_fuzzy__Option_int32_t;
+typedef struct {
+    const int32_t *ptr;
+    size_t len;
+    size_t capacity;
+} blink_cmp_fuzzy__Vec_int32_t;
+
 typedef struct {
     const char * *ptr;
     size_t len;
     size_t capacity;
 } blink_cmp_fuzzy__Vec___string_ptr;
 typedef struct {
-    const int32_t *ptr;
-    size_t len;
-    size_t capacity;
-} blink_cmp_fuzzy__Vec_int32_t;
-typedef struct {
-    const int32_t *ptr;
-} blink_cmp_fuzzy__Option_int32_t;
-typedef struct {
-    const uint32_t *ptr;
-    size_t len;
-    size_t capacity;
-} blink_cmp_fuzzy__Vec_uint32_t;
-
-
-
-typedef struct {
     const char * *ptr;
 } blink_cmp_fuzzy__Option___string_ptr;
-
-            typedef struct {
-                    const char * label;
-    const blink_cmp_fuzzy__Option___string_ptr sort_text;
-    const blink_cmp_fuzzy__Option___string_ptr filter_text;
-    const uint32_t kind;
-    const blink_cmp_fuzzy__Option_int32_t score_offset;
-    const char * source;
-            } blink_cmp_fuzzy__LspItem;
-            
 typedef struct {
     const blink_cmp_fuzzy__Vec___string_ptr *ptr;
 } blink_cmp_fuzzy__Option_Vec___string_ptr;
@@ -65,6 +49,22 @@ typedef struct {
     const blink_cmp_fuzzy__Vec___string_ptr sorts;
             } blink_cmp_fuzzy__FuzzyOptions;
             
+
+
+            typedef struct {
+                    const char * label;
+    const blink_cmp_fuzzy__Option___string_ptr sort_text;
+    const blink_cmp_fuzzy__Option___string_ptr filter_text;
+    const uint32_t kind;
+    const blink_cmp_fuzzy__Option_int32_t score_offset;
+    const char * source;
+            } blink_cmp_fuzzy__LspItem;
+            
+typedef struct {
+    const uint32_t *ptr;
+    size_t len;
+    size_t capacity;
+} blink_cmp_fuzzy__Vec_uint32_t;
 int32_t init_db(
         const char *,
     int8_t*);
@@ -97,37 +97,33 @@ int32_t __gc_get_words(
 
     ]]
 
-    local rust = ffi.load(debug.getinfo(1).source:match('@?(.*/)') .. '../../../../target/release/libblink_cmp_fuzzy' .. get_shared_lib_extension())
+    local ok, rust = pcall(function() return ffi.load(debug.getinfo(1).source:match('@?(.*/)') .. '../../../../target/release/libblink_cmp_fuzzy' .. get_shared_lib_extension()) end)
+if not ok then
+    rust = ffi.load(debug.getinfo(1).source:match('@?(.*/)') .. '../../../../target/release/blink_cmp_fuzzy' .. get_shared_lib_extension())
+end
 
     local M = {}
 
     
 
+local __const_c_typename_bool = ffi.typeof("const int8_t[?]")
+local __c_function_argument_bool = ffi.typeof("int8_t[?]")
+local __c_mut_function_argument_bool = ffi.typeof("int8_t[?]")
+
+
+local __const_c_typename_size_t = ffi.typeof("const size_t[?]")
+local __c_function_argument_size_t = ffi.typeof("size_t[?]")
+local __c_mut_function_argument_size_t = ffi.typeof("size_t[?]")
+
+
+local __const_c_typename_uint16_t = ffi.typeof("const uint16_t[?]")
+local __c_function_argument_uint16_t = ffi.typeof("uint16_t[?]")
+local __c_mut_function_argument_uint16_t = ffi.typeof("uint16_t[?]")
+
+
 local __const_c_typename_int32_t = ffi.typeof("const int32_t[?]")
 local __c_function_argument_int32_t = ffi.typeof("int32_t[?]")
 local __c_mut_function_argument_int32_t = ffi.typeof("int32_t[?]")
-
-
-local __const_c_typename___string_ptr = ffi.typeof("const char *[?]")
-local __c_function_argument___string_ptr = ffi.typeof("const char *[?]")
-local __c_mut_function_argument___string_ptr = ffi.typeof("char *[?]")
-
-
-local __const_c_typename_uint32_t = ffi.typeof("const uint32_t[?]")
-local __c_function_argument_uint32_t = ffi.typeof("uint32_t[?]")
-local __c_mut_function_argument_uint32_t = ffi.typeof("uint32_t[?]")
-
-
-local __typename_Vec___string_ptr = ffi.metatype("blink_cmp_fuzzy__Vec___string_ptr", {})
-local __const_c_typename_Vec___string_ptr = ffi.typeof("const blink_cmp_fuzzy__Vec___string_ptr[?]")
-local __c_function_argument_Vec___string_ptr = ffi.typeof("const blink_cmp_fuzzy__Vec___string_ptr*[?]")
-local __c_mut_function_argument_Vec___string_ptr = ffi.typeof("blink_cmp_fuzzy__Vec___string_ptr*[?]")
-
-
-local __typename_Vec_int32_t = ffi.metatype("blink_cmp_fuzzy__Vec_int32_t", {})
-local __const_c_typename_Vec_int32_t = ffi.typeof("const blink_cmp_fuzzy__Vec_int32_t[?]")
-local __c_function_argument_Vec_int32_t = ffi.typeof("const blink_cmp_fuzzy__Vec_int32_t*[?]")
-local __c_mut_function_argument_Vec_int32_t = ffi.typeof("blink_cmp_fuzzy__Vec_int32_t*[?]")
 
 
 local __typename_Option_int32_t = ffi.metatype("blink_cmp_fuzzy__Option_int32_t", {})
@@ -136,37 +132,27 @@ local __c_function_argument_Option_int32_t = ffi.typeof("const blink_cmp_fuzzy__
 local __c_mut_function_argument_Option_int32_t = ffi.typeof("blink_cmp_fuzzy__Option_int32_t*[?]")
 
 
-local __typename_Vec_uint32_t = ffi.metatype("blink_cmp_fuzzy__Vec_uint32_t", {})
-local __const_c_typename_Vec_uint32_t = ffi.typeof("const blink_cmp_fuzzy__Vec_uint32_t[?]")
-local __c_function_argument_Vec_uint32_t = ffi.typeof("const blink_cmp_fuzzy__Vec_uint32_t*[?]")
-local __c_mut_function_argument_Vec_uint32_t = ffi.typeof("blink_cmp_fuzzy__Vec_uint32_t*[?]")
+local __typename_Vec_int32_t = ffi.metatype("blink_cmp_fuzzy__Vec_int32_t", {})
+local __const_c_typename_Vec_int32_t = ffi.typeof("const blink_cmp_fuzzy__Vec_int32_t[?]")
+local __c_function_argument_Vec_int32_t = ffi.typeof("const blink_cmp_fuzzy__Vec_int32_t*[?]")
+local __c_mut_function_argument_Vec_int32_t = ffi.typeof("blink_cmp_fuzzy__Vec_int32_t*[?]")
 
 
-local __const_c_typename_size_t = ffi.typeof("const size_t[?]")
-local __c_function_argument_size_t = ffi.typeof("size_t[?]")
-local __c_mut_function_argument_size_t = ffi.typeof("size_t[?]")
+local __const_c_typename___string_ptr = ffi.typeof("const char *[?]")
+local __c_function_argument___string_ptr = ffi.typeof("const char *[?]")
+local __c_mut_function_argument___string_ptr = ffi.typeof("char *[?]")
 
 
-local __const_c_typename_bool = ffi.typeof("const int8_t[?]")
-local __c_function_argument_bool = ffi.typeof("int8_t[?]")
-local __c_mut_function_argument_bool = ffi.typeof("int8_t[?]")
-
-
-local __const_c_typename_uint16_t = ffi.typeof("const uint16_t[?]")
-local __c_function_argument_uint16_t = ffi.typeof("uint16_t[?]")
-local __c_mut_function_argument_uint16_t = ffi.typeof("uint16_t[?]")
+local __typename_Vec___string_ptr = ffi.metatype("blink_cmp_fuzzy__Vec___string_ptr", {})
+local __const_c_typename_Vec___string_ptr = ffi.typeof("const blink_cmp_fuzzy__Vec___string_ptr[?]")
+local __c_function_argument_Vec___string_ptr = ffi.typeof("const blink_cmp_fuzzy__Vec___string_ptr*[?]")
+local __c_mut_function_argument_Vec___string_ptr = ffi.typeof("blink_cmp_fuzzy__Vec___string_ptr*[?]")
 
 
 local __typename_Option___string_ptr = ffi.metatype("blink_cmp_fuzzy__Option___string_ptr", {})
 local __const_c_typename_Option___string_ptr = ffi.typeof("const blink_cmp_fuzzy__Option___string_ptr[?]")
 local __c_function_argument_Option___string_ptr = ffi.typeof("const blink_cmp_fuzzy__Option___string_ptr*[?]")
 local __c_mut_function_argument_Option___string_ptr = ffi.typeof("blink_cmp_fuzzy__Option___string_ptr*[?]")
-
-
-local __typename_LspItem = ffi.metatype("blink_cmp_fuzzy__LspItem", {})
-local __const_c_typename_LspItem = ffi.typeof("const blink_cmp_fuzzy__LspItem[?]")
-local __c_function_argument_LspItem = ffi.typeof("const blink_cmp_fuzzy__LspItem*[?]")
-local __c_mut_function_argument_LspItem = ffi.typeof("blink_cmp_fuzzy__LspItem*[?]")
 
 
 local __typename_Option_Vec___string_ptr = ffi.metatype("blink_cmp_fuzzy__Option_Vec___string_ptr", {})
@@ -179,6 +165,23 @@ local __typename_FuzzyOptions = ffi.metatype("blink_cmp_fuzzy__FuzzyOptions", {}
 local __const_c_typename_FuzzyOptions = ffi.typeof("const blink_cmp_fuzzy__FuzzyOptions[?]")
 local __c_function_argument_FuzzyOptions = ffi.typeof("const blink_cmp_fuzzy__FuzzyOptions*[?]")
 local __c_mut_function_argument_FuzzyOptions = ffi.typeof("blink_cmp_fuzzy__FuzzyOptions*[?]")
+
+
+local __const_c_typename_uint32_t = ffi.typeof("const uint32_t[?]")
+local __c_function_argument_uint32_t = ffi.typeof("uint32_t[?]")
+local __c_mut_function_argument_uint32_t = ffi.typeof("uint32_t[?]")
+
+
+local __typename_LspItem = ffi.metatype("blink_cmp_fuzzy__LspItem", {})
+local __const_c_typename_LspItem = ffi.typeof("const blink_cmp_fuzzy__LspItem[?]")
+local __c_function_argument_LspItem = ffi.typeof("const blink_cmp_fuzzy__LspItem*[?]")
+local __c_mut_function_argument_LspItem = ffi.typeof("blink_cmp_fuzzy__LspItem*[?]")
+
+
+local __typename_Vec_uint32_t = ffi.metatype("blink_cmp_fuzzy__Vec_uint32_t", {})
+local __const_c_typename_Vec_uint32_t = ffi.typeof("const blink_cmp_fuzzy__Vec_uint32_t[?]")
+local __c_function_argument_Vec_uint32_t = ffi.typeof("const blink_cmp_fuzzy__Vec_uint32_t*[?]")
+local __c_mut_function_argument_Vec_uint32_t = ffi.typeof("blink_cmp_fuzzy__Vec_uint32_t*[?]")
 
 function M.init_db(
     db_path)
