@@ -7,6 +7,7 @@
 
 local config = require('blink.cmp.config')
 local renderer = require('blink.cmp.windows.lib.render')
+local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
 local autocomplete = {
   items = {},
@@ -137,25 +138,9 @@ end
 
 ---------- Selection ----------
 
---- @param n number
-local function delete_last_n_chars(n)
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  col = col - n
-  if col < 0 then col = 0 end
-  vim.api.nvim_buf_set_text(0, row - 1, col, row - 1, col + n, { '' })
-end
-
 --- @param line number
 local function select(line)
   local auto_insert = config.windows.autocomplete.auto_insert
-
-  local context = autocomplete.context
-  local original_context = ''
-  if context.bounds.start_col ~= context.cursor[2] then
-    original_context = context.line:sub(context.bounds.start_col, context.cursor[2])
-  end
-  local has_already_selected = autocomplete.has_selected
-  local prev_selected_item = autocomplete.get_selected_item()
 
   autocomplete.set_has_selected(true)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
@@ -163,15 +148,15 @@ local function select(line)
   local selected_item = autocomplete.get_selected_item()
 
   if auto_insert then
-    if prev_selected_item ~= nil and has_already_selected then
-      delete_last_n_chars(#prev_selected_item.label)
-    elseif not has_already_selected then
-      delete_last_n_chars(#original_context)
-    end
-    if selected_item ~= nil then vim.api.nvim_feedkeys(selected_item.label, 'int', true) end
+    local text_edit = text_edits_lib.get_from_item(selected_item)
+    text_edits_lib.apply_text_edits(selected_item.client_id, { text_edit })
+    vim.api.nvim_win_set_cursor(0, {
+      text_edit.range.start.line + 1,
+      text_edit.range.start.character + #text_edit.newText,
+    })
   end
 
-  autocomplete.event_targets.on_select(selected_item, context)
+  autocomplete.event_targets.on_select(selected_item, autocomplete.context)
 end
 
 function autocomplete.select_next()

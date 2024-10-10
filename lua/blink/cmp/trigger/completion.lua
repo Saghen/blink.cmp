@@ -32,26 +32,23 @@ function trigger.activate_autocmds()
       -- no characters added so let cursormoved handle it
       if last_char == '' then return end
 
-      if trigger.triggered_by ~= 'select' then
-        -- ignore if in a special buffer
-        if utils.is_special_buffer() then
-          trigger.hide()
+      -- ignore if in a special buffer
+      if utils.is_special_buffer() then
+        trigger.hide()
         -- character forces a trigger according to the sources, create a fresh context
-        elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
-          trigger.context = nil
-          trigger.triggered_by = nil
-          trigger.show({ trigger_character = last_char })
+      elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
+        trigger.context = nil
+        trigger.triggered_by = nil
+        trigger.show({ trigger_character = last_char })
         -- character is part of the current context OR in an existing context
-        elseif last_char:match(config.keyword_regex) ~= nil then
-          trigger.show()
+      elseif last_char:match(config.keyword_regex) ~= nil then
+        trigger.show()
         -- nothing matches so hide
-        else
-          trigger.hide()
-        end
+      else
+        trigger.hide()
       end
 
       last_char = ''
-      trigger.triggered_by = nil
     end,
   })
 
@@ -69,22 +66,26 @@ function trigger.activate_autocmds()
         and not vim.tbl_contains(config.show_on_insert_blocked_trigger_characters, char_under_cursor)
       local is_on_context_char = char_under_cursor:match(config.keyword_regex) ~= nil
 
-      if is_within_bounds then
-        trigger.show()
-      elseif
-        -- check if we've gone 1 char behind the context and we're still on a context char
-        (is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1)
-        -- or if we've moved onto a trigger character
-        or (is_on_trigger and trigger.context ~= nil)
-      then
-        trigger.context = nil
-        trigger.triggered_by = nil
-        trigger.show()
-      elseif config.show_on_insert_on_trigger_character and is_on_trigger and ev.event == 'InsertEnter' then
-        trigger.show({ trigger_character = char_under_cursor })
-      else
-        trigger.hide()
+      if trigger.triggered_by ~= 'select' then
+        if is_within_bounds then
+          trigger.show()
+        elseif
+          -- check if we've gone 1 char behind the context and we're still on a context char
+          (is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1)
+          -- or if we've moved onto a trigger character
+          or (is_on_trigger and trigger.context ~= nil)
+        then
+          trigger.context = nil
+          trigger.triggered_by = nil
+          trigger.show()
+        elseif config.show_on_insert_on_trigger_character and is_on_trigger and ev.event == 'InsertEnter' then
+          trigger.show({ trigger_character = char_under_cursor })
+        else
+          trigger.hide()
+        end
       end
+
+      trigger.triggered_by = nil
     end,
   })
 
