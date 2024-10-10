@@ -7,6 +7,7 @@
 
 local config = require('blink.cmp.config')
 local renderer = require('blink.cmp.windows.lib.render')
+local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
 local autocomplete = {
   items = {},
@@ -65,7 +66,7 @@ function autocomplete.open_with_items(context, items)
 
   autocomplete.context = context
   autocomplete.update_position(context)
-  autocomplete.set_has_selected(autocmp_config.preselect)
+  autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
@@ -75,13 +76,13 @@ end
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
   autocomplete.win:open()
-  autocomplete.set_has_selected(autocmp_config.preselect)
+  autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 end
 
 function autocomplete.close()
   if not autocomplete.win:is_open() then return end
   autocomplete.win:close()
-  autocomplete.has_selected = autocmp_config.preselect
+  autocomplete.has_selected = autocmp_config.selection == 'preselect'
   autocomplete.event_targets.on_close()
 end
 function autocomplete.listen_on_close(callback) autocomplete.event_targets.on_close = callback end
@@ -137,6 +138,41 @@ end
 
 ---------- Selection ----------
 
+--- @param line number
+local function select(line)
+  local auto_insert = config.windows.autocomplete.selection == 'auto_insert'
+
+  local prev_selected_item = autocomplete.get_selected_item()
+
+  autocomplete.set_has_selected(true)
+  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
+
+  local selected_item = autocomplete.get_selected_item()
+
+  if auto_insert and selected_item ~= nil then
+    local text_edit = text_edits_lib.get_from_item(selected_item)
+
+    if selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+      text_edit.newText = selected_item.label
+    end
+
+    if
+      prev_selected_item ~= nil and prev_selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet
+    then
+      local current_col = vim.api.nvim_win_get_cursor(0)[2]
+      text_edit.range.start.character = current_col - #prev_selected_item.label
+    end
+
+    text_edits_lib.apply_text_edits(selected_item.client_id, { text_edit })
+    vim.api.nvim_win_set_cursor(0, {
+      text_edit.range.start.line + 1,
+      text_edit.range.start.character + #text_edit.newText,
+    })
+  end
+
+  autocomplete.event_targets.on_select(selected_item, autocomplete.context)
+end
+
 function autocomplete.select_next()
   if not autocomplete.win:is_open() then return end
 
@@ -146,6 +182,7 @@ function autocomplete.select_next()
   -- We need to ajust the disconnect between the line position
   -- on the window and the selected item
   if not autocomplete.has_selected then line = line - 1 end
+  if autocomplete.has_selected and l == 1 then return end
   if line == l then
     -- at the end of completion list and the config is not enabled: do nothing
     if not cycle_from_bottom then return end
@@ -154,10 +191,7 @@ function autocomplete.select_next()
     line = line + 1
   end
 
-  autocomplete.set_has_selected(true)
-
-  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  select(line)
 end
 
 function autocomplete.select_prev()
@@ -166,6 +200,7 @@ function autocomplete.select_prev()
   local cycle_from_top = config.windows.autocomplete.cycle.from_top
   local l = #autocomplete.items
   local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
+  if autocomplete.has_selected and l == 1 then return end
   if line <= 1 then
     if not cycle_from_top then return end
     line = l
@@ -173,10 +208,7 @@ function autocomplete.select_prev()
     line = line - 1
   end
 
-  autocomplete.set_has_selected(true)
-
-  vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), autocomplete.context)
+  select(line)
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end
@@ -255,6 +287,7 @@ function autocomplete.render_item_reversed(ctx)
   }
 end
 
+--- @return blink.cmp.CompletionItem | nil
 function autocomplete.get_selected_item()
   if not autocomplete.win:is_open() then return end
   if not autocomplete.has_selected then return end

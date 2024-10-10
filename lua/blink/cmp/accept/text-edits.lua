@@ -7,7 +7,7 @@ function text_edits.get_from_item(item)
   -- from when the items were fetched versus the current.
   -- hack: is there a better way?
   if item.textEdit ~= nil then
-    local text_edit = utils.shallow_copy(item.textEdit)
+    local text_edit = vim.deepcopy(item.textEdit)
     local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
     text_edit.range['end'].character = text_edit.range['end'].character + offset
     return text_edit
