@@ -55,7 +55,7 @@ end
 function nvim_cmp:get_trigger_characters()
   local source = nvim_cmp_registry:get_source(self.name)
   --- @diagnostic disable: return-type-mismatch
-  if source == nil or source.get_trigger_characters == nil then return nil end
+  if source == nil or source.get_trigger_characters == nil then return {} end
   return source:get_trigger_characters()
 end
 
