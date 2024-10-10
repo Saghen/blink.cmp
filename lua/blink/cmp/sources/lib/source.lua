@@ -5,9 +5,9 @@ local source = {}
 --- @param config blink.cmp.SourceProviderConfig
 function source.new(config)
   local self = setmetatable({}, { __index = source })
-  self.name = config[1]
+  self.name = config.name or config[1]
   --- @type blink.cmp.Source
-  self.module = require(config[1]).new(config.opts or {})
+  self.module = require(config[1]).new(config.opts or {}, self.name)
   self.config = config
   self.last_response = nil
 

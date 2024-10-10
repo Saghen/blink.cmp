@@ -1,10 +1,12 @@
 local async = require('blink.cmp.sources.lib.async')
+local nvim_cmp_registry = require('blink.cmp.sources.lib.nvim_cmp_registry')
 local config = require('blink.cmp.config')
 local sources = {
   current_context = nil,
   sources_registered = false,
   sources_groups = {},
   on_completions_callback = function(_, _) end,
+  nvim_cmp_registry = nvim_cmp_registry.new(),
 }
 
 function sources.register()
