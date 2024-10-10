@@ -54,21 +54,11 @@ function text_edits.guess_text_edit(bufnr, item)
     start_col = start_col - 1
   end
 
-  -- todo: optionally dont search forward since LSPs dont typically do this with textEdits
-  -- so this will lead to inconsistent behavior
-  -- OR add support on textEdits
-  local end_col = current_col
-  while end_col < #line do
-    local char = line:sub(end_col + 1, end_col + 1)
-    if char:match('[%w_\\-]') == nil then break end
-    end_col = end_col + 1
-  end
-
   -- convert to 0-index
   return {
     range = {
       start = { line = current_line - 1, character = start_col - 1 },
-      ['end'] = { line = current_line - 1, character = end_col },
+      ['end'] = { line = current_line - 1, character = current_col - 1 },
     },
     newText = word,
   }
