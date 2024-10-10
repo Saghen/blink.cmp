@@ -43,7 +43,7 @@ function text_edits.guess_text_edit(bufnr, item)
   local word = item.insertText or item.label
 
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
-  local current_col = vim.api.nvim_win_get_cursor(0)[2]
+  local current_col = vim.api.nvim_win_get_cursor(0)[2] + 1
   local line = vim.api.nvim_buf_get_lines(bufnr, current_line - 1, current_line, false)[1]
 
   -- Search forward/backward for the start/end of the word
