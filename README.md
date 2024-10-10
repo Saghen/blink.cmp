@@ -242,10 +242,11 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 's', 'n' },
-      -- whether to preselect the first item in the completion list
-      preselect = true,
-      -- Whether to insert the completion items automatically when selecting them. Requires `preselect = false`
-      auto_insert = true,
+      -- Controls how the completion items are selected
+      -- 'preselect' will automatically select the first item in the completion list
+      -- 'manual' will not select any item by default
+      -- 'auto_insert' will not select any item by default, and insert the completion items automatically when selecting them
+      selection = 'preselect',
       -- Controls how the completion items are rendered on the popup window
       -- 'simple' will render the item's kind icon the left alongside the label
       -- 'reversed' will render the label on the left and the kind icon + name on the right

@@ -66,7 +66,7 @@ function autocomplete.open_with_items(context, items)
 
   autocomplete.context = context
   autocomplete.update_position(context)
-  autocomplete.set_has_selected(autocmp_config.preselect)
+  autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
@@ -76,13 +76,13 @@ end
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
   autocomplete.win:open()
-  autocomplete.set_has_selected(autocmp_config.preselect)
+  autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 end
 
 function autocomplete.close()
   if not autocomplete.win:is_open() then return end
   autocomplete.win:close()
-  autocomplete.has_selected = autocmp_config.preselect
+  autocomplete.has_selected = autocmp_config.selection == 'preselect'
   autocomplete.event_targets.on_close()
 end
 function autocomplete.listen_on_close(callback) autocomplete.event_targets.on_close = callback end
@@ -140,7 +140,7 @@ end
 
 --- @param line number
 local function select(line)
-  local auto_insert = config.windows.autocomplete.auto_insert
+  local auto_insert = config.windows.autocomplete.selection == 'auto_insert'
 
   local prev_selected_item = autocomplete.get_selected_item()
 

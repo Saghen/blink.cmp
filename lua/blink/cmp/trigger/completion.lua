@@ -67,7 +67,7 @@ function trigger.activate_autocmds()
         and not vim.tbl_contains(config_trigger.show_on_insert_blocked_trigger_characters, char_under_cursor)
       local is_on_context_char = char_under_cursor:match(config_trigger.keyword_regex) ~= nil
 
-      if config.windows.autocomplete.auto_insert and trigger.triggered_by ~= 'select' then
+      if config.windows.autocomplete.selection == 'auto_insert' and trigger.triggered_by ~= 'select' then
         if is_within_bounds then
           trigger.show()
         elseif
