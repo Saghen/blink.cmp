@@ -63,7 +63,7 @@ function download.is_downloaded(cb)
       cb(true)
     else
       -- If not found, check without 'lib' prefix
-      vim.uv.fs_stat(string.gsub(lib_path, 'lib', ''), function(error) cb(not error) end)
+      vim.uv.fs_stat(string.gsub(lib_path, 'libblink_cmp_fuzzy', 'blink_cmp_fuzzy'), function(error) cb(not error) end)
     end
   end)
 end
