@@ -1,11 +1,23 @@
 local text_edits_lib = require('blink.cmp.accept.text-edits')
 local brackets_lib = require('blink.cmp.accept.brackets')
+local config = require('blink.cmp.config')
 
 --- Applies a completion item to the current buffer
 --- @param item blink.cmp.CompletionItem
 local function accept(item)
+  local has_original_text_edit = item.textEdit ~= nil
   item = vim.deepcopy(item)
   item.textEdit = text_edits_lib.get_from_item(item)
+
+  -- As `text_edits.guess_text_edit`'s way of detecting the start position of the edit is a bit
+  -- naive for now, if selection mode is `auto_insert` and the LSP didn't provide a textEdit, then
+  -- we need to manually set the correct position here.
+  if config.windows.autocomplete.selection == 'auto_insert' and not has_original_text_edit then
+    local word = item.insertText or item.label
+    if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then word = item.label end
+    local current_col = vim.api.nvim_win_get_cursor(0)[2]
+    item.textEdit.range.start.character = current_col - #word
+  end
 
   -- Add brackets to the text edit if needed
   local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(vim.bo.filetype, item)
