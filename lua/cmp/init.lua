@@ -1,6 +1,7 @@
 local M = {
   core = require('cmp.core'),
-  lsp = require('cmp.lsp'),
+  types = require('cmp.types'),
+  lsp = require('cmp.types.lsp'),
 }
 
 function M.register_source(name, s)
