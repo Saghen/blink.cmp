@@ -54,4 +54,9 @@ function nvim_cmp:get_trigger_characters()
   return self.module:get_trigger_characters()
 end
 
+function nvim_cmp:should_show_completions()
+  if self.module.is_available == nil then return true end
+  return self.module:is_available()
+end
+
 return nvim_cmp
