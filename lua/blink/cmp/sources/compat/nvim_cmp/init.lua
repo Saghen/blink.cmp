@@ -1,5 +1,22 @@
 local registry = require('blink.cmp.sources.compat.nvim_cmp.registry')
 
+local function make_params(name, opts, ctx)
+  -- todo: follow nvim-cmp behavior more closely
+  local params = {
+    name = name,
+    option = opts or {},
+    offset = ctx.cursor[2], -- todo: this is wrong
+    context = {
+      bufnr = ctx.bufnr,
+      cursor_after_line = string.sub(ctx.line, ctx.cursor[2] + 1),
+      cursor_before_line = string.sub(ctx.line, 1, ctx.cursor[2]),
+      cursor_line = ctx.line,
+    },
+  }
+
+  return params
+end
+
 --- @class blink.cmp.Source
 --- @field name string
 --- @field opts table | nil
@@ -38,16 +55,7 @@ function nvim_cmp:get_completions(ctx, callback)
     })
   end
 
-  local params = {
-    name = self.name,
-    option = self.opts or {},
-    offset = ctx.cursor[2], -- todo: match nvim-cmp behavior more closely
-    context = {
-      bufnr = ctx.bufnr,
-      cursor_before_line = string.sub(ctx.line, 1, ctx.cursor[2]),
-    },
-  }
-
+  local params = make_params(self.name, self.opts, ctx)
   source:complete(params, transformed_callback)
 
   return function() end
@@ -65,5 +73,10 @@ function nvim_cmp:should_show_completions()
   if source == nil or source.is_available == nil then return true end
   return source:is_available()
 end
+
+-- Currently missing:
+-- resolve
+-- execute
+-- get_signature_help
 
 return nvim_cmp
