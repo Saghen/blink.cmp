@@ -6,6 +6,8 @@ local config = require('blink.cmp.config')
 local config_trigger = config.trigger.completion
 local sources = require('blink.cmp.sources.lib')
 local utils = require('blink.cmp.utils')
+local autocomplete = require('blink.cmp.windows.autocomplete')
+local text_edits_lib = require('blink.cmp.accept.text-edits')
 
 local trigger = {
   current_context_id = -1,
@@ -46,6 +48,15 @@ function trigger.activate_autocmds()
         trigger.show()
         -- nothing matches so hide
       else
+        local selected_item = autocomplete.get_selected_item()
+        if
+          config.windows.autocomplete.selection == 'auto_insert'
+          and autocomplete.has_selected
+          and selected_item ~= nil
+        then
+          text_edits_lib.apply_additional_text_edits(selected_item)
+        end
+
         trigger.hide()
       end
 
