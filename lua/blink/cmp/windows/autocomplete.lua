@@ -103,7 +103,7 @@ function autocomplete.update_position(context)
 
   -- place the window at the start col of the current text we're fuzzy matching against
   -- so the window doesnt move around as we type
-  local col = context.bounds.start_col - cursor_col - 1
+  local col = context.bounds.start_col - cursor_col - (context.bounds.start_col == 0 and 0 or 1)
 
   -- detect if there's space above/below the cursor
   -- todo: should pick the largest space if both are false and limit height of the window
