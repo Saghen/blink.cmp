@@ -54,8 +54,16 @@ function docs.show_item(item)
       return
     end
 
-    local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
     local doc_lines = {}
+    if item.detail and item.detail ~= '' then
+      table.insert(doc_lines, '```'..vim.bo.filetype)
+      for s in item.detail:gmatch('[^\r\n]+') do
+        table.insert(doc_lines, s)
+      end
+      table.insert(doc_lines, '```')
+    end
+
+    local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
     for s in doc:gmatch('[^\r\n]+') do
       table.insert(doc_lines, s)
     end
