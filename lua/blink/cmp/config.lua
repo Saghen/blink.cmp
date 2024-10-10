@@ -82,6 +82,7 @@
 --- @field use_nvim_cmp_as_default? boolean
 
 --- @class blink.cmp.AutocompleteConfig
+--- @field min_width? number
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
 --- @field order? "top_down" | "bottom_up"
@@ -232,6 +233,7 @@ local config = {
 
   windows = {
     autocomplete = {
+      min_width = 15,
       max_height = 10,
       border = 'none',
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',

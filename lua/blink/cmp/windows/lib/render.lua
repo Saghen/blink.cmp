@@ -41,10 +41,12 @@ function renderer.draw_highlights(rendered, bufnr, ns, line_number)
   end
 end
 
----@param strings string[]
----@param max_width? number
----@return blink.cmp.StringsBuild
-function renderer.build_strings(strings, max_width)
+--- Gets the concatenated text and length for a list of strings
+--- and truncates if necessary when max_width is set
+--- @param strings string[]
+--- @param max_width? number
+--- @return blink.cmp.StringsBuild
+function renderer.concat_strings(strings, max_width)
   local text = ''
   for _, component in ipairs(strings) do
     text = text .. component
@@ -67,20 +69,20 @@ function renderer.render(components, lengths)
       text = text .. component
       offset = offset + #component
     else
-      local build = renderer.build_strings(component, component.max_width)
+      local concatenated = renderer.concat_strings(component, component.max_width)
 
       table.insert(highlights, {
         start = offset + 1,
-        stop = offset + #build.text + 1,
+        stop = offset + #concatenated.text + 1,
         group = component.hl_group,
         params = component.hl_params,
       })
 
-      text = text .. build.text
-      offset = offset + #build.text
+      text = text .. concatenated.text
+      offset = offset + #concatenated.text
 
       if component.fill then
-        local spaces = lengths[i] - build.length
+        local spaces = lengths[i] - concatenated.length
         text = text .. string.rep(' ', spaces)
         offset = offset + spaces
       end
@@ -96,14 +98,15 @@ function renderer.get_length(component)
   if type(component) == 'string' then
     return vim.api.nvim_strwidth(component)
   else
-    local build = renderer.build_strings(component, component.max_width)
+    local build = renderer.concat_strings(component, component.max_width)
     return build.length
   end
 end
 
 --- @param components_list (blink.cmp.Component | string)[][]
+--- @param min_width number
 --- @return number[]
-function renderer.get_max_lengths(components_list)
+function renderer.get_max_lengths(components_list, min_width)
   local lengths = {}
   for _, components in ipairs(components_list) do
     for i, component in ipairs(components) do
@@ -111,6 +114,11 @@ function renderer.get_max_lengths(components_list)
       if not lengths[i] or lengths[i] < length then lengths[i] = length end
     end
   end
+
+  for i, length in ipairs(lengths) do
+    if length < min_width then lengths[i] = min_width end
+  end
+
   return lengths
 end
 

@@ -21,6 +21,7 @@ local autocomplete = {
 
 function autocomplete.setup()
   autocomplete.win = require('blink.cmp.windows.lib').new({
+    min_width = autocmp_config.min_width,
     max_height = autocmp_config.max_height,
     border = autocmp_config.border,
     winhighlight = autocmp_config.winhighlight,
@@ -207,7 +208,7 @@ function autocomplete.draw()
     )
   end
 
-  local max_lengths = renderer.get_max_lengths(components_list)
+  local max_lengths = renderer.get_max_lengths(components_list, autocmp_config.min_width)
   autocomplete.rendered_items = vim.tbl_map(
     function(component) return renderer.render(component, max_lengths) end,
     components_list
@@ -236,7 +237,12 @@ function autocomplete.render_item_simple(ctx)
   return {
     ' ',
     { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
-    { ctx.item.label, fill = true, hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
+    {
+      ctx.item.label,
+      fill = true,
+      hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+      max_width = 50,
+    },
     ' ',
   }
 end
@@ -250,6 +256,7 @@ function autocomplete.render_item_reversed(ctx)
       ctx.item.label,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+      max_width = 50,
     },
     ' ',
     { ctx.kind_icon, ctx.icon_gap, ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
