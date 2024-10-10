@@ -161,7 +161,7 @@ local config = {
       blocked_filetypes = {},
       kind_resolution = {
         enabled = true,
-        blocked_filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact', 'vue' },
+        blocked_filetypes = { 'typescriptreact', 'javascriptreact', 'vue' },
       },
       semantic_token_resolution = {
         enabled = true,
