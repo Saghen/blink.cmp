@@ -9,8 +9,18 @@ function download.get_lib_extension()
   return '.so'
 end
 
+--- @return string
+function download.get_lib_prefix()
+  if jit.os:lower() == 'windows' then return '' end
+  return 'lib'
+end
+
 local root_dir = debug.getinfo(1).source:match('@?(.*/)')
-local lib_path = root_dir .. '../../../../target/release/libblink_cmp_fuzzy' .. download.get_lib_extension()
+local lib_path = root_dir
+  .. '../../../../target/release/'
+  .. download.get_lib_prefix()
+  .. 'blink_cmp_fuzzy'
+  .. download.get_lib_extension()
 local version_path = root_dir .. '../../../../target/release/version.txt'
 
 --- @param callback fun(err: string | nil)
