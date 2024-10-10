@@ -4,10 +4,11 @@ local M = {
 }
 
 function M.register_source(name, s)
-  require('blink.cmp.sources.lib').nvim_cmp_registry:register_source(name, s)
+  require('blink.cmp.sources.compat.nvim_cmp.registry').register_source(name, s)
+  -- use name as id
   return name
 end
 
-function M.unregister_source(id) require('blink.cmp.sources.lib').nvim_cmp_registry:unregister_source(id) end
+function M.unregister_source(id) require('blink.cmp.sources.compat.nvim_cmp.registry').unregister_source(id) end
 
 return M

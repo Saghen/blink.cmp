@@ -1,4 +1,4 @@
-local nvim_cmp_registry = require('blink.cmp.sources.lib').nvim_cmp_registry
+local registry = require('blink.cmp.sources.compat.nvim_cmp.registry')
 
 --- @class blink.cmp.Source
 --- @field name string
@@ -15,7 +15,7 @@ function nvim_cmp.new(opts, name)
 end
 
 function nvim_cmp:get_completions(ctx, callback)
-  local source = nvim_cmp_registry:get_source(self.name)
+  local source = registry.get_source(self.name)
   if source == nil or source.complete == nil then
     --- @diagnostic disable: missing-parameter
     return callback()
@@ -54,14 +54,14 @@ function nvim_cmp:get_completions(ctx, callback)
 end
 
 function nvim_cmp:get_trigger_characters()
-  local source = nvim_cmp_registry:get_source(self.name)
+  local source = registry.get_source(self.name)
   --- @diagnostic disable: return-type-mismatch
   if source == nil or source.get_trigger_characters == nil then return {} end
   return source:get_trigger_characters()
 end
 
 function nvim_cmp:should_show_completions()
-  local source = nvim_cmp_registry:get_source(self.name)
+  local source = registry.get_source(self.name)
   if source == nil or source.is_available == nil then return true end
   return source:is_available()
 end
