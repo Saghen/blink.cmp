@@ -235,8 +235,6 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 
   windows = {
     autocomplete = {
-      min_width = 30,
-      max_width = 60,
       max_height = 10,
       border = 'none',
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
