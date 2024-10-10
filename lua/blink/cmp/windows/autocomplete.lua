@@ -21,8 +21,6 @@ local autocomplete = {
 
 function autocomplete.setup()
   autocomplete.win = require('blink.cmp.windows.lib').new({
-    min_width = autocmp_config.min_width,
-    max_width = autocmp_config.max_width,
     max_height = autocmp_config.max_height,
     border = autocmp_config.border,
     winhighlight = autocmp_config.winhighlight,
@@ -192,13 +190,13 @@ end
 function autocomplete.draw()
   local draw_fn = autocomplete.get_draw_fn()
   local icon_gap = config.nerd_font_variant == 'mono' and ' ' or '  '
-  local arr_of_components = {}
+  local components_list = {}
   for _, item in ipairs(autocomplete.items) do
     local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
     local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
 
     table.insert(
-      arr_of_components,
+      components_list,
       draw_fn({
         item = item,
         kind = kind,
@@ -209,11 +207,10 @@ function autocomplete.draw()
     )
   end
 
-  local max_line_length =
-    math.min(autocmp_config.max_width, math.max(autocmp_config.min_width, renderer.get_max_length(arr_of_components)))
+  local max_lengths = renderer.get_max_lengths(components_list)
   autocomplete.rendered_items = vim.tbl_map(
-    function(component) return renderer.render(component, max_line_length) end,
-    arr_of_components
+    function(component) return renderer.render(component, max_lengths) end,
+    components_list
   )
 
   local lines = vim.tbl_map(function(rendered) return rendered.text end, autocomplete.rendered_items)
@@ -237,8 +234,10 @@ end
 --- @return blink.cmp.Component[]
 function autocomplete.render_item_simple(ctx)
   return {
-    { ' ', ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    ' ',
+    { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
     { ctx.item.label, fill = true, hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
+    ' ',
   }
 end
 
@@ -246,12 +245,15 @@ end
 --- @return blink.cmp.Component[]
 function autocomplete.render_item_reversed(ctx)
   return {
+    ' ',
     {
-      ' ' .. ctx.item.label,
+      ctx.item.label,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
     },
-    { ' ', ctx.kind_icon, ctx.icon_gap, ctx.kind .. ' ', hl_group = 'BlinkCmpKind' .. ctx.kind },
+    ' ',
+    { ctx.kind_icon, ctx.icon_gap, ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    ' ',
   }
 end
 
