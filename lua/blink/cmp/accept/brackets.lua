@@ -51,10 +51,8 @@ function brackets.add_brackets(filetype, item)
   -- check if configuration incidates we should skip
   if not brackets.should_run_resolution(filetype, 'kind') then return 'check_semantic_token', text_edit, 0 end
   -- not a function, skip
-  if
-    item.kind ~= vim.lsp.protocol.CompletionItemKind.Function
-    and item.kind ~= vim.lsp.protocol.CompletionItemKind.Method
-  then
+  local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
+  if item.kind ~= CompletionItemKind.Function and item.kind ~= CompletionItemKind.Method then
     return 'check_semantic_token', text_edit, 0
   end
 
@@ -107,7 +105,9 @@ function brackets.add_brackets_via_semantic_token(filetype, item, callback)
   if client == nil then return callback() end
 
   local start_time = vim.uv.hrtime()
-  if not (client.server_capabilities.semanticTokensProvider and client.server_capabilities.semanticTokensProvider.legend) then
+  if
+    not (client.server_capabilities.semanticTokensProvider and client.server_capabilities.semanticTokensProvider.legend)
+  then
     return callback()
   end
   local numToTokenType = client.server_capabilities.semanticTokensProvider.legend.tokenTypes

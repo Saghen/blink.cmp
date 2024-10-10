@@ -107,10 +107,10 @@ end
 function registry:snippet_to_completion_item(snippet)
   local body = type(snippet.body) == 'string' and snippet.body or table.concat(snippet.body, '\n')
   return {
-    kind = vim.lsp.protocol.CompletionItemKind.Snippet,
+    kind = require('blink.cmp.types').CompletionItemKind.Snippet,
     label = snippet.prefix,
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
-    insertText = self:parse_body(body),
+    insertText = self:expand_vars(body),
     description = snippet.description,
   }
 end

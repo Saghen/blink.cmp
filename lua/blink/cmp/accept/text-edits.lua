@@ -43,13 +43,13 @@ function text_edits.guess_text_edit(bufnr, item)
   local word = item.insertText or item.label
 
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
-  local current_col = vim.api.nvim_win_get_cursor(0)[2] + 1
+  local current_col = vim.api.nvim_win_get_cursor(0)[2]
   local line = vim.api.nvim_buf_get_lines(bufnr, current_line - 1, current_line, false)[1]
 
   -- Search forward/backward for the start/end of the word
   local start_col = current_col
-  while start_col > 1 do
-    local char = line:sub(start_col - 1, start_col - 1)
+  while start_col > 0 do
+    local char = line:sub(start_col, start_col)
     if char:match('[%w_\\-]') == nil then break end
     start_col = start_col - 1
   end
@@ -57,8 +57,8 @@ function text_edits.guess_text_edit(bufnr, item)
   -- convert to 0-index
   return {
     range = {
-      start = { line = current_line - 1, character = start_col - 1 },
-      ['end'] = { line = current_line - 1, character = current_col - 1 },
+      start = { line = current_line - 1, character = start_col },
+      ['end'] = { line = current_line - 1, character = current_col },
     },
     newText = word,
   }

@@ -226,7 +226,7 @@ function autocomplete.draw()
   local icon_gap = config.nerd_font_variant == 'mono' and ' ' or '  '
   local arr_of_components = {}
   for _, item in ipairs(autocomplete.items) do
-    local kind = vim.lsp.protocol.CompletionItemKind[item.kind] or 'Unknown'
+    local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
     local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
 
     table.insert(

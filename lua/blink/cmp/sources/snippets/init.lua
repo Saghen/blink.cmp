@@ -44,8 +44,11 @@ function snippets:get_completions(_, callback)
 end
 
 function snippets:resolve(item, callback)
+  local parsed_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(item.insertText)
+  local snippet = parsed_snippet and tostring(parsed_snippet) or item.insertText
+
   -- TODO: ideally context is passed with the filetype
-  local documentation = '```' .. vim.bo.filetype .. '\n' .. item.insertText .. '```' .. '\n---\n' .. item.description
+  local documentation = '```' .. vim.bo.filetype .. '\n' .. snippet .. '```' .. '\n---\n' .. item.description
 
   local resolved_item = vim.deepcopy(item)
   resolved_item.documentation = {
