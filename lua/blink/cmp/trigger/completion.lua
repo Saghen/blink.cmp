@@ -49,31 +49,10 @@ function trigger.activate_autocmds()
     end,
   })
 
-  -- hack: 'a' triggers both the InsertEnter and CursorMovedI event
-  -- However, the cursor_col hasn't changed. When we're on a trigger character,
-  -- this causes two show() calls, one with the trigger character and one without.
-  -- To prevent this, we ignore the first CursorMovedI event when 'a' is pressed
-  local ignore_next_cursor_moved = false
-  vim.api.nvim_set_keymap('n', 'a', '', {
-    callback = function()
-      ignore_next_cursor_moved = true
-      return 'a'
-    end,
-    expr = true,
-    noremap = true,
-    silent = true,
-  })
-
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
       -- characters added so let textchanged handle it
       if last_char ~= '' then return end
-
-      -- ignore CursorMovedI event when flag is enabled
-      if ev.event == 'CursorMovedI' and ignore_next_cursor_moved then
-        ignore_next_cursor_moved = false
-        return
-      end
 
       local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
@@ -128,8 +107,13 @@ end
 function trigger.show(opts)
   opts = opts or {}
 
-  -- update context
   local cursor = vim.api.nvim_win_get_cursor(0)
+  -- already triggered at this position, ignore
+  if trigger.context ~= nil and cursor[1] == trigger.context.cursor[1] and cursor[2] == trigger.context.cursor[2] then
+    return
+  end
+
+  -- update context
   if trigger.context == nil then trigger.current_context_id = trigger.current_context_id + 1 end
   trigger.context = {
     id = trigger.current_context_id,
