@@ -142,8 +142,8 @@ MiniDeps.add({
     select_prev = { '<Up>', '<C-p>' },
     select_next = { '<Down>', '<C-n>' },
 
-    show_documentation = {},
-    hide_documentation = {},
+    show_documentation = '<C-space>',
+    hide_documentation = '<C-space>',
     scroll_documentation_up = '<C-b>',
     scroll_documentation_down = '<C-f>',
 
@@ -169,6 +169,8 @@ MiniDeps.add({
       semantic_token_resolution = {
         enabled = true,
         blocked_filetypes = {},
+        -- How long to wait for semantic tokens to return before assuming no brackets should be added
+        timeout_ms = 400,
       },
     },
   },
@@ -185,6 +187,8 @@ MiniDeps.add({
       blocked_trigger_characters = { ' ', '\n', '\t' },
       -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_on_trigger_character = true,
+      -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
+      show_on_insert_blocked_trigger_characters = { "'", '"' },
     },
 
     signature_help = {
@@ -270,7 +274,7 @@ MiniDeps.add({
 
   windows = {
     autocomplete = {
-      min_width = 30,
+      min_width = 15,
       max_height = 10,
       border = 'none',
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
@@ -291,7 +295,7 @@ MiniDeps.add({
         -- When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.
         from_bottom = true,
         -- When `true`, calling `select_prev` at the *top* of the completion list will select the *last* completion item.
-        from_top = true
+        from_top = true,
       },
     },
     documentation = {
@@ -307,7 +311,7 @@ MiniDeps.add({
         autocomplete_north = { 'e', 'w', 'n', 's' },
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
-      auto_show = true,
+      auto_show = false,
       auto_show_delay_ms = 500,
       update_delay_ms = 50,
     },
