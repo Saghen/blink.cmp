@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "frizbee"
 version = "0.1.0"
-source = "git+https://github.com/saghen/frizbee#1773ea4bbba2b703150166654296a8f4dd1e7adc"
+source = "git+https://github.com/saghen/frizbee#3a8f8947551e1d86c51ea6ce24bc8b7adf7b6a31"
 dependencies = [
  "memchr",
  "smith_waterman_macro",
@@ -447,7 +447,7 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 [[package]]
 name = "smith_waterman_macro"
 version = "0.1.0"
-source = "git+https://github.com/saghen/frizbee#1773ea4bbba2b703150166654296a8f4dd1e7adc"
+source = "git+https://github.com/saghen/frizbee#3a8f8947551e1d86c51ea6ce24bc8b7adf7b6a31"
 dependencies = [
  "proc-macro2 1.0.87",
  "quote 1.0.37",
