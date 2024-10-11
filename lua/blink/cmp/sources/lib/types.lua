@@ -9,7 +9,7 @@
 --- @field items blink.cmp.CompletionItem[]
 ---
 --- @class blink.cmp.Source
---- @field new fun(opts: table): blink.cmp.Source
+--- @field new fun(opts: table, name: string): blink.cmp.Source
 --- @field get_trigger_characters (fun(self: blink.cmp.Source): string[]) | nil
 --- @field get_completions fun(self: blink.cmp.Source, context: blink.cmp.Context, callback: fun(response: blink.cmp.CompletionResponse)): (fun(): nil) | nil
 --- @field filter_completions (fun(self: blink.cmp.Source, response: blink.cmp.CompletionResponse): blink.cmp.CompletionItem[]) | nil

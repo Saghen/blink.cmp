@@ -51,6 +51,7 @@
 ---
 --- @class blink.cmp.SourceProviderConfig
 --- @field [1]? string
+--- @field name? string
 --- @field keyword_length? number | nil
 --- @field score_offset? number | nil
 --- @field deduplicate? blink.cmp.DeduplicateConfig | nil
