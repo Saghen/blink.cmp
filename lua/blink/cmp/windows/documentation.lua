@@ -61,6 +61,7 @@ function docs.show_item(item)
         table.insert(doc_lines, s)
       end
       table.insert(doc_lines, '```')
+      table.insert(doc_lines, '---')
     end
 
     local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
@@ -70,15 +71,22 @@ function docs.show_item(item)
     vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, doc_lines)
     vim.api.nvim_set_option_value('modified', false, { buf = docs.win:get_buf() })
 
-    local filetype = item.documentation.kind == 'markdown' and 'markdown' or 'plaintext'
-    if filetype ~= vim.api.nvim_get_option_value('filetype', { buf = docs.win:get_buf() }) then
-      vim.api.nvim_set_option_value('filetype', filetype, { buf = docs.win:get_buf() })
-    end
-
     if autocomplete.win:get_win() then
       docs.win:open()
       docs.update_position()
     end
+
+    -- use the built-in markdown styling
+    -- NOTE: according to https://github.com/Saghen/blink.cmp/pull/33#issuecomment-2400195950
+    -- it's possible for this to fail so we call it safely
+    pcall(
+      function()
+        vim.lsp.util.stylize_markdown(docs.win:get_buf(), doc_lines, {
+          height = vim.api.nvim_win_get_height(docs.win:get_win()),
+          width = vim.api.nvim_win_get_width(docs.win:get_win()),
+        })
+      end
+    )
   end)
 end
 
