@@ -6,10 +6,10 @@ local NAME_REGEX = '\\%([^/\\\\:\\*?<>\'"`\\|]\\)'
 local PATH_REGEX =
   assert(vim.regex(([[\%(\%(/PAT*[^/\\\\:\\*?<>\'"`\\| .~]\)\|\%(/\.\.\)\)*/\zePAT*$]]):gsub('PAT', NAME_REGEX)))
 
-function path.new(opts)
+function path.new(config)
   local self = setmetatable({}, { __index = path })
 
-  opts = vim.tbl_deep_extend('keep', opts, {
+  local opts = vim.tbl_deep_extend('keep', config.opts or {}, {
     trailing_slash = false,
     label_trailing_slash = true,
     get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,
@@ -22,7 +22,7 @@ function path.new(opts)
     show_hidden_files_by_default = { opts.show_hidden_files_by_default, 'boolean' },
   })
 
-  self.opts = opts or {}
+  self.opts = opts
   return self
 end
 

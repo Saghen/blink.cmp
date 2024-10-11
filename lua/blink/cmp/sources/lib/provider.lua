@@ -9,7 +9,7 @@ function source.new(config)
   local self = setmetatable({}, { __index = source })
   self.name = config.name
   --- @type blink.cmp.Source
-  self.module = require(config[1]).new(config.opts or {})
+  self.module = require(config[1]).new(config)
   self.config = config
   self.last_response = nil
 

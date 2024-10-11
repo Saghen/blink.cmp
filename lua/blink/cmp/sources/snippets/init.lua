@@ -7,11 +7,12 @@
 
 local snippets = {}
 
---- @param opts blink.cmp.SnippetsOpts
-function snippets.new(opts)
+function snippets.new(config)
   local self = setmetatable({}, { __index = snippets })
   --- @type table<string, blink.cmp.CompletionItem[]>
   self.cache = {}
+  --- @type blink.cmp.SnippetsOpts
+  local opts = config.opts or {}
   self.registry = require('blink.cmp.sources.snippets.registry').new(opts)
   return self
 end
