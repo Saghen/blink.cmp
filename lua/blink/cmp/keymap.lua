@@ -39,11 +39,10 @@ function keymap.setup(opts)
     end
   end
 
-  -- apply keymaps
   -- we set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
-  -- from overriding our mappings
-  keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands) -- apply immediately since the plugin starts asynchronously
-  vim.api.nvim_create_autocmd('BufEnter', {
+  -- from overriding our mappings. We also use InsertEnter to avoid conflicts with keymaps
+  -- applied on other autocmds, such as LspAttach used by nvim-lspconfig and most configs
+  vim.api.nvim_create_autocmd('InsertEnter', {
     callback = function() keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands) end,
   })
 end
@@ -52,6 +51,11 @@ end
 --- @param insert_keys_to_commands table<string, string[]>
 --- @param snippet_keys_to_commands table<string, string[]>
 function keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands)
+  -- skip if we've already applied the keymaps
+  for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(0, 'i')) do
+    if mapping.desc == 'blink.cmp' then return end
+  end
+
   -- insert mode: uses both snippet and insert commands
   for _, key in ipairs(utils.union_keys(insert_keys_to_commands, snippet_keys_to_commands)) do
     keymap.set('i', key, function()
