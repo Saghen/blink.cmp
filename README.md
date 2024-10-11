@@ -376,6 +376,13 @@ MiniDeps.add({
 
 </details>
 
+<details>
+<summary><strong>Community Sources</strong></summary>
+
+- [ctags](https://github.com/netmute/blink-cmp-ctags)
+
+</details>
+
 ## How it works
 
 The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
