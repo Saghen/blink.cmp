@@ -60,4 +60,15 @@ function utils.concat_responses(responses)
   }
 end
 
+--- @param item blink.cmp.CompletionItem
+--- @return lsp.CompletionItem
+function utils.blink_item_to_lsp_item(item)
+  local lsp_item = vim.deepcopy(item)
+  lsp_item.cursor_column = nil
+  lsp_item.score_offset = nil
+  lsp_item.client_id = nil
+  lsp_item.source = nil
+  return lsp_item
+end
+
 return utils

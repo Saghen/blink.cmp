@@ -152,6 +152,9 @@ function lsp:resolve(item, callback)
     return
   end
 
+  -- strip blink specific fields to avoid decoding errors on some LSPs (i.e. fsautocomplete)
+  item = require('blink.cmp.sources.lib.utils').blink_item_to_lsp_item(item)
+
   local _, request_id = client.request('completionItem/resolve', item, function(error, resolved_item)
     if error or resolved_item == nil then callback(item) end
     callback(resolved_item)
