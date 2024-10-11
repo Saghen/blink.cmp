@@ -74,9 +74,4 @@ function nvim_cmp:should_show_completions()
   return source:is_available()
 end
 
--- Currently missing:
--- resolve
--- execute
--- get_signature_help
-
 return nvim_cmp
