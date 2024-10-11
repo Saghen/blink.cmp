@@ -49,32 +49,58 @@ function trigger.activate_autocmds()
     end,
   })
 
-  -- check if we've moved outside of the context by diffing against the query boundary
+  -- hack: 'a' triggers both the InsertEnter and CursorMovedI event
+  -- However, the cursor_col hasn't changed. When we're on a trigger character,
+  -- this causes two show() calls, one with the trigger character and one without.
+  -- To prevent this, we ignore the first CursorMovedI event when 'a' is pressed
+  local ignore_next_cursor_moved = false
+  vim.api.nvim_set_keymap('n', 'a', '', {
+    callback = function()
+      ignore_next_cursor_moved = true
+      return 'a'
+    end,
+    expr = true,
+    noremap = true,
+    silent = true,
+  })
+
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
       -- characters added so let textchanged handle it
       if last_char ~= '' then return end
 
-      local is_within_bounds = trigger.within_query_bounds(vim.api.nvim_win_get_cursor(0))
+      -- ignore CursorMovedI event when flag is enabled
+      if ev.event == 'CursorMovedI' and ignore_next_cursor_moved then
+        ignore_next_cursor_moved = false
+        return
+      end
 
       local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
       local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
+      local is_on_trigger_for_show_on_insert = is_on_trigger
         and not vim.tbl_contains(config.show_on_insert_blocked_trigger_characters, char_under_cursor)
       local is_on_context_char = char_under_cursor:match(config.keyword_regex) ~= nil
 
-      if is_within_bounds then
+      -- check if we're still within the bounds of the query used for the context
+      if trigger.within_query_bounds(vim.api.nvim_win_get_cursor(0)) then
         trigger.show()
+
+      -- check if we've entered insert mode on a trigger character
+      -- or if we've moved onto a trigger character
       elseif
-        -- check if we've gone 1 char behind the context and we're still on a context char
-        (is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1)
-        -- or if we've moved onto a trigger character
+        (config.show_on_insert_on_trigger_character and is_on_trigger_for_show_on_insert and ev.event == 'InsertEnter')
         or (is_on_trigger and trigger.context ~= nil)
       then
         trigger.context = nil
-        trigger.show()
-      elseif config.show_on_insert_on_trigger_character and is_on_trigger and ev.event == 'InsertEnter' then
         trigger.show({ trigger_character = char_under_cursor })
+
+      -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
+      elseif is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
+        trigger.context = nil
+        trigger.show()
+
+      -- otherwise hide
       else
         trigger.hide()
       end
@@ -84,7 +110,7 @@ function trigger.activate_autocmds()
   -- definitely leaving the context
   vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufLeave' }, { callback = trigger.hide })
 
-  -- trigger InsertLeave autocommand when exiting insert mode with ctrl+c
+  -- manually hide when exiting insert mode with ctrl+c, since it doesn't trigger InsertLeave
   local ctrl_c = vim.api.nvim_replace_termcodes('<C-c>', true, true, true)
   vim.on_key(function(key)
     if key == ctrl_c then
