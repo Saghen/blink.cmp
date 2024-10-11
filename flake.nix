@@ -30,6 +30,7 @@
         # define the packages provided by this flake
         packages = let
           inherit (fenix.packages.${system}.minimal) toolchain;
+          inherit (pkgs.stdenv) hostPlatform;
 
           rustPlatform = pkgs.makeRustPlatform {
             cargo = toolchain;
@@ -52,13 +53,18 @@
               };
             };
           };
+          
+          libExt = 
+            if hostPlatform.isDarwin then "dylib"
+            else if hostPlatform.isWindows then "dll"
+            else "so";       
         in {
           blink-cmp = pkgs.vimUtils.buildVimPlugin {
             pname = "blink-cmp";
             inherit src version;
             preInstall = ''
               mkdir -p target/release
-              ln -s ${blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.so target/release/libblink_cmp_fuzzy.so
+              ln -s ${blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.${libExt} target/release/libblink_cmp_fuzzy.${libExt}
             '';
 
             meta = {
