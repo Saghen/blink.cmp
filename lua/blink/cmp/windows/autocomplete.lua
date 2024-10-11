@@ -170,7 +170,7 @@ local function select(line)
   -- when auto_insert is enabled, we immediately apply the text edit
   -- todo: move this to the accept module
   if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil then
-    require('blink.cmp.trigger.completion').ignore_autocmds_for_callback(function()
+    require('blink.cmp.trigger.completion').suppress_events_for_callback(function()
       local text_edit = text_edits_lib.get_from_item(selected_item)
 
       if selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then

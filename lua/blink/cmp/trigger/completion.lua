@@ -122,10 +122,11 @@ function trigger.activate_autocmds()
   return trigger
 end
 
--- todo: extract into an autocmd module
--- hack: there's likely edge cases with this since we can't know for sure
--- if the autocmds will fire for cursor_moved afaik
-function trigger.ignore_autocmds_for_callback(cb)
+--- Suppresses on_hide and on_show events for the duration of the callback
+--- todo: extract into an autocmd module
+--- hack: there's likely edge cases with this since we can't know for sure
+--- if the autocmds will fire for cursor_moved afaik
+function trigger.suppress_events_for_callback(cb)
   local cursor_before = vim.api.nvim_win_get_cursor(0)
   local changed_tick_before = vim.api.nvim_buf_get_changedtick(0)
 
