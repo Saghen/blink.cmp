@@ -149,13 +149,21 @@ cmp.accept = function()
 end
 
 cmp.select_prev = function()
-  if not cmp.windows.autocomplete.win:is_open() then return end
+  if not cmp.trigger.auto_show then cmp.trigger.set_auto_show(true) end
+  if not cmp.windows.autocomplete.win:is_open() then
+    cmp.show()
+    return true
+  end
   vim.schedule(cmp.windows.autocomplete.select_prev)
   return true
 end
 
 cmp.select_next = function()
-  if not cmp.windows.autocomplete.win:is_open() then return end
+  if not cmp.trigger.auto_show then cmp.trigger.set_auto_show(true) end
+  if not cmp.windows.autocomplete.win:is_open() then
+    cmp.show()
+    return true
+  end
   vim.schedule(cmp.windows.autocomplete.select_next)
   return true
 end

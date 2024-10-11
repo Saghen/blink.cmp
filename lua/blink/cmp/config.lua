@@ -84,6 +84,7 @@
 --- @field use_nvim_cmp_as_default? boolean
 
 --- @class blink.cmp.AutocompleteConfig
+--- @field auto_show? boolean
 --- @field min_width? number
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
@@ -239,6 +240,7 @@ local config = {
 
   windows = {
     autocomplete = {
+      auto_show = true,
       min_width = 15,
       max_height = 10,
       border = 'none',
