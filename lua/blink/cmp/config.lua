@@ -47,10 +47,12 @@
 --- @field signature_help? blink.cmp.SignatureHelpTriggerConfig
 
 --- @class blink.cmp.SourceConfig
---- @field providers? blink.cmp.SourceProviderConfig[][]
+--- @field providers? blink.cmp.SourceProviderConfig[]
 ---
 --- @class blink.cmp.SourceProviderConfig
 --- @field [1]? string
+--- @field name string
+--- @field fallback_for? string[] | nil
 --- @field keyword_length? number | nil
 --- @field score_offset? number | nil
 --- @field deduplicate? blink.cmp.DeduplicateConfig | nil
@@ -228,12 +230,10 @@ local config = {
     -- returns no completion items
     -- WARN: This API will have breaking changes during the beta
     providers = {
-      {
-        { 'blink.cmp.sources.lsp' },
-        { 'blink.cmp.sources.path' },
-        { 'blink.cmp.sources.snippets', score_offset = -2 },
-      },
-      { { 'blink.cmp.sources.buffer' } },
+      { 'blink.cmp.sources.lsp', name = 'LSP' },
+      { 'blink.cmp.sources.path', name = 'Path', score_offset = 3 },
+      { 'blink.cmp.sources.snippets', name = 'Snippets', score_offset = -3 },
+      { 'blink.cmp.sources.buffer', name = 'Buffer', fallback_for = { 'LSP' } },
     },
   },
 

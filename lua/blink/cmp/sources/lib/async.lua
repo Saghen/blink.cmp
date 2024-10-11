@@ -7,8 +7,8 @@
 --- @field new fun(fn: fun(resolve: fun(result: any), reject: fun(err: any))): blink.cmp.Task
 ---
 --- @field cancel fun(self: blink.cmp.Task)
---- @field map fun(self: blink.cmp.Task, fn: fun(result: any): blink.cmp.Task | any)
---- @field catch fun(self: blink.cmp.Task, fn: fun(err: any): blink.cmp.Task | any)
+--- @field map fun(self: blink.cmp.Task, fn: fun(result: any): blink.cmp.Task | any): blink.cmp.Task
+--- @field catch fun(self: blink.cmp.Task, fn: fun(err: any): blink.cmp.Task | any): blink.cmp.Task
 ---
 --- @field on_completion fun(self: blink.cmp.Task, cb: fun(result: any))
 --- @field on_failure fun(self: blink.cmp.Task, cb: fun(err: any))
