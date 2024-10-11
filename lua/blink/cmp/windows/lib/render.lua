@@ -1,14 +1,30 @@
 --- @class blink.cmp.Component
 --- @field [number] blink.cmp.Component | string
---- @field fill boolean | nil
---- @field hl_group string | nil
---- @field hl_params table | nil
+--- @field fill? boolean
+--- @field max_width? number
+--- @field hl_group? string
+--- @field hl_params? table
 
 --- @class blink.cmp.RenderedComponentTree
 --- @field text string
---- @field highlights { start: number, stop: number, group: string | nil, params: table | nil }[]
+--- @field highlights { start: number, stop: number, group?: string, params?: table }[]
+
+--- @class blink.cmp.StringsBuild
+--- @field text string
+--- @field length number
 
 local renderer = {}
+
+---@param text string
+---@param max_width number
+---@return string
+function renderer.truncate_text(text, max_width)
+  if vim.api.nvim_strwidth(text) > max_width then
+    return vim.fn.strcharpart(text, 0, max_width) .. '…'
+  else
+    return text
+  end
+end
 
 --- Draws the highlights for the rendered component tree
 --- as ephemeral extmarks
@@ -25,101 +41,91 @@ function renderer.draw_highlights(rendered, bufnr, ns, line_number)
   end
 end
 
---- @param components blink.cmp.Component[]
---- @param length number
---- @return blink.cmp.RenderedComponentTree
-function renderer.render(components, length)
-  local left_of_fill = {}
-  local right_of_fill = {}
-  local fill = nil
-  for _, component in ipairs(components) do
-    if component.fill then
-      fill = component
-    else
-      table.insert(fill and right_of_fill or left_of_fill, component)
-    end
+--- Gets the concatenated text and length for a list of strings
+--- and truncates if necessary when max_width is set
+--- @param strings string[]
+--- @param max_width? number
+--- @return blink.cmp.StringsBuild
+function renderer.concat_strings(strings, max_width)
+  local text = ''
+  for _, component in ipairs(strings) do
+    text = text .. component
   end
 
-  local left_rendered = renderer.render_components(left_of_fill)
-  local fill_rendered = renderer.render_components({ fill })
-  local right_rendered = renderer.render_components(right_of_fill)
-
-  -- expanad/truncate the fill component to the width
-  fill_rendered.text = fill_rendered.text
-    .. string.rep(' ', length - vim.api.nvim_strwidth(left_rendered.text .. fill_rendered.text .. right_rendered.text))
-  fill_rendered.text = fill_rendered.text:sub(
-    1,
-    length - vim.api.nvim_strwidth(left_rendered.text) - vim.api.nvim_strwidth(right_rendered.text)
-  )
-
-  renderer.add_offset_to_rendered_component(fill_rendered, left_rendered.text:len())
-  renderer.add_offset_to_rendered_component(right_rendered, left_rendered.text:len() + fill_rendered.text:len())
-
-  local highlights = {}
-  vim.list_extend(highlights, left_rendered.highlights)
-  vim.list_extend(highlights, fill_rendered.highlights)
-  vim.list_extend(highlights, right_rendered.highlights)
-
-  return {
-    text = left_rendered.text .. fill_rendered.text .. right_rendered.text,
-    highlights = highlights,
-  }
+  if max_width then text = renderer.truncate_text(text, max_width) end
+  return { text = text, length = vim.api.nvim_strwidth(text) }
 end
 
 --- @param components (blink.cmp.Component | string)[]
+--- @param lengths number[]
 --- @return blink.cmp.RenderedComponentTree
-function renderer.render_components(components)
+function renderer.render(components, lengths)
   local text = ''
   local offset = 0
   local highlights = {}
 
-  for _, component in ipairs(components) do
+  for i, component in ipairs(components) do
     if type(component) == 'string' then
       text = text .. component
       offset = offset + #component
     else
-      local rendered = renderer.render_components(component)
+      local concatenated = renderer.concat_strings(component, component.max_width)
 
-      renderer.add_offset_to_rendered_component(rendered, offset)
       table.insert(highlights, {
         start = offset + 1,
-        stop = offset + #rendered.text + 1,
+        stop = offset + #concatenated.text + 1,
         group = component.hl_group,
         params = component.hl_params,
       })
-      vim.list_extend(highlights, rendered.highlights)
 
-      text = text .. rendered.text
-      offset = offset + #rendered.text
+      text = text .. concatenated.text
+      offset = offset + #concatenated.text
+
+      if component.fill then
+        local spaces = lengths[i] - concatenated.length
+        text = text .. string.rep(' ', spaces)
+        offset = offset + spaces
+      end
     end
   end
 
   return { text = text, highlights = highlights }
 end
 
---- @param components blink.cmp.Component[]
+--- @param component blink.cmp.Component | string
 --- @return number
-function renderer.get_length(components)
-  local length = 0
-  for _, component in ipairs(components) do
-    if type(component) == 'string' then
-      length = length + #component
-    else
-      length = length + renderer.get_length(component)
-    end
+function renderer.get_length(component)
+  if type(component) == 'string' then
+    return vim.api.nvim_strwidth(component)
+  else
+    local build = renderer.concat_strings(component, component.max_width)
+    return build.length
   end
-  return length
 end
 
---- @param arr_of_components blink.cmp.Component[][]
---- @return number
-function renderer.get_max_length(arr_of_components)
-  local max_length = 0
-  for _, components in ipairs(arr_of_components) do
-    local length = renderer.get_length(components)
-    if length > max_length then max_length = length end
+--- @param components_list (blink.cmp.Component | string)[][]
+--- @param min_width number
+--- @return number[]
+function renderer.get_max_lengths(components_list, min_width)
+  local lengths = {}
+  local first_fill
+
+  for _, components in ipairs(components_list) do
+    for i, component in ipairs(components) do
+      local length = renderer.get_length(component)
+      if not lengths[i] or lengths[i] < length then lengths[i] = length end
+      if component.fill and not first_fill then first_fill = i end
+    end
   end
-  return max_length
+
+  for _, length in ipairs(lengths) do
+    min_width = min_width - length
+  end
+
+  first_fill = first_fill or 1
+  if min_width > 0 then lengths[first_fill] = lengths[first_fill] + min_width end
+
+  return lengths
 end
 
 --- @param component blink.cmp.RenderedComponentTree

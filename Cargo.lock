@@ -61,9 +61,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.1.28"
+version = "1.1.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e80e3b6a3ab07840e1cae9b0666a63970dc28e8ed5ffbcdacbfc760c281bfc1"
+checksum = "58e804ac3194a48bb129643eb1d62fcc20d18c6b8c181704489353d13120bcd1"
 dependencies = [
  "shlex",
 ]
@@ -125,7 +125,7 @@ dependencies = [
 [[package]]
 name = "frizbee"
 version = "0.1.0"
-source = "git+https://github.com/saghen/frizbee#1773ea4bbba2b703150166654296a8f4dd1e7adc"
+source = "git+https://github.com/saghen/frizbee#d910bec53b867ce06702520c7e05f9862bf78dd9"
 dependencies = [
  "memchr",
  "smith_waterman_macro",
@@ -447,7 +447,7 @@ checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
 [[package]]
 name = "smith_waterman_macro"
 version = "0.1.0"
-source = "git+https://github.com/saghen/frizbee#1773ea4bbba2b703150166654296a8f4dd1e7adc"
+source = "git+https://github.com/saghen/frizbee#d910bec53b867ce06702520c7e05f9862bf78dd9"
 dependencies = [
  "proc-macro2 1.0.87",
  "quote 1.0.37",

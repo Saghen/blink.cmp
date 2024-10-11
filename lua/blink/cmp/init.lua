@@ -129,6 +129,12 @@ cmp.hide = function()
   return true
 end
 
+--- @param callback fun(context: blink.cmp.Context)
+cmp.on_open = function(callback) cmp.windows.autocomplete.listen_on_open(callback) end
+
+--- @param callback fun()
+cmp.on_close = function(callback) cmp.windows.autocomplete.listen_on_close(callback) end
+
 cmp.accept = function()
   require('blink.cmp.trigger.completion').triggered_by = 'accept'
 

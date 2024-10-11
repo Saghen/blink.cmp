@@ -22,6 +22,9 @@ function utils.read_snippet(snippet, fallback)
   local prefix = snippet.prefix or fallback
   local description = snippet.description or fallback
   local body = snippet.body
+
+  if type(description) == 'table' then description = vim.fn.join(description, '') end
+
   if type(prefix) == 'table' then
     for _, p in ipairs(prefix) do
       snippets[p] = {

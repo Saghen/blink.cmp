@@ -22,7 +22,7 @@ function utils.union_keys(t1, t2)
   for k, _ in pairs(t1) do
     t3[k] = true
   end
-  for k, _ in ipairs(t2) do
+  for k, _ in pairs(t2) do
     t3[k] = true
   end
   return vim.tbl_keys(t3)

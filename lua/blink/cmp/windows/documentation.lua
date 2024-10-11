@@ -17,23 +17,23 @@ function docs.setup()
   autocomplete.listen_on_position_update(function()
     if autocomplete.win:is_open() then docs.update_position() end
   end)
-  if config.auto_show then
-    local timer = vim.uv.new_timer()
-    local last_context_id = nil
-    autocomplete.listen_on_select(function(item, context)
-      timer:stop()
-      if docs.win:is_open() or context.id == last_context_id then
-        timer:start(config.update_delay_ms, 0, function()
-          vim.schedule(function() docs.show_item(item) end)
-        end)
-      else
-        timer:start(config.auto_show_delay_ms, 0, function()
-          last_context_id = context.id
-          vim.schedule(function() docs.show_item(item) end)
-        end)
-      end
-    end)
-  end
+
+  local timer = vim.uv.new_timer()
+  local last_context_id = nil
+  autocomplete.listen_on_select(function(item, context)
+    timer:stop()
+    if docs.win:is_open() or context.id == last_context_id then
+      last_context_id = context.id
+      timer:start(config.update_delay_ms, 0, function()
+        vim.schedule(function() docs.show_item(item) end)
+      end)
+    elseif config.auto_show then
+      timer:start(config.auto_show_delay_ms, 0, function()
+        last_context_id = context.id
+        vim.schedule(function() docs.show_item(item) end)
+      end)
+    end
+  end)
   autocomplete.listen_on_close(function() docs.win:close() end)
 
   return docs
@@ -54,23 +54,39 @@ function docs.show_item(item)
       return
     end
 
-    local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
     local doc_lines = {}
+    if item.detail and item.detail ~= '' then
+      table.insert(doc_lines, '```' .. vim.bo.filetype)
+      for s in item.detail:gmatch('[^\r\n]+') do
+        table.insert(doc_lines, s)
+      end
+      table.insert(doc_lines, '```')
+      table.insert(doc_lines, '---')
+    end
+
+    local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
     for s in doc:gmatch('[^\r\n]+') do
       table.insert(doc_lines, s)
     end
     vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, doc_lines)
     vim.api.nvim_set_option_value('modified', false, { buf = docs.win:get_buf() })
 
-    local filetype = item.documentation.kind == 'markdown' and 'markdown' or 'plaintext'
-    if filetype ~= vim.api.nvim_get_option_value('filetype', { buf = docs.win:get_buf() }) then
-      vim.api.nvim_set_option_value('filetype', filetype, { buf = docs.win:get_buf() })
-    end
-
     if autocomplete.win:get_win() then
       docs.win:open()
       docs.update_position()
     end
+
+    -- use the built-in markdown styling
+    -- NOTE: according to https://github.com/Saghen/blink.cmp/pull/33#issuecomment-2400195950
+    -- it's possible for this to fail so we call it safely
+    pcall(
+      function()
+        vim.lsp.util.stylize_markdown(docs.win:get_buf(), doc_lines, {
+          height = vim.api.nvim_win_get_height(docs.win:get_win()),
+          width = vim.api.nvim_win_get_width(docs.win:get_win()),
+        })
+      end
+    )
   end)
 end
 

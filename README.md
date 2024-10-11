@@ -70,6 +70,41 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 ```
 
 <details>
+<summary><strong>mini.deps</strong></summary>
+
+```lua
+-- use a release tag to download pre-built binaries
+MiniDeps.add({
+  source = "saghen/blink.cmp",
+  depends = {
+	"rafamadriz/friendly-snippets",
+  },
+  checkout = "some.version", -- check releases for latest tag
+})
+
+-- OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+local function build_blink(params)
+  vim.notify('Building blink.cmp', vim.log.levels.INFO)
+  local obj = vim.system({ 'cargo', 'build', '--release' }, { cwd = params.path }):wait()
+  if obj.code == 0 then
+    vim.notify('Building blink.cmp done', vim.log.levels.INFO)
+  else
+    vim.notify('Building blink.cmp failed', vim.log.levels.ERROR)
+  end
+end
+
+MiniDeps.add({
+  source = 'Saghen/blink.cmp',
+  hooks = {
+    post_install = build_blink,
+    post_checkout = build_blink,
+  },
+})
+```
+
+</details>
+
+<details>
 <summary><strong>Highlight groups</strong></summary>
 
 | Group | Default | Description |
@@ -107,8 +142,8 @@ For LazyVim/distro users, you can disable nvim-cmp via:
     select_prev = { '<Up>', '<C-p>' },
     select_next = { '<Down>', '<C-n>' },
 
-    show_documentation = {},
-    hide_documentation = {},
+    show_documentation = '<C-space>',
+    hide_documentation = '<C-space>',
     scroll_documentation_up = '<C-b>',
     scroll_documentation_down = '<C-f>',
 
@@ -128,12 +163,14 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- Synchronously use the kind of the item to determine if brackets should be added
       kind_resolution = {
         enabled = true,
-        blocked_filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact', 'vue' },
+        blocked_filetypes = { 'typescriptreact', 'javascriptreact', 'vue' },
       },
       -- Asynchronously use semantic token to determine if brackets should be added
       semantic_token_resolution = {
         enabled = true,
         blocked_filetypes = {},
+        -- How long to wait for semantic tokens to return before assuming no brackets should be added
+        timeout_ms = 400,
       },
     },
   },
@@ -150,6 +187,8 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       blocked_trigger_characters = { ' ', '\n', '\t' },
       -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_on_trigger_character = true,
+      -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
+      show_on_insert_blocked_trigger_characters = { "'", '"' },
     },
 
     signature_help = {
@@ -235,8 +274,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 
   windows = {
     autocomplete = {
-      min_width = 30,
-      max_width = 60,
+      min_width = 15,
       max_height = 10,
       border = 'none',
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
@@ -253,6 +291,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
       -- Controls how the completion items are rendered on the popup window
       -- 'simple' will render the item's kind icon the left alongside the label
       -- 'reversed' will render the label on the left and the kind icon + name on the right
+      -- 'minimal' will render the label on the left and the kind name on the right
       -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
       draw = 'simple',
       -- Controls the cycling behavior when reaching the beginning or end of the completion list.
@@ -260,7 +299,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
         -- When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.
         from_bottom = true,
         -- When `true`, calling `select_prev` at the *top* of the completion list will select the *last* completion item.
-        from_top = true
+        from_top = true,
       },
     },
     documentation = {
@@ -276,9 +315,9 @@ For LazyVim/distro users, you can disable nvim-cmp via:
         autocomplete_north = { 'e', 'w', 'n', 's' },
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
-      auto_show = true,
+      auto_show = false,
       auto_show_delay_ms = 500,
-      update_delay_ms = 100,
+      update_delay_ms = 50,
     },
     signature_help = {
       min_width = 1,
@@ -340,6 +379,13 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 
 </details>
 
+<details>
+<summary><strong>Community Sources</strong></summary>
+
+- [ctags](https://github.com/netmute/blink-cmp-ctags)
+
+</details>
+
 ## How it works
 
 The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
@@ -352,9 +398,9 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 &nbsp;&nbsp;&nbsp;&nbsp;**Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (todo: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
 
-&nbsp;&nbsp;&nbsp;&nbsp;**Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking presedence over the LSP source. The paramaters here still need to be tuned, so please let me know if you find some magical parameters!
+&nbsp;&nbsp;&nbsp;&nbsp;**Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking precedence over the LSP source. The parameters here still need to be tuned, so please let me know if you find some magical parameters!
 
-**Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overriden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
+**Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overridden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
 
 ## Compared to nvim-cmp
 

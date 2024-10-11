@@ -1,8 +1,8 @@
 local win = {}
 
 --- @class blink.cmp.WindowOptions
---- @field min_width number
---- @field max_width number
+--- @field min_width? number
+--- @field max_width? number
 --- @field max_height number
 --- @field cursorline boolean
 --- @field border blink.cmp.WindowBorder
@@ -12,7 +12,7 @@ local win = {}
 --- @field scrolloff number
 
 --- @class blink.cmp.Window
---- @field id number | nil
+--- @field id? number
 --- @field config blink.cmp.WindowOptions
 ---
 --- @param config blink.cmp.WindowOptions
@@ -21,8 +21,8 @@ function win.new(config)
 
   self.id = nil
   self.config = {
-    min_width = config.min_width or 30,
-    max_width = config.max_width or 60,
+    min_width = config.min_width,
+    max_width = config.max_width,
     max_height = config.max_height or 10,
     cursorline = config.cursorline or false,
     border = config.border or 'none',
@@ -63,7 +63,7 @@ function win:open()
   self.id = vim.api.nvim_open_win(self:get_buf(), false, {
     relative = 'cursor',
     style = 'minimal',
-    width = self.config.min_width,
+    width = self.config.min_width or 1,
     height = self.config.max_height,
     row = 1,
     col = 1,
@@ -81,9 +81,7 @@ function win:open()
   vim.api.nvim_set_option_value('scrolloff', self.config.scrolloff, { win = self.id })
 end
 
-function win:set_option_values(option, value)
-  vim.api.nvim_set_option_value(option, value, { win = self.id })
-end
+function win:set_option_values(option, value) vim.api.nvim_set_option_value(option, value, { win = self.id }) end
 
 function win:close()
   if self.id ~= nil then
@@ -100,7 +98,9 @@ function win:update_size()
   -- todo: never go above the screen width and height
 
   -- set width to current content width, bounded by min and max
-  local width = math.max(math.min(self:get_content_width(), config.max_width), config.min_width)
+  local width = self:get_content_width()
+  if config.max_width then width = math.min(width, config.max_width) end
+  if config.min_width then width = math.max(width, config.min_width) end
   vim.api.nvim_win_set_width(winnr, width)
 
   -- set height to current line count, bounded by max

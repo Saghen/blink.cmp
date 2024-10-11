@@ -10,20 +10,25 @@ local renderer = require('blink.cmp.windows.lib.render')
 local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
 local autocomplete = {
+  ---@type blink.cmp.CompletionItem[]
   items = {},
   has_selected = nil,
+  ---@type blink.cmp.Context?
   context = nil,
   event_targets = {
     on_position_update = {},
+    --- @type fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)
     on_select = function() end,
-    on_close = function() end,
+    --- @type table<fun()>
+    on_close = {},
+    --- @type table<fun()>
+    on_open = {},
   },
 }
 
 function autocomplete.setup()
   autocomplete.win = require('blink.cmp.windows.lib').new({
     min_width = autocmp_config.min_width,
-    max_width = autocmp_config.max_width,
     max_height = autocmp_config.max_height,
     border = autocmp_config.border,
     winhighlight = autocmp_config.winhighlight,
@@ -57,10 +62,14 @@ end
 
 ---------- Visibility ----------
 
+--- @param context blink.cmp.Context
+--- @param items blink.cmp.CompletionItem[]
 function autocomplete.open_with_items(context, items)
   autocomplete.context = context
   autocomplete.items = items
   autocomplete.draw()
+
+  vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 
   autocomplete.win:open()
 
@@ -75,6 +84,7 @@ end
 
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
+  vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
   autocomplete.win:open()
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 end
@@ -82,10 +92,20 @@ end
 function autocomplete.close()
   if not autocomplete.win:is_open() then return end
   autocomplete.win:close()
-  autocomplete.has_selected = autocmp_config.selection == 'preselect'
-  autocomplete.event_targets.on_close()
+  autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
+
+  vim.iter(autocomplete.event_targets.on_close):each(function(callback) callback() end)
 end
-function autocomplete.listen_on_close(callback) autocomplete.event_targets.on_close = callback end
+
+--- Add a listener for when the autocomplete window closes
+--- @param callback fun()
+function autocomplete.listen_on_close(callback) table.insert(autocomplete.event_targets.on_close, callback) end
+
+--- Add a listener for when the autocomplete window opens
+--- This is useful for hiding GitHub Copilot ghost text and similar functionality.
+---
+--- @param callback fun()
+function autocomplete.listen_on_open(callback) table.insert(autocomplete.event_targets.on_open, callback) end
 
 --- @param context blink.cmp.Context
 --- TODO: Don't switch directions if the context is the same
@@ -106,7 +126,7 @@ function autocomplete.update_position(context)
 
   -- place the window at the start col of the current text we're fuzzy matching against
   -- so the window doesnt move around as we type
-  local col = context.bounds.start_col - cursor_col - 1
+  local col = context.bounds.start_col - cursor_col - (context.bounds.start_col == 0 and 0 or 1)
 
   -- detect if there's space above/below the cursor
   -- todo: should pick the largest space if both are false and limit height of the window
@@ -224,28 +244,27 @@ end
 function autocomplete.draw()
   local draw_fn = autocomplete.get_draw_fn()
   local icon_gap = config.nerd_font_variant == 'mono' and ' ' or '  '
-  local arr_of_components = {}
+  local components_list = {}
   for _, item in ipairs(autocomplete.items) do
     local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
     local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
 
     table.insert(
-      arr_of_components,
+      components_list,
       draw_fn({
         item = item,
         kind = kind,
         kind_icon = kind_icon,
         icon_gap = icon_gap,
-        deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)),
+        deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) or false,
       })
     )
   end
 
-  local max_line_length =
-    math.min(autocmp_config.max_width, math.max(autocmp_config.min_width, renderer.get_max_length(arr_of_components)))
+  local max_lengths = renderer.get_max_lengths(components_list, autocmp_config.min_width)
   autocomplete.rendered_items = vim.tbl_map(
-    function(component) return renderer.render(component, max_line_length) end,
-    arr_of_components
+    function(component) return renderer.render(component, max_lengths) end,
+    components_list
   )
 
   local lines = vim.tbl_map(function(rendered) return rendered.text end, autocomplete.rendered_items)
@@ -261,6 +280,8 @@ function autocomplete.get_draw_fn()
     return autocomplete.render_item_simple
   elseif autocmp_config.draw == 'reversed' then
     return autocomplete.render_item_reversed
+  elseif autocmp_config.draw == 'minimal' then
+    return autocomplete.render_item_minimal
   end
   error('Invalid autocomplete window draw config')
 end
@@ -269,8 +290,16 @@ end
 --- @return blink.cmp.Component[]
 function autocomplete.render_item_simple(ctx)
   return {
-    { ' ', ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
-    { ctx.item.label, fill = true, hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
+    ' ',
+    { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    {
+      ctx.item.label,
+      ctx.kind == 'Snippet' and '~' or nil,
+      fill = true,
+      hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+      max_width = 50,
+    },
+    ' ',
   }
 end
 
@@ -278,16 +307,39 @@ end
 --- @return blink.cmp.Component[]
 function autocomplete.render_item_reversed(ctx)
   return {
+    ' ',
     {
-      ' ' .. ctx.item.label,
+      ctx.item.label,
+      ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+      max_width = 50,
     },
-    { ' ', ctx.kind_icon, ctx.icon_gap, ctx.kind .. ' ', hl_group = 'BlinkCmpKind' .. ctx.kind },
+    ' ',
+    { ctx.kind_icon, ctx.icon_gap, ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    ' ',
   }
 end
 
---- @return blink.cmp.CompletionItem | nil
+--- @param ctx blink.cmp.CompletionRenderContext
+--- @return blink.cmp.Component[]
+function autocomplete.render_item_minimal(ctx)
+  return {
+    ' ',
+    {
+      ctx.item.label,
+      ctx.kind == 'Snippet' and '~' or nil,
+      fill = true,
+      hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+      max_width = 50,
+    },
+    ' ',
+    { ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    ' ',
+  }
+end
+
+---@return blink.cmp.CompletionItem?
 function autocomplete.get_selected_item()
   if not autocomplete.win:is_open() then return end
   if not autocomplete.has_selected then return end

@@ -83,7 +83,6 @@
 
 --- @class blink.cmp.AutocompleteConfig
 --- @field min_width? number
---- @field max_width? number
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
 --- @field order? "top_down" | "bottom_up"
@@ -91,7 +90,7 @@
 --- @field selection? "preselect" | "manual" | "auto_insert"
 --- @field winhighlight? string
 --- @field scrolloff? number
---- @field draw? 'simple' | 'reversed' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
+--- @field draw? 'simple' | 'reversed' | 'minimal' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
 --- @field cycle? blink.cmp.AutocompleteConfig.CycleConfig
 
 --- @class blink.cmp.AutocompleteConfig.CycleConfig
@@ -159,15 +158,19 @@ local config = {
       enabled = false,
       default_brackets = { '(', ')' },
       override_brackets_for_filetypes = {},
+      -- Overrides the default blocked filetypes
       force_allow_filetypes = {},
       blocked_filetypes = {},
+      -- Synchronously use the kind of the item to determine if brackets should be added
       kind_resolution = {
         enabled = true,
-        blocked_filetypes = { 'typescript', 'typescriptreact', 'javascript', 'javascriptreact', 'vue' },
+        blocked_filetypes = { 'typescriptreact', 'javascriptreact', 'vue' },
       },
+      -- Asynchronously use semantic token to determine if brackets should be added
       semantic_token_resolution = {
         enabled = true,
         blocked_filetypes = {},
+        -- How long to wait for semantic tokens to return before assuming no brackets should be added
         timeout_ms = 400,
       },
     },
@@ -206,6 +209,7 @@ local config = {
     max_items = 200,
     -- controls which sorts to use and in which order, these three are currently the only allowed options
     sorts = { 'label', 'kind', 'score' },
+
     prebuiltBinaries = {
       -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
       -- you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
@@ -222,6 +226,7 @@ local config = {
     -- similar to nvim-cmp's sources, but we point directly to the source's lua module
     -- multiple groups can be provided, where it'll fallback to the next group if the previous
     -- returns no completion items
+    -- WARN: This API will have breaking changes during the beta
     providers = {
       {
         { 'blink.cmp.sources.lsp' },
@@ -234,8 +239,7 @@ local config = {
 
   windows = {
     autocomplete = {
-      min_width = 30,
-      max_width = 60,
+      min_width = 15,
       max_height = 10,
       border = 'none',
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
@@ -256,8 +260,11 @@ local config = {
       -- 'reversed' will render the label on the left and the kind icon + name on the right
       -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
       draw = 'simple',
+      -- Controls the cycling behavior when reaching the beginning or end of the completion list.
       cycle = {
+        -- When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.
         from_bottom = true,
+        -- When `true`, calling `select_prev` at the *top* of the completion list will select the *last* completion item.
         from_top = true,
       },
     },
@@ -276,7 +283,7 @@ local config = {
       },
       auto_show = false,
       auto_show_delay_ms = 500,
-      update_delay_ms = 100,
+      update_delay_ms = 50,
     },
     signature_help = {
       min_width = 1,
