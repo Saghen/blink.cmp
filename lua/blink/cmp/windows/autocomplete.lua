@@ -248,6 +248,8 @@ function autocomplete.get_draw_fn()
     return autocomplete.render_item_simple
   elseif autocmp_config.draw == 'reversed' then
     return autocomplete.render_item_reversed
+  elseif autocmp_config.draw == 'minimal' then
+    return autocomplete.render_item_minimal
   end
   error('Invalid autocomplete window draw config')
 end
@@ -260,6 +262,7 @@ function autocomplete.render_item_simple(ctx)
     { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
     {
       ctx.item.label,
+      ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
@@ -275,12 +278,29 @@ function autocomplete.render_item_reversed(ctx)
     ' ',
     {
       ctx.item.label,
+      ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
     },
     ' ',
     { ctx.kind_icon, ctx.icon_gap, ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    ' ',
+  }
+end
+
+function autocomplete.render_item_minimal(ctx)
+  return {
+    ' ',
+    {
+      ctx.item.label,
+      ctx.kind == 'Snippet' and '~' or nil,
+      fill = true,
+      hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+      max_width = 50,
+    },
+    ' ',
+    { ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
     ' ',
   }
 end
