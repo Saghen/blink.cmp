@@ -160,8 +160,6 @@ end
 
 --- @param line number
 local function select(line)
-  local auto_insert = config.windows.autocomplete.selection == 'auto_insert'
-
   local prev_selected_item = autocomplete.get_selected_item()
 
   autocomplete.set_has_selected(true)
@@ -169,25 +167,29 @@ local function select(line)
 
   local selected_item = autocomplete.get_selected_item()
 
-  if auto_insert and selected_item ~= nil then
-    local text_edit = text_edits_lib.get_from_item(selected_item)
+  -- when auto_insert is enabled, we immediately apply the text edit
+  -- todo: move this to the accept module
+  if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil then
+    require('blink.cmp.trigger.completion').ignore_autocmds_for_callback(function()
+      local text_edit = text_edits_lib.get_from_item(selected_item)
 
-    if selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
-      text_edit.newText = selected_item.label
-    end
+      if selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+        text_edit.newText = selected_item.label
+      end
 
-    if
-      prev_selected_item ~= nil and prev_selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet
-    then
-      local current_col = vim.api.nvim_win_get_cursor(0)[2]
-      text_edit.range.start.character = current_col - #prev_selected_item.label
-    end
+      if
+        prev_selected_item ~= nil and prev_selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet
+      then
+        local current_col = vim.api.nvim_win_get_cursor(0)[2]
+        text_edit.range.start.character = current_col - #prev_selected_item.label
+      end
 
-    text_edits_lib.apply_text_edits(selected_item.client_id, { text_edit })
-    vim.api.nvim_win_set_cursor(0, {
-      text_edit.range.start.line + 1,
-      text_edit.range.start.character + #text_edit.newText,
-    })
+      text_edits_lib.apply_text_edits(selected_item.client_id, { text_edit })
+      vim.api.nvim_win_set_cursor(0, {
+        text_edit.range.start.line + 1,
+        text_edit.range.start.character + #text_edit.newText,
+      })
+    end)
   end
 
   autocomplete.event_targets.on_select(selected_item, autocomplete.context)
