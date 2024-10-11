@@ -16,8 +16,6 @@ local trigger = {
     --- @type fun()
     on_hide = function() end,
   },
-  --- @type "select" | "accept" | nil
-  triggered_by = nil,
 }
 
 function trigger.activate_autocmds()
@@ -46,7 +44,6 @@ function trigger.activate_autocmds()
       -- character forces a trigger according to the sources, create a fresh context
       elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
         trigger.context = nil
-        trigger.triggered_by = nil
         trigger.show({ trigger_character = last_char })
 
       -- character is part of the current context OR in an existing context
@@ -94,13 +91,11 @@ function trigger.activate_autocmds()
         -- or if we've moved onto a trigger character
       elseif insert_enter_on_trigger_character or (is_on_trigger and trigger.context ~= nil) then
         trigger.context = nil
-        trigger.triggered_by = nil
         trigger.show({ trigger_character = char_under_cursor })
 
         -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
       elseif is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
         trigger.context = nil
-        trigger.triggered_by = nil
         trigger.show()
 
         -- otherwise hide
@@ -181,8 +176,6 @@ function trigger.hide()
   if not trigger.context then return end
 
   trigger.context = nil
-  trigger.triggered_by = nil
-
   trigger.event_targets.on_hide()
 end
 
