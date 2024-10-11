@@ -4,8 +4,10 @@ local source = {}
 
 --- @param config blink.cmp.SourceProviderConfig
 function source.new(config)
+  assert(type(config.name) == 'string', 'Each source in config.sources.providers must have a "name" of type string')
+
   local self = setmetatable({}, { __index = source })
-  self.name = config[1]
+  self.name = config.name
   --- @type blink.cmp.Source
   self.module = require(config[1]).new(config.opts or {})
   self.config = config
@@ -45,12 +47,16 @@ function source:get_completions(context)
       for _, item in ipairs(response.items) do
         item.score_offset = (item.score_offset or 0) + (self.config.score_offset or 0)
         item.cursor_column = context.cursor[2]
-        item.source = self.config[1]
+        item.source = self.name
       end
 
       self.last_response = require('blink.cmp.utils').shallow_copy(response)
       self.last_response.is_cached = true
       return response
+    end)
+    :catch(function(err)
+      vim.print('failed to get completions with error: ' .. err)
+      return { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
     end)
 end
 

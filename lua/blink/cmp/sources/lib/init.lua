@@ -3,19 +3,15 @@ local config = require('blink.cmp.config')
 local sources = {
   current_context = nil,
   sources_registered = false,
-  sources_groups = {},
+  providers = {},
   on_completions_callback = function(_, _) end,
 }
 
 function sources.register()
-  assert(#sources.sources_groups == 0, 'Sources have already been registered')
+  assert(#sources.providers == 0, 'Sources have already been registered')
 
-  for _, sources_group in ipairs(config.sources.providers) do
-    local group = {}
-    for _, source_config in ipairs(sources_group) do
-      table.insert(group, require('blink.cmp.sources.lib.source').new(source_config))
-    end
-    table.insert(sources.sources_groups, group)
+  for _, source_config in ipairs(config.sources.providers) do
+    table.insert(sources.providers, require('blink.cmp.sources.lib.provider').new(source_config))
   end
 end
 
@@ -29,8 +25,7 @@ function sources.get_trigger_characters()
   end
 
   local trigger_characters = {}
-  -- todo: should this be all source groups?
-  for _, source in pairs(sources.sources_groups[1]) do
+  for _, source in pairs(sources.providers) do
     local source_trigger_characters = source:get_trigger_characters()
     for _, char in ipairs(source_trigger_characters) do
       if not blocked_trigger_characters[char] then table.insert(trigger_characters, char) end
@@ -48,7 +43,7 @@ function sources.request_completions(context)
   if is_new_context then
     if sources.current_context ~= nil then sources.current_context:destroy() end
     sources.current_context =
-      require('blink.cmp.sources.lib.context').new(context, sources.sources_groups, sources.on_completions_callback)
+      require('blink.cmp.sources.lib.context').new(context, sources.providers, sources.on_completions_callback)
   end
 
   sources.current_context:get_completions(context)
@@ -68,14 +63,11 @@ end
 --- @return fun(): nil Cancelation function
 function sources.resolve(item, callback)
   local item_source = nil
-  for _, group in ipairs(sources.sources_groups) do
-    for _, source in ipairs(group) do
-      if source.name == item.source then
-        item_source = source
-        break
-      end
+  for _, source in ipairs(sources.providers) do
+    if source.name == item.source then
+      item_source = source
+      break
     end
-    if item_source ~= nil then break end
   end
 
   if item_source == nil then
@@ -105,7 +97,7 @@ function sources.get_signature_help_trigger_characters()
   local retrigger_characters = {}
 
   -- todo: should this be all source groups?
-  for _, source in ipairs(sources.sources_groups[1]) do
+  for _, source in ipairs(sources.providers) do
     local res = source:get_signature_help_trigger_characters()
     for _, char in ipairs(res.trigger_characters) do
       if not blocked_trigger_characters[char] then table.insert(trigger_characters, char) end
@@ -121,7 +113,7 @@ end
 --- @param callback fun(signature_helps: lsp.SignatureHelp)
 function sources.get_signature_help(context, callback)
   local tasks = {}
-  for _, source in ipairs(sources.sources_groups[1]) do
+  for _, source in ipairs(sources.providers) do
     table.insert(tasks, source:get_signature_help(context))
   end
   sources.current_signature_help = async.task.await_all(tasks):map(function(tasks_results)
