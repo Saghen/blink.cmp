@@ -154,6 +154,7 @@ function trigger.hide()
   if not trigger.context then return end
 
   trigger.context = nil
+
   trigger.event_targets.on_hide()
 end
 

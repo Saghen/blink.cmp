@@ -9,13 +9,19 @@ local config = require('blink.cmp.config')
 local renderer = require('blink.cmp.windows.lib.render')
 local autocmp_config = config.windows.autocomplete
 local autocomplete = {
+  ---@type blink.cmp.CompletionItem[]
   items = {},
   has_selected = nil,
+  ---@type blink.cmp.Context?
   context = nil,
   event_targets = {
     on_position_update = {},
+    --- @type fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)
     on_select = function() end,
-    on_close = function() end,
+    --- @type table<fun()>
+    on_close = {},
+    --- @type table<fun()>
+    on_open = {},
   },
 }
 
@@ -55,10 +61,14 @@ end
 
 ---------- Visibility ----------
 
+--- @param context blink.cmp.Context
+--- @param items blink.cmp.CompletionItem[]
 function autocomplete.open_with_items(context, items)
   autocomplete.context = context
   autocomplete.items = items
   autocomplete.draw()
+
+  vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 
   autocomplete.win:open()
 
@@ -73,6 +83,7 @@ end
 
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
+  vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
   autocomplete.win:open()
   autocomplete.set_has_selected(autocmp_config.preselect)
 end
@@ -81,9 +92,19 @@ function autocomplete.close()
   if not autocomplete.win:is_open() then return end
   autocomplete.win:close()
   autocomplete.has_selected = autocmp_config.preselect
-  autocomplete.event_targets.on_close()
+
+  vim.iter(autocomplete.event_targets.on_close):each(function(callback) callback() end)
 end
-function autocomplete.listen_on_close(callback) autocomplete.event_targets.on_close = callback end
+
+--- Add a listener for when the autocomplete window closes
+--- @param callback fun()
+function autocomplete.listen_on_close(callback) table.insert(autocomplete.event_targets.on_close, callback) end
+
+--- Add a listener for when the autocomplete window opens
+--- This is useful for hiding GitHub Copilot ghost text and similar functionality.
+---
+--- @param callback fun()
+function autocomplete.listen_on_open(callback) table.insert(autocomplete.event_targets.on_open, callback) end
 
 --- @param context blink.cmp.Context
 --- TODO: Don't switch directions if the context is the same
@@ -203,7 +224,7 @@ function autocomplete.draw()
         kind = kind,
         kind_icon = kind_icon,
         icon_gap = icon_gap,
-        deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)),
+        deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) or false,
       })
     )
   end
@@ -264,6 +285,7 @@ function autocomplete.render_item_reversed(ctx)
   }
 end
 
+---@return blink.cmp.CompletionItem?
 function autocomplete.get_selected_item()
   if not autocomplete.win:is_open() then return end
   if not autocomplete.has_selected then return end
