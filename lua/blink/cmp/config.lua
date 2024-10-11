@@ -90,7 +90,7 @@
 --- @field preselect? boolean
 --- @field winhighlight? string
 --- @field scrolloff? number
---- @field draw? 'simple' | 'reversed' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
+--- @field draw? 'simple' | 'reversed' | 'minimal' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
 --- @field cycle? blink.cmp.AutocompleteConfig.CycleConfig
 
 --- @class blink.cmp.AutocompleteConfig.CycleConfig
