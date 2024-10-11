@@ -108,16 +108,21 @@ end
 --- @return number[]
 function renderer.get_max_lengths(components_list, min_width)
   local lengths = {}
+  local first_fill = 1
+
   for _, components in ipairs(components_list) do
     for i, component in ipairs(components) do
       local length = renderer.get_length(component)
       if not lengths[i] or lengths[i] < length then lengths[i] = length end
+      if component.fill and first_fill == 1 then first_fill = i end
     end
   end
 
-  for i, length in ipairs(lengths) do
-    if length < min_width then lengths[i] = min_width end
+  for _, length in ipairs(lengths) do
+    min_width = min_width - length
   end
+
+  if min_width > 0 then lengths[first_fill] = lengths[first_fill] + min_width end
 
   return lengths
 end
