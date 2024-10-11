@@ -27,19 +27,29 @@ function trigger.activate_autocmds()
   -- decide if we should show the completion window
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
+      -- we were told to ignore the text changed event, so we update the context
+      -- but don't send an on_show event upstream
+      if trigger.ignore_next_text_changed then
+        if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
+        trigger.ignore_next_text_changed = false
+
       -- no characters added so let cursormoved handle it
-      if last_char == '' then return end
+      elseif last_char == '' then
+        return
 
       -- ignore if in a special buffer
-      if utils.is_special_buffer() then
+      elseif utils.is_special_buffer() then
         trigger.hide()
+
       -- character forces a trigger according to the sources, create a fresh context
       elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
         trigger.context = nil
         trigger.show({ trigger_character = last_char })
+
       -- character is part of the current context OR in an existing context
       elseif last_char:match(config.keyword_regex) ~= nil then
         trigger.show()
+
       -- nothing matches so hide
       else
         trigger.hide()
@@ -51,6 +61,14 @@ function trigger.activate_autocmds()
 
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
+      -- we were told to ignore the cursor moved event, so we update the context
+      -- but don't send an on_show event upstream
+      if trigger.ignore_next_cursor_moved and ev.event == 'CursorMovedI' then
+        if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
+        trigger.ignore_next_cursor_moved = false
+        return
+      end
+
       -- characters added so let textchanged handle it
       if last_char ~= '' then return end
 
@@ -61,25 +79,26 @@ function trigger.activate_autocmds()
         and not vim.tbl_contains(config.show_on_insert_blocked_trigger_characters, char_under_cursor)
       local is_on_context_char = char_under_cursor:match(config.keyword_regex) ~= nil
 
+      local insert_enter_on_trigger_character = config.show_on_insert_on_trigger_character
+        and is_on_trigger_for_show_on_insert
+        and ev.event == 'InsertEnter'
+
       -- check if we're still within the bounds of the query used for the context
       if trigger.within_query_bounds(vim.api.nvim_win_get_cursor(0)) then
         trigger.show()
 
-      -- check if we've entered insert mode on a trigger character
-      -- or if we've moved onto a trigger character
-      elseif
-        (config.show_on_insert_on_trigger_character and is_on_trigger_for_show_on_insert and ev.event == 'InsertEnter')
-        or (is_on_trigger and trigger.context ~= nil)
-      then
+        -- check if we've entered insert mode on a trigger character
+        -- or if we've moved onto a trigger character
+      elseif insert_enter_on_trigger_character or (is_on_trigger and trigger.context ~= nil) then
         trigger.context = nil
         trigger.show({ trigger_character = char_under_cursor })
 
-      -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
+        -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
       elseif is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
         trigger.context = nil
         trigger.show()
 
-      -- otherwise hide
+        -- otherwise hide
       else
         trigger.hide()
       end
@@ -103,7 +122,26 @@ function trigger.activate_autocmds()
   return trigger
 end
 
---- @param opts { trigger_character: string } | nil
+-- todo: extract into an autocmd module
+-- hack: there's likely edge cases with this since we can't know for sure
+-- if the autocmds will fire for cursor_moved afaik
+function trigger.ignore_autocmds_for_callback(cb)
+  local cursor_before = vim.api.nvim_win_get_cursor(0)
+  local changed_tick_before = vim.api.nvim_buf_get_changedtick(0)
+
+  cb()
+
+  local cursor_after = vim.api.nvim_win_get_cursor(0)
+  local changed_tick_after = vim.api.nvim_buf_get_changedtick(0)
+
+  local is_insert_mode = vim.api.nvim_get_mode().mode == 'i'
+  trigger.ignore_next_text_changed = changed_tick_after ~= changed_tick_before and is_insert_mode
+  -- todo: does this guarantee that the CursorMovedI event will fire?
+  trigger.ignore_next_cursor_moved = (cursor_after[1] ~= cursor_before[1] or cursor_after[2] ~= cursor_before[2])
+    and is_insert_mode
+end
+
+--- @param opts { trigger_character?: string, send_upstream?: boolean } | nil
 function trigger.show(opts)
   opts = opts or {}
 
@@ -128,7 +166,7 @@ function trigger.show(opts)
     },
   }
 
-  trigger.event_targets.on_show(trigger.context)
+  if opts.send_upstream ~= false then trigger.event_targets.on_show(trigger.context) end
 end
 
 --- @param callback fun(context: blink.cmp.Context)
@@ -138,7 +176,6 @@ function trigger.hide()
   if not trigger.context then return end
 
   trigger.context = nil
-
   trigger.event_targets.on_hide()
 end
 
