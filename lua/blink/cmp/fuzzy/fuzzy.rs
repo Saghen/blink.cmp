@@ -72,7 +72,7 @@ pub fn fuzzy(
 
     // Find the highest score and filter out matches that are unreasonably lower than it
     let max_score = matches.iter().map(|mtch| mtch.score).max().unwrap_or(0);
-    let secondary_min_score = max_score.max(4) - 4;
+    let secondary_min_score = max_score.max(16) - 16;
     matches = matches
         .into_iter()
         .filter(|mtch| mtch.score >= secondary_min_score)
