@@ -30,6 +30,11 @@ jobs:
             target: aarch64-apple-darwin
             artifact_name: target/aarch64-apple-darwin/release/libblink_cmp_fuzzy.dylib
 
+          # Windows builds
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: target/x86_64-pc-windows-msvc/release/blink_cmp_fuzzy.dll
+
     steps:
       - uses: actions/checkout@v4
 
