@@ -28,7 +28,7 @@ function text_edits.apply_additional_text_edits(item)
   -- LSPs can either include these in the initial response or require a resolve
   -- These are used for things like auto-imports
   -- todo: if the main text edit was before this text edit, do we need to compensate?
-  if item.additionalTextEdits ~= nil then
+  if item.additionalTextEdits ~= nil and next(item.additionalTextEdits) ~= nil then
     text_edits.apply_text_edits(item.client_id, item.additionalTextEdits)
   else
     require('blink.cmp.sources.lib').resolve(item, function(resolved_item)
