@@ -1,4 +1,5 @@
 local utils = require('blink.cmp.utils')
+local config = require('blink.cmp.config')
 local keymap = {}
 
 local insert_commands = {
@@ -13,9 +14,6 @@ local insert_commands = {
   'scroll_documentation_down',
 }
 local snippet_commands = { 'snippet_forward', 'snippet_backward' }
-
--- disable blink.cmp keymaps in thies buffers
-local exclude_filetypes = { 'TelescopePrompt' }
 
 --- @param opts blink.cmp.KeymapConfig
 function keymap.setup(opts)
@@ -54,10 +52,7 @@ end
 --- @param insert_keys_to_commands table<string, string[]>
 --- @param snippet_keys_to_commands table<string, string[]>
 function keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands)
-  local current_ft = vim.bo.ft
-  for _, ft in ipairs(exclude_filetypes) do
-    if ft == current_ft then return end
-  end
+  if config.exclude_filetypes[vim.bo.ft] then return end
 
   -- skip if we've already applied the keymaps
   for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(0, 'i')) do
