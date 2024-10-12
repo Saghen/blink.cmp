@@ -1,12 +1,14 @@
 // TODO: refactor this heresy
 
 use crate::frecency::FrecencyTracker;
-use lua_marshalling::LuaMarshalling;
+use mlua::prelude::*;
+use mlua::FromLua;
+use mlua::Lua;
 use serde::{Deserialize, Serialize};
 use std::cmp::Reverse;
 use std::collections::HashSet;
 
-#[derive(Clone, Serialize, Deserialize, LuaMarshalling)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct LspItem {
     pub label: String,
     #[serde(rename = "sortText")]
@@ -18,7 +20,31 @@ pub struct LspItem {
     pub source: String,
 }
 
-#[derive(Clone, LuaMarshalling)]
+impl FromLua<'_> for LspItem {
+    fn from_lua(value: LuaValue<'_>, _lua: &'_ Lua) -> LuaResult<Self> {
+        if let Some(tab) = value.as_table() {
+        let label: String = tab.get("label").unwrap_or_default();
+        let sort_text: Option<String> = tab.get("sortText").ok();
+        let filter_text: Option<String> = tab.get("filterText").ok();
+        let kind: u32 = tab.get("kind").unwrap_or_default();
+        let score_offset: Option<i32> = tab.get("score_offset").ok();
+        let source: String = tab.get("source").unwrap_or_default();
+
+        Ok(LspItem {
+            label,
+            sort_text,
+            filter_text,
+            kind,
+            score_offset,
+            source,
+        })
+        } else {
+            Err(mlua::Error::FromLuaConversionError { from: "LuaValue" , to: "LspItem", message: None })
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
 pub struct MatchedLspItem {
     label: String,
     kind: u32,
@@ -26,13 +52,35 @@ pub struct MatchedLspItem {
     score: i32,
 }
 
-#[derive(LuaMarshalling)]
+#[derive(Clone, Serialize, Deserialize, Hash)]
 pub struct FuzzyOptions {
     use_frecency: bool,
     nearby_words: Option<Vec<String>>,
     min_score: u16,
-    max_items: usize,
+    max_items: u32,
     sorts: Vec<String>,
+}
+
+impl FromLua<'_> for FuzzyOptions {
+    fn from_lua(value: LuaValue<'_>, _lua: &'_ Lua) -> LuaResult<Self> {
+        if let Some(tab) = value.as_table() {
+            let use_frecency: bool = tab.get("use_frecency").unwrap_or_default();
+            let nearby_words: Option<Vec<String>> = tab.get("nearby_words").ok();
+            let min_score: u16 = tab.get("min_score").unwrap_or_default();
+            let max_items: u32 = tab.get("max_items").unwrap_or_default();
+            let sorts: Vec<String> = tab.get("sorts").unwrap_or_default();
+
+            Ok(FuzzyOptions {
+                use_frecency,
+                nearby_words,
+                min_score,
+                max_items,
+                sorts,
+            })
+        } else {
+            Err(mlua::Error::FromLuaConversionError { from: "LuaValue", to: "FuzzyOptions", message: None })
+        }
+    }
 }
 
 pub fn fuzzy(
@@ -108,6 +156,6 @@ pub fn fuzzy(
     matches
         .iter()
         .map(|mtch| mtch.index_in_haystack)
-        .take(opts.max_items)
+        .take(opts.max_items as usize)
         .collect::<Vec<_>>()
 }
