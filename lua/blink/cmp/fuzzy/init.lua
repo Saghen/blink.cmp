@@ -5,7 +5,7 @@ local fuzzy = {
   last_context = nil,
   ---@type blink.cmp.CompletionItem[]?
   last_items = nil,
-  rust = require('blink.cmp.fuzzy.ffi'),
+  rust = require('libblink_cmp_fuzzy'),
 }
 
 ---@param db_path string
