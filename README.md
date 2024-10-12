@@ -229,7 +229,7 @@ MiniDeps.add({
     providers = {
       { 'blink.cmp.sources.lsp', name = 'LSP' },
       { 'blink.cmp.sources.path', name = 'Path', score_offset = 3 },
-      { 'blink.cmp.sources.snippets', score_offset = -3 },
+      { 'blink.cmp.sources.snippets', name = 'Snippets', score_offset = -3 },
       { 'blink.cmp.sources.buffer', name = 'Buffer', fallback_for = { 'LSP' } },
     },
     -- FOR REF: full example
