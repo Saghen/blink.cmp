@@ -193,6 +193,13 @@ function trigger.within_query_bounds(cursor)
   return row == bounds.line_number and col >= bounds.start_col and col <= bounds.end_col
 end
 
+---@return string?
+function trigger.get_current_word()
+  if not trigger.context then return end
+
+  local bounds = trigger.context.bounds
+  return trigger.context.line:sub(bounds.start_col, bounds.end_col)
+end
 --- Moves forward and backwards around the cursor looking for word boundaries
 --- @param regex string
 --- @return blink.cmp.ContextBounds

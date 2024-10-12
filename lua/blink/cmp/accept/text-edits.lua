@@ -1,4 +1,3 @@
-local utils = require('blink.cmp.utils')
 local text_edits = {}
 
 function text_edits.get_from_item(item)
