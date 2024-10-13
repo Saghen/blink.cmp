@@ -10,7 +10,7 @@ function download.get_lib_extension()
 end
 
 local root_dir = debug.getinfo(1).source:match('@?(.*/)')
-local lib_path = root_dir .. '../../../../target/release/libblink_cmp_fuzzy' .. download.get_lib_extension()
+download.lib_path = root_dir .. '../../../../target/release/libblink_cmp_fuzzy' .. download.get_lib_extension()
 local version_path = root_dir .. '../../../../target/release/version.txt'
 
 --- @param callback fun(err: string | nil)
@@ -58,12 +58,15 @@ end
 
 --- @param cb fun(downloaded: boolean)
 function download.is_downloaded(cb)
-  vim.uv.fs_stat(lib_path, function(err)
+  vim.uv.fs_stat(download.lib_path, function(err)
     if not err then
       cb(true)
     else
       -- If not found, check without 'lib' prefix
-      vim.uv.fs_stat(string.gsub(lib_path, 'libblink_cmp_fuzzy', 'blink_cmp_fuzzy'), function(error) cb(not error) end)
+      vim.uv.fs_stat(
+        string.gsub(download.lib_path, 'libblink_cmp_fuzzy', 'blink_cmp_fuzzy'),
+        function(error) cb(not error) end
+      )
     end
   end)
 end
@@ -97,7 +100,7 @@ function download.from_github(tag, cb)
     .. system_triple
     .. download.get_lib_extension()
 
-  vim.system({ 'curl', '--create-dirs', '-Lo', lib_path, url }, {}, function(out)
+  vim.system({ 'curl', '--create-dirs', '-Lo', download.lib_path, url }, {}, function(out)
     if out.code ~= 0 then cb('Failed to download pre-build binaries: ' .. out.stderr) end
     cb()
   end)
