@@ -61,6 +61,8 @@ function trigger.activate_autocmds()
 
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
+      if utils.is_special_buffer() then return end
+
       -- we were told to ignore the cursor moved event, so we update the context
       -- but don't send an on_show event upstream
       if trigger.ignore_next_cursor_moved and ev.event == 'CursorMovedI' then

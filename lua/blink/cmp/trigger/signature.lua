@@ -60,6 +60,8 @@ function trigger.activate_autocmds()
   -- check if we've moved outside of the context by diffing against the query boundary
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
+      if utils.is_special_buffer() then return end
+
       -- characters added so let textchanged handle it
       if #last_chars ~= 0 then return end
 
