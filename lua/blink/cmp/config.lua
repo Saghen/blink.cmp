@@ -125,7 +125,6 @@
 
 --- @class blink.cmp.Config
 --- @field keymap? blink.cmp.KeymapConfig
---- @field exclude_filetypes? table<string, boolean>
 --- @field accept? blink.cmp.AcceptConfig
 --- @field trigger? blink.cmp.TriggerConfig
 --- @field fuzzy? blink.cmp.FuzzyConfig
@@ -154,7 +153,6 @@ local config = {
     snippet_forward = '<Tab>',
     snippet_backward = '<S-Tab>',
   },
-  exclude_filetypes = { TelescopePrompt = true },
 
   accept = {
     create_undo_point = true,

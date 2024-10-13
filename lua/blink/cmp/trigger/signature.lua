@@ -30,6 +30,8 @@ function trigger.activate_autocmds()
   -- decide if we should show the completion window
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
+      if not vim.g.blinkcmp_enabled then return end
+
       -- no characters added so let cursormoved handle it
       if #last_chars == 0 then return end
 
@@ -60,6 +62,8 @@ function trigger.activate_autocmds()
   -- check if we've moved outside of the context by diffing against the query boundary
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
+      if not vim.g.blinkcmp_enabled then return end
+
       -- characters added so let textchanged handle it
       if #last_chars ~= 0 then return end
 

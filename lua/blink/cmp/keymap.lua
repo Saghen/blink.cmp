@@ -44,7 +44,10 @@ function keymap.setup(opts)
   -- from overriding our mappings. We also use InsertEnter to avoid conflicts with keymaps
   -- applied on other autocmds, such as LspAttach used by nvim-lspconfig and most configs
   vim.api.nvim_create_autocmd('InsertEnter', {
-    callback = function() keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands) end,
+    callback = function()
+      if not vim.g.blinkcmp_enabled then return end
+      keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands)
+    end,
   })
 end
 
