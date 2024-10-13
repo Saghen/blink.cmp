@@ -3,7 +3,6 @@ local cmp = {}
 --- @param opts blink.cmp.Config
 cmp.setup = function(opts)
   local config = require('blink.cmp.config')
-  local utils = require('blink.cmp.utils')
   config.merge_with(opts)
 
   require('blink.cmp.fuzzy.download').ensure_downloaded(function(err)
@@ -13,18 +12,6 @@ cmp.setup = function(opts)
     end
 
     cmp.add_default_highlights()
-
-    -- disable blinkcmp if there is a special buffer e.g. prompt
-    -- prompt is used by many plugins like telescope
-    vim.api.nvim_create_autocmd({ 'BufEnter', 'InsertEnter' }, {
-      callback = function()
-        if utils.is_special_buffer() then
-          vim.g.blinkcmp_enabled = false
-          return
-        end
-        vim.g.blinkcmp_enabled = true
-      end,
-    })
 
     require('blink.cmp.keymap').setup(config.keymap)
 
