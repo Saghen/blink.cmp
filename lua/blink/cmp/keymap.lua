@@ -55,8 +55,6 @@ end
 --- @param insert_keys_to_commands table<string, string[]>
 --- @param snippet_keys_to_commands table<string, string[]>
 function keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands)
-  if config.exclude_filetypes[vim.bo.ft] then return end
-
   -- skip if we've already applied the keymaps
   for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(0, 'i')) do
     if mapping.desc == 'blink.cmp' then return end
