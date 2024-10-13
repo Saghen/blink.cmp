@@ -134,6 +134,9 @@ function download.get_system_triple()
     if jit.arch:lower():match('arm') then return 'aarch64-apple-darwin' end
     if jit.arch:lower():match('x64') then return 'x86_64-apple-darwin' end
   end
+  if jit.os:lower() == 'windows' then
+    if jit.arch:lower():match('x64') then return 'x86_64-pc-windows-msvc' end
+  end
   if jit.os:lower() ~= 'windows' then
     if jit.arch:lower():match('arm') then return 'aarch64-unknown-linux-gnu' end
     if jit.arch:lower():match('x64') then return 'x86_64-unknown-linux-gnu' end
