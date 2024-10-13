@@ -1,5 +1,6 @@
 --- @class blink.cmp.CompletionRenderContext
 --- @field item blink.cmp.CompletionItem
+--- @field label string
 --- @field kind string
 --- @field kind_icon string
 --- @field icon_gap string
@@ -250,11 +251,15 @@ function autocomplete.draw()
   for _, item in ipairs(autocomplete.items) do
     local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
     local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
+    -- Some LSPs can return labels with newlines.
+    -- Escape them to avoid errors in nvim_buf_set_lines when rendering the autocomplete menu.
+    local label = item.label:gsub('\n', '\\n')
 
     table.insert(
       components_list,
       draw_fn({
         item = item,
+        label = label,
         kind = kind,
         kind_icon = kind_icon,
         icon_gap = icon_gap,
@@ -295,7 +300,7 @@ function autocomplete.render_item_simple(ctx)
     ' ',
     { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
     {
-      ctx.item.label,
+      ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
@@ -311,7 +316,7 @@ function autocomplete.render_item_reversed(ctx)
   return {
     ' ',
     {
-      ctx.item.label,
+      ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
@@ -329,7 +334,7 @@ function autocomplete.render_item_minimal(ctx)
   return {
     ' ',
     {
-      ctx.item.label,
+      ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
