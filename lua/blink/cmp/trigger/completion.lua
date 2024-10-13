@@ -27,8 +27,6 @@ function trigger.activate_autocmds()
   -- decide if we should show the completion window
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
-      if utils.is_special_buffer() then return end
-
       -- we were told to ignore the text changed event, so we update the context
       -- but don't send an on_show event upstream
       if trigger.ignore_next_text_changed then

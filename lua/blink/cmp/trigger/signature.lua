@@ -30,8 +30,6 @@ function trigger.activate_autocmds()
   -- decide if we should show the completion window
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
-      if utils.is_special_buffer() then return end
-
       -- no characters added so let cursormoved handle it
       if #last_chars == 0 then return end
 
