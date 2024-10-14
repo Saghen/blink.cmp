@@ -68,25 +68,33 @@ function docs.show_item(item)
     for s in doc:gmatch('[^\r\n]+') do
       table.insert(doc_lines, s)
     end
-    vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, doc_lines)
+    vim.api.nvim_buf_call(docs.win:get_buf(), function()
+      vim.cmd('syntax clear')
+      vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, false, {})
+    end)
+
+    -- use the built-in markdown styling
+    -- NOTE: according to https://github.com/Saghen/blink.cmp/pull/33#issuecomment-2400195950
+    -- it's possible for this to fail so we call it safely
+    local stylize_success = pcall(
+      function()
+        vim.lsp.util.stylize_markdown(docs.win:get_buf(), doc_lines, {
+          max_width = config.max_width,
+          max_height = config.max_height,
+        })
+      end
+    )
+    if not stylize_success then
+      -- show without stylize if failed
+      vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, doc_lines)
+    end
+
     vim.api.nvim_set_option_value('modified', false, { buf = docs.win:get_buf() })
 
     if autocomplete.win:get_win() then
       docs.win:open()
       docs.update_position()
     end
-
-    -- use the built-in markdown styling
-    -- NOTE: according to https://github.com/Saghen/blink.cmp/pull/33#issuecomment-2400195950
-    -- it's possible for this to fail so we call it safely
-    pcall(
-      function()
-        vim.lsp.util.stylize_markdown(docs.win:get_buf(), doc_lines, {
-          height = vim.api.nvim_win_get_height(docs.win:get_win()),
-          width = vim.api.nvim_win_get_width(docs.win:get_win()),
-        })
-      end
-    )
   end)
 end
 
