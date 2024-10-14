@@ -58,6 +58,12 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET="13" cargo build --release --target ${{ matrix.target }}
           mv "${{ matrix.artifact_name }}" "${{ matrix.target }}.dylib"
 
+      - name: Build for windowss
+        if: contains(matrix.os, 'windows')
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+          mv "${{ matrix.artifact_name }}" "${{ matrix.target }}.dylib"
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
