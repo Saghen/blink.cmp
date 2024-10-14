@@ -58,7 +58,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET="13" cargo build --release --target ${{ matrix.target }}
           mv "${{ matrix.artifact_name }}" "${{ matrix.target }}.dylib"
 
-      - name: Build for windowss
+      - name: Build for Windows
         if: contains(matrix.os, 'windows')
         run: |
           cargo build --release --target ${{ matrix.target }}
