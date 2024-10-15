@@ -48,19 +48,20 @@ function brackets.add_brackets(filetype, item)
   if brackets.has_brackets_in_front(text_edit, brackets_for_filetype[1]) then
     return 'skipped', text_edit, #brackets_for_filetype[1]
   end
-  -- check if configuration incidates we should skip
-  if not brackets.should_run_resolution(filetype, 'kind') then return 'check_semantic_token', text_edit, 0 end
-  -- not a function, skip
-  local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
-  if item.kind ~= CompletionItemKind.Function and item.kind ~= CompletionItemKind.Method then
-    return 'check_semantic_token', text_edit, 0
-  end
 
   -- if the item already contains the brackets, conservatively skip adding brackets
   -- todo: won't work for snippets when the brackets_for_filetype is { '{', '}' }
   -- I've never seen a language like that though
   if brackets_for_filetype[1] ~= ' ' and text_edit.newText:match('[\\' .. brackets_for_filetype[1] .. ']') ~= nil then
     return 'skipped', text_edit, 0
+  end
+
+  -- check if configuration incidates we should skip
+  if not brackets.should_run_resolution(filetype, 'kind') then return 'check_semantic_token', text_edit, 0 end
+  -- not a function, skip
+  local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
+  if item.kind ~= CompletionItemKind.Function and item.kind ~= CompletionItemKind.Method then
+    return 'check_semantic_token', text_edit, 0
   end
 
   text_edit = vim.deepcopy(text_edit)
