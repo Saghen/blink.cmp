@@ -69,7 +69,7 @@ function win:open()
     col = 1,
     focusable = false,
     zindex = 1001,
-    border = self.config.border == 'padded' and { ' ', '', '', '', '', '', ' ', ' ' } or self.config.border,
+    border = self.config.border == 'padded' and { ' ', '', '', ' ', '', '', ' ', ' ' } or self.config.border,
   })
   vim.api.nvim_set_option_value('winhighlight', self.config.winhighlight, { win = self.id })
   vim.api.nvim_set_option_value('wrap', self.config.wrap, { win = self.id })
