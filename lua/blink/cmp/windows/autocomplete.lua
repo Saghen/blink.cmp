@@ -14,6 +14,8 @@ local autocomplete = {
   ---@type blink.cmp.CompletionItem[]
   items = {},
   has_selected = nil,
+  -- hack: ideally this doesn't get mutated by the public API
+  auto_show = autocmp_config.auto_show,
   ---@type blink.cmp.Context?
   context = nil,
   event_targets = {
@@ -72,9 +74,9 @@ function autocomplete.open_with_items(context, items)
 
   vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 
+  if not autocomplete.auto_show then return end
   autocomplete.win:open()
 
-  autocomplete.context = context
   autocomplete.update_position(context)
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 
@@ -92,6 +94,7 @@ end
 
 function autocomplete.close()
   if not autocomplete.win:is_open() then return end
+  autocomplete.auto_show = autocmp_config.auto_show
   autocomplete.win:close()
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 

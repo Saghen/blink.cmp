@@ -144,13 +144,18 @@ function trigger.suppress_events_for_callback(cb)
     and is_insert_mode
 end
 
---- @param opts { trigger_character?: string, send_upstream?: boolean } | nil
+--- @param opts { trigger_character?: string, send_upstream?: boolean, force?: boolean } | nil
 function trigger.show(opts)
   opts = opts or {}
 
   local cursor = vim.api.nvim_win_get_cursor(0)
   -- already triggered at this position, ignore
-  if trigger.context ~= nil and cursor[1] == trigger.context.cursor[1] and cursor[2] == trigger.context.cursor[2] then
+  if
+    not opts.force
+    and trigger.context ~= nil
+    and cursor[1] == trigger.context.cursor[1]
+    and cursor[2] == trigger.context.cursor[2]
+  then
     return
   end
 
@@ -177,7 +182,6 @@ function trigger.listen_on_show(callback) trigger.event_targets.on_show = callba
 
 function trigger.hide()
   if not trigger.context then return end
-
   trigger.context = nil
   trigger.event_targets.on_hide()
 end
