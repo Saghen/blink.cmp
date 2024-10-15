@@ -3,7 +3,6 @@
 -- This can be used downstream to determine if we should make new requests to the sources or not.
 
 local config = require('blink.cmp.config').trigger.completion
-local autocomplete = require('blink.cmp.config').windows.autocomplete
 local sources = require('blink.cmp.sources.lib')
 local utils = require('blink.cmp.utils')
 
@@ -11,7 +10,6 @@ local trigger = {
   current_context_id = -1,
   --- @type blink.cmp.Context | nil
   context = nil,
-  auto_show = autocomplete.auto_show,
   event_targets = {
     --- @type fun(context: blink.cmp.Context)
     on_show = function() end,
@@ -19,39 +17,6 @@ local trigger = {
     on_hide = function() end,
   },
 }
-
-function trigger.set_auto_show(value)
-  trigger.auto_show = value
-  trigger.on_input(vim.v.char)
-end
-
---- @param last_char string
-function trigger.on_input(last_char)
-  if not trigger.auto_show then return end
-  -- no characters added so let cursormoved handle it
-  if last_char == '' then return end
-
-  -- ignore if in a special buffer
-  if utils.is_special_buffer() then
-    trigger.hide()
-    -- character forces a trigger according to the sources, create a fresh context
-  elseif vim.tbl_contains(sources.get_trigger_characters(), last_char) then
-    trigger.context = nil
-    trigger.show({ trigger_character = last_char })
-    -- character is part of the current context OR in an existing context
-  elseif last_char:match(config.keyword_regex) ~= nil then
-    trigger.show()
-    -- nothing matches so hide
-  else
-    trigger.hide()
-  end
-
-  last_char = ''
-end
-
--- vim.api.nvim_create_autocmd('TextChangedI', {
---   callback = function() trigger.on_input(last_char) end,
--- })
 
 function trigger.activate_autocmds()
   local last_char = ''
@@ -177,13 +142,18 @@ function trigger.suppress_events_for_callback(cb)
     and is_insert_mode
 end
 
---- @param opts { trigger_character?: string, send_upstream?: boolean } | nil
+--- @param opts { trigger_character?: string, send_upstream?: boolean, force?: boolean } | nil
 function trigger.show(opts)
   opts = opts or {}
 
   local cursor = vim.api.nvim_win_get_cursor(0)
   -- already triggered at this position, ignore
-  if trigger.context ~= nil and cursor[1] == trigger.context.cursor[1] and cursor[2] == trigger.context.cursor[2] then
+  if
+    not opts.force
+    and trigger.context ~= nil
+    and cursor[1] == trigger.context.cursor[1]
+    and cursor[2] == trigger.context.cursor[2]
+  then
     return
   end
 
@@ -210,7 +180,6 @@ function trigger.listen_on_show(callback) trigger.event_targets.on_show = callba
 
 function trigger.hide()
   if not trigger.context then return end
-  trigger.set_auto_show(autocomplete.auto_show)
   trigger.context = nil
   trigger.event_targets.on_hide()
 end
