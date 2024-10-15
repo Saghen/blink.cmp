@@ -262,6 +262,7 @@ local config = {
       -- Controls how the completion items are rendered on the popup window
       -- 'simple' will render the item's kind icon the left alongside the label
       -- 'reversed' will render the label on the left and the kind icon + name on the right
+      -- 'minimal' will render the label on the left and the kind name on the right
       -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
       draw = 'simple',
       -- Controls the cycling behavior when reaching the beginning or end of the completion list.
