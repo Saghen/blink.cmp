@@ -114,4 +114,12 @@ function source:get_signature_help(context)
   end)
 end
 
+--- Misc ---
+
+--- For external integrations to force reloading the source
+function source:reload()
+  if self.module.reload == nil then return end
+  self.module:reload()
+end
+
 return source

@@ -15,6 +15,9 @@
 --- @field filter_completions (fun(self: blink.cmp.Source, response: blink.cmp.CompletionResponse): blink.cmp.CompletionItem[]) | nil
 --- @field should_show_completions (fun(self: blink.cmp.Source, context: blink.cmp.Context, response: blink.cmp.CompletionResponse): boolean) | nil
 --- @field resolve (fun(self: blink.cmp.Source, item: blink.cmp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil)): ((fun(): nil) | nil)) | nil
+--- @field get_signature_help_trigger_characters fun(self: blink.cmp.Source): string[]
+--- @field get_signature_help fun(self: blink.cmp.Source, context: blink.cmp.SignatureHelpContext): blink.cmp.Task
+--- @field reload (fun(self: blink.cmp.Source): nil) | nil
 ---
 --- @class blink.cmp.SourceProvider
 --- @field name string
@@ -27,3 +30,4 @@
 --- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
 --- @field get_signature_help fun(self: blink.cmp.SourceProvider, context: blink.cmp.SignatureHelpContext): blink.cmp.Task
+--- @field reload (fun(self: blink.cmp.Source): nil) | nil

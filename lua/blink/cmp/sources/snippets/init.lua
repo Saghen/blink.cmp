@@ -12,8 +12,7 @@ function snippets.new(config)
   --- @type table<string, blink.cmp.CompletionItem[]>
   self.cache = {}
   --- @type blink.cmp.SnippetsOpts
-  local opts = config.opts or {}
-  self.registry = require('blink.cmp.sources.snippets.registry').new(opts)
+  self.registry = require('blink.cmp.sources.snippets.registry').new(config.opts or {})
   return self
 end
 
@@ -58,5 +57,8 @@ function snippets:resolve(item, callback)
   }
   callback(resolved_item)
 end
+
+--- For external integrations to force reloading the snippets
+function snippets:reload() self.cache = {} end
 
 return snippets
