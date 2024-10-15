@@ -84,12 +84,12 @@
 --- @field use_nvim_cmp_as_default? boolean
 
 --- @class blink.cmp.AutocompleteConfig
---- @field auto_show? boolean
 --- @field min_width? number
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
 --- @field order? "top_down" | "bottom_up"
 --- @field direction_priority? ("n" | "s")[]
+--- @field auto_show? boolean
 --- @field selection? "preselect" | "manual" | "auto_insert"
 --- @field winhighlight? string
 --- @field scrolloff? number
@@ -240,7 +240,6 @@ local config = {
 
   windows = {
     autocomplete = {
-      auto_show = true,
       min_width = 15,
       max_height = 10,
       border = 'none',
@@ -252,6 +251,8 @@ local config = {
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 's', 'n' },
+      -- Controls whether the completion window will automatically show when typing
+      auto_show = true,
       -- Controls how the completion items are selected
       -- 'preselect' will automatically select the first item in the completion list
       -- 'manual' will not select any item by default
@@ -283,6 +284,7 @@ local config = {
         autocomplete_north = { 'e', 'w', 'n', 's' },
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
+      -- Controls whether the documentation window will automatically show when selecting a completion item
       auto_show = false,
       auto_show_delay_ms = 500,
       update_delay_ms = 50,
