@@ -134,6 +134,7 @@
 --- @field highlight? blink.cmp.HighlightConfig
 --- @field nerd_font_variant? 'mono' | 'normal'
 --- @field kind_icons? table<string, string>
+--- @field blocked_filetypes? string[]
 
 --- @type blink.cmp.Config
 local config = {
@@ -309,6 +310,9 @@ local config = {
   -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
   -- adjusts spacing to ensure icons are aligned
   nerd_font_variant = 'normal',
+
+  -- don't show completions or signature help for these filetypes. Keymaps are also disabled.
+  blocked_filetypes = {},
 
   kind_icons = {
     Text = '󰉿',

@@ -346,6 +346,9 @@ MiniDeps.add({
   -- adjusts spacing to ensure icons are aligned
   nerd_font_variant = 'normal',
 
+  -- don't show completions or signature help for these filetypes. Keymaps are also disabled.
+  blocked_filetypes = {},
+
   kind_icons = {
     Text = '󰉿',
     Method = '󰊕',
