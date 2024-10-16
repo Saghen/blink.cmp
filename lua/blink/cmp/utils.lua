@@ -134,4 +134,33 @@ function utils.highlight_with_treesitter(bufnr, root_lang, start_line, end_line)
   end)
 end
 
+--- Gets characters around the cursor and returns the range, 0-indexed
+--- @param regex string
+--- @param range 'prefix' | 'full'
+--- @return number[]
+function utils.get_regex_around_cursor(regex, range)
+  local current_col = vim.api.nvim_win_get_cursor(0)[2]
+  local line = vim.api.nvim_get_current_line()
+
+  -- Search backward for the start of the word
+  local start_col = current_col
+  while start_col > 0 do
+    local char = line:sub(start_col, start_col)
+    if char:match(regex) == nil then break end
+    start_col = start_col - 1
+  end
+
+  if range == 'prefix' then return { start_col, current_col } end
+
+  -- Search forward for the end of the word
+  local end_col = current_col
+  while end_col < #line do
+    local char = line:sub(end_col + 1, end_col + 1)
+    if char:match(regex) == nil then break end
+    end_col = end_col + 1
+  end
+
+  return { start_col, end_col }
+end
+
 return utils

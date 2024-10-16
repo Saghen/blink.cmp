@@ -1,4 +1,4 @@
-local config = require('blink.cmp.config').fuzzy
+local config = require('blink.cmp.config')
 
 local fuzzy = {
   ---@type blink.cmp.Context?
@@ -59,10 +59,10 @@ function fuzzy.filter_items(needle, items)
       -- so this should generally be good
       -- TODO: make this configurable
       min_score = 6 * needle:len(),
-      max_items = config.max_items,
-      use_frecency = config.use_frecency,
-      use_proximity = config.use_proximity,
-      sorts = config.sorts,
+      max_items = config.fuzzy.max_items,
+      use_frecency = config.fuzzy.use_frecency,
+      use_proximity = config.fuzzy.use_proximity,
+      sorts = config.fuzzy.sorts,
       nearby_words = nearby_words,
     })
 
@@ -88,18 +88,14 @@ function fuzzy.filter_items_with_cache(needle, context, items)
 end
 
 --- Gets the text under the cursor to be used for fuzzy matching
---- @param regex string | nil
 --- @return string
-function fuzzy.get_query(regex)
-  if regex == nil then regex = '[%w_\\-]+$' end
-
-  local bufnr = vim.api.nvim_get_current_buf()
-
-  local current_line = vim.api.nvim_win_get_cursor(0)[1] - 1
-  local current_col = vim.api.nvim_win_get_cursor(0)[2] - 1
-  local line = vim.api.nvim_buf_get_lines(bufnr, current_line, current_line + 1, false)[1]
-
-  return string.sub(line, 1, current_col + 1):match(regex) or ''
+function fuzzy.get_query()
+  local line = vim.api.nvim_get_current_line()
+  local range = require('blink.cmp.utils').get_regex_around_cursor(
+    config.trigger.completion.keyword_regex,
+    config.fuzzy.keyword_range
+  )
+  return string.sub(line, range[1] + 1, range[2] + 1)
 end
 
 return fuzzy

@@ -1,3 +1,4 @@
+local config = require('blink.cmp.config')
 local text_edits = {}
 
 function text_edits.get_from_item(item)
@@ -13,7 +14,7 @@ function text_edits.get_from_item(item)
   end
 
   -- No text edit so we fallback to our own resolution
-  return text_edits.guess_text_edit(vim.api.nvim_get_current_buf(), item)
+  return text_edits.guess_text_edit(item)
 end
 
 function text_edits.apply_text_edits(client_id, edits)
@@ -38,26 +39,17 @@ function text_edits.apply_additional_text_edits(item)
 end
 
 -- todo: doesnt work when the item contains characters not included in the context regex
-function text_edits.guess_text_edit(bufnr, item)
+function text_edits.guess_text_edit(item)
   local word = item.textEditText or item.insertText or item.label
 
+  local range = require('blink.cmp.utils').get_regex_around_cursor('[%w_\\-]', config.fuzzy.keyword_range)
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
-  local current_col = vim.api.nvim_win_get_cursor(0)[2]
-  local line = vim.api.nvim_buf_get_lines(bufnr, current_line - 1, current_line, false)[1]
-
-  -- Search forward/backward for the start/end of the word
-  local start_col = current_col
-  while start_col > 0 do
-    local char = line:sub(start_col, start_col)
-    if char:match('[%w_\\-]') == nil then break end
-    start_col = start_col - 1
-  end
 
   -- convert to 0-index
   return {
     range = {
-      start = { line = current_line - 1, character = start_col },
-      ['end'] = { line = current_line - 1, character = current_col },
+      start = { line = current_line - 1, character = range[1] },
+      ['end'] = { line = current_line - 1, character = range[2] },
     },
     newText = word,
   }
