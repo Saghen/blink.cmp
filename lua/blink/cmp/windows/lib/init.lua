@@ -171,18 +171,30 @@ function win:get_width()
   return vim.api.nvim_win_get_width(self:get_win()) + self:get_border_size().horizontal
 end
 
---- @return { bufnr: number, start_line: number, end_line: number, horizontal_offset: number }
-function win.get_screen_scroll_range()
-  local bufnr = vim.api.nvim_win_get_buf(0)
-  local line_count = vim.api.nvim_buf_line_count(bufnr)
+--- Gets the cursor's distance from the top and bottom of the window
+--- @return { distance_from_top: number, distance_from_bottom: number }
+function win.get_cursor_screen_position()
+  local win_height = vim.api.nvim_win_get_height(0)
+  local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
 
-  -- Get the scrolled range (start and end line)
-  local start_line = math.max(1, vim.fn.line('w0') - 1)
-  local end_line = math.max(start_line, math.min(line_count, vim.fn.line('w$') + 1))
+  -- Calculate the visual distance from top of the window sinc the vim.fn.line()
+  -- func gives the literal line number but there can be folds.
+  -- HACK: ideally there's a more generic solution since vertical conceal
+  -- will be added in the future
+  local distance_from_top = 0
+  local line = math.max(1, vim.fn.line('w0'))
+  while line < cursor_line do
+    distance_from_top = distance_from_top + 1
+    if vim.fn.foldclosedend(line) ~= -1 then line = vim.fn.foldclosedend(line) end
+    line = line + 1
+  end
 
-  local horizontal_offset = vim.fn.winsaveview().leftcol
+  local distance_from_bottom = win_height - distance_from_top - 1
 
-  return { bufnr = bufnr, start_line = start_line, end_line = end_line, horizontal_offset = horizontal_offset }
+  return {
+    distance_from_bottom = distance_from_bottom,
+    distance_from_top = distance_from_top,
+  }
 end
 
 return win

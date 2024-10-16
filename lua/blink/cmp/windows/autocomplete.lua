@@ -121,11 +121,9 @@ function autocomplete.update_position(context)
   win:update_size()
 
   local height = win:get_height()
-  local screen_height = vim.api.nvim_win_get_height(0)
-  local screen_scroll_range = win.get_screen_scroll_range()
+  local cursor_screen_position = win.get_cursor_screen_position()
 
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local cursor_row = cursor[1]
   local cursor_col = cursor[2]
 
   -- place the window at the start col of the current text we're fuzzy matching against
@@ -134,8 +132,8 @@ function autocomplete.update_position(context)
 
   -- detect if there's space above/below the cursor
   -- todo: should pick the largest space if both are false and limit height of the window
-  local is_space_below = screen_height - (cursor_row - screen_scroll_range.start_line) > height
-  local is_space_above = cursor_row - screen_scroll_range.start_line > height
+  local is_space_below = cursor_screen_position.distance_from_bottom > height
+  local is_space_above = cursor_screen_position.distance_from_top > height
 
   -- default to the user's preference but attempt to use the other options
   local row = autocmp_config.direction_priority[1] == 's' and 1 or -height

@@ -104,13 +104,12 @@ function signature.update_position(context)
   local direction = autocomplete_win_is_up and 's' or 'n'
 
   local height = signature.win:get_height()
-  local screen_height = vim.api.nvim_win_get_height(0)
-  local screen_scroll_range = signature.win.get_screen_scroll_range()
+  local cursor_screen_position = win.get_cursor_screen_position()
 
   -- detect if there's space above/below the cursor
   local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
-  local is_space_below = screen_height - cursor_row - screen_scroll_range.start_line > height
-  local is_space_above = cursor_row - screen_scroll_range.start_line > height
+  local is_space_below = cursor_screen_position.distance_from_bottom > height
+  local is_space_above = cursor_screen_position.distance_from_top > height
 
   -- default to the user's preference but attempt to use the other options
   local row = direction == 's' and 1 or -height
