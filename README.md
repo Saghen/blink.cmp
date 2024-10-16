@@ -203,7 +203,7 @@ MiniDeps.add({
 
   fuzzy = {
     -- 'prefix' will fuzzy match on the text before the cursor
-    -- 'full' will fuzzy match on the text befor *and* after the cursor
+    -- 'full' will fuzzy match on the text before *and* after the cursor
     -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
     keyword_range = 'prefix',
     -- frencency tracks the most recently/frequently used items and boosts the score of the item

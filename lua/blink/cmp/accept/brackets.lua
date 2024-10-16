@@ -137,6 +137,7 @@ function brackets.add_brackets_via_semantic_token(filetype, item, callback)
     end
 
     -- cancel if the token isn't a function or method
+    -- TODO: should check the token closest to the end of the textEdit/cursor
     local type = numToTokenType[result.data[4] + 1]
     if type ~= 'function' and type ~= 'method' then return callback() end
 
