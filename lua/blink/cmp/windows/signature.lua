@@ -104,7 +104,7 @@ function signature.update_position(context)
   local direction = autocomplete_win_is_up and 's' or 'n'
 
   local height = signature.win:get_height()
-  local cursor_screen_position = win.get_cursor_screen_position()
+  local cursor_screen_position = signature.win.get_cursor_screen_position()
 
   -- detect if there's space above/below the cursor
   local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
