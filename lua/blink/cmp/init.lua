@@ -164,7 +164,7 @@ cmp.select_and_accept = function()
 end
 
 cmp.select_prev = function()
-  if not cmp.windows.autocomplete.win:is_open() then
+  if not cmp.windows.autocomplete.win:is_open() and not cmp.windows.autocomplete.auto_show then
     cmp.show()
     return true
   end
@@ -173,7 +173,7 @@ cmp.select_prev = function()
 end
 
 cmp.select_next = function()
-  if not cmp.windows.autocomplete.win:is_open() then
+  if not cmp.windows.autocomplete.win:is_open() and not cmp.windows.autocomplete.auto_show then
     cmp.show()
     return true
   end
