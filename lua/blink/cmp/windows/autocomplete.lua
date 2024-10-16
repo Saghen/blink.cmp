@@ -257,6 +257,7 @@ function autocomplete.draw()
     -- Some LSPs can return labels with newlines.
     -- Escape them to avoid errors in nvim_buf_set_lines when rendering the autocomplete menu.
     local label = item.label:gsub('\n', '\\n')
+    if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
     table.insert(
       components_list,
