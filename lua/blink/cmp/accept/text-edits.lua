@@ -39,7 +39,7 @@ end
 
 -- todo: doesnt work when the item contains characters not included in the context regex
 function text_edits.guess_text_edit(bufnr, item)
-  local word = item.insertText or item.label
+  local word = item.textEditText or item.insertText or item.label
 
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
   local current_col = vim.api.nvim_win_get_cursor(0)[2]
