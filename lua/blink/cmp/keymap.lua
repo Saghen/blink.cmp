@@ -5,6 +5,7 @@ local insert_commands = {
   'show',
   'hide',
   'accept',
+  'select_and_accept',
   'select_prev',
   'select_next',
   'show_documentation',

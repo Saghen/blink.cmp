@@ -151,6 +151,18 @@ cmp.accept = function()
   return true
 end
 
+cmp.select_and_accept = function()
+  if not cmp.windows.autocomplete.win:is_open() then return end
+
+  vim.schedule(function()
+    -- select an item if none is selected
+    if not cmp.windows.autocomplete.get_selected_item() then cmp.windows.autocomplete.select_next() end
+    local item = cmp.windows.autocomplete.get_selected_item()
+    if item ~= nil then require('blink.cmp.accept')(item) end
+  end)
+  return true
+end
+
 cmp.select_prev = function()
   if not cmp.windows.autocomplete.win:is_open() then
     cmp.show()
