@@ -43,6 +43,8 @@
   -- On musl libc based systems you need to add this flag
   -- build = 'RUSTFLAGS="-C target-feature=-crt-static" cargo build --release',
 
+  ---@module 'blink.cmp'
+  ---@type blink.cmp.Config
   opts = {
     highlight = {
       -- sets the fallback highlight groups to nvim-cmp's highlight groups
@@ -53,10 +55,10 @@
     -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
     -- adjusts spacing to ensure icons are aligned
     nerd_font_variant = 'normal',
-    
+
     -- experimental auto-brackets support
     -- accept = { auto_brackets = { enabled = true } }
-    
+
     -- experimental signature help support
     -- trigger = { signature_help = { enabled = true } }
   }
@@ -246,10 +248,10 @@ MiniDeps.add({
           keyword_length = 0,
           score_offset = 0,
           trigger_characters = { 'f', 'o', 'o' },
-      }, 
+      },
       -- the following two sources have additional options
-      { 
-        'blink.cmp.sources.path', 
+      {
+        'blink.cmp.sources.path',
         name = 'Path',
         score_offset = 3,
         opts = {
@@ -272,7 +274,7 @@ MiniDeps.add({
           ignored_filetypes = {},
         },
       },
-      { 
+      {
         'blink.cmp.sources.buffer',
         name = 'Buffer',
         fallback_for = { 'LSP' },
