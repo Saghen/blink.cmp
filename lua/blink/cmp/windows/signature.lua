@@ -25,7 +25,9 @@ end
 --- @param signature_help lsp.SignatureHelp | nil
 function signature.open_with_signature_help(context, signature_help)
   signature.context = context
-  if signature_help == nil then
+  -- check if there are any signatures in signature_help, since
+  -- convert_signature_help_to_markdown_lines errors with no signatures
+  if signature_help == nil or #signature_help.signatures == 0 then
     signature.win:close()
     return
   end
