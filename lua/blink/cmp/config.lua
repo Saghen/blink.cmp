@@ -144,6 +144,7 @@ local config = {
     show = '<C-space>',
     hide = '<C-e>',
     accept = '<Tab>',
+    select_and_accept = {},
     select_prev = { '<Up>', '<C-p>' },
     select_next = { '<Down>', '<C-n>' },
 
