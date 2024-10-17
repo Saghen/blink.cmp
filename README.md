@@ -41,7 +41,7 @@
   -- OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
   -- build = 'cargo build --release',
   -- You can use rust-nightly through a temporary nix shell:
-  -- build = 'nix shell github:oxalica/rust-overlay#rust-nightly -c cargo build --release',
+  -- build = 'nix shell github:nix-community/fenix#latest.toolchain -c cargo build --release',
   -- On musl libc based systems you need to add this flag
   -- build = 'RUSTFLAGS="-C target-feature=-crt-static" cargo build --release',
 
