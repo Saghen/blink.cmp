@@ -3,7 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:cachix/devenv-nixpkgs/rolling";
-    devenv.url = "github:cachix/devenv";
     flake-parts.url = "github:hercules-ci/flake-parts";
     fenix.url = "github:nix-community/fenix";
     fenix.inputs.nixpkgs.follows = "nixpkgs";
@@ -15,9 +14,8 @@
     extra-substituters = "https://devenv.cachix.org";
   };
 
-  outputs = inputs@{ flake-parts, nixpkgs, fenix, ... }:
+  outputs = inputs@{ flake-parts, nixpkgs, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      imports = [ inputs.devenv.flakeModule ];
       systems = [
         "x86_64-linux"
         "i686-linux"
@@ -27,9 +25,15 @@
       ];
 
       perSystem = { config, self', inputs', pkgs, system, lib, ... }: {
+        # use fenix overlay
+        _module.args.pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ inputs.fenix.overlays.default ];
+        };
+
         # define the packages provided by this flake
         packages = let
-          inherit (fenix.packages.${system}.minimal) toolchain;
+          inherit (inputs.fenix.packages.${system}.minimal) toolchain;
           inherit (pkgs.stdenv) hostPlatform;
 
           rustPlatform = pkgs.makeRustPlatform {
@@ -53,11 +57,13 @@
               };
             };
           };
-          
-          libExt = 
-            if hostPlatform.isDarwin then "dylib"
-            else if hostPlatform.isWindows then "dll"
-            else "so";       
+
+          libExt = if hostPlatform.isDarwin then
+            "dylib"
+          else if hostPlatform.isWindows then
+            "dll"
+          else
+            "so";
         in {
           blink-cmp = pkgs.vimUtils.buildVimPlugin {
             pname = "blink-cmp";
@@ -79,14 +85,29 @@
           default = self'.packages.blink-cmp;
         };
 
-        # define the default dev environment
-        devenv.shells.default = {
-          name = "blink";
+        apps.build-plugin = {
+          type = "app";
+          program = let
+            buildScript = pkgs.writeShellApplication {
+              name = "build-plugin";
+              runtimeInputs = with pkgs; [
+                fenix.complete.toolchain
+                rust-analyzer-nightly
+              ];
+              text = ''
+                cargo build --release
+              '';
+            };
+          in (lib.getExe buildScript);
+        };
 
-          languages.rust = {
-            enable = true;
-            channel = "nightly";
-          };
+        # define the default dev environment
+        devShells.default = pkgs.mkShell {
+          name = "blink";
+          packages = with pkgs; [
+            fenix.complete.toolchain
+            rust-analyzer-nightly
+          ];
         };
       };
     };
