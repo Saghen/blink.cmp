@@ -151,7 +151,10 @@ cmp.select_and_accept = function()
 
   vim.schedule(function()
     -- select an item if none is selected
-    if not cmp.windows.autocomplete.get_selected_item() then cmp.windows.autocomplete.select_next() end
+    if not cmp.windows.autocomplete.get_selected_item() then
+      -- avoid running auto_insert since we're about to accept anyway
+      cmp.windows.autocomplete.select_next({ skip_auto_insert = true })
+    end
 
     local item = cmp.windows.autocomplete.get_selected_item()
     if item ~= nil then require('blink.cmp.accept')(item) end

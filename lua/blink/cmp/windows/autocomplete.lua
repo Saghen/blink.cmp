@@ -175,14 +175,15 @@ function autocomplete.accept()
 end
 
 --- @param line number
-local function select(line)
+--- @param skip_auto_insert? boolean
+local function select(line, skip_auto_insert)
   autocomplete.set_has_selected(true)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
 
   local selected_item = autocomplete.get_selected_item()
 
   -- when auto_insert is enabled, we immediately apply the text edit
-  if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil then
+  if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil and not skip_auto_insert then
     require('blink.cmp.trigger.completion').suppress_events_for_callback(function()
       if autocomplete.preview_text_edit ~= nil and autocomplete.preview_context_id == autocomplete.context.id then
         text_edits_lib.undo_text_edit(autocomplete.preview_text_edit)
@@ -195,7 +196,8 @@ local function select(line)
   autocomplete.event_targets.on_select(selected_item, autocomplete.context)
 end
 
-function autocomplete.select_next()
+--- @params opts? { skip_auto_insert?: boolean }
+function autocomplete.select_next(opts)
   if not autocomplete.win:is_open() then return end
 
   local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
@@ -213,10 +215,11 @@ function autocomplete.select_next()
     line = line + 1
   end
 
-  select(line)
+  select(line, opts and opts.skip_auto_insert)
 end
 
-function autocomplete.select_prev()
+--- @params opts? { skip_auto_insert?: boolean }
+function autocomplete.select_prev(opts)
   if not autocomplete.win:is_open() then return end
 
   local cycle_from_top = config.windows.autocomplete.cycle.from_top
@@ -230,7 +233,7 @@ function autocomplete.select_prev()
     line = line - 1
   end
 
-  select(line)
+  select(line, opts and opts.skip_auto_insert)
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end
