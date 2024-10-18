@@ -40,7 +40,11 @@
   version = 'v0.*',
   -- OR build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
   -- build = 'cargo build --release',
+  -- If you use nix, you can build from source using latest nightly rust with:
+  -- build = 'nix run .#build-plugin',
 
+  ---@module 'blink.cmp'
+  ---@type blink.cmp.Config
   opts = {
     highlight = {
       -- sets the fallback highlight groups to nvim-cmp's highlight groups
@@ -51,10 +55,10 @@
     -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
     -- adjusts spacing to ensure icons are aligned
     nerd_font_variant = 'normal',
-    
+
     -- experimental auto-brackets support
     -- accept = { auto_brackets = { enabled = true } }
-    
+
     -- experimental signature help support
     -- trigger = { signature_help = { enabled = true } }
   }
@@ -75,7 +79,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 MiniDeps.add({
   source = "saghen/blink.cmp",
   depends = {
-	"rafamadriz/friendly-snippets",
+  "rafamadriz/friendly-snippets",
   },
   checkout = "some.version", -- check releases for latest tag
 })
@@ -137,6 +141,7 @@ MiniDeps.add({
     show = '<C-space>',
     hide = '<C-e>',
     accept = '<Tab>',
+    select_and_accept = {},
     select_prev = { '<Up>', '<C-p>' },
     select_next = { '<Down>', '<C-n>' },
 
@@ -175,10 +180,16 @@ MiniDeps.add({
 
   trigger = {
     completion = {
+      -- 'prefix' will fuzzy match on the text before the cursor
+      -- 'full' will fuzzy match on the text before *and* after the cursor
+      -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
+      keyword_range = 'prefix',
       -- regex used to get the text when fuzzy matching
       -- changing this may break some sources, so please report if you run into issues
       -- todo: shouldnt this also affect the accept command? should this also be per language?
       keyword_regex = '[%w_\\-]',
+      -- after matching with keyword_regex, any characters matching this regex at the prefix will be excluded
+      exclude_from_prefix_regex = '[\\-]',
       -- LSPs can indicate when to show the completion window via trigger characters
       -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
       -- always show the window. We block these by default
@@ -187,6 +198,8 @@ MiniDeps.add({
       show_on_insert_on_trigger_character = true,
       -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_blocked_trigger_characters = { "'", '"' },
+      -- when false, will not show the completion window when in a snippet
+      show_in_snippet = false,
     },
 
     signature_help = {
@@ -227,10 +240,10 @@ MiniDeps.add({
     providers = {
       { 'blink.cmp.sources.lsp', name = 'LSP' },
       { 'blink.cmp.sources.path', name = 'Path', score_offset = 3 },
-      { 'blink.cmp.sources.snippets', score_offset = -3 },
+      { 'blink.cmp.sources.snippets', name = 'Snippets', score_offset = -3 },
       { 'blink.cmp.sources.buffer', name = 'Buffer', fallback_for = { 'LSP' } },
     },
-    -- FOR REF: full example
+    -- WARN: **For reference only** to see what options are available. **See above for the default config**
     providers = {
       -- all of these properties work on every source
       {
@@ -239,10 +252,10 @@ MiniDeps.add({
           keyword_length = 0,
           score_offset = 0,
           trigger_characters = { 'f', 'o', 'o' },
-      }, 
+      },
       -- the following two sources have additional options
-      { 
-        'blink.cmp.sources.path', 
+      {
+        'blink.cmp.sources.path',
         name = 'Path',
         score_offset = 3,
         opts = {
@@ -265,7 +278,7 @@ MiniDeps.add({
           ignored_filetypes = {},
         },
       },
-      { 
+      {
         'blink.cmp.sources.buffer',
         name = 'Buffer',
         fallback_for = { 'LSP' },
@@ -284,6 +297,8 @@ MiniDeps.add({
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 's', 'n' },
+      -- Controls whether the completion window will automatically show when typing
+      auto_show = true,
       -- Controls how the completion items are selected
       -- 'preselect' will automatically select the first item in the completion list
       -- 'manual' will not select any item by default
@@ -316,6 +331,7 @@ MiniDeps.add({
         autocomplete_north = { 'e', 'w', 'n', 's' },
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
+      -- Controls whether the documentation window will automatically show when selecting a completion item
       auto_show = false,
       auto_show_delay_ms = 500,
       update_delay_ms = 50,
@@ -340,6 +356,9 @@ MiniDeps.add({
   -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
   -- adjusts spacing to ensure icons are aligned
   nerd_font_variant = 'normal',
+
+  -- don't show completions or signature help for these filetypes. Keymaps are also disabled.
+  blocked_filetypes = {},
 
   kind_icons = {
     Text = '󰉿',
@@ -384,6 +403,7 @@ MiniDeps.add({
 <summary><strong>Community Sources</strong></summary>
 
 - [ctags](https://github.com/netmute/blink-cmp-ctags)
+- [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 
 </details>
 
@@ -409,8 +429,8 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 - Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
 - Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
-    - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp) or the more recent [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim)
-- Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
+  - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp) or the more recent [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim)
+- Boosts completion item score via frecency _and_ proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
 - Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
 - Built-in auto bracket and signature help support
@@ -422,8 +442,6 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 - Ghost text
 - Matched character highlighting
 - Cmdline completions
-- Windows support (You may temporarily build from source as outlined in the [installation](#installation) section)
-
 
 ## Special Thanks
 

@@ -47,7 +47,10 @@ end
 --- @param context blink.cmp.Context
 --- @return blink.cmp.Task
 function sources_context:get_completions_for_sources(sources, context)
-  local non_fallback_sources = vim.tbl_filter(function(source) return source.config.fallback_for == nil end, sources)
+  local non_fallback_sources = vim.tbl_filter(
+    function(source) return source.config.fallback_for == nil or #source.config.fallback_for == 0 end,
+    sources
+  )
 
   -- get completions for each non-fallback source
   local tasks = vim.tbl_map(function(source)

@@ -1,5 +1,6 @@
 --- @class blink.cmp.CompletionRenderContext
 --- @field item blink.cmp.CompletionItem
+--- @field label string
 --- @field kind string
 --- @field kind_icon string
 --- @field icon_gap string
@@ -13,6 +14,8 @@ local autocomplete = {
   ---@type blink.cmp.CompletionItem[]
   items = {},
   has_selected = nil,
+  -- hack: ideally this doesn't get mutated by the public API
+  auto_show = autocmp_config.auto_show,
   ---@type blink.cmp.Context?
   context = nil,
   event_targets = {
@@ -71,9 +74,9 @@ function autocomplete.open_with_items(context, items)
 
   vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 
+  if not autocomplete.auto_show then return end
   autocomplete.win:open()
 
-  autocomplete.context = context
   autocomplete.update_position(context)
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 
@@ -91,6 +94,7 @@ end
 
 function autocomplete.close()
   if not autocomplete.win:is_open() then return end
+  autocomplete.auto_show = autocmp_config.auto_show
   autocomplete.win:close()
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 
@@ -117,11 +121,9 @@ function autocomplete.update_position(context)
   win:update_size()
 
   local height = win:get_height()
-  local screen_height = vim.api.nvim_win_get_height(0)
-  local screen_scroll_range = win.get_screen_scroll_range()
+  local cursor_screen_position = win.get_cursor_screen_position()
 
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local cursor_row = cursor[1]
   local cursor_col = cursor[2]
 
   -- place the window at the start col of the current text we're fuzzy matching against
@@ -130,8 +132,8 @@ function autocomplete.update_position(context)
 
   -- detect if there's space above/below the cursor
   -- todo: should pick the largest space if both are false and limit height of the window
-  local is_space_below = screen_height - (cursor_row - screen_scroll_range.start_line) > height
-  local is_space_above = cursor_row - screen_scroll_range.start_line > height
+  local is_space_below = cursor_screen_position.distance_from_bottom > height
+  local is_space_above = cursor_screen_position.distance_from_top > height
 
   -- default to the user's preference but attempt to use the other options
   local row = autocmp_config.direction_priority[1] == 's' and 1 or -height
@@ -156,46 +158,46 @@ function autocomplete.listen_on_position_update(callback)
   table.insert(autocomplete.event_targets.on_position_update, callback)
 end
 
----------- Selection ----------
+---------- Selection/Accept ----------
+
+function autocomplete.accept()
+  local selected_item = autocomplete.get_selected_item()
+  if selected_item == nil then return end
+
+  -- undo the preview if it exists
+  if autocomplete.preview_text_edit ~= nil and autocomplete.preview_context_id == autocomplete.context.id then
+    text_edits_lib.undo_text_edit(autocomplete.preview_text_edit)
+  end
+
+  -- apply
+  require('blink.cmp.accept')(selected_item)
+  return true
+end
 
 --- @param line number
-local function select(line)
-  local prev_selected_item = autocomplete.get_selected_item()
-
+--- @param skip_auto_insert? boolean
+local function select(line, skip_auto_insert)
   autocomplete.set_has_selected(true)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
 
   local selected_item = autocomplete.get_selected_item()
 
   -- when auto_insert is enabled, we immediately apply the text edit
-  -- todo: move this to the accept module
-  if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil then
+  if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil and not skip_auto_insert then
     require('blink.cmp.trigger.completion').suppress_events_for_callback(function()
-      local text_edit = text_edits_lib.get_from_item(selected_item)
-
-      if selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
-        text_edit.newText = selected_item.label
+      if autocomplete.preview_text_edit ~= nil and autocomplete.preview_context_id == autocomplete.context.id then
+        text_edits_lib.undo_text_edit(autocomplete.preview_text_edit)
       end
-
-      if
-        prev_selected_item ~= nil and prev_selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet
-      then
-        local current_col = vim.api.nvim_win_get_cursor(0)[2]
-        text_edit.range.start.character = current_col - #prev_selected_item.label
-      end
-
-      text_edits_lib.apply_text_edits(selected_item.client_id, { text_edit })
-      vim.api.nvim_win_set_cursor(0, {
-        text_edit.range.start.line + 1,
-        text_edit.range.start.character + #text_edit.newText,
-      })
+      autocomplete.preview_text_edit = require('blink.cmp.accept.preview')(selected_item)
+      autocomplete.preview_context_id = autocomplete.context.id
     end)
   end
 
   autocomplete.event_targets.on_select(selected_item, autocomplete.context)
 end
 
-function autocomplete.select_next()
+--- @params opts? { skip_auto_insert?: boolean }
+function autocomplete.select_next(opts)
   if not autocomplete.win:is_open() then return end
 
   local cycle_from_bottom = config.windows.autocomplete.cycle.from_bottom
@@ -213,10 +215,11 @@ function autocomplete.select_next()
     line = line + 1
   end
 
-  select(line)
+  select(line, opts and opts.skip_auto_insert)
 end
 
-function autocomplete.select_prev()
+--- @params opts? { skip_auto_insert?: boolean }
+function autocomplete.select_prev(opts)
   if not autocomplete.win:is_open() then return end
 
   local cycle_from_top = config.windows.autocomplete.cycle.from_top
@@ -230,7 +233,7 @@ function autocomplete.select_prev()
     line = line - 1
   end
 
-  select(line)
+  select(line, opts and opts.skip_auto_insert)
 end
 
 function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end
@@ -250,11 +253,16 @@ function autocomplete.draw()
   for _, item in ipairs(autocomplete.items) do
     local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
     local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
+    -- Some LSPs can return labels with newlines.
+    -- Escape them to avoid errors in nvim_buf_set_lines when rendering the autocomplete menu.
+    local label = item.label:gsub('\n', '\\n')
+    if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
     table.insert(
       components_list,
       draw_fn({
         item = item,
+        label = label,
         kind = kind,
         kind_icon = kind_icon,
         icon_gap = icon_gap,
@@ -295,7 +303,7 @@ function autocomplete.render_item_simple(ctx)
     ' ',
     { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
     {
-      ctx.item.label,
+      ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
@@ -311,7 +319,7 @@ function autocomplete.render_item_reversed(ctx)
   return {
     ' ',
     {
-      ctx.item.label,
+      ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
@@ -329,7 +337,7 @@ function autocomplete.render_item_minimal(ctx)
   return {
     ' ',
     {
-      ctx.item.label,
+      ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',

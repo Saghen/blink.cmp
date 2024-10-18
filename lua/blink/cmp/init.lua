@@ -119,7 +119,10 @@ end
 
 cmp.show = function()
   if cmp.windows.autocomplete.win:is_open() then return end
-  vim.schedule(cmp.trigger.show)
+  vim.schedule(function()
+    cmp.windows.autocomplete.auto_show = true
+    cmp.trigger.show({ force = true })
+  end)
   return true
 end
 
@@ -139,23 +142,42 @@ cmp.accept = function()
   local item = cmp.windows.autocomplete.get_selected_item()
   if item == nil then return end
 
-  -- create an undo point
-  if require('blink.cmp.config').accept.create_undo_point then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
-  end
+  vim.schedule(function() cmp.windows.autocomplete.accept() end)
+  return true
+end
 
-  vim.schedule(function() require('blink.cmp.accept')(item) end)
+cmp.select_and_accept = function()
+  if not cmp.windows.autocomplete.win:is_open() then return end
+
+  vim.schedule(function()
+    -- select an item if none is selected
+    if not cmp.windows.autocomplete.get_selected_item() then
+      -- avoid running auto_insert since we're about to accept anyway
+      cmp.windows.autocomplete.select_next({ skip_auto_insert = true })
+    end
+
+    local item = cmp.windows.autocomplete.get_selected_item()
+    if item ~= nil then require('blink.cmp.accept')(item) end
+  end)
   return true
 end
 
 cmp.select_prev = function()
-  if not cmp.windows.autocomplete.win:is_open() then return end
+  if not cmp.windows.autocomplete.win:is_open() then
+    if cmp.windows.autocomplete.auto_show then return end
+    cmp.show()
+    return true
+  end
   vim.schedule(cmp.windows.autocomplete.select_prev)
   return true
 end
 
 cmp.select_next = function()
-  if not cmp.windows.autocomplete.win:is_open() then return end
+  if not cmp.windows.autocomplete.win:is_open() then
+    if cmp.windows.autocomplete.auto_show then return end
+    cmp.show()
+    return true
+  end
   vim.schedule(cmp.windows.autocomplete.select_next)
   return true
 end

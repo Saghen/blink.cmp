@@ -4,6 +4,11 @@ local brackets_lib = require('blink.cmp.accept.brackets')
 --- Applies a completion item to the current buffer
 --- @param item blink.cmp.CompletionItem
 local function accept(item)
+  -- create an undo point
+  if require('blink.cmp.config').accept.create_undo_point then
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
+  end
+
   item = vim.deepcopy(item)
   item.textEdit = text_edits_lib.get_from_item(item)
 

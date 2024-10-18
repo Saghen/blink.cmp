@@ -31,10 +31,13 @@
 --- @field timeout_ms? number How long to wait for semantic tokens to return before assuming no brackets should be added
 
 --- @class blink.cmp.CompletionTriggerConfig
+--- @field keyword_range? 'prefix' | 'full'
 --- @field keyword_regex? string
+--- @field exclude_from_prefix_regex? string
 --- @field blocked_trigger_characters? string[]
 --- @field show_on_insert_on_trigger_character? boolean When true, will show the completion window when the cursor comes after a trigger character when entering insert mode
 --- @field show_on_insert_blocked_trigger_characters? string[] List of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
+--- @field show_in_snippet? boolean When false, will not show the completion window when in a snippet
 ---
 --- @class blink.cmp.SignatureHelpTriggerConfig
 --- @field enabled? boolean
@@ -89,6 +92,7 @@
 --- @field border? blink.cmp.WindowBorder
 --- @field order? "top_down" | "bottom_up"
 --- @field direction_priority? ("n" | "s")[]
+--- @field auto_show? boolean
 --- @field selection? "preselect" | "manual" | "auto_insert"
 --- @field winhighlight? string
 --- @field scrolloff? number
@@ -133,6 +137,7 @@
 --- @field highlight? blink.cmp.HighlightConfig
 --- @field nerd_font_variant? 'mono' | 'normal'
 --- @field kind_icons? table<string, string>
+--- @field blocked_filetypes? string[]
 
 --- @type blink.cmp.Config
 local config = {
@@ -142,6 +147,7 @@ local config = {
     show = '<C-space>',
     hide = '<C-e>',
     accept = '<Tab>',
+    select_and_accept = {},
     select_prev = { '<Up>', '<C-p>' },
     select_next = { '<Down>', '<C-n>' },
 
@@ -180,10 +186,16 @@ local config = {
 
   trigger = {
     completion = {
+      -- 'prefix' will fuzzy match on the text before the cursor
+      -- 'full' will fuzzy match on the text before *and* after the cursor
+      -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
+      keyword_range = 'prefix',
       -- regex used to get the text when fuzzy matching
       -- changing this may break some sources, so please report if you run into issues
       -- todo: shouldnt this also affect the accept command? should this also be per language?
       keyword_regex = '[%w_\\-]',
+      -- after matching with keyword_regex, any characters matching this regex at the prefix will be excluded
+      exclude_from_prefix_regex = '[\\-]',
       -- LSPs can indicate when to show the completion window via trigger characters
       -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
       -- always show the window. We block these by default
@@ -192,6 +204,8 @@ local config = {
       show_on_insert_on_trigger_character = true,
       -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_blocked_trigger_characters = { "'", '"' },
+      -- when false, will not show the completion window when in a snippet
+      show_in_snippet = false,
     },
 
     signature_help = {
@@ -250,6 +264,8 @@ local config = {
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 's', 'n' },
+      -- Controls whether the completion window will automatically show when typing
+      auto_show = true,
       -- Controls how the completion items are selected
       -- 'preselect' will automatically select the first item in the completion list
       -- 'manual' will not select any item by default
@@ -258,6 +274,7 @@ local config = {
       -- Controls how the completion items are rendered on the popup window
       -- 'simple' will render the item's kind icon the left alongside the label
       -- 'reversed' will render the label on the left and the kind icon + name on the right
+      -- 'minimal' will render the label on the left and the kind name on the right
       -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
       draw = 'simple',
       -- Controls the cycling behavior when reaching the beginning or end of the completion list.
@@ -281,6 +298,7 @@ local config = {
         autocomplete_north = { 'e', 'w', 'n', 's' },
         autocomplete_south = { 'e', 'w', 's', 'n' },
       },
+      -- Controls whether the documentation window will automatically show when selecting a completion item
       auto_show = false,
       auto_show_delay_ms = 500,
       update_delay_ms = 50,
@@ -305,6 +323,9 @@ local config = {
   -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
   -- adjusts spacing to ensure icons are aligned
   nerd_font_variant = 'normal',
+
+  -- don't show completions or signature help for these filetypes. Keymaps are also disabled.
+  blocked_filetypes = {},
 
   kind_icons = {
     Text = '󰉿',

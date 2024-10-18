@@ -1,5 +1,8 @@
+local config = require('blink.cmp.config')
 local text_edits = {}
 
+--- @param item blink.cmp.CompletionItem
+--- @return lsp.TextEdit
 function text_edits.get_from_item(item)
   -- Adjust the position of the text edit to be the current cursor position
   -- since the data might be outdated. We compare the cursor column position
@@ -13,15 +16,31 @@ function text_edits.get_from_item(item)
   end
 
   -- No text edit so we fallback to our own resolution
-  return text_edits.guess_text_edit(vim.api.nvim_get_current_buf(), item)
+  return text_edits.guess_text_edit(item)
 end
 
+--- @param client_id number
+--- @param edits lsp.TextEdit[]
 function text_edits.apply_text_edits(client_id, edits)
   local client = vim.lsp.get_client_by_id(client_id)
   local offset_encoding = client ~= nil and client.offset_encoding or 'utf-16'
   vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), offset_encoding)
 end
 
+--- @param text_edit lsp.TextEdit
+function text_edits.undo_text_edit(text_edit)
+  text_edit = vim.deepcopy(text_edit)
+  local lines = vim.split(text_edit.newText, '\n')
+  local range = text_edit.range
+
+  range['end'].line = range.start.line + #lines - 1
+  range['end'].character = lines[#lines] and #lines[#lines] or 0
+  text_edit.newText = ''
+
+  vim.lsp.util.apply_text_edits({ text_edit }, vim.api.nvim_get_current_buf(), 'utf-16')
+end
+
+--- @param item blink.cmp.CompletionItem
 function text_edits.apply_additional_text_edits(item)
   -- Apply additional text edits
   -- LSPs can either include these in the initial response or require a resolve
@@ -37,27 +56,24 @@ function text_edits.apply_additional_text_edits(item)
   end
 end
 
--- todo: doesnt work when the item contains characters not included in the context regex
-function text_edits.guess_text_edit(bufnr, item)
-  local word = item.insertText or item.label
+--- @param item blink.cmp.CompletionItem
+--- todo: doesnt work when the item contains characters not included in the context regex
+function text_edits.guess_text_edit(item)
+  local word = item.textEditText or item.insertText or item.label
 
+  local cmp_config = config.trigger.completion
+  local range = require('blink.cmp.utils').get_regex_around_cursor(
+    cmp_config.keyword_range,
+    cmp_config.keyword_regex,
+    cmp_config.exclude_from_prefix_regex
+  )
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
-  local current_col = vim.api.nvim_win_get_cursor(0)[2]
-  local line = vim.api.nvim_buf_get_lines(bufnr, current_line - 1, current_line, false)[1]
-
-  -- Search forward/backward for the start/end of the word
-  local start_col = current_col
-  while start_col > 0 do
-    local char = line:sub(start_col, start_col)
-    if char:match('[%w_\\-]') == nil then break end
-    start_col = start_col - 1
-  end
 
   -- convert to 0-index
   return {
     range = {
-      start = { line = current_line - 1, character = start_col },
-      ['end'] = { line = current_line - 1, character = current_col },
+      start = { line = current_line - 1, character = range[1] },
+      ['end'] = { line = current_line - 1, character = range[2] },
     },
     newText = word,
   }

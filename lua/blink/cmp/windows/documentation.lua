@@ -1,4 +1,5 @@
 local config = require('blink.cmp.config').windows.documentation
+local utils = require('blink.cmp.utils')
 local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')
 local docs = {}
@@ -11,7 +12,6 @@ function docs.setup()
     border = config.border,
     winhighlight = config.winhighlight,
     wrap = true,
-    filetype = 'markdown',
   })
 
   autocomplete.listen_on_position_update(function()
@@ -54,39 +54,40 @@ function docs.show_item(item)
       return
     end
 
-    local doc_lines = {}
-    if item.detail and item.detail ~= '' then
-      table.insert(doc_lines, '```' .. vim.bo.filetype)
-      for s in item.detail:gmatch('[^\r\n]+') do
-        table.insert(doc_lines, s)
-      end
-      table.insert(doc_lines, '```')
-      table.insert(doc_lines, '---')
-    end
+    local detail_lines = {}
+    if item.detail and item.detail ~= '' then detail_lines = utils.split_lines(item.detail) end
 
     local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
-    for s in doc:gmatch('[^\r\n]+') do
-      table.insert(doc_lines, s)
+    local doc_lines = utils.split_lines(doc)
+    if type(item.documentation) ~= 'string' and item.documentation.kind == 'markdown' then
+      -- if the rendering seems bugged, it's likely due to this function
+      doc_lines = utils.combine_markdown_lines(doc_lines)
     end
-    vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, doc_lines)
+
+    local combined_lines = vim.list_extend({}, detail_lines)
+    -- add a blank line for the --- separator
+    if #detail_lines > 0 then table.insert(combined_lines, '') end
+    vim.list_extend(combined_lines, doc_lines)
+
+    vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, combined_lines)
     vim.api.nvim_set_option_value('modified', false, { buf = docs.win:get_buf() })
+
+    vim.api.nvim_buf_clear_namespace(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, 0, -1)
+    if #detail_lines > 0 then
+      utils.highlight_with_treesitter(docs.win:get_buf(), vim.bo.filetype, 0, #detail_lines)
+      vim.api.nvim_buf_set_extmark(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, #detail_lines, 0, {
+        virt_text = { { string.rep('─', docs.win.config.max_width) } },
+        virt_text_pos = 'overlay',
+        hl_eol = true,
+        hl_group = 'BlinkCmpDocDetail',
+      })
+    end
+    utils.highlight_with_treesitter(docs.win:get_buf(), 'markdown', #detail_lines + 1, #detail_lines + 1 + #doc_lines)
 
     if autocomplete.win:get_win() then
       docs.win:open()
       docs.update_position()
     end
-
-    -- use the built-in markdown styling
-    -- NOTE: according to https://github.com/Saghen/blink.cmp/pull/33#issuecomment-2400195950
-    -- it's possible for this to fail so we call it safely
-    pcall(
-      function()
-        vim.lsp.util.stylize_markdown(docs.win:get_buf(), doc_lines, {
-          height = vim.api.nvim_win_get_height(docs.win:get_win()),
-          width = vim.api.nvim_win_get_width(docs.win:get_win()),
-        })
-      end
-    )
   end)
 end
 
