@@ -1,23 +1,10 @@
-local function load_rust()
-  local platform = jit.os:lower()
-  if platform == 'osx' or platform == 'mac' then
-    return require('blink.cmp.fuzzy.rust-macos')
-  elseif platform == 'windows' then
-    return require('blink.cmp.fuzzy.rust-win')
-  else
-    return require('blink.cmp.fuzzy.rust-linux')
-  end
-end
-
-----------------
-
 local config = require('blink.cmp.config').fuzzy
 local fuzzy = {
   ---@type blink.cmp.Context?
   last_context = nil,
   ---@type blink.cmp.CompletionItem[]?
   last_items = nil,
-  rust = load_rust(),
+  rust = require('blink.cmp.fuzzy.rust'),
 }
 
 ---@param db_path string
