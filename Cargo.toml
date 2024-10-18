@@ -4,18 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-path = "lua/blink/cmp/fuzzy/ffi.rs"
+path = "lua/blink/cmp/fuzzy/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-libc = "0.2.20"
-c-marshalling = { git = "https://github.com/distil/rust_lua_ffi" }
-lua-marshalling = { git = "https://github.com/distil/rust_lua_ffi" }
 regex = "1.10.5"
 lazy_static = "1.5.0"
 frizbee = { git = "https://github.com/saghen/frizbee" }
 serde = { version = "1.0.204", features = ["derive"] }
 heed = "0.20.3"
-
-[build-dependencies]
-generator = { git = "https://github.com/distil/rust_lua_ffi" }
+mlua = { version = "0.9.9", features = ["module", "luajit"] }

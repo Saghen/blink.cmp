@@ -22,6 +22,7 @@ impl From<&LspItem> for CompletionItemKey {
     }
 }
 
+#[derive(Debug)]
 pub struct FrecencyTracker {
     env: Env,
     db: Database<SerdeBincode<CompletionItemKey>, SerdeBincode<Vec<u64>>>,

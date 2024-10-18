@@ -60,7 +60,7 @@ end
 function download.is_downloaded(cb)
   vim.uv.fs_stat(download.lib_path, function(err)
     if not err then
-      cb(true)
+      return cb(true)
     else
       -- If not found, check without 'lib' prefix
       vim.uv.fs_stat(

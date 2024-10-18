@@ -53,7 +53,7 @@ local function run_sync(buf_text, callback) callback(words_to_items(require('bli
 local function run_async(buf_text, callback)
   local worker = uv.new_work(
     -- must use ffi directly since the normal one requires the config which isnt present
-    function(items) return table.concat(require('blink.cmp.fuzzy.ffi').get_words(items), '\n') end,
+    function(items) return table.concat(require('blink.cmp.fuzzy.rust').get_words(items), '\n') end,
     function(words)
       local items = words_to_items(vim.split(words, '\n'))
       vim.schedule(function() callback(items) end)
