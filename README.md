@@ -243,7 +243,7 @@ MiniDeps.add({
       { 'blink.cmp.sources.snippets', name = 'Snippets', score_offset = -3 },
       { 'blink.cmp.sources.buffer', name = 'Buffer', fallback_for = { 'LSP' } },
     },
-    -- FOR REF: full example
+    -- WARN: **For reference only** to see what options are available. **See above for the default config**
     providers = {
       -- all of these properties work on every source
       {
