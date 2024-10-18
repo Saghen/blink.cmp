@@ -63,7 +63,7 @@ pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
 }
 
 #[mlua::lua_module]
-fn libblink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
+fn blink_cmp_fuzzy_rust(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
     exports.set("fuzzy", lua.create_function(fuzzy)?)?;
     exports.set("get_words", lua.create_function(get_words)?)?;
