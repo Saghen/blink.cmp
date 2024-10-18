@@ -200,6 +200,8 @@ MiniDeps.add({
       show_on_insert_on_trigger_character = true,
       -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_blocked_trigger_characters = { "'", '"' },
+      -- when false, will not show the completion window when in a snippet
+      show_in_snippet = false,
     },
 
     signature_help = {
