@@ -79,9 +79,10 @@ function utils.combine_markdown_lines(lines)
   return combined_lines
 end
 
-function utils.highlight_with_treesitter(bufnr, root_lang, start_line, end_line)
+function utils.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
   local Range = require('vim.treesitter._range')
 
+  local root_lang = vim.treesitter.language.get_lang(filetype)
   local trees = vim.treesitter.get_parser(bufnr, root_lang)
   trees:parse({ start_line, end_line })
   if not trees then return end
