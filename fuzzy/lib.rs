@@ -36,34 +36,17 @@ pub fn destroy_db(_: &Lua, _: ()) -> LuaResult<bool> {
 pub fn access(_: &Lua, item: LspItem) -> LuaResult<bool> {
     let mut frecency_handle = FRECENCY.write().unwrap();
     let frecency = frecency_handle.as_mut().unwrap();
-    frecency.access(&item)?;
+    frecency.access(&item).unwrap();
     Ok(true)
 }
 
-// pretty confident this is the entry point
 pub fn fuzzy(
     _lua: &Lua,
-    (needle, haystack_labels, haystack_kinds, haystack_score_offsets, haystack_sources, opts): (
-        String,
-        Vec<String>,
-        Vec<u32>,
-        Vec<i32>,
-        Vec<String>,
-        FuzzyOptions, // so this is the problem
-    ),
+    (needle, haystack, opts): (String, Vec<LspItem>, FuzzyOptions),
 ) -> LuaResult<Vec<u32>> {
     let mut frecency_handle = FRECENCY.write().unwrap();
     let frecency = frecency_handle.as_mut().unwrap();
-    let haystack = (0..haystack_labels.len())
-        .map(|i| LspItem {
-            label: haystack_labels[i].clone(),
-            sort_text: None,
-            filter_text: None,
-            kind: haystack_kinds[i],
-            score_offset: Some(haystack_score_offsets[i]),
-            source: haystack_sources[i].clone(),
-        })
-        .collect::<Vec<_>>();
+
     Ok(fuzzy::fuzzy(needle, haystack, frecency, opts)
         .into_iter()
         .map(|i| i as u32)

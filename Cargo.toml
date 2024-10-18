@@ -4,11 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
+path = "fuzzy/lib.rs"
 crate-type = ["cdylib"]
-
-[features]
-luajit = ["mlua/luajit"]
-lua51 = ["mlua/lua51"]
 
 [dependencies]
 regex = "1.10.5"
@@ -16,4 +13,4 @@ lazy_static = "1.5.0"
 frizbee = { git = "https://github.com/saghen/frizbee" }
 serde = { version = "1.0.204", features = ["derive"] }
 heed = "0.20.3"
-mlua = { version = "0.9.9", features = ["module"] }
+mlua = { version = "0.9.9", features = ["module", "luajit"] }
