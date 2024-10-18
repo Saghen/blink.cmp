@@ -42,6 +42,8 @@
   -- build = 'cargo build --release',
   -- On musl libc based systems you need to add this flag
   -- build = 'RUSTFLAGS="-C target-feature=-crt-static" cargo build --release',
+  -- If you use nix, you can build from source using latest nightly rust with:
+  -- build = 'nix run .#build-plugin',
 
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
@@ -79,7 +81,7 @@ For LazyVim/distro users, you can disable nvim-cmp via:
 MiniDeps.add({
   source = "saghen/blink.cmp",
   depends = {
-	"rafamadriz/friendly-snippets",
+  "rafamadriz/friendly-snippets",
   },
   checkout = "some.version", -- check releases for latest tag
 })
@@ -424,8 +426,8 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 - Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
 - Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
-    - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp) or the more recent [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim)
-- Boosts completion item score via frecency *and* proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
+  - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp) or the more recent [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim)
+- Boosts completion item score via frecency _and_ proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
 - Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
 - Built-in auto bracket and signature help support
@@ -438,7 +440,6 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 - Matched character highlighting
 - Cmdline completions
 - Windows support (You may temporarily build from source as outlined in the [installation](#installation) section)
-
 
 ## Special Thanks
 

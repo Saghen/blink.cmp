@@ -104,10 +104,7 @@
         # define the default dev environment
         devShells.default = pkgs.mkShell {
           name = "blink";
-          packages = with pkgs; [
-            fenix.complete.toolchain
-            rust-analyzer-nightly
-          ];
+          packages = with pkgs; [ fenix.minimal.toolchain ];
         };
       };
     };
