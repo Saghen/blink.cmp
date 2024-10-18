@@ -136,10 +136,11 @@ function utils.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
 end
 
 --- Gets characters around the cursor and returns the range, 0-indexed
---- @param regex string
 --- @param range 'prefix' | 'full'
+--- @param regex string
+--- @param exclude_from_prefix_regex string
 --- @return number[]
-function utils.get_regex_around_cursor(regex, range)
+function utils.get_regex_around_cursor(range, regex, exclude_from_prefix_regex)
   local current_col = vim.api.nvim_win_get_cursor(0)[2]
   local line = vim.api.nvim_get_current_line()
 
@@ -151,14 +152,24 @@ function utils.get_regex_around_cursor(regex, range)
     start_col = start_col - 1
   end
 
-  if range == 'prefix' then return { start_col, current_col } end
-
-  -- Search forward for the end of the word
   local end_col = current_col
-  while end_col < #line do
-    local char = line:sub(end_col + 1, end_col + 1)
-    if char:match(regex) == nil then break end
-    end_col = end_col + 1
+
+  -- Search forward for the end of the word if configured
+  if range == 'full' then
+    while end_col < #line do
+      local char = line:sub(end_col + 1, end_col + 1)
+      if char:match(regex) == nil then break end
+      end_col = end_col + 1
+    end
+  end
+
+  -- exclude characters matching exclude_prefix_regex from the beginning of the bounds
+  if exclude_from_prefix_regex ~= nil then
+    while start_col <= end_col do
+      local char = line:sub(start_col + 1, start_col + 1)
+      if char:match(exclude_from_prefix_regex) == nil then break end
+      start_col = start_col + 1
+    end
   end
 
   return { start_col, end_col }

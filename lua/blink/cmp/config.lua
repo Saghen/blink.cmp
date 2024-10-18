@@ -31,7 +31,9 @@
 --- @field timeout_ms? number How long to wait for semantic tokens to return before assuming no brackets should be added
 
 --- @class blink.cmp.CompletionTriggerConfig
+--- @field keyword_range? 'prefix' | 'full'
 --- @field keyword_regex? string
+--- @field exclude_from_prefix_regex? string
 --- @field blocked_trigger_characters? string[]
 --- @field show_on_insert_on_trigger_character? boolean When true, will show the completion window when the cursor comes after a trigger character when entering insert mode
 --- @field show_on_insert_blocked_trigger_characters? string[] List of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
@@ -68,7 +70,6 @@
 --- @field forceVersion? string | nil
 
 --- @class blink.cmp.FuzzyConfig
---- @field keyword_range? 'prefix' | 'full'
 --- @field use_frecency? boolean
 --- @field use_proximity? boolean
 --- @field max_items? number
@@ -184,10 +185,16 @@ local config = {
 
   trigger = {
     completion = {
+      -- 'prefix' will fuzzy match on the text before the cursor
+      -- 'full' will fuzzy match on the text before *and* after the cursor
+      -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
+      keyword_range = 'prefix',
       -- regex used to get the text when fuzzy matching
       -- changing this may break some sources, so please report if you run into issues
       -- todo: shouldnt this also affect the accept command? should this also be per language?
       keyword_regex = '[%w_\\-]',
+      -- after matching with keyword_regex, any characters matching this regex at the prefix will be excluded
+      exclude_from_prefix_regex = '[\\-]',
       -- LSPs can indicate when to show the completion window via trigger characters
       -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
       -- always show the window. We block these by default
@@ -208,10 +215,6 @@ local config = {
   },
 
   fuzzy = {
-    -- 'prefix' will fuzzy match on the text before the cursor
-    -- 'full' will fuzzy match on the text before *and* after the cursor
-    -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
-    keyword_range = 'prefix',
     -- frencency tracks the most recently/frequently used items and boosts the score of the item
     use_frecency = true,
     -- proximity bonus boosts the score of items with a value in the buffer

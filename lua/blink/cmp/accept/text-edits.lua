@@ -61,7 +61,12 @@ end
 function text_edits.guess_text_edit(item)
   local word = item.textEditText or item.insertText or item.label
 
-  local range = require('blink.cmp.utils').get_regex_around_cursor('[%w_\\-]', config.fuzzy.keyword_range)
+  local cmp_config = config.trigger.completion
+  local range = require('blink.cmp.utils').get_regex_around_cursor(
+    cmp_config.keyword_range,
+    cmp_config.keyword_regex,
+    cmp_config.exclude_from_prefix_regex
+  )
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
 
   -- convert to 0-index
