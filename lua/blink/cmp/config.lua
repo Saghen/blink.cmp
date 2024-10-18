@@ -37,6 +37,7 @@
 --- @field blocked_trigger_characters? string[]
 --- @field show_on_insert_on_trigger_character? boolean When true, will show the completion window when the cursor comes after a trigger character when entering insert mode
 --- @field show_on_insert_blocked_trigger_characters? string[] List of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
+--- @field show_in_snippet? boolean When false, will not show the completion window when in a snippet
 ---
 --- @class blink.cmp.SignatureHelpTriggerConfig
 --- @field enabled? boolean
@@ -203,6 +204,8 @@ local config = {
       show_on_insert_on_trigger_character = true,
       -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_blocked_trigger_characters = { "'", '"' },
+      -- when false, will not show the completion window when in a snippet
+      show_in_snippet = false,
     },
 
     signature_help = {
