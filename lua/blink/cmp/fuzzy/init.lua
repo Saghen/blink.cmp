@@ -97,7 +97,6 @@ function fuzzy.get_query()
     cmp_config.keyword_regex,
     cmp_config.exclude_from_prefix_regex
   )
-  vim.print(range)
   return string.sub(line, range[1] + 1, range[2] + 1)
 end
 
