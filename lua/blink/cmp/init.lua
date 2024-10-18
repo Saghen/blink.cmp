@@ -142,12 +142,7 @@ cmp.accept = function()
   local item = cmp.windows.autocomplete.get_selected_item()
   if item == nil then return end
 
-  -- create an undo point
-  if require('blink.cmp.config').accept.create_undo_point then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
-  end
-
-  vim.schedule(function() require('blink.cmp.accept')(item) end)
+  vim.schedule(function() cmp.windows.autocomplete.accept() end)
   return true
 end
 
