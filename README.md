@@ -405,6 +405,7 @@ MiniDeps.add({
 <summary><strong>Community Sources</strong></summary>
 
 - [ctags](https://github.com/netmute/blink-cmp-ctags)
+- [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 
 </details>
 
