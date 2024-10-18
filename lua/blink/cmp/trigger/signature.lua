@@ -39,7 +39,7 @@ function trigger.activate_autocmds()
 
       for _, last_char in ipairs(last_chars) do
         -- ignore if in a special buffer
-        if utils.is_ignored_buffer() then
+        if utils.is_blocked_buffer() then
           trigger.hide()
           break
         -- character forces a trigger according to the sources, refresh the existing context if it exists
@@ -60,7 +60,7 @@ function trigger.activate_autocmds()
   -- check if we've moved outside of the context by diffing against the query boundary
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
-      if utils.is_ignored_buffer() then return end
+      if utils.is_blocked_buffer() then return end
 
       -- characters added so let textchanged handle it
       if #last_chars ~= 0 then return end

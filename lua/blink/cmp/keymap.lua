@@ -45,7 +45,7 @@ function keymap.setup(opts)
   -- applied on other autocmds, such as LspAttach used by nvim-lspconfig and most configs
   vim.api.nvim_create_autocmd('InsertEnter', {
     callback = function()
-      if utils.is_ignored_buffer() then return end
+      if utils.is_blocked_buffer() then return end
       keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands)
     end,
   })

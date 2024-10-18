@@ -38,7 +38,7 @@ function trigger.activate_autocmds()
         return
 
       -- ignore if in a special buffer
-      elseif utils.is_ignored_buffer() then
+      elseif utils.is_blocked_buffer() then
         trigger.hide()
 
       -- character forces a trigger according to the sources, create a fresh context
@@ -61,7 +61,7 @@ function trigger.activate_autocmds()
 
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
-      if utils.is_ignored_buffer() then return end
+      if utils.is_blocked_buffer() then return end
 
       -- we were told to ignore the cursor moved event, so we update the context
       -- but don't send an on_show event upstream

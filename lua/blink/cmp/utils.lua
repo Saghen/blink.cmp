@@ -30,7 +30,7 @@ end
 
 --- Determines whether the current buffer is a "special" buffer or if the filetype is in the list of ignored filetypes
 --- @return boolean
-function utils.is_ignored_buffer()
+function utils.is_blocked_buffer()
   local bufnr = vim.api.nvim_get_current_buf()
   local buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
   local blocked_filetypes = require('blink.cmp.config').blocked_filetypes or {}
