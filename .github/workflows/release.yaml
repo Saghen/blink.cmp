@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        include:
+          # Linux builds (statically linked for compatibility, have to use glibc for FFI)
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: target/x86_64-unknown-linux-gnu/release/libblink_cmp_fuzzy.so
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            artifact_name: target/aarch64-unknown-linux-gnu/release/libblink_cmp_fuzzy.so
+
+          # macOS builds
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: target/x86_64-apple-darwin/release/libblink_cmp_fuzzy.dylib
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: target/aarch64-apple-darwin/release/libblink_cmp_fuzzy.dylib
+
+          # Windows builds
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: target/x86_64-pc-windows-msvc/release/blink_cmp_fuzzy.dll
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          rustup toolchain install nightly
+          rustup default nightly
+          rustup target add ${{ matrix.target }}
+
+      - name: Build for Linux
+        if: contains(matrix.os, 'ubuntu')
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
+          RUSTFLAGS="-C target-feature=-crt-static" cross build --release --target ${{ matrix.target }}
+          mv "${{ matrix.artifact_name }}" "${{ matrix.target }}.so"
+
+      - name: Build for macOS
+        if: contains(matrix.os, 'macos')
+        run: |
+          # Ventura
+          MACOSX_DEPLOYMENT_TARGET="13" cargo build --release --target ${{ matrix.target }}
+          mv "${{ matrix.artifact_name }}" "${{ matrix.target }}.dylib"
+
+      - name: Build for Windows
+        if: contains(matrix.os, 'windows')
+        run: |
+          cargo build --release --target ${{ matrix.target }}
+          mv "${{ matrix.artifact_name }}" "${{ matrix.target }}.dll"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: ${{ matrix.target }}.*
+
+  release:
+    name: Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          token: ${{ github.token }}
+          files: ./**/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
