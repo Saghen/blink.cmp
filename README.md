@@ -452,3 +452,5 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 [@redxtech](https://github.com/redxtech) Help with design and testing
 
 [@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing
+
+[@scottmckendry](https://github.com/scottmckendry) Actively contributing to the project
