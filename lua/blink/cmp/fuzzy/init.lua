@@ -40,18 +40,17 @@ function fuzzy.filter_items(needle, haystack)
 
   -- perform fuzzy search
   local filtered_items = {}
-  local matched_indices =
-    fuzzy.rust.fuzzy(needle, haystack, {
-      -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
-      -- so this should generally be good
-      -- TODO: make this configurable
-      min_score = 6 * needle:len(),
-      max_items = config.fuzzy.max_items,
-      use_frecency = config.fuzzy.use_frecency,
-      use_proximity = config.fuzzy.use_proximity,
-      sorts = config.fuzzy.sorts,
-      nearby_words = nearby_words,
-    })
+  local matched_indices = fuzzy.rust.fuzzy(needle, haystack, {
+    -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
+    -- so this should generally be good
+    -- TODO: make this configurable
+    min_score = 6 * needle:len(),
+    max_items = config.fuzzy.max_items,
+    use_frecency = config.fuzzy.use_frecency,
+    use_proximity = config.fuzzy.use_proximity,
+    sorts = config.fuzzy.sorts,
+    nearby_words = nearby_words,
+  })
 
   for _, idx in ipairs(matched_indices) do
     table.insert(filtered_items, haystack[idx + 1])

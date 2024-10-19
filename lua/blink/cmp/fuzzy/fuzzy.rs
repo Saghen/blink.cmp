@@ -23,23 +23,27 @@ pub struct LspItem {
 impl FromLua<'_> for LspItem {
     fn from_lua(value: LuaValue<'_>, _lua: &'_ Lua) -> LuaResult<Self> {
         if let Some(tab) = value.as_table() {
-        let label: String = tab.get("label").unwrap_or_default();
-        let sort_text: Option<String> = tab.get("sortText").ok();
-        let filter_text: Option<String> = tab.get("filterText").ok();
-        let kind: u32 = tab.get("kind").unwrap_or_default();
-        let score_offset: Option<i32> = tab.get("score_offset").ok();
-        let source: String = tab.get("source").unwrap_or_default();
+            let label: String = tab.get("label").unwrap_or_default();
+            let sort_text: Option<String> = tab.get("sortText").ok();
+            let filter_text: Option<String> = tab.get("filterText").ok();
+            let kind: u32 = tab.get("kind").unwrap_or_default();
+            let score_offset: Option<i32> = tab.get("score_offset").ok();
+            let source: String = tab.get("source").unwrap_or_default();
 
-        Ok(LspItem {
-            label,
-            sort_text,
-            filter_text,
-            kind,
-            score_offset,
-            source,
-        })
+            Ok(LspItem {
+                label,
+                sort_text,
+                filter_text,
+                kind,
+                score_offset,
+                source,
+            })
         } else {
-            Err(mlua::Error::FromLuaConversionError { from: "LuaValue" , to: "LspItem", message: None })
+            Err(mlua::Error::FromLuaConversionError {
+                from: "LuaValue",
+                to: "LspItem",
+                message: None,
+            })
         }
     }
 }
@@ -78,7 +82,11 @@ impl FromLua<'_> for FuzzyOptions {
                 sorts,
             })
         } else {
-            Err(mlua::Error::FromLuaConversionError { from: "LuaValue", to: "FuzzyOptions", message: None })
+            Err(mlua::Error::FromLuaConversionError {
+                from: "LuaValue",
+                to: "FuzzyOptions",
+                message: None,
+            })
         }
     }
 }
@@ -108,13 +116,18 @@ pub fn fuzzy(
     let match_scores = matches
         .iter()
         .map(|mtch| {
-            (mtch.score as i32)
-                + frecency.get_score(&haystack[mtch.index_in_haystack]) as i32
-                + nearby_words
-                    .get(&haystack[mtch.index_in_haystack].label)
-                    .map(|_| 2)
-                    .unwrap_or(0)
-                + haystack[mtch.index_in_haystack].score_offset.unwrap_or(0)
+            let frecency_score = if opts.use_frecency {
+                frecency.get_score(&haystack[mtch.index_in_haystack]) as i32
+            } else {
+                0
+            };
+            let nearby_words_score = nearby_words
+                .get(&haystack[mtch.index_in_haystack].label)
+                .map(|_| 2)
+                .unwrap_or(0);
+            let score_offset = haystack[mtch.index_in_haystack].score_offset.unwrap_or(0);
+
+            (mtch.score as i32) + frecency_score + nearby_words_score + score_offset
         })
         .collect::<Vec<_>>();
 

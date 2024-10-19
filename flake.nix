@@ -63,7 +63,6 @@
           else
             "so";
         in {
-          # TODO: I'm not sure how this will change
           blink-cmp = pkgs.vimUtils.buildVimPlugin {
             pname = "blink-cmp";
             inherit src version;

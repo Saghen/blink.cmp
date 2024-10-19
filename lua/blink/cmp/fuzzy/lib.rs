@@ -15,28 +15,38 @@ lazy_static! {
 }
 
 pub fn init_db(_: &Lua, db_path: String) -> LuaResult<bool> {
-    let mut frecency = FRECENCY.write().unwrap();
+    let mut frecency = FRECENCY.write().map_err(|_| {
+        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
+    })?;
     if frecency.is_some() {
         return Ok(false);
     }
-    *frecency = Some(FrecencyTracker::new(&db_path));
+    *frecency = Some(FrecencyTracker::new(&db_path)?);
     Ok(true)
 }
 
 pub fn destroy_db(_: &Lua, _: ()) -> LuaResult<bool> {
-    // todo: there should be a way to get rid of old locks
-    // since a crash would result in a leak
-    let frecency = FRECENCY.write().unwrap();
+    let frecency = FRECENCY.write().map_err(|_| {
+        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
+    })?;
     drop(frecency);
-    let mut frecency = FRECENCY.write().unwrap();
+
+    let mut frecency = FRECENCY.write().map_err(|_| {
+        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
+    })?;
     *frecency = None;
+
     Ok(true)
 }
 
 pub fn access(_: &Lua, item: LspItem) -> LuaResult<bool> {
-    let mut frecency_handle = FRECENCY.write().unwrap();
-    let frecency = frecency_handle.as_mut().unwrap();
-    frecency.access(&item).unwrap();
+    let mut frecency_handle = FRECENCY.write().map_err(|_| {
+        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
+    })?;
+    let frecency = frecency_handle.as_mut().ok_or_else(|| {
+        mlua::Error::RuntimeError("Attempted to use frencecy before initialization".to_string())
+    })?;
+    frecency.access(&item)?;
     Ok(true)
 }
 
@@ -44,8 +54,12 @@ pub fn fuzzy(
     _lua: &Lua,
     (needle, haystack, opts): (String, Vec<LspItem>, FuzzyOptions),
 ) -> LuaResult<Vec<u32>> {
-    let mut frecency_handle = FRECENCY.write().unwrap();
-    let frecency = frecency_handle.as_mut().unwrap();
+    let mut frecency_handle = FRECENCY.write().map_err(|_| {
+        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
+    })?;
+    let frecency = frecency_handle.as_mut().ok_or_else(|| {
+        mlua::Error::RuntimeError("Attempted to use frencecy before initialization".to_string())
+    })?;
 
     Ok(fuzzy::fuzzy(needle, haystack, frecency, opts)
         .into_iter()
@@ -63,7 +77,7 @@ pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
 }
 
 #[mlua::lua_module]
-fn blink_cmp_fuzzy_rust(lua: &Lua) -> LuaResult<LuaTable> {
+fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
     exports.set("fuzzy", lua.create_function(fuzzy)?)?;
     exports.set("get_words", lua.create_function(get_words)?)?;
