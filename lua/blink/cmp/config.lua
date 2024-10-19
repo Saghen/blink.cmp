@@ -248,6 +248,7 @@ local config = {
       { 'blink.cmp.sources.path', name = 'Path', score_offset = 3 },
       { 'blink.cmp.sources.snippets', name = 'Snippets', score_offset = -3 },
       { 'blink.cmp.sources.buffer', name = 'Buffer', fallback_for = { 'LSP' } },
+      { 'blink.cmp.sources.rg', name = 'Rg' },
     },
   },
 
