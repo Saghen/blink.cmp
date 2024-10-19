@@ -7,6 +7,7 @@
 --- @field deprecated boolean
 
 local config = require('blink.cmp.config')
+local utils = require('blink.cmp.utils')
 local renderer = require('blink.cmp.windows.lib.render')
 local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
@@ -326,7 +327,7 @@ function autocomplete.render_item_reversed(ctx)
       max_width = 50,
     },
     ' ',
-    { ctx.kind_icon, ctx.icon_gap, ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    { ctx.kind_icon, ctx.icon_gap, ctx.kind, hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind) },
     ' ',
   }
 end
