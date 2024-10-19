@@ -5,7 +5,7 @@ local fuzzy = {
   last_context = nil,
   ---@type blink.cmp.CompletionItem[]?
   last_items = nil,
-  rust = require('blink.cmp.fuzzy.ffi'),
+  rust = require('blink.cmp.fuzzy.rust'),
 }
 
 ---@param db_path string
@@ -28,21 +28,8 @@ function fuzzy.get_words(lines) return fuzzy.rust.get_words(lines) end
 ---@param needle string
 ---@param items blink.cmp.CompletionItem[]?
 ---@return blink.cmp.CompletionItem[]
-function fuzzy.filter_items(needle, items)
-  -- convert to table of strings
-  local haystack_labels = {}
-  local haystack_score_offsets = {}
-  local haystack_kinds = {}
-  local haystack_sources = {}
-
-  items = items or {}
-
-  for _, item in ipairs(items) do
-    table.insert(haystack_labels, item.label)
-    table.insert(haystack_score_offsets, item.score_offset or 0)
-    table.insert(haystack_kinds, item.kind)
-    table.insert(haystack_sources, item.source)
-  end
+function fuzzy.filter_items(needle, haystack)
+  haystack = haystack or {}
 
   -- get the nearby words
   local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
@@ -53,21 +40,20 @@ function fuzzy.filter_items(needle, items)
 
   -- perform fuzzy search
   local filtered_items = {}
-  local matched_indices =
-    fuzzy.rust.fuzzy(needle, haystack_labels, haystack_kinds, haystack_score_offsets, haystack_sources, {
-      -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
-      -- so this should generally be good
-      -- TODO: make this configurable
-      min_score = 6 * needle:len(),
-      max_items = config.fuzzy.max_items,
-      use_frecency = config.fuzzy.use_frecency,
-      use_proximity = config.fuzzy.use_proximity,
-      sorts = config.fuzzy.sorts,
-      nearby_words = nearby_words,
-    })
+  local matched_indices = fuzzy.rust.fuzzy(needle, haystack, {
+    -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
+    -- so this should generally be good
+    -- TODO: make this configurable
+    min_score = 6 * needle:len(),
+    max_items = config.fuzzy.max_items,
+    use_frecency = config.fuzzy.use_frecency,
+    use_proximity = config.fuzzy.use_proximity,
+    sorts = config.fuzzy.sorts,
+    nearby_words = nearby_words,
+  })
 
   for _, idx in ipairs(matched_indices) do
-    table.insert(filtered_items, items[idx + 1])
+    table.insert(filtered_items, haystack[idx + 1])
   end
 
   return filtered_items

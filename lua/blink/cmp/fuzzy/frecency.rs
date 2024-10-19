@@ -1,6 +1,7 @@
 use crate::fuzzy::LspItem;
 use heed::types::*;
 use heed::{Database, Env, EnvOpenOptions};
+use mlua::Result as LuaResult;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -22,6 +23,7 @@ impl From<&LspItem> for CompletionItemKey {
     }
 }
 
+#[derive(Debug)]
 pub struct FrecencyTracker {
     env: Env,
     db: Database<SerdeBincode<CompletionItemKey>, SerdeBincode<Vec<u64>>>,
@@ -29,38 +31,68 @@ pub struct FrecencyTracker {
 }
 
 impl FrecencyTracker {
-    pub fn new(db_path: &str) -> Self {
-        fs::create_dir_all(db_path).unwrap();
-        let env = unsafe { EnvOpenOptions::new().open(db_path).unwrap() };
-        env.clear_stale_readers().unwrap();
+    pub fn new(db_path: &str) -> LuaResult<Self> {
+        fs::create_dir_all(db_path).map_err(|err| {
+            mlua::Error::RuntimeError(
+                "Failed to create frecency database directory: ".to_string() + &err.to_string(),
+            )
+        })?;
+        let env = unsafe {
+            EnvOpenOptions::new().open(db_path).map_err(|err| {
+                mlua::Error::RuntimeError(
+                    "Failed to open frecency database: ".to_string() + &err.to_string(),
+                )
+            })?
+        };
+        env.clear_stale_readers().map_err(|err| {
+            mlua::Error::RuntimeError(
+                "Failed to clear stale readers for frecency database: ".to_string()
+                    + &err.to_string(),
+            )
+        })?;
 
         // we will open the default unnamed database
-        let mut wtxn = env.write_txn().unwrap();
-        let db = env.create_database(&mut wtxn, None).unwrap();
+        let mut wtxn = env.write_txn().map_err(|err| {
+            mlua::Error::RuntimeError(
+                "Failed to open write transaction for frecency database: ".to_string()
+                    + &err.to_string(),
+            )
+        })?;
+        let db = env.create_database(&mut wtxn, None).map_err(|err| {
+            mlua::Error::RuntimeError(
+                "Failed to create frecency database: ".to_string() + &err.to_string(),
+            )
+        })?;
 
         let access_thresholds = [
-            (1., 1000 * 60 * 2),            // 2 minutes
-            (0.5, 1000 * 60 * 60),          // 1 hour
-            (0.2, 1000 * 60 * 60 * 24),     // 1 day
-            (0.1, 1000 * 60 * 60 * 24 * 7), // 1 week
+            (1., 1000 * 60 * 2),             // 2 minutes
+            (0.2, 1000 * 60 * 60),           // 1 hour
+            (0.1, 1000 * 60 * 60 * 24),      // 1 day
+            (0.05, 1000 * 60 * 60 * 24 * 7), // 1 week
         ]
         .to_vec();
 
-        FrecencyTracker {
+        Ok(FrecencyTracker {
             env: env.clone(),
             db,
             access_thresholds,
-        }
+        })
     }
 
-    fn get_accesses(&self, item: &LspItem) -> Option<Vec<u64>> {
-        let rtxn = self
-            .env
-            .read_txn()
-            .expect("Failed to start read transaction");
+    fn get_accesses(&self, item: &LspItem) -> LuaResult<Option<Vec<u64>>> {
+        let rtxn = self.env.read_txn().map_err(|err| {
+            mlua::Error::RuntimeError(
+                "Failed to start read transaction for frecency database: ".to_string()
+                    + &err.to_string(),
+            )
+        })?;
         self.db
             .get(&rtxn, &CompletionItemKey::from(item))
-            .expect("Failed to read from database")
+            .map_err(|err| {
+                mlua::Error::RuntimeError(
+                    "Failed to read from frecency database: ".to_string() + &err.to_string(),
+                )
+            })
     }
 
     fn get_now(&self) -> u64 {
@@ -70,18 +102,37 @@ impl FrecencyTracker {
             .as_secs()
     }
 
-    pub fn access(&mut self, item: &LspItem) -> Result<(), heed::Error> {
-        let mut wtxn = self.env.write_txn()?;
-        let mut accesses = self.get_accesses(item).unwrap_or_default();
+    pub fn access(&mut self, item: &LspItem) -> LuaResult<()> {
+        let mut wtxn = self.env.write_txn().map_err(|err| {
+            mlua::Error::RuntimeError(
+                "Failed to start write transaction for frecency database: ".to_string()
+                    + &err.to_string(),
+            )
+        })?;
+
+        let mut accesses = self.get_accesses(item)?.unwrap_or_default();
         accesses.push(self.get_now());
+
         self.db
-            .put(&mut wtxn, &CompletionItemKey::from(item), &accesses)?;
-        wtxn.commit()?;
+            .put(&mut wtxn, &CompletionItemKey::from(item), &accesses)
+            .map_err(|err| {
+                mlua::Error::RuntimeError(
+                    "Failed to write to frecency database: ".to_string() + &err.to_string(),
+                )
+            })?;
+
+        wtxn.commit().map_err(|err| {
+            mlua::Error::RuntimeError(
+                "Failed to commit write transaction for frecency database: ".to_string()
+                    + &err.to_string(),
+            )
+        })?;
+
         Ok(())
     }
 
     pub fn get_score(&self, item: &LspItem) -> i64 {
-        let accesses = self.get_accesses(item).unwrap_or_default();
+        let accesses = self.get_accesses(item).unwrap_or(None).unwrap_or_default();
         let now = self.get_now();
         let mut score = 0.0;
         'outer: for access in &accesses {
