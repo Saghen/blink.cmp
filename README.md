@@ -10,7 +10,7 @@
 ## Features
 
 - Works out of the box with no additional configuration
-- Updates on every keystroke (0.5-4ms non-blocking, single core)
+- Updates on every keystroke (0.5-4ms async, single core)
 - Typo resistant fuzzy with frecency and proximity bonus
 - Extensive LSP support ([tracker](./LSP_TRACKER.md))
 - Native `vim.snippet` support (including `friendly-snippets`)
