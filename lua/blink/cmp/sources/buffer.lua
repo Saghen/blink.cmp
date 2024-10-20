@@ -39,7 +39,7 @@ local function words_to_items(words)
     table.insert(items, {
       label = word,
       kind = require('blink.cmp.types').CompletionItemKind.Text,
-      insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
+      insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
       insertText = word,
     })
   end
