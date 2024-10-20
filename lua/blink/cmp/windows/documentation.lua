@@ -49,7 +49,7 @@ function docs.show_item(item)
   -- todo: only resolve if documentation does not exist
   sources.resolve(item, function(resolved_item)
     item = resolved_item or item
-    if item.documentation == nil then
+    if item.documentation == nil and item.detail == nil then
       docs.win:close()
       return
     end
@@ -57,11 +57,14 @@ function docs.show_item(item)
     local detail_lines = {}
     if item.detail and item.detail ~= '' then detail_lines = utils.split_lines(item.detail) end
 
-    local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
-    local doc_lines = utils.split_lines(doc)
-    if type(item.documentation) ~= 'string' and item.documentation.kind == 'markdown' then
-      -- if the rendering seems bugged, it's likely due to this function
-      doc_lines = utils.combine_markdown_lines(doc_lines)
+    local doc_lines = {}
+    if item.documentation ~= nil then
+      local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
+      doc_lines = utils.split_lines(doc)
+      if type(item.documentation) ~= 'string' and item.documentation.kind == 'markdown' then
+        -- if the rendering seems bugged, it's likely due to this function
+        doc_lines = utils.combine_markdown_lines(doc_lines)
+      end
     end
 
     local combined_lines = vim.list_extend({}, detail_lines)
@@ -75,13 +78,18 @@ function docs.show_item(item)
     vim.api.nvim_buf_clear_namespace(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, 0, -1)
     if #detail_lines > 0 then
       utils.highlight_with_treesitter(docs.win:get_buf(), vim.bo.filetype, 0, #detail_lines)
-      vim.api.nvim_buf_set_extmark(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, #detail_lines, 0, {
-        virt_text = { { string.rep('─', docs.win.config.max_width) } },
-        virt_text_pos = 'overlay',
-        hl_eol = true,
-        hl_group = 'BlinkCmpDocDetail',
-      })
+
+      -- Only add the separator if there are documentation lines (otherwise only display the detail)
+      if #doc_lines > 0 then
+        vim.api.nvim_buf_set_extmark(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, #detail_lines, 0, {
+          virt_text = { { string.rep('─', docs.win.config.max_width) } },
+          virt_text_pos = 'overlay',
+          hl_eol = true,
+          hl_group = 'BlinkCmpDocDetail',
+        })
+      end
     end
+
     utils.highlight_with_treesitter(docs.win:get_buf(), 'markdown', #detail_lines + 1, #detail_lines + 1 + #doc_lines)
 
     if autocomplete.win:get_win() then
