@@ -12,6 +12,7 @@ function docs.setup()
     border = config.border,
     winhighlight = config.winhighlight,
     wrap = true,
+    filetype = 'markdown'
   })
 
   autocomplete.listen_on_position_update(function()
