@@ -242,6 +242,7 @@ MiniDeps.add({
       { 'blink.cmp.sources.path', name = 'Path', score_offset = 3 },
       { 'blink.cmp.sources.snippets', name = 'Snippets', score_offset = -3 },
       { 'blink.cmp.sources.buffer', name = 'Buffer', fallback_for = { 'LSP' } },
+      { 'blink.cmp.sources.rg', name = 'Rg' },
     },
     -- WARN: **For reference only** to see what options are available. **See above for the default config**
     providers = {
@@ -253,7 +254,7 @@ MiniDeps.add({
           score_offset = 0,
           trigger_characters = { 'f', 'o', 'o' },
       },
-      -- the following two sources have additional options
+      -- the following three sources have additional options
       {
         'blink.cmp.sources.path',
         name = 'Path',
@@ -278,6 +279,31 @@ MiniDeps.add({
           ignored_filetypes = {},
         },
       },
+      {
+		'blink.cmp.sources.rg',
+		name = 'Rg',
+		opts = {
+		  prefix_min_len = 3,
+		  get_command = function(context, prefix)
+		    return {
+		  	  'rg',
+			  '--heading',
+			  '--json',
+			  '--word-regexp',
+			  '--color',
+			  'never',
+			  prefix .. '[\\w_-]+',
+			  vim.fs.root(0, 'git') or vim.fn.getcwd(),
+			}
+		  end,
+          get_prefix = function(context)
+            local col = vim.api.nvim_win_get_cursor(0)[2]
+            local line = vim.api.nvim_get_current_line()
+            local prefix = line:sub(1, col):match('[%w_]+$') or ''
+            return prefix
+          end,
+		},
+	  },
       {
         'blink.cmp.sources.buffer',
         name = 'Buffer',
@@ -403,7 +429,6 @@ MiniDeps.add({
 <summary><strong>Community Sources</strong></summary>
 
 - [ctags](https://github.com/netmute/blink-cmp-ctags)
-- [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 
 </details>
 
