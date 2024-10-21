@@ -161,13 +161,10 @@ function lsp:resolve(item, callback)
   end
 
   -- strip blink specific fields to avoid decoding errors on some LSPs (i.e. fsautocomplete)
-  vim.print(item)
   item = require('blink.cmp.sources.lib.utils').blink_item_to_lsp_item(item)
-  vim.print(item)
 
   local _, request_id = client.request('completionItem/resolve', item, function(error, resolved_item)
     if error or resolved_item == nil then callback(item) end
-    vim.print(resolved_item)
     callback(resolved_item)
   end)
   if request_id ~= nil then return function() client.cancel_request(request_id) end end
