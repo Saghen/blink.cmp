@@ -113,8 +113,9 @@ function lsp:get_completions(context, callback)
       end
     end
 
-    -- add client_id to the items
+    -- add client_id and defaults to the items
     for client_id, response in pairs(responses) do
+      local defaults = response.result and response.result.itemDefaults or {}
       for _, item in ipairs(response.items) do
         -- todo: terraform lsp doesn't return a .kind in situations like `toset`, is there a default value we need to grab?
         -- it doesn't seem to return itemDefaults either
@@ -123,6 +124,11 @@ function lsp:get_completions(context, callback)
 
         -- todo: make configurable
         if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then item.score_offset = -2 end
+
+        -- add defaults to the item
+        for key, value in pairs(defaults) do
+          item[key] = value
+        end
       end
     end
 
