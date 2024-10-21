@@ -24,12 +24,11 @@ function snippets:get_completions(_, callback)
     local global_snippets = self.registry:get_global_snippets()
     local extended_snippets = self.registry:get_extended_snippets(filetype)
     local ft_snippets = self.registry:get_snippets_for_ft(filetype)
-    local snips = vim.tbl_deep_extend('force', {}, global_snippets, extended_snippets, ft_snippets)
+    local snips = vim.list_extend({}, global_snippets)
+    vim.list_extend(snips, extended_snippets)
+    vim.list_extend(snips, ft_snippets)
 
-    self.cache[filetype] = {}
-    for _, snippet in pairs(snips) do
-      table.insert(self.cache[filetype], snippet)
-    end
+    self.cache[filetype] = snips
   end
 
   local items = vim.tbl_map(
