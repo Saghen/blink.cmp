@@ -105,6 +105,14 @@ function lsp:get_completions(context, callback)
 
       -- convert full response to our internal format
       else
+        local defaults = response.result and response.result.itemDefaults or {}
+        for _, item in ipairs(response.result.items) do
+          -- add defaults to the item
+          for key, value in pairs(defaults) do
+            item[key] = value
+          end
+        end
+
         responses[client_id] = {
           is_incomplete_forward = response.result.isIncomplete,
           is_incomplete_backward = true,
@@ -115,7 +123,6 @@ function lsp:get_completions(context, callback)
 
     -- add client_id and defaults to the items
     for client_id, response in pairs(responses) do
-      local defaults = response.result and response.result.itemDefaults or {}
       for _, item in ipairs(response.items) do
         -- todo: terraform lsp doesn't return a .kind in situations like `toset`, is there a default value we need to grab?
         -- it doesn't seem to return itemDefaults either
@@ -124,11 +131,6 @@ function lsp:get_completions(context, callback)
 
         -- todo: make configurable
         if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then item.score_offset = -2 end
-
-        -- add defaults to the item
-        for key, value in pairs(defaults) do
-          item[key] = value
-        end
       end
     end
 
@@ -159,10 +161,13 @@ function lsp:resolve(item, callback)
   end
 
   -- strip blink specific fields to avoid decoding errors on some LSPs (i.e. fsautocomplete)
+  vim.print(item)
   item = require('blink.cmp.sources.lib.utils').blink_item_to_lsp_item(item)
+  vim.print(item)
 
   local _, request_id = client.request('completionItem/resolve', item, function(error, resolved_item)
     if error or resolved_item == nil then callback(item) end
+    vim.print(resolved_item)
     callback(resolved_item)
   end)
   if request_id ~= nil then return function() client.cancel_request(request_id) end end
