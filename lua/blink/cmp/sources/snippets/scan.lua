@@ -72,10 +72,10 @@ function scan.load_package_json(path)
   local data = utils.read_file(file)
   if not data then return end
 
-  local pkg = vim.json.decode(data)
+  local pkg = require('blink.cmp.sources.snippets.utils').parse_json_with_error_msg(file, data)
+
   ---@type {path: string, language: string|string[]}[]
   local snippets = vim.tbl_get(pkg, 'contributes', 'snippets')
-
   if not snippets then return end
 
   local ret = {} ---@type table<string, string[]>

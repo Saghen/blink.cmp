@@ -46,7 +46,7 @@ function registry:get_snippets_for_ft(filetype)
     for _, f in ipairs(files) do
       local contents = utils.read_file(f)
       if contents then
-        local snippets = vim.json.decode(contents)
+        local snippets = utils.parse_json_with_error_msg(f, contents)
         for _, key in ipairs(vim.tbl_keys(snippets)) do
           local snippet = utils.read_snippet(snippets[key], key)
           for snippet_name, snippet_def in pairs(snippet) do
@@ -58,7 +58,7 @@ function registry:get_snippets_for_ft(filetype)
   else
     local contents = utils.read_file(files)
     if contents then
-      local snippets = vim.json.decode(contents)
+      local snippets = utils.parse_json_with_error_msg(files, contents)
       for _, key in ipairs(vim.tbl_keys(snippets)) do
         local snippet = utils.read_snippet(snippets[key], key)
         for key, snippet in pairs(snippet) do

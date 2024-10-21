@@ -1,5 +1,20 @@
 local utils = {}
 
+--- Parses the json file and notifies the user if there's an error
+---@param path string
+---@param json string
+function utils.parse_json_with_error_msg(path, json)
+  local ok, parsed = pcall(vim.json.decode, json)
+  if not ok then
+    vim.notify(
+      'Failed to parse json file "' .. path .. '" for blink.cmp snippets. Error: ' .. parsed,
+      vim.log.levels.ERROR
+    )
+    return {}
+  end
+  return parsed
+end
+
 ---@type fun(path: string): string|nil
 function utils.read_file(path)
   local file = io.open(path, 'r')
