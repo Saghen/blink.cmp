@@ -83,6 +83,8 @@ function utils.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
   local Range = require('vim.treesitter._range')
 
   local root_lang = vim.treesitter.language.get_lang(filetype)
+  if root_lang == nil then return end
+
   local trees = vim.treesitter.get_parser(bufnr, root_lang)
   trees:parse({ start_line, end_line })
   if not trees then return end

@@ -105,6 +105,14 @@ function lsp:get_completions(context, callback)
 
       -- convert full response to our internal format
       else
+        local defaults = response.result and response.result.itemDefaults or {}
+        for _, item in ipairs(response.result.items) do
+          -- add defaults to the item
+          for key, value in pairs(defaults) do
+            item[key] = value
+          end
+        end
+
         responses[client_id] = {
           is_incomplete_forward = response.result.isIncomplete,
           is_incomplete_backward = true,
@@ -113,7 +121,7 @@ function lsp:get_completions(context, callback)
       end
     end
 
-    -- add client_id to the items
+    -- add client_id and defaults to the items
     for client_id, response in pairs(responses) do
       for _, item in ipairs(response.items) do
         -- todo: terraform lsp doesn't return a .kind in situations like `toset`, is there a default value we need to grab?

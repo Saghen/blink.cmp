@@ -12,6 +12,7 @@ function docs.setup()
     border = config.border,
     winhighlight = config.winhighlight,
     wrap = true,
+    filetype = 'markdown'
   })
 
   autocomplete.listen_on_position_update(function()
@@ -69,28 +70,31 @@ function docs.show_item(item)
 
     local combined_lines = vim.list_extend({}, detail_lines)
     -- add a blank line for the --- separator
-    if #detail_lines > 0 then table.insert(combined_lines, '') end
+    if #detail_lines > 0 and #doc_lines > 0 then table.insert(combined_lines, '') end
     vim.list_extend(combined_lines, doc_lines)
 
     vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, combined_lines)
     vim.api.nvim_set_option_value('modified', false, { buf = docs.win:get_buf() })
 
+    -- Highlight with treesitter
     vim.api.nvim_buf_clear_namespace(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, 0, -1)
-    if #detail_lines > 0 then
-      utils.highlight_with_treesitter(docs.win:get_buf(), vim.bo.filetype, 0, #detail_lines)
 
-      -- Only add the separator if there are documentation lines (otherwise only display the detail)
-      if #doc_lines > 0 then
-        vim.api.nvim_buf_set_extmark(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, #detail_lines, 0, {
-          virt_text = { { string.rep('─', docs.win.config.max_width) } },
-          virt_text_pos = 'overlay',
-          hl_eol = true,
-          hl_group = 'BlinkCmpDocDetail',
-        })
-      end
+    if #detail_lines > 0 then utils.highlight_with_treesitter(docs.win:get_buf(), vim.bo.filetype, 0, #detail_lines) end
+
+    -- Only add the separator if there are documentation lines (otherwise only display the detail)
+    if #detail_lines > 0 and #doc_lines > 0 then
+      vim.api.nvim_buf_set_extmark(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, #detail_lines, 0, {
+        virt_text = { { string.rep('─', docs.win.config.max_width) } },
+        virt_text_pos = 'overlay',
+        hl_eol = true,
+        hl_group = 'BlinkCmpDocDetail',
+      })
     end
 
-    utils.highlight_with_treesitter(docs.win:get_buf(), 'markdown', #detail_lines + 1, #detail_lines + 1 + #doc_lines)
+    if #doc_lines > 0 then
+      local start = #detail_lines + (#detail_lines > 0 and 1 or 0)
+      utils.highlight_with_treesitter(docs.win:get_buf(), 'markdown', start, start + #doc_lines)
+    end
 
     if autocomplete.win:get_win() then
       docs.win:open()

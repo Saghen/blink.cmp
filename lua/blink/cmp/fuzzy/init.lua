@@ -26,7 +26,7 @@ function fuzzy.access(item) fuzzy.rust.access(item) end
 function fuzzy.get_words(lines) return fuzzy.rust.get_words(lines) end
 
 ---@param needle string
----@param items blink.cmp.CompletionItem[]?
+---@param haystack blink.cmp.CompletionItem[]?
 ---@return blink.cmp.CompletionItem[]
 function fuzzy.filter_items(needle, haystack)
   haystack = haystack or {}
@@ -44,8 +44,9 @@ function fuzzy.filter_items(needle, haystack)
     -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
     -- so this should generally be good
     -- TODO: make this configurable
-    min_score = 6 * needle:len(),
+    min_score = config.fuzzy.use_typo_resistance and (6 * needle:len()) or 0,
     max_items = config.fuzzy.max_items,
+    use_typo_resistance = config.fuzzy.use_typo_resistance,
     use_frecency = config.fuzzy.use_frecency,
     use_proximity = config.fuzzy.use_proximity,
     sorts = config.fuzzy.sorts,

@@ -36,7 +36,7 @@ function registry.new(config)
 end
 
 --- @param filetype string
---- @return table<string, blink.cmp.Snippet>
+--- @return blink.cmp.Snippet[]
 function registry:get_snippets_for_ft(filetype)
   local loaded_snippets = {}
   local files = self.registry[filetype]
@@ -46,11 +46,11 @@ function registry:get_snippets_for_ft(filetype)
     for _, f in ipairs(files) do
       local contents = utils.read_file(f)
       if contents then
-        local snippets = vim.json.decode(contents)
+        local snippets = utils.parse_json_with_error_msg(f, contents)
         for _, key in ipairs(vim.tbl_keys(snippets)) do
           local snippet = utils.read_snippet(snippets[key], key)
-          for snippet_name, snippet_def in pairs(snippet) do
-            loaded_snippets[snippet_name] = snippet_def
+          for _, snippet_def in pairs(snippet) do
+            table.insert(loaded_snippets, snippet_def)
           end
         end
       end
@@ -58,11 +58,11 @@ function registry:get_snippets_for_ft(filetype)
   else
     local contents = utils.read_file(files)
     if contents then
-      local snippets = vim.json.decode(contents)
+      local snippets = utils.parse_json_with_error_msg(files, contents)
       for _, key in ipairs(vim.tbl_keys(snippets)) do
         local snippet = utils.read_snippet(snippets[key], key)
-        for key, snippet in pairs(snippet) do
-          loaded_snippets[key] = snippet
+        for _, snippet in pairs(snippet) do
+          table.insert(loaded_snippets, snippet)
         end
       end
     end
@@ -72,7 +72,7 @@ function registry:get_snippets_for_ft(filetype)
 end
 
 --- @param filetype string
---- @return table<string, blink.cmp.Snippet>
+--- @return blink.cmp.Snippet[]
 function registry:get_extended_snippets(filetype)
   local loaded_snippets = {}
   if not filetype then return loaded_snippets end
@@ -80,23 +80,23 @@ function registry:get_extended_snippets(filetype)
   local extended_snippets = self.config.extended_filetypes[filetype] or {}
   for _, ft in ipairs(extended_snippets) do
     if vim.tbl_contains(self.config.extended_filetypes, filetype) then
-      loaded_snippets = vim.tbl_deep_extend('force', {}, loaded_snippets, self:get_extended_snippets(ft))
+      vim.list_extend(loaded_snippets, self:get_extended_snippets(ft))
     else
-      loaded_snippets = vim.tbl_deep_extend('force', {}, loaded_snippets, self:get_snippets_for_ft(ft))
+      vim.list_extend(loaded_snippets, self:get_snippets_for_ft(ft))
     end
   end
   return loaded_snippets
 end
 
---- @return table<string, blink.cmp.Snippet>
+--- @return blink.cmp.Snippet[]
 function registry:get_global_snippets()
   local loaded_snippets = {}
   local global_snippets = self.config.global_snippets
   for _, ft in ipairs(global_snippets) do
     if vim.tbl_contains(self.config.extended_filetypes, ft) then
-      loaded_snippets = vim.tbl_deep_extend('force', {}, loaded_snippets, self:get_extended_snippets(ft))
+      vim.list_extend(loaded_snippets, self:get_extended_snippets(ft))
     else
-      loaded_snippets = vim.tbl_deep_extend('force', {}, loaded_snippets, self:get_snippets_for_ft(ft))
+      vim.list_extend(loaded_snippets, self:get_snippets_for_ft(ft))
     end
   end
   return loaded_snippets

@@ -71,6 +71,7 @@
 --- @field forceVersion? string | nil
 
 --- @class blink.cmp.FuzzyConfig
+--- @field use_typo_resistance? boolean
 --- @field use_frecency? boolean
 --- @field use_proximity? boolean
 --- @field max_items? number
@@ -218,6 +219,9 @@ local config = {
   },
 
   fuzzy = {
+    -- when enabled, allows for a number of typos relative to the length of the query
+    -- disabling this matches the behavior of fzf
+    use_typo_resistance = false,
     -- frencency tracks the most recently/frequently used items and boosts the score of the item
     use_frecency = true,
     -- proximity bonus boosts the score of items with a value in the buffer

@@ -51,7 +51,7 @@
               lockFile = ./Cargo.lock;
               outputHashes = {
                 "frizbee-0.1.0" =
-                  "sha256-zO2S282DVCjnALMXu3GxmAfjCXsPNUZ7+xgiqITfGmU=";
+                  "sha256-/O+XLuRc1/a7FQLnLV8peQ4BfSXoiHvcEGLGE6rbegc=";
               };
             };
           };
