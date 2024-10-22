@@ -40,6 +40,14 @@ function text_edits.get_undo_text_edit_range(text_edit)
   return range
 end
 
+function text_edits.undo_text_edit(text_edit)
+  text_edit = vim.deepcopy(text_edit)
+  text_edit.range = text_edits.get_undo_text_edit_range(text_edit)
+  text_edit.newText = ''
+
+  vim.lsp.util.apply_text_edits({ text_edit }, vim.api.nvim_get_current_buf(), 'utf-16')
+end
+
 --- @param item blink.cmp.CompletionItem
 function text_edits.apply_additional_text_edits(item)
   -- Apply additional text edits
