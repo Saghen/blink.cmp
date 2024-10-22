@@ -4,6 +4,8 @@ local brackets_lib = require('blink.cmp.accept.brackets')
 --- Applies a completion item to the current buffer
 --- @param item blink.cmp.CompletionItem
 local function accept(item)
+  require('blink.cmp.trigger.completion').hide()
+
   -- create an undo point
   if require('blink.cmp.config').accept.create_undo_point then
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
@@ -16,14 +18,8 @@ local function accept(item)
   local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(vim.bo.filetype, item)
   item.textEdit = text_edit_with_brackets
 
-  local current_word = require('blink.cmp.trigger.completion').get_current_word()
-  if current_word == item.textEdit.newText then
-    -- Hide the completion window and don't apply the text edit because
-    -- the new text is already inserted
-    require('blink.cmp.trigger.completion').hide()
-
   -- Snippet
-  elseif item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+  if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
     -- We want to handle offset_encoding and the text edit api can do this for us
     -- so we empty the newText and apply
     local temp_text_edit = vim.deepcopy(item.textEdit)
