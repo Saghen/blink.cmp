@@ -58,4 +58,27 @@ function utils.read_snippet(snippet, fallback)
   return snippets
 end
 
+function utils.get_tab_stops(snippet)
+  local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(snippet)
+  if not expanded_snippet then return end
+
+  local tabstops = {}
+  local grammar = require('vim.lsp._snippet_grammar')
+  local line = 1
+  local character = 1
+  for _, child in ipairs(expanded_snippet.data.children) do
+    local lines = tostring(child) == '' and {} or vim.split(tostring(child), '\n')
+    line = line + math.max(#lines - 1, 0)
+    character = #lines == 0 and character or #lines > 1 and #lines[#lines] or (character + #lines[#lines])
+    vim.print('Line: ' .. line .. ' Character: ' .. character)
+    if child.type == grammar.NodeType.Placeholder or child.type == grammar.NodeType.Tabstop then
+      vim.print(child)
+      table.insert(tabstops, { index = child.data.tabstop, line = line, character = character })
+    end
+  end
+
+  table.sort(tabstops, function(a, b) return a.index < b.index end)
+  return tabstops
+end
+
 return utils
