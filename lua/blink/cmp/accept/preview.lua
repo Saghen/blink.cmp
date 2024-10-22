@@ -1,5 +1,5 @@
 --- @param item blink.cmp.CompletionItem
-local function preview(item)
+local function preview(item, previous_text_edit)
   local text_edits_lib = require('blink.cmp.accept.text-edits')
   local text_edit = text_edits_lib.get_from_item(item)
 
@@ -8,6 +8,8 @@ local function preview(item)
     local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(text_edit.newText)
     text_edit.newText = expanded_snippet and tostring(expanded_snippet) or text_edit.newText
   end
+
+  if previous_text_edit ~= nil then text_edit.range = text_edits_lib.get_undo_text_edit_range(previous_text_edit) end
 
   text_edits_lib.apply_text_edits(item.client_id, { text_edit })
   vim.api.nvim_win_set_cursor(0, {

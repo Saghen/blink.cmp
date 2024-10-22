@@ -185,10 +185,9 @@ local function select(line, skip_auto_insert)
   -- when auto_insert is enabled, we immediately apply the text edit
   if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil and not skip_auto_insert then
     require('blink.cmp.trigger.completion').suppress_events_for_callback(function()
-      if autocomplete.preview_text_edit ~= nil and autocomplete.preview_context_id == autocomplete.context.id then
-        text_edits_lib.undo_text_edit(autocomplete.preview_text_edit)
-      end
-      autocomplete.preview_text_edit = require('blink.cmp.accept.preview')(selected_item)
+      if autocomplete.preview_context_id ~= autocomplete.context.id then autocomplete.preview_text_edit = nil end
+      autocomplete.preview_text_edit =
+        require('blink.cmp.accept.preview')(selected_item, autocomplete.preview_text_edit)
       autocomplete.preview_context_id = autocomplete.context.id
     end)
   end
