@@ -111,6 +111,9 @@ function signature.update_position(context)
   local is_space_below = cursor_screen_position.distance_from_bottom > height
   local is_space_above = cursor_screen_position.distance_from_top > height
 
+  -- fixes issue where the signature window would cover the cursor
+  if is_space_above then direction = 'n' else direction = 's' end
+
   -- default to the user's preference but attempt to use the other options
   local row = direction == 's' and 1 or -height
   vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = -1 })
