@@ -221,7 +221,7 @@ local config = {
   fuzzy = {
     -- when enabled, allows for a number of typos relative to the length of the query
     -- disabling this matches the behavior of fzf
-    use_typo_resistance = false,
+    use_typo_resistance = true,
     -- frencency tracks the most recently/frequently used items and boosts the score of the item
     use_frecency = true,
     -- proximity bonus boosts the score of items with a value in the buffer
