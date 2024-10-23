@@ -108,7 +108,8 @@
 --- @field autocomplete_north? ("n" | "s" | "e" | "w")[]
 --- @field autocomplete_south? ("n" | "s" | "e" | "w")[]
 ---
---- @alias blink.cmp.WindowBorder 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | 'none' | string[]
+--- @alias blink.cmp.WindowBorderChar string | table
+--- @alias blink.cmp.WindowBorder 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | 'none' | blink.cmp.WindowBorderChar
 ---
 --- @class blink.cmp.DocumentationConfig
 --- @field min_width? number
