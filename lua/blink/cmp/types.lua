@@ -1,6 +1,7 @@
 --- @class blink.cmp.CompletionItem : lsp.CompletionItem
 --- @field score_offset number | nil
---- @field source string
+--- @field source_id string
+--- @field source_name string
 --- @field cursor_column number
 --- @field client_id number
 

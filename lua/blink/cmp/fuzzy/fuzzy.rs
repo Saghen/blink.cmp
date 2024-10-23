@@ -17,7 +17,7 @@ pub struct LspItem {
     pub filter_text: Option<String>,
     pub kind: u32,
     pub score_offset: Option<i32>,
-    pub source: String,
+    pub source_id: String,
 }
 
 impl FromLua<'_> for LspItem {
@@ -28,7 +28,7 @@ impl FromLua<'_> for LspItem {
             let filter_text: Option<String> = tab.get("filterText").ok();
             let kind: u32 = tab.get("kind").unwrap_or_default();
             let score_offset: Option<i32> = tab.get("score_offset").ok();
-            let source: String = tab.get("source").unwrap_or_default();
+            let source_id: String = tab.get("source_id").unwrap_or_default();
 
             Ok(LspItem {
                 label,
@@ -36,7 +36,7 @@ impl FromLua<'_> for LspItem {
                 filter_text,
                 kind,
                 score_offset,
-                source,
+                source_id,
             })
         } else {
             Err(mlua::Error::FromLuaConversionError {

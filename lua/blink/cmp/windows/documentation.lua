@@ -12,7 +12,7 @@ function docs.setup()
     border = config.border,
     winhighlight = config.winhighlight,
     wrap = true,
-    filetype = 'markdown'
+    filetype = 'markdown',
   })
 
   autocomplete.listen_on_position_update(function()
@@ -49,6 +49,11 @@ function docs.show_item(item)
   -- todo: cancellation
   -- todo: only resolve if documentation does not exist
   sources.resolve(item, function(resolved_item)
+    if resolved_item ~= nil and resolved_item.documentation == nil then
+      resolved_item.documentation = item.documentation
+    end
+    if resolved_item ~= nil and resolved_item.detail == nil then resolved_item.detail = item.detail end
+
     item = resolved_item or item
     if item.documentation == nil and item.detail == nil then
       docs.win:close()

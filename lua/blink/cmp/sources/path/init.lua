@@ -6,10 +6,10 @@ local NAME_REGEX = '\\%([^/\\\\:\\*?<>\'"`\\|]\\)'
 local PATH_REGEX =
   assert(vim.regex(([[\%(\%(/PAT*[^/\\\\:\\*?<>\'"`\\| .~]\)\|\%(/\.\.\)\)*/\zePAT*$]]):gsub('PAT', NAME_REGEX)))
 
-function path.new(config)
+function path.new(opts)
   local self = setmetatable({}, { __index = path })
 
-  local opts = vim.tbl_deep_extend('keep', config.opts or {}, {
+  opts = vim.tbl_deep_extend('keep', opts or {}, {
     trailing_slash = false,
     label_trailing_slash = true,
     get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,

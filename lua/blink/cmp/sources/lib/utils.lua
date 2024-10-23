@@ -25,18 +25,6 @@ function utils.should_run_request(new_context, response)
   return false
 end
 
-function utils.cache_get_completions_func(fn, module)
-  local cached_function = {}
-  cached_function.call = function(context)
-    return fn(module, context):map(function(response)
-      cached_function.last_context = context
-      cached_function.last_response = response
-      return response
-    end)
-  end
-  return cached_function
-end
-
 --- @param responses blink.cmp.CompletionResponse[]
 --- @return blink.cmp.CompletionResponse
 function utils.concat_responses(responses)
@@ -68,6 +56,7 @@ function utils.blink_item_to_lsp_item(item)
   lsp_item.score_offset = nil
   lsp_item.client_id = nil
   lsp_item.source = nil
+  lsp_item.source_name = nil
   return lsp_item
 end
 

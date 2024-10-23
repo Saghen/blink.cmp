@@ -50,17 +50,22 @@
 --- @field signature_help? blink.cmp.SignatureHelpTriggerConfig
 
 --- @class blink.cmp.SourceConfig
---- @field providers? blink.cmp.SourceProviderConfig[]
+--- @field completion? string[] | fun(ctx?: blink.cmp.Context): string[]
+--- @field providers? table<string, blink.cmp.SourceProviderConfig>
 ---
 --- @class blink.cmp.SourceProviderConfig
---- @field [1]? string
 --- @field name string
---- @field fallback_for? string[] | nil
---- @field keyword_length? number | nil
---- @field score_offset? number | nil
---- @field deduplicate? blink.cmp.DeduplicateConfig | nil
---- @field trigger_characters? string[] | nil
---- @field opts? table | nil
+--- @field module string
+--- @field enabled? boolean | fun(ctx?: blink.cmp.Context): boolean
+--- @field opts? table
+--- @field transform_items? fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
+--- @field should_show_items? boolean | number | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
+--- @field max_items? number | fun(ctx: blink.cmp.Context, enabled_sources: string[], items: blink.cmp.CompletionItem[]): number
+--- @field min_keyword_length? number | fun(ctx: blink.cmp.Context, enabled_sources: string[]): number
+--- @field fallback_for? string[] | fun(ctx: blink.cmp.Context, enabled_sources: string[]): string[]
+--- @field score_offset? number | fun(ctx: blink.cmp.Context, enabled_sources: string[]): number
+--- @field deduplicate? blink.cmp.DeduplicateConfig
+--- @field override? blink.cmp.SourceOverride
 ---
 --- @class blink.cmp.DeduplicateConfig
 --- @field enabled? boolean
@@ -244,15 +249,30 @@ local config = {
   },
 
   sources = {
-    -- similar to nvim-cmp's sources, but we point directly to the source's lua module
-    -- multiple groups can be provided, where it'll fallback to the next group if the previous
-    -- returns no completion items
-    -- WARN: This API will have breaking changes during the beta
+    -- list of enabled providers
+    completion = { 'lsp', 'path', 'snippets', 'buffer' },
+
+    -- table of providers to configure
     providers = {
-      { 'blink.cmp.sources.lsp', name = 'LSP' },
-      { 'blink.cmp.sources.path', name = 'Path', score_offset = 3 },
-      { 'blink.cmp.sources.snippets', name = 'Snippets', score_offset = -3 },
-      { 'blink.cmp.sources.buffer', name = 'Buffer', fallback_for = { 'LSP' } },
+      lsp = {
+        name = 'LSP',
+        module = 'blink.cmp.sources.lsp',
+      },
+      path = {
+        name = 'Path',
+        module = 'blink.cmp.sources.path',
+        score_offset = 3,
+      },
+      snippets = {
+        name = 'Snippets',
+        module = 'blink.cmp.sources.snippets',
+        score_offset = -3,
+      },
+      buffer = {
+        name = 'Buffer',
+        module = 'blink.cmp.sources.buffer',
+        fallback_for = { 'lsp' },
+      },
     },
   },
 

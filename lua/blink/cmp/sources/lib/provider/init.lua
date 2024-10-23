@@ -1,16 +1,39 @@
-local utils = require('blink.cmp.sources.lib.utils')
-local async = require('blink.cmp.sources.lib.async')
+--- Wraps the sources to respect the configuration options and provide a unified interface
+--- @class blink.cmp.SourceProvider
+--- @field id string
+--- @field name string
+--- @field config blink.cmp.SourceProviderConfigWrapper
+--- @field module blink.cmp.Source
+--- @field last_response blink.cmp.CompletionResponse | nil
+---
+--- @field new fun(id: string, config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProvider
+--- @field get_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
+--- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, enabled_sources: string[]): blink.cmp.Task
+--- @field should_show_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, enabled_sources: string[], response: blink.cmp.CompletionResponse): boolean
+--- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
+--- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
+--- @field get_signature_help fun(self: blink.cmp.SourceProvider, context: blink.cmp.SignatureHelpContext): blink.cmp.Task
+--- @field reload (fun(self: blink.cmp.Source): nil) | nil
+
+--- @type blink.cmp.SourceProvider
+--- @diagnostic disable-next-line: missing-fields
 local source = {}
 
---- @param config blink.cmp.SourceProviderConfig
-function source.new(config)
+local utils = require('blink.cmp.sources.lib.utils')
+local async = require('blink.cmp.sources.lib.async')
+
+function source.new(id, config)
   assert(type(config.name) == 'string', 'Each source in config.sources.providers must have a "name" of type string')
+  assert(type(config.module) == 'string', 'Each source in config.sources.providers must have a "module" of type string')
 
   local self = setmetatable({}, { __index = source })
+  self.id = id
   self.name = config.name
-  --- @type blink.cmp.Source
-  self.module = require(config[1]).new(config)
-  self.config = config
+  self.module = require('blink.cmp.sources.lib.provider.override').new(
+    require(config.module).new(config.opts, config),
+    config.override
+  )
+  self.config = require('blink.cmp.sources.lib.provider.config').new(config)
   self.last_response = nil
 
   return self
@@ -18,17 +41,12 @@ end
 
 --- Completion ---
 
---- @return string[]
 function source:get_trigger_characters()
-  if self.module.get_trigger_characters == nil then return self.config.trigger_characters or {} end
-  local trigger_characters = self.module:get_trigger_characters()
-  vim.list_extend(trigger_characters, self.config.trigger_characters or {})
-  return trigger_characters
+  if self.module.get_trigger_characters == nil then return {} end
+  return self.module:get_trigger_characters()
 end
 
---- @param context blink.cmp.Context
---- @return blink.cmp.Task
-function source:get_completions(context)
+function source:get_completions(context, enabled_sources)
   -- Return the previous successful completions if the context is the same
   -- and the data doesn't need to be updated
   if self.last_response ~= nil and self.last_response.context.id == context.id then
@@ -43,11 +61,17 @@ function source:get_completions(context)
       if response == nil then response = { is_incomplete_forward = true, is_incomplete_backward = true, items = {} } end
       response.context = context
 
-      -- add score offset if configured
+      -- add non-lsp meta
       for _, item in ipairs(response.items) do
-        item.score_offset = (item.score_offset or 0) + (self.config.score_offset or 0)
+        item.score_offset = (item.score_offset or 0) + (self.config.score_offset(context, enabled_sources) or 0)
         item.cursor_column = context.cursor[2]
-        item.source = self.name
+        item.source_id = self.id
+        item.source_name = self.name
+      end
+
+      -- if the user provided a transform_items function, run it
+      if self.config.transform_items ~= nil then
+        response.items = self.config.transform_items(context, response.items)
       end
 
       self.last_response = require('blink.cmp.utils').shallow_copy(response)
@@ -60,24 +84,14 @@ function source:get_completions(context)
     end)
 end
 
---- @param response blink.cmp.CompletionResponse
---- @return blink.cmp.CompletionItem[]
-function source:filter_completions(response)
-  if self.module.filter_completions == nil then return response.items end
-  return self.module:filter_completions(response)
-end
-
---- @param context blink.cmp.Context
---- @param response blink.cmp.CompletionResponse
---- @return boolean
-function source:should_show_completions(context, response)
+function source:should_show_items(context, enabled_sources, response)
   -- if keyword length is configured, check if the context is long enough
-  local min_keyword_length = self.config.keyword_length or 0
+  local min_keyword_length = self.config.min_keyword_length(context, enabled_sources)
   local current_keyword_length = context.bounds.end_col - context.bounds.start_col
-  if self.config.keyword_length ~= nil and current_keyword_length < min_keyword_length then return false end
+  if current_keyword_length < min_keyword_length then return false end
 
-  if self.module.should_show_completions == nil then return true end
-  return self.module:should_show_completions(context, response)
+  if self.config.should_show_items == nil then return true end
+  return self.config.should_show_items(context, response.items)
 end
 
 --- Resolve ---
@@ -95,7 +109,6 @@ end
 
 --- Signature help ---
 
---- @return { trigger_characters: string[], retrigger_characters: string[] }
 function source:get_signature_help_trigger_characters()
   if self.module.get_signature_help_trigger_characters == nil then
     return { trigger_characters = {}, retrigger_characters = {} }
@@ -103,8 +116,6 @@ function source:get_signature_help_trigger_characters()
   return self.module:get_signature_help_trigger_characters()
 end
 
---- @param context blink.cmp.SignatureHelpContext
---- @return blink.cmp.Task
 function source:get_signature_help(context)
   return async.task.new(function(resolve)
     if self.module.get_signature_help == nil then return resolve(nil) end

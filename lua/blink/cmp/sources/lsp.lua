@@ -147,6 +147,10 @@ function lsp:get_completions(context, callback)
       vim.list_extend(combined_response.items, response.items)
     end
 
+    for _, item in ipairs(combined_response.items) do
+      if item.label == 'len' then vim.print(item) end
+    end
+
     callback(combined_response)
   end)
 end
@@ -160,7 +164,7 @@ function lsp:resolve(item, callback)
     return
   end
 
-  -- strip blink specific fields to avoid decoding errors on some LSPs (i.e. fsautocomplete)
+  -- strip blink specific fields to avoid decoding errors on some LSPs
   item = require('blink.cmp.sources.lib.utils').blink_item_to_lsp_item(item)
 
   local _, request_id = client.request('completionItem/resolve', item, function(error, resolved_item)

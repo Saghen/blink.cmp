@@ -1,10 +1,23 @@
 local utils = require('blink.cmp.sources.lib.utils')
 local async = require('blink.cmp.sources.lib.async')
+
+--- @class blink.cmp.SourcesContext
+--- @field id number
+--- @field sources table<string, blink.cmp.SourceProvider>
+--- @field active_request blink.cmp.Task | nil
+--- @field queued_request_context blink.cmp.Context | nil
+--- @field on_completions_callback fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
+---
+--- @field new fun(context: blink.cmp.Context, sources: table<string, blink.cmp.SourceProvider>, on_completions_callback: fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])): blink.cmp.SourcesContext
+--- @field get_completions fun(self: blink.cmp.SourcesContext, context: blink.cmp.Context)
+--- @field get_completions_for_sources fun(self: blink.cmp.SourcesContext, sources: table<string, blink.cmp.SourceProvider>, context: blink.cmp.Context): blink.cmp.Task
+--- @field get_completions_with_fallbacks fun(self: blink.cmp.SourcesContext, context: blink.cmp.Context, source: blink.cmp.SourceProvider, sources: table<string, blink.cmp.SourceProvider>): blink.cmp.Task
+--- @field destroy fun(self: blink.cmp.SourcesContext)
+
+--- @type blink.cmp.SourcesContext
+--- @diagnostic disable-next-line: missing-fields
 local sources_context = {}
 
---- @param context blink.cmp.Context
---- @param sources blink.cmp.SourceProvider[]
---- @param on_completions_callback fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
 function sources_context.new(context, sources, on_completions_callback)
   local self = setmetatable({}, { __index = sources_context })
   self.id = context.id
@@ -18,7 +31,6 @@ function sources_context.new(context, sources, on_completions_callback)
   return self
 end
 
---- @param context blink.cmp.Context
 function sources_context:get_completions(context)
   assert(context.id == self.id, 'Requested completions on a sources context with a different context ID')
 
@@ -43,13 +55,14 @@ function sources_context:get_completions(context)
   end)
 end
 
---- @param sources blink.cmp.SourceProvider[]
---- @param context blink.cmp.Context
---- @return blink.cmp.Task
 function sources_context:get_completions_for_sources(sources, context)
+  local enabled_sources = vim.tbl_keys(sources)
+  --- @type blink.cmp.SourceProvider[]
   local non_fallback_sources = vim.tbl_filter(
-    function(source) return source.config.fallback_for == nil or #source.config.fallback_for == 0 end,
-    sources
+    function(source)
+      return source.config.fallback_for == nil or #source.config.fallback_for(context, enabled_sources) == 0
+    end,
+    vim.tbl_values(sources)
   )
 
   -- get completions for each non-fallback source
@@ -73,16 +86,19 @@ function sources_context:get_completions_for_sources(sources, context)
     :map(function(tasks_results)
       local is_cached = true
       local items = {}
-      -- for each task, filter the items and add them to the list
-      -- if the source should show the completions
+      -- for each task, add them to the list if the source should show the items
       for idx, task_result in ipairs(tasks_results) do
         if task_result.status == async.STATUS.COMPLETED then
-          is_cached = is_cached and (task_result.result.is_cached or false)
-          local source = sources[idx]
+          --- @type blink.cmp.SourceProvider
+          local source = vim.tbl_values(sources)[idx]
           --- @type blink.cmp.CompletionResponse
           local response = task_result.result
-          response.items = source:filter_completions(response)
-          if source:should_show_completions(context, response) then vim.list_extend(items, response.items) end
+
+          is_cached = is_cached and (response.is_cached or false)
+
+          if source:should_show_items(context, enabled_sources, response) then
+            vim.list_extend(items, response.items)
+          end
         end
       end
       return { is_cached = is_cached, items = items }
@@ -95,22 +111,19 @@ end
 
 --- Runs the source's get_completions function, falling back to other sources
 --- with fallback_for = { source.name } if the source returns no completion items
---- @param context blink.cmp.Context
---- @param source blink.cmp.SourceProvider
---- @param sources blink.cmp.SourceProvider[]
---- @return blink.cmp.Task
 --- TODO: When a source has multiple fallbacks, we may end up with duplicate completion items
 function sources_context:get_completions_with_fallbacks(context, source, sources)
+  local enabled_sources = vim.tbl_keys(sources)
   local fallback_sources = vim.tbl_filter(
     function(fallback_source)
-      return fallback_source.name ~= source.name
+      return fallback_source.id ~= source.id
         and fallback_source.config.fallback_for ~= nil
-        and vim.tbl_contains(fallback_source.config.fallback_for, source.name)
+        and vim.tbl_contains(fallback_source.config.fallback_for(context), source.id)
     end,
-    sources
+    vim.tbl_values(sources)
   )
 
-  return source:get_completions(context):map(function(response)
+  return source:get_completions(context, enabled_sources):map(function(response)
     -- source returned completions, no need to fallback
     if #response.items > 0 or #fallback_sources == 0 then return response end
 
