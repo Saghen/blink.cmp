@@ -20,7 +20,7 @@ function RgSource.new(config)
     get_prefix = config.opts.get_prefix or function(_)
       local col = vim.api.nvim_win_get_cursor(0)[2]
       local line = vim.api.nvim_get_current_line()
-      local prefix = line:sub(1, col):match('[%w_]+$') or ''
+      local prefix = line:sub(1, col):match('[%w_-]+$') or ''
       return prefix
     end,
   }, { __index = RgSource })
