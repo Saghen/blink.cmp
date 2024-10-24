@@ -99,6 +99,8 @@ cmp.add_default_highlights = function()
     set_hl('BlinkCmpKind' .. kind, { link = use_nvim_cmp and 'CmpItemKind' .. kind or 'BlinkCmpKind' })
   end
 
+  set_hl('BlinkCmpGhostText', { link = use_nvim_cmp and 'CmpGhostText' or 'Comment' })
+
   set_hl('BlinkCmpMenu', { link = 'Pmenu' })
   set_hl('BlinkCmpMenuBorder', { link = 'Pmenu' })
   set_hl('BlinkCmpMenuSelection', { link = 'PmenuSel' })
