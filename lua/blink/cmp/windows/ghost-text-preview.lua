@@ -12,12 +12,24 @@ local function get_text_before_cursor()
   return string.gsub(string.sub(current_line, 1, col), '^%s*', '')
 end
 
---- @param selected_item blink.cmp.CompletionItem
+--- @param str1 string
+--- @param str2 string
+--- @return string
+local function get_overlapping_text_from(str1, str2)
+  for i = 1, #str2 do
+    local sub_str2 = string.sub(str2, i)
+    if string.sub(str1, 1, #sub_str2) == sub_str2 then return sub_str2 end
+  end
+  return ''
+end
+
+--- @param selected_item? blink.cmp.CompletionItem
 function ghost_text_preview.show_preview(selected_item)
   if selected_item == nil then return end
 
   local display_lines = vim.split(selected_item.label, '\n', { plain = true }) or {}
-  display_lines[1] = display_lines[1]:gsub(get_text_before_cursor(), '')
+  display_lines[1] =
+    string.gsub(display_lines[1], '^' .. get_overlapping_text_from(display_lines[1], get_text_before_cursor()), '')
 
   --- @type vim.api.keyset.set_extmark
   local extmark = {
