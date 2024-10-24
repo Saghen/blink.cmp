@@ -68,7 +68,6 @@ function fuzzy.get_query()
   -- Since sub(1, 1) returns a single char string, we need to check if that single char matches
   -- and otherwise return an empty string
   if range[1] == range[2] and line:sub(range[1], range[1]):match(cmp_config.keyword_regex) == nil then return '' end
-  vim.print(string.sub(line, range[1], range[2]))
   return string.sub(line, range[1], range[2])
 end
 
