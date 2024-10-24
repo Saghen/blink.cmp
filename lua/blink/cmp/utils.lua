@@ -142,6 +142,7 @@ end
 --- @param regex string
 --- @param exclude_from_prefix_regex string
 --- @return number[]
+--- TODO: switch to return start_col, length to simplify downstream logic
 function utils.get_regex_around_cursor(range, regex, exclude_from_prefix_regex)
   local current_col = vim.api.nvim_win_get_cursor(0)[2]
   local line = vim.api.nvim_get_current_line()

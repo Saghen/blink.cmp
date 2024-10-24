@@ -1,10 +1,6 @@
 local config = require('blink.cmp.config')
 
 local fuzzy = {
-  ---@type blink.cmp.Context?
-  last_context = nil,
-  ---@type blink.cmp.CompletionItem[]?
-  last_items = nil,
   rust = require('blink.cmp.fuzzy.rust'),
 }
 
@@ -61,20 +57,6 @@ function fuzzy.filter_items(needle, haystack)
     table.insert(filtered_items, haystack[idx + 1])
   end
   return filtered_items
-end
-
----@param needle string
----@param context blink.cmp.Context
----@param items blink.cmp.CompletionItem[]?
-function fuzzy.filter_items_with_cache(needle, context, items)
-  if items == nil then
-    if fuzzy.last_context == nil or fuzzy.last_context.id ~= context.id then return {} end
-    items = fuzzy.last_items
-  end
-  fuzzy.last_context = context
-  fuzzy.last_items = items
-
-  return fuzzy.filter_items(needle, items)
 end
 
 --- Gets the text under the cursor to be used for fuzzy matching

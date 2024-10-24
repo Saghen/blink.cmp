@@ -233,57 +233,47 @@ MiniDeps.add({
   },
 
   sources = {
-    -- similar to nvim-cmp's sources, but we point directly to the source's lua module
-    -- multiple groups can be provided, where it'll fallback to the next group if the previous
-    -- returns no completion items
-    -- WARN: This API will have breaking changes during the beta
-    providers = {
-      { 'blink.cmp.sources.lsp', name = 'LSP' },
-      { 'blink.cmp.sources.path', name = 'Path', score_offset = 3 },
-      { 'blink.cmp.sources.snippets', name = 'Snippets', score_offset = -3 },
-      { 'blink.cmp.sources.buffer', name = 'Buffer', fallback_for = { 'LSP' } },
-    },
-    -- WARN: **For reference only** to see what options are available. **See above for the default config**
-    providers = {
-      -- all of these properties work on every source
-      {
-          'blink.cmp.sources.lsp',
-          name = 'LSP',
-          keyword_length = 0,
-          score_offset = 0,
-          trigger_characters = { 'f', 'o', 'o' },
-      },
-      -- the following two sources have additional options
-      {
-        'blink.cmp.sources.path',
-        name = 'Path',
-        score_offset = 3,
-        opts = {
-          trailing_slash = false,
-          label_trailing_slash = true,
-          get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,
-          show_hidden_files_by_default = true,
-        }
-      },
-      {
-        'blink.cmp.sources.snippets',
-        name = 'Snippets',
-        score_offset = -3,
-        -- similar to https://github.com/garymjr/nvim-snippets
-        opts = {
-          friendly_snippets = true,
-          search_paths = { vim.fn.stdpath('config') .. '/snippets' },
-          global_snippets = { 'all' },
-          extended_filetypes = {},
-          ignored_filetypes = {},
-        },
-      },
-      {
-        'blink.cmp.sources.buffer',
-        name = 'Buffer',
-        fallback_for = { 'LSP' },
-      }
+    -- list of enabled providers
+    completion = { 
+      enabled_providers = {'lsp', 'path', 'snippets', 'buffer' },
     }
+
+    providers = {
+      lsp = {
+        name = 'LSP',
+        module = 'blink.cmp.sources.lsp',
+
+        --- *All* of the providers have the following options available
+        --- NOTE: All of these options may be functions to enable dynamic behavior
+        --- See the type definitions for more information
+        enabled = true, -- whether or not to enable the provider
+        transform_items = nil, -- function to transform the items before they're returned
+        should_show_items = true, -- whether or not to show the items
+        max_items = nil, -- maximum number of items to return
+        min_keyword_length = 0, -- minimum number of characters to trigger the provider
+        fallback_for = {}, -- if any of these providers return 0 items, it will fallback to this provider
+        score_offset = 0, -- boost/penalize the score of the items
+        override = nil, -- override the source's functions
+      },
+      path = {
+        name = 'Path',
+        module = 'blink.cmp.sources.path',
+        score_offset = 3,
+      },
+      snippets = {
+        name = 'Snippets',
+        module = 'blink.cmp.sources.snippets',
+        score_offset = -3,
+
+        --- Example usage for disabling the snippet provider after pressing trigger characters (i.e. ".")
+        -- enabled = function(ctx) return ctx ~= nil and ctx.trigger.kind == vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter end,
+      },
+      buffer = {
+        name = 'Buffer',
+        module = 'blink.cmp.sources.buffer',
+        fallback_for = { 'lsp' },
+      },
+    },
   },
 
   windows = {
@@ -437,7 +427,6 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 ### Planned missing features
 
-- Less customizable with regards to trigger, sources, sorting, filtering
 - Significantly less testing and documentation
 - Ghost text
 - Matched character highlighting

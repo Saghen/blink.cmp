@@ -240,7 +240,14 @@ function trigger.get_context_bounds(regex)
   end
 
   -- hack: why do we have to math.min here?
-  return { line_number = cursor_line, start_col = math.min(start_col, end_col), end_col = end_col }
+  start_col = math.min(start_col, end_col)
+
+  local length = end_col - start_col + 1
+  -- Since sub(1, 1) returns a single char string, we need to check if that single char matches
+  -- and otherwise mark the length as 0
+  if start_col == end_col and line:sub(start_col, end_col):match(regex) == nil then length = 0 end
+
+  return { line_number = cursor_line, start_col = start_col, end_col = end_col, length = length }
 end
 
 return trigger

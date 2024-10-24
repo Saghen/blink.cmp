@@ -87,7 +87,7 @@ end
 function source:should_show_items(context, enabled_sources, response)
   -- if keyword length is configured, check if the context is long enough
   local min_keyword_length = self.config.min_keyword_length(context, enabled_sources)
-  local current_keyword_length = context.bounds.end_col - context.bounds.start_col
+  local current_keyword_length = context.bounds.length
   if current_keyword_length < min_keyword_length then return false end
 
   if self.config.should_show_items == nil then return true end

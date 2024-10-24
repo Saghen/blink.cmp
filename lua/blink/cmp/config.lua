@@ -50,8 +50,11 @@
 --- @field signature_help? blink.cmp.SignatureHelpTriggerConfig
 
 --- @class blink.cmp.SourceConfig
---- @field completion? string[] | fun(ctx?: blink.cmp.Context): string[]
+--- @field completion? blink.cmp.SourceModeConfig
 --- @field providers? table<string, blink.cmp.SourceProviderConfig>
+---
+--- @class blink.cmp.SourceModeConfig
+--- @field enabled_providers? string[] | fun(ctx?: blink.cmp.Context): string[]
 ---
 --- @class blink.cmp.SourceProviderConfig
 --- @field name string
@@ -250,7 +253,9 @@ local config = {
 
   sources = {
     -- list of enabled providers
-    completion = { 'lsp', 'path', 'snippets', 'buffer' },
+    completion = {
+      enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
+    },
 
     -- table of providers to configure
     providers = {

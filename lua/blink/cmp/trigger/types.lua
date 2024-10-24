@@ -3,6 +3,7 @@
 --- @field line_number number
 --- @field start_col number
 --- @field end_col number
+--- @field length number
 
 --- @class blink.cmp.Context
 --- @field id number

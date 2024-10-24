@@ -6,9 +6,12 @@ local async = require('blink.cmp.sources.lib.async')
 --- @field sources table<string, blink.cmp.SourceProvider>
 --- @field active_request blink.cmp.Task | nil
 --- @field queued_request_context blink.cmp.Context | nil
---- @field on_completions_callback fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
+--- @field cached_responses table<string, blink.cmp.CompletionResponse> | nil
+--- @field on_completions_callback fun(context: blink.cmp.Context, enabled_sources: string[], responses: table<string, blink.cmp.CompletionResponse>)
 ---
---- @field new fun(context: blink.cmp.Context, sources: table<string, blink.cmp.SourceProvider>, on_completions_callback: fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])): blink.cmp.SourcesContext
+--- @field new fun(context: blink.cmp.Context, sources: table<string, blink.cmp.SourceProvider>, on_completions_callback: fun(context: blink.cmp.Context, items: table<string, blink.cmp.CompletionResponse>)): blink.cmp.SourcesContext
+--- @field get_sources fun(self: blink.cmp.SourcesContext): string[]
+--- @field get_cached_completions fun(self: blink.cmp.SourcesContext): table<string, blink.cmp.CompletionResponse> | nil
 --- @field get_completions fun(self: blink.cmp.SourcesContext, context: blink.cmp.Context)
 --- @field get_completions_for_sources fun(self: blink.cmp.SourcesContext, sources: table<string, blink.cmp.SourceProvider>, context: blink.cmp.Context): blink.cmp.Task
 --- @field get_completions_with_fallbacks fun(self: blink.cmp.SourcesContext, context: blink.cmp.Context, source: blink.cmp.SourceProvider, sources: table<string, blink.cmp.SourceProvider>): blink.cmp.Task
@@ -25,11 +28,14 @@ function sources_context.new(context, sources, on_completions_callback)
 
   self.active_request = nil
   self.queued_request_context = nil
-  --- @type fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
   self.on_completions_callback = on_completions_callback
 
   return self
 end
+
+function sources_context:get_sources() return vim.tbl_keys(self.sources) end
+
+function sources_context:get_cached_completions() return self.cached_responses end
 
 function sources_context:get_completions(context)
   assert(context.id == self.id, 'Requested completions on a sources context with a different context ID')
@@ -41,10 +47,17 @@ function sources_context:get_completions(context)
 
   -- Create a task to get the completions, send responses upstream
   -- and run the queued request, if it exists
-  self.active_request = self:get_completions_for_sources(self.sources, context):map(function(response)
+  self.active_request = self:get_completions_for_sources(self.sources, context):map(function(responses)
+    self.cached_responses = responses
+    --- @cast responses table<string, blink.cmp.CompletionResponse>
     self.active_request = nil
-    -- only send upstream if the response contains something new
-    if not response.is_cached then self.on_completions_callback(context, response.items) end
+
+    -- only send upstream if the responses contain something new
+    local is_cached = true
+    for _, response in pairs(responses) do
+      is_cached = is_cached and (response.is_cached or false)
+    end
+    if not is_cached then self.on_completions_callback(context, self:get_sources(), responses) end
 
     -- run the queued request, if it exists
     if self.queued_request_context ~= nil then
@@ -84,28 +97,19 @@ function sources_context:get_completions_for_sources(sources, context)
   return async.task
     .await_all(tasks)
     :map(function(tasks_results)
-      local is_cached = true
-      local items = {}
-      -- for each task, add them to the list if the source should show the items
+      local responses = {}
       for idx, task_result in ipairs(tasks_results) do
         if task_result.status == async.STATUS.COMPLETED then
           --- @type blink.cmp.SourceProvider
-          local source = vim.tbl_values(sources)[idx]
-          --- @type blink.cmp.CompletionResponse
-          local response = task_result.result
-
-          is_cached = is_cached and (response.is_cached or false)
-
-          if source:should_show_items(context, enabled_sources, response) then
-            vim.list_extend(items, response.items)
-          end
+          local source = vim.tbl_values(non_fallback_sources)[idx]
+          responses[source.id] = task_result.result
         end
       end
-      return { is_cached = is_cached, items = items }
+      return responses
     end)
     :catch(function(err)
       vim.print('failed to get completions for sources with error: ' .. err)
-      return { is_cached = false, items = {} }
+      return {}
     end)
 end
 

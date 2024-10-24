@@ -32,36 +32,31 @@ cmp.setup = function(opts)
       documentation = require('blink.cmp.windows.documentation').setup(),
     }
 
-    -- fuzzy combines smith waterman with frecency
-    -- and bonus from proximity words but I'm still working
-    -- on tuning the weights
-    --- @param context blink.cmp.Context
-    --- @param items blink.cmp.CompletionItem[] | nil
-    local function update_completions(context, items)
+    cmp.trigger.listen_on_show(function(context) cmp.sources.request_completions(context) end)
+    cmp.trigger.listen_on_hide(function()
+      cmp.sources.cancel_completions()
+      cmp.windows.autocomplete.close()
+    end)
+    cmp.sources.listen_on_completions(function(context, items)
+      -- fuzzy combines smith waterman with frecency
+      -- and bonus from proximity words but I'm still working
+      -- on tuning the weights
       if not cmp.fuzzy then
         cmp.fuzzy = require('blink.cmp.fuzzy')
         cmp.fuzzy.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
       end
-      -- we avoid adding 1-4ms to insertion latency by scheduling for later
+
+      -- we avoid adding 0.5-4ms to insertion latency by scheduling for later
       vim.schedule(function()
-        local filtered_items = cmp.fuzzy.filter_items_with_cache(cmp.fuzzy.get_query(), context, items)
+        local filtered_items = cmp.fuzzy.filter_items(cmp.fuzzy.get_query(), items)
+        filtered_items = cmp.sources.apply_max_items_for_completions(context, filtered_items)
         if #filtered_items > 0 then
           cmp.windows.autocomplete.open_with_items(context, filtered_items)
         else
           cmp.windows.autocomplete.close()
         end
       end)
-    end
-
-    cmp.trigger.listen_on_show(function(context)
-      update_completions(context) -- immediately update via cache on keystroke
-      cmp.sources.request_completions(context)
     end)
-    cmp.trigger.listen_on_hide(function()
-      cmp.sources.cancel_completions()
-      cmp.windows.autocomplete.close()
-    end)
-    cmp.sources.listen_on_completions(update_completions)
 
     -- setup signature help if enabled
     if config.trigger.signature_help.enabled then cmp.setup_signature_help() end
