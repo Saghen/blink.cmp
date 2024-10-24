@@ -41,7 +41,8 @@ pub fn destroy_db(_: &Lua, _: ()) -> LuaResult<bool> {
     Ok(true)
 }
 
-pub fn access(_: &Lua, item: LspItem) -> LuaResult<bool> {
+pub fn access(_: &Lua, item: LuaTable) -> LuaResult<bool> {
+    let item: LspItem = item.into();
     let mut frecency_handle = FRECENCY.write().map_err(|_| {
         mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
     })?;
@@ -94,6 +95,6 @@ fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
     exports.set("get_words", lua.create_function(get_words)?)?;
     exports.set("init_db", lua.create_function(init_db)?)?;
     exports.set("destroy_db", lua.create_function(destroy_db)?)?;
-    // exports.set("access", lua.create_function(access)?)?;
+    exports.set("access", lua.create_function(access)?)?;
     Ok(exports)
 }
