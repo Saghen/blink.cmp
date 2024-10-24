@@ -41,8 +41,7 @@ pub fn destroy_db(_: &Lua, _: ()) -> LuaResult<bool> {
     Ok(true)
 }
 
-pub fn access(_: &Lua, item: LuaTable) -> LuaResult<bool> {
-    let item: LspItem = item.into();
+pub fn access(_: &Lua, item: LspItem) -> LuaResult<bool> {
     let mut frecency_handle = FRECENCY.write().map_err(|_| {
         mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
     })?;
@@ -55,12 +54,7 @@ pub fn access(_: &Lua, item: LuaTable) -> LuaResult<bool> {
 
 pub fn fuzzy(
     _lua: &Lua,
-    (needle, haystack_filter_text, haystack, opts): (
-        String,
-        Vec<String>,
-        Vec<LuaTable>,
-        FuzzyOptions,
-    ),
+    (needle, haystack, opts): (String, Vec<LspItem>, FuzzyOptions),
 ) -> LuaResult<Vec<u32>> {
     let mut frecency_handle = FRECENCY.write().map_err(|_| {
         mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
@@ -69,12 +63,10 @@ pub fn fuzzy(
         mlua::Error::RuntimeError("Attempted to use frencecy before initialization".to_string())
     })?;
 
-    Ok(
-        fuzzy::fuzzy(needle, haystack_filter_text, haystack, frecency, opts)
-            .into_iter()
-            .map(|i| i as u32)
-            .collect(),
-    )
+    Ok(fuzzy::fuzzy(needle, haystack, frecency, opts)
+        .into_iter()
+        .map(|i| i as u32)
+        .collect())
 }
 
 pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
@@ -86,7 +78,9 @@ pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
         .collect())
 }
 
-#[mlua::lua_module]
+// NOTE: skip_memory_check greatly improves performance
+// https://github.com/mlua-rs/mlua/issues/318
+#[mlua::lua_module(skip_memory_check)]
 fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
     exports.set("fuzzy", lua.create_function(fuzzy)?)?;

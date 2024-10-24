@@ -20,8 +20,8 @@ pub struct FuzzyOptions {
     sorts: Vec<String>,
 }
 
-impl FromLua<'_> for FuzzyOptions {
-    fn from_lua(value: LuaValue<'_>, _lua: &'_ Lua) -> LuaResult<Self> {
+impl FromLua for FuzzyOptions {
+    fn from_lua(value: LuaValue, _lua: &'_ Lua) -> LuaResult<Self> {
         if let Some(tab) = value.as_table() {
             let use_typo_resistance: bool = tab.get("use_typo_resistance").unwrap_or_default();
             let use_frecency: bool = tab.get("use_frecency").unwrap_or_default();
@@ -43,7 +43,7 @@ impl FromLua<'_> for FuzzyOptions {
         } else {
             Err(mlua::Error::FromLuaConversionError {
                 from: "LuaValue",
-                to: "FuzzyOptions",
+                to: "FuzzyOptions".to_string(),
                 message: None,
             })
         }
@@ -52,17 +52,12 @@ impl FromLua<'_> for FuzzyOptions {
 
 pub fn fuzzy(
     needle: String,
-    haystack_labels: Vec<String>,
-    haystack: Vec<LuaTable>,
+    haystack: Vec<LspItem>,
     frecency: &FrecencyTracker,
     opts: FuzzyOptions,
 ) -> Vec<usize> {
-    let haystack = haystack
-        .into_iter()
-        .map(|item| LazyCell::new(move || -> LspItem { item.into() }))
-        .collect::<Vec<_>>();
-
     let nearby_words: HashSet<String> = HashSet::from_iter(opts.nearby_words.unwrap_or_default());
+    let haystack_labels = haystack.iter().map(|s| s.label.clone()).collect::<Vec<_>>();
 
     // Fuzzy match with fzrs
     let options = frizbee::Options {

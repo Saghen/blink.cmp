@@ -35,11 +35,7 @@ function fuzzy.filter_items(needle, haystack)
   local nearby_words = #nearby_text < 10000 and fuzzy.rust.get_words(nearby_text) or {}
 
   -- perform fuzzy search
-  local haystack_filter_text = {}
-  for _, item in ipairs(haystack) do
-    table.insert(haystack_filter_text, item.label)
-  end
-  local matched_indices = fuzzy.rust.fuzzy(needle, haystack_filter_text, haystack, {
+  local matched_indices = fuzzy.rust.fuzzy(needle, haystack, {
     -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
     -- so this should generally be good
     -- TODO: make this configurable
