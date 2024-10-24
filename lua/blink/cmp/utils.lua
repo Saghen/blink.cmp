@@ -152,23 +152,23 @@ end
 --- @return number[]
 --- TODO: switch to return start_col, length to simplify downstream logic
 function utils.get_regex_around_cursor(range, regex, exclude_from_prefix_regex)
-  local current_col = vim.api.nvim_win_get_cursor(0)[2]
+  local current_col = vim.api.nvim_win_get_cursor(0)[2] + 1
   local line = vim.api.nvim_get_current_line()
 
   -- Search backward for the start of the word
   local start_col = current_col
   while start_col > 0 do
-    local char = line:sub(start_col, start_col)
+    local char = line:sub(start_col - 1, start_col - 1)
     if char:match(regex) == nil then break end
     start_col = start_col - 1
   end
 
-  local end_col = current_col
+  local end_col = current_col - 1
 
   -- Search forward for the end of the word if configured
   if range == 'full' then
     while end_col < #line do
-      local char = line:sub(end_col + 1, end_col + 1)
+      local char = line:sub(end_col, end_col)
       if char:match(regex) == nil then break end
       end_col = end_col + 1
     end
