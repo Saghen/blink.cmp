@@ -54,6 +54,7 @@ function semantic.add_brackets_via_semantic_token(filetype, item, callback)
           cursor_after_call[1] == token.line
           and cursor_after_call[2] >= token.start_col
           and cursor_after_call[2] <= token.end_col
+          and (token.type == 'function' or token.type == 'method')
         then
           -- add the brackets
           local brackets_for_filetype = utils.get_for_filetype(filetype, item)
