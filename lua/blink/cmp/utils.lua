@@ -79,13 +79,21 @@ function utils.combine_markdown_lines(lines)
   return combined_lines
 end
 
+--- Highlights the given range with treesitter with the given filetype
+--- @param bufnr number
+--- @param filetype string
+--- @param start_line number
+--- @param end_line number
+--- TODO: fallback to regex highlighting if treesitter fails
 function utils.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
   local Range = require('vim.treesitter._range')
 
   local root_lang = vim.treesitter.language.get_lang(filetype)
   if root_lang == nil then return end
 
-  local trees = vim.treesitter.get_parser(bufnr, root_lang)
+  local success, trees = pcall(vim.treesitter.get_parser, bufnr, root_lang)
+  if not success then return end
+
   trees:parse({ start_line, end_line })
   if not trees then return end
 
