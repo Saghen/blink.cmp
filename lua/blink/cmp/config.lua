@@ -90,6 +90,7 @@
 --- @field autocomplete? blink.cmp.AutocompleteConfig
 --- @field documentation? blink.cmp.DocumentationConfig
 --- @field signature_help? blink.cmp.SignatureHelpConfig
+--- @field ghost_text_preview? blink.cmp.GhostTextPreviewConfig
 
 --- @class blink.cmp.HighlightConfig
 --- @field ns? number
@@ -136,6 +137,9 @@
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
 --- @field winhighlight? string
+
+--- @class blink.cmp.GhostTextPreviewConfig
+--- @field enabled? boolean
 
 --- @class blink.cmp.Config
 --- @field keymap? blink.cmp.KeymapConfig

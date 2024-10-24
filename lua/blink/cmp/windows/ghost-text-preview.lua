@@ -1,6 +1,9 @@
 local config = require('blink.cmp.config')
 
+local ghost_text_preview_config = config.windows.ghost_text_preview
+
 local ghost_text_preview = {
+  enabled = ghost_text_preview_config and ghost_text_preview_config.enabled or false,
   extmark_id = 1,
   ns_id = config.highlight.ns,
 }
@@ -25,6 +28,7 @@ end
 
 --- @param selected_item? blink.cmp.CompletionItem
 function ghost_text_preview.show_preview(selected_item)
+  if ghost_text_preview.enabled ~= true then return end
   if selected_item == nil then return end
 
   local text_to_display = selected_item.insertText or selected_item.label
