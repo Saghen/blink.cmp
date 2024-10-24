@@ -65,10 +65,7 @@ function fuzzy.get_query()
     cmp_config.keyword_regex,
     cmp_config.exclude_from_prefix_regex
   )
-  -- Since sub(1, 1) returns a single char string, we need to check if that single char matches
-  -- and otherwise return an empty string
-  if range[1] == range[2] and line:sub(range[1], range[1]):match(cmp_config.keyword_regex) == nil then return '' end
-  return string.sub(line, range[1], range[2])
+  return string.sub(line, range.start_col, range.start_col + range.length - 1)
 end
 
 return fuzzy

@@ -87,9 +87,8 @@ function text_edits.guess_text_edit(item)
   -- convert to 0-index
   return {
     range = {
-      start = { line = current_line - 1, character = range[1] - 1 },
-      -- don't - 1 on the end col since it's exclusive while get_regex_around_cursor assumes inclusive
-      ['end'] = { line = current_line - 1, character = range[2] },
+      start = { line = current_line - 1, character = range.start_col - 1 },
+      ['end'] = { line = current_line - 1, character = range.start_col - 1 + range.length },
     },
     newText = word,
   }
