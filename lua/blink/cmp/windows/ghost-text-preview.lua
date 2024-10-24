@@ -27,7 +27,14 @@ end
 function ghost_text_preview.show_preview(selected_item)
   if selected_item == nil then return end
 
-  local display_lines = vim.split(selected_item.label, '\n', { plain = true }) or {}
+  local text_to_display = selected_item.insertText or selected_item.label
+
+  if selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+    local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(text_to_display)
+    text_to_display = expanded_snippet and tostring(expanded_snippet) or text_to_display
+  end
+
+  local display_lines = vim.split(text_to_display, '\n', { plain = true }) or {}
   display_lines[1] =
     string.gsub(display_lines[1], '^' .. get_overlapping_text_from(display_lines[1], get_text_before_cursor()), '')
 
