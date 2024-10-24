@@ -86,9 +86,7 @@ pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
         .collect())
 }
 
-// NOTE: skip_memory_check greatly improves performance
-// https://github.com/mlua-rs/mlua/issues/318
-#[mlua::lua_module(skip_memory_check)]
+#[mlua::lua_module]
 fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
     exports.set("fuzzy", lua.create_function(fuzzy)?)?;
