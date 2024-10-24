@@ -48,6 +48,8 @@ cmp.setup = function(opts)
 
       -- we avoid adding 0.5-4ms to insertion latency by scheduling for later
       vim.schedule(function()
+        if cmp.trigger.context == nil or cmp.trigger.context.id ~= context.id then return end
+
         local filtered_items = cmp.fuzzy.filter_items(cmp.fuzzy.get_query(), items)
         filtered_items = cmp.sources.apply_max_items_for_completions(context, filtered_items)
         if #filtered_items > 0 then
