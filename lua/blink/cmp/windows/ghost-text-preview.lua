@@ -34,7 +34,7 @@ function ghost_text_preview.show_preview(selected_item)
   --- @type vim.api.keyset.set_extmark
   local extmark = {
     id = ghost_text_preview.extmark_id,
-    virt_text_win_col = vim.fn.virtcol('.') - 1,
+    virt_text_pos = 'inline',
     virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
     hl_mode = 'combine',
   }
@@ -46,8 +46,8 @@ function ghost_text_preview.show_preview(selected_item)
     end
   end
 
-  local cursor_col = vim.fn.col('.')
-  vim.api.nvim_buf_set_extmark(0, ghost_text_preview.ns_id, vim.fn.line('.') - 1, cursor_col - 1, extmark)
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+  vim.api.nvim_buf_set_extmark(0, ghost_text_preview.ns_id, row - 1, col, extmark)
 end
 
 function ghost_text_preview.clear_preview()
