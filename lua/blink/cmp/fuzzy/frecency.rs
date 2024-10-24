@@ -1,4 +1,4 @@
-use crate::fuzzy::LspItem;
+use crate::lsp_item::LspItem;
 use heed::types::*;
 use heed::{Database, Env, EnvOpenOptions};
 use mlua::Result as LuaResult;
