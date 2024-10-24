@@ -70,9 +70,7 @@ function utils.get_tab_stops(snippet)
     local lines = tostring(child) == '' and {} or vim.split(tostring(child), '\n')
     line = line + math.max(#lines - 1, 0)
     character = #lines == 0 and character or #lines > 1 and #lines[#lines] or (character + #lines[#lines])
-    vim.print('Line: ' .. line .. ' Character: ' .. character)
     if child.type == grammar.NodeType.Placeholder or child.type == grammar.NodeType.Tabstop then
-      vim.print(child)
       table.insert(tabstops, { index = child.data.tabstop, line = line, character = character })
     end
   end
