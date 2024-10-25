@@ -10,7 +10,6 @@ local config = require('blink.cmp.config')
 local renderer = require('blink.cmp.windows.lib.render')
 local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
-local ghost_text = require('blink.cmp.windows.ghost-text')
 
 local autocomplete = {
   ---@type blink.cmp.CompletionItem[]
@@ -81,7 +80,6 @@ function autocomplete.open_with_items(context, items)
 
   autocomplete.update_position(context)
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
-  ghost_text.show_preview(autocomplete.get_selected_item())
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
@@ -93,7 +91,6 @@ function autocomplete.open()
   vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
   autocomplete.win:open()
 
-  -- ghost_text_preview.show_preview(auto)
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 end
 
@@ -103,7 +100,6 @@ function autocomplete.close()
   autocomplete.win:close()
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 
-  ghost_text.clear_preview()
   vim.iter(autocomplete.event_targets.on_close):each(function(callback) callback() end)
 end
 
@@ -187,7 +183,6 @@ local function select(line, skip_auto_insert)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
 
   local selected_item = autocomplete.get_selected_item()
-  ghost_text.show_preview(selected_item)
 
   -- when auto_insert is enabled, we immediately apply the text edit
   if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil and not skip_auto_insert then

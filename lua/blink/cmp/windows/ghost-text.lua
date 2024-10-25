@@ -1,4 +1,5 @@
 local config = require('blink.cmp.config')
+local autocomplete = require('blink.cmp.windows.autocomplete')
 
 local ghost_text_config = config.windows.ghost_text
 
@@ -7,6 +8,16 @@ local ghost_text = {
   extmark_id = 1,
   ns_id = config.highlight.ns,
 }
+
+function ghost_text.setup()
+  autocomplete.listen_on_select(function(item, context)
+    if ghost_text.enabled ~= true then return end
+    ghost_text.show_preview(item)
+  end)
+  autocomplete.listen_on_close(function() ghost_text.clear_preview() end)
+
+  return ghost_text
+end
 
 local function get_text_before_cursor()
   local current_line = vim.api.nvim_get_current_line()
@@ -36,7 +47,6 @@ end
 
 --- @param selected_item? blink.cmp.CompletionItem
 function ghost_text.show_preview(selected_item)
-  if ghost_text.enabled ~= true then return end
   if selected_item == nil then return end
 
   local text_edits_lib = require('blink.cmp.accept.text-edits')

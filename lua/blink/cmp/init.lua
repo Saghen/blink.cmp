@@ -30,6 +30,7 @@ cmp.setup = function(opts)
     cmp.windows = {
       autocomplete = require('blink.cmp.windows.autocomplete').setup(),
       documentation = require('blink.cmp.windows.documentation').setup(),
+      ghost_text = require('blink.cmp.windows.ghost-text').setup(),
     }
 
     cmp.trigger.listen_on_show(function(context) cmp.sources.request_completions(context) end)
