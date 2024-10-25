@@ -3,7 +3,7 @@ local config = require('blink.cmp.config')
 local ghost_text_config = config.windows.ghost_text
 
 local ghost_text = {
-  enabled = ghost_text_config and ghost_text_config.enabled or false,
+  enabled = ghost_text_config and ghost_text_config.enabled,
   extmark_id = 1,
   ns_id = config.highlight.ns,
 }

@@ -344,6 +344,9 @@ local config = {
       border = 'padded',
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
     },
+    ghost_text = {
+      enabled = false,
+    },
   },
 
   highlight = {
