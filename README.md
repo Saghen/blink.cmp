@@ -346,6 +346,9 @@ MiniDeps.add({
       border = 'padded',
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
     },
+    ghost_text = {
+      enabled = false,
+    },
   },
 
   highlight = {

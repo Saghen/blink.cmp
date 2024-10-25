@@ -90,6 +90,7 @@
 --- @field autocomplete? blink.cmp.AutocompleteConfig
 --- @field documentation? blink.cmp.DocumentationConfig
 --- @field signature_help? blink.cmp.SignatureHelpConfig
+--- @field ghost_text? GhostTextConfig
 
 --- @class blink.cmp.HighlightConfig
 --- @field ns? number
@@ -136,6 +137,9 @@
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
 --- @field winhighlight? string
+
+--- @class GhostTextConfig
+--- @field enabled? boolean
 
 --- @class blink.cmp.Config
 --- @field keymap? blink.cmp.KeymapConfig
@@ -339,6 +343,9 @@ local config = {
       max_height = 10,
       border = 'padded',
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
+    },
+    ghost_text = {
+      enabled = false,
     },
   },
 
