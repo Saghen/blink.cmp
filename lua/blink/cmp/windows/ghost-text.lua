@@ -1,9 +1,9 @@
 local config = require('blink.cmp.config')
 
-local ghost_text_preview_config = config.windows.ghost_text_preview
+local ghost_text_config = config.windows.ghost_text
 
-local ghost_text_preview = {
-  enabled = ghost_text_preview_config and ghost_text_preview_config.enabled or false,
+local ghost_text = {
+  enabled = ghost_text_config and ghost_text_config.enabled or false,
   extmark_id = 1,
   ns_id = config.highlight.ns,
 }
@@ -27,8 +27,8 @@ local function get_overlapping_text_from(str1, str2)
 end
 
 --- @param selected_item? blink.cmp.CompletionItem
-function ghost_text_preview.show_preview(selected_item)
-  if ghost_text_preview.enabled ~= true then return end
+function ghost_text.show_preview(selected_item)
+  if ghost_text.enabled ~= true then return end
   if selected_item == nil then return end
 
   local text_to_display = selected_item.insertText or selected_item.label
@@ -44,7 +44,7 @@ function ghost_text_preview.show_preview(selected_item)
 
   --- @type vim.api.keyset.set_extmark
   local extmark = {
-    id = ghost_text_preview.extmark_id,
+    id = ghost_text.extmark_id,
     virt_text_pos = 'inline',
     virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
     hl_mode = 'combine',
@@ -58,11 +58,9 @@ function ghost_text_preview.show_preview(selected_item)
   end
 
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  vim.api.nvim_buf_set_extmark(0, ghost_text_preview.ns_id, row - 1, col, extmark)
+  vim.api.nvim_buf_set_extmark(0, ghost_text.ns_id, row - 1, col, extmark)
 end
 
-function ghost_text_preview.clear_preview()
-  vim.api.nvim_buf_del_extmark(0, ghost_text_preview.ns_id, ghost_text_preview.extmark_id)
-end
+function ghost_text.clear_preview() vim.api.nvim_buf_del_extmark(0, ghost_text.ns_id, ghost_text.extmark_id) end
 
-return ghost_text_preview
+return ghost_text
