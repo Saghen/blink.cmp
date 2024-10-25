@@ -26,21 +26,29 @@ local function get_overlapping_text_from(str1, str2)
   return ''
 end
 
+--- @param str1 string
+--- @param str2 string
+--- @return string
+local function remove_overlapping_text(str1, str2)
+  local newString = string.gsub(str1, '^' .. get_overlapping_text_from(str1, str2), '')
+  return newString
+end
+
 --- @param selected_item? blink.cmp.CompletionItem
 function ghost_text.show_preview(selected_item)
   if ghost_text.enabled ~= true then return end
   if selected_item == nil then return end
 
-  local text_to_display = selected_item.insertText or selected_item.label
+  local text_edits_lib = require('blink.cmp.accept.text-edits')
+  local text_edit = text_edits_lib.get_from_item(selected_item)
 
   if selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
-    local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(text_to_display)
-    text_to_display = expanded_snippet and tostring(expanded_snippet) or text_to_display
+    local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(text_edit.newText)
+    text_edit.newText = expanded_snippet and tostring(expanded_snippet) or text_edit.newText
   end
 
-  local display_lines = vim.split(text_to_display, '\n', { plain = true }) or {}
-  display_lines[1] =
-    string.gsub(display_lines[1], '^' .. get_overlapping_text_from(display_lines[1], get_text_before_cursor()), '')
+  local display_lines = vim.split(text_edit.newText, '\n', { plain = true }) or {}
+  display_lines[1] = remove_overlapping_text(display_lines[1], get_text_before_cursor())
 
   --- @type vim.api.keyset.set_extmark
   local extmark = {
@@ -57,8 +65,11 @@ function ghost_text.show_preview(selected_item)
     end
   end
 
-  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-  vim.api.nvim_buf_set_extmark(0, ghost_text.ns_id, row - 1, col, extmark)
+  local cursor_pos = {
+    text_edit.range.start.line,
+    text_edit.range['end'].character,
+  }
+  vim.api.nvim_buf_set_extmark(0, ghost_text.ns_id, cursor_pos[1], cursor_pos[2], extmark)
 end
 
 function ghost_text.clear_preview() vim.api.nvim_buf_del_extmark(0, ghost_text.ns_id, ghost_text.extmark_id) end
