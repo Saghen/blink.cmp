@@ -219,4 +219,10 @@ cmp.snippet_backward = function()
   return true
 end
 
+--- @param override? lsp.ClientCapabilities
+--- @param include_nvim_defaults? boolean
+cmp.get_lsp_capabilities = function(override, include_nvim_defaults)
+  return require('blink.cmp.sources.lib').get_lsp_capabilities(override, include_nvim_defaults)
+end
+
 return cmp

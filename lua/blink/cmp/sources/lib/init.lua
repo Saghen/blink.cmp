@@ -20,6 +20,7 @@ local config = require('blink.cmp.config')
 --- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil)): (fun(): nil) | nil
 --- @field cancel_signature_help fun()
 --- @field reload fun()
+--- @field get_lsp_capabilities fun(override?: lsp.ClientCapabilities, include_nvim_defaults?: boolean): lsp.ClientCapabilities
 
 --- @type blink.cmp.Sources
 --- @diagnostic disable-next-line: missing-fields
@@ -219,6 +220,50 @@ function sources.reload()
   for _, source in ipairs(sources.providers) do
     source:reload()
   end
+end
+
+function sources.get_lsp_capabilities(override, include_nvim_defaults)
+  return vim.tbl_deep_extend('force', include_nvim_defaults and vim.lsp.protocol.make_client_capabilities() or {}, {
+    textDocument = {
+      completion = {
+        completionItem = {
+          snippetSupport = true,
+          commitCharactersSupport = false, -- todo:
+          documentationFormat = { 'markdown', 'plaintext' },
+          deprecatedSupport = true,
+          preselectSupport = false, -- todo:
+          tagSupport = { valueSet = { 1 } }, -- deprecated
+          insertReplaceSupport = true, -- todo:
+          resolveSupport = {
+            properties = {
+              'documentation',
+              'detail',
+              'additionalTextEdits',
+              'textEdits',
+              -- todo: support more properties? should test if it improves latency
+            },
+          },
+          insertTextModeSupport = {
+            -- todo: support adjustIndentation
+            valueSet = { 'asIs' },
+          },
+          labelDetailsSupport = true,
+        },
+        completionList = {
+          itemDefaults = {
+            'commitCharacters',
+            'editRange',
+            'insertTextFormat',
+            'insertTextMode',
+            'data',
+          },
+        },
+
+        contextSupport = true,
+        insertTextMode = 'asIs',
+      },
+    },
+  }, override or {})
 end
 
 return sources
