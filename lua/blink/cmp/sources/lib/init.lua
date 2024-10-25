@@ -245,7 +245,7 @@ function sources.get_lsp_capabilities(override, include_nvim_defaults)
           },
           insertTextModeSupport = {
             -- todo: support adjustIndentation
-            valueSet = { 'asIs' },
+            valueSet = { 1 }, -- asIs
           },
           labelDetailsSupport = true,
         },
@@ -260,7 +260,7 @@ function sources.get_lsp_capabilities(override, include_nvim_defaults)
         },
 
         contextSupport = true,
-        insertTextMode = 'asIs',
+        insertTextMode = 1, -- asIs
       },
     },
   }, override or {})
