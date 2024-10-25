@@ -19,36 +19,16 @@ function ghost_text.setup()
   return ghost_text
 end
 
-local function get_text_before_cursor()
-  local current_line = vim.api.nvim_get_current_line()
-  local _, col = unpack(vim.api.nvim_win_get_cursor(0))
-
-  return string.gsub(string.sub(current_line, 1, col), '^%s*', '')
-end
-
---- @param str1 string
---- @param str2 string
---- @return string
-local function get_overlapping_text_from(str1, str2)
-  for i = 1, #str2 do
-    local sub_str2 = string.sub(str2, i)
-    if string.sub(str1, 1, #sub_str2) == sub_str2 then return sub_str2 end
-  end
-  return ''
-end
-
---- @param str1 string
---- @param str2 string
---- @return string
-local function remove_overlapping_text(str1, str2)
-  local newString = string.gsub(str1, '^' .. get_overlapping_text_from(str1, str2), '')
-  return newString
+--- @param textEdit lsp.TextEdit
+local function get_still_untyped_text(textEdit)
+  local type_text_length = textEdit.range['end'].character - textEdit.range.start.character
+  local result = textEdit.newText:sub(type_text_length + 1)
+  return result
 end
 
 --- @param selected_item? blink.cmp.CompletionItem
 function ghost_text.show_preview(selected_item)
   if selected_item == nil then return end
-
   local text_edits_lib = require('blink.cmp.accept.text-edits')
   local text_edit = text_edits_lib.get_from_item(selected_item)
 
@@ -57,8 +37,7 @@ function ghost_text.show_preview(selected_item)
     text_edit.newText = expanded_snippet and tostring(expanded_snippet) or text_edit.newText
   end
 
-  local display_lines = vim.split(text_edit.newText, '\n', { plain = true }) or {}
-  display_lines[1] = remove_overlapping_text(display_lines[1], get_text_before_cursor())
+  local display_lines = vim.split(get_still_untyped_text(text_edit), '\n', { plain = true }) or {}
 
   --- @type vim.api.keyset.set_extmark
   local extmark = {
