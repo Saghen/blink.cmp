@@ -136,7 +136,7 @@ end
 --- @param callback fun(): string | nil
 function keymap.set(mode, key, callback)
   vim.api.nvim_buf_set_keymap(0, mode, key, '', {
-    callback = callback,
+    callback = vim.schedule_wrap(callback),
     expr = true,
     silent = true,
     noremap = true,
