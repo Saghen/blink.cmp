@@ -10,7 +10,6 @@ local config = require('blink.cmp.config')
 local renderer = require('blink.cmp.windows.lib.render')
 local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
-
 local autocomplete = {
   ---@type blink.cmp.CompletionItem[]
   items = {},
@@ -90,7 +89,6 @@ function autocomplete.open()
   if autocomplete.win:is_open() then return end
   vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
   autocomplete.win:open()
-
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 end
 
