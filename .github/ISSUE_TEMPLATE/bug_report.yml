@@ -1,6 +1,5 @@
 name: Bug Report
 description: File a bug report
-title: "Bug: "
 labels: ["bug"]
 body:
   - type: checkboxes
@@ -8,9 +7,9 @@ body:
     attributes:
       label: Make sure you have done the following
       options:
-        - label: I have updated to the latest version of `blink.cmp`.
+        - label: I have updated to the latest version of `blink.cmp`
           required: true
-        - label: I have read the README.
+        - label: I have read the README
           required: true
   - type: textarea
     id: bug-description
@@ -21,7 +20,7 @@ body:
     id: user-config
     attributes:
       label: Relevant configuration
-      description: Copypaste the part of the config relevant to the bug.
+      description: Copypaste the part of the config relevant to the bug. Do NOT paste the entire default config.
       render: lua
       placeholder: |
         sources = {
@@ -34,7 +33,7 @@ body:
     id: version-info
     attributes:
       label: neovim version
-      placeholder: "for example: 0.10.0 or nightly"
+      placeholder: "output for `nvim --version`"
     validations: { required: true }
   - type: input
     id: branch-or-tag
