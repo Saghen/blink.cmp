@@ -8,23 +8,12 @@
     fenix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  nixConfig = {
-    extra-trusted-public-keys =
-      "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=";
-    extra-substituters = "https://devenv.cachix.org";
-  };
-
   outputs = inputs@{ flake-parts, nixpkgs, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [
-        "x86_64-linux"
-        "i686-linux"
-        "x86_64-darwin"
-        "aarch64-linux"
-        "aarch64-darwin"
-      ];
+      systems =
+        [ "x86_64-linux" "x86_64-darwin" "aarch64-linux" "aarch64-darwin" ];
 
-      perSystem = { config, self', inputs', pkgs, system, lib, ... }: {
+      perSystem = { self, config, self', inputs', pkgs, system, lib, ... }: {
         # use fenix overlay
         _module.args.pkgs = import nixpkgs {
           inherit system;
@@ -83,6 +72,7 @@
           default = self'.packages.blink-cmp;
         };
 
+        # builds the native module of the plugin
         apps.build-plugin = {
           type = "app";
           program = let
