@@ -30,7 +30,10 @@ end
 --- @param edits lsp.TextEdit[]
 function text_edits.apply_text_edits(client_id, edits)
   local client = vim.lsp.get_client_by_id(client_id)
-  local offset_encoding = client ~= nil and client.offset_encoding or 'utf-16'
+  local offset_encoding = (client and client.offset_encoding) or 'utf-8'
+  if not edits or #edits == 0 then
+    return
+  end
   vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), offset_encoding)
 end
 
