@@ -152,6 +152,14 @@ function trigger.suppress_events_for_callback(cb)
     and is_insert_mode
 end
 
+function trigger.show_if_on_trigger_character()
+  local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
+  local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
+  local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
+  if is_on_trigger then trigger.show({ trigger_character = char_under_cursor }) end
+  return is_on_trigger
+end
+
 --- @param opts { trigger_character?: string, send_upstream?: boolean, force?: boolean } | nil
 function trigger.show(opts)
   opts = opts or {}
