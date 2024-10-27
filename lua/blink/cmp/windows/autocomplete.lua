@@ -276,7 +276,17 @@ function autocomplete.draw()
     components_list
   )
 
-  local lines = vim.tbl_map(function(rendered) return rendered.text end, autocomplete.rendered_items)
+  local lines = vim
+    .iter(autocomplete.rendered_items)
+    :map(function(rendered)
+      local item_lines = {}
+      for s in rendered.text:gmatch('[^\r\n]+') do
+        table.insert(item_lines, s)
+      end
+      return item_lines
+    end)
+    :flatten()
+    :totable()
   local bufnr = autocomplete.win:get_buf()
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
