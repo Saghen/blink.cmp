@@ -20,8 +20,8 @@ local autocomplete = {
   context = nil,
   event_targets = {
     on_position_update = {},
-    --- @type fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)
-    on_select = function() end,
+    --- @type table<fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)>
+    on_select = {},
     --- @type table<fun()>
     on_close = {},
     --- @type table<fun()>
@@ -82,7 +82,8 @@ function autocomplete.open_with_items(context, items)
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
-  autocomplete.event_targets.on_select(autocomplete.get_selected_item(), context)
+
+  autocomplete.on_select_callbacks(autocomplete.get_selected_item(), context)
 end
 
 function autocomplete.open()
@@ -192,7 +193,7 @@ local function select(line, skip_auto_insert)
     end)
   end
 
-  autocomplete.event_targets.on_select(selected_item, autocomplete.context)
+  autocomplete.on_select_callbacks(selected_item, autocomplete.context)
 end
 
 --- @params opts? { skip_auto_insert?: boolean }
@@ -235,7 +236,15 @@ function autocomplete.select_prev(opts)
   select(line, opts and opts.skip_auto_insert)
 end
 
-function autocomplete.listen_on_select(callback) autocomplete.event_targets.on_select = callback end
+function autocomplete.listen_on_select(callback) table.insert(autocomplete.event_targets.on_select, callback) end
+
+--- @param item? blink.cmp.CompletionItem
+--- @param context blink.cmp.Context
+function autocomplete.on_select_callbacks(item, context)
+  for _, callback in ipairs(autocomplete.event_targets.on_select) do
+    callback(item, context)
+  end
+end
 
 ---------- Rendering ----------
 
