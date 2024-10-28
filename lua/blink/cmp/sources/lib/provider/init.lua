@@ -61,9 +61,10 @@ function source:get_completions(context, enabled_sources)
       if response == nil then response = { is_incomplete_forward = true, is_incomplete_backward = true, items = {} } end
       response.context = context
 
-      -- add non-lsp meta
+      -- add non-lsp metadata
+      local source_score_offset = self.config.score_offset(context, enabled_sources) or 0
       for _, item in ipairs(response.items) do
-        item.score_offset = (item.score_offset or 0) + (self.config.score_offset(context, enabled_sources) or 0)
+        item.score_offset = (item.score_offset or 0) + source_score_offset
         item.cursor_column = context.cursor[2]
         item.source_id = self.id
         item.source_name = self.name
