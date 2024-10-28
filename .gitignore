@@ -1,5 +1,6 @@
 target/
 .archive.lua
+_*.lua
 dual/
 result
 .direnv
