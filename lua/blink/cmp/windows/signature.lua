@@ -1,3 +1,4 @@
+local utils = require('blink.cmp.utils')
 local config = require('blink.cmp.config').windows.signature_help
 local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')
@@ -27,36 +28,39 @@ function signature.open_with_signature_help(context, signature_help)
   signature.context = context
   -- check if there are any signatures in signature_help, since
   -- convert_signature_help_to_markdown_lines errors with no signatures
-  if signature_help == nil or #signature_help.signatures == 0 then
+  if
+    signature_help == nil
+    or #signature_help.signatures == 0
+    or signature_help.signatures[(signature_help.activeSignature or 0) + 1] == nil
+  then
     signature.win:close()
     return
   end
 
-  -- set buffer to markdown
-  if vim.api.nvim_get_option_value('filetype', { buf = signature.win:get_buf() }) ~= 'markdown' then
-    vim.api.nvim_set_option_value('filetype', 'markdown', { buf = signature.win:get_buf() })
-  end
+  local active_signature = signature_help.signatures[(signature_help.activeSignature or 0) + 1]
 
-  -- convert signature help to markdown lines and draw
-  local lines, active_highlight = vim.lsp.util.convert_signature_help_to_markdown_lines(
+  if signature.shown_signature ~= active_signature then
+    require('blink.cmp.windows.lib.docs').render_detail_and_documentation(
+      signature.win:get_buf(),
+      active_signature.label,
+      active_signature.documentation,
+      config.max_width
+    )
+  end
+  signature.shown_signature = active_signature
+
+  -- highlight active parameter
+  local _, active_highlight = vim.lsp.util.convert_signature_help_to_markdown_lines(
     signature_help,
     vim.bo.filetype,
     sources.get_signature_help_trigger_characters().trigger_characters
   )
-  if lines == nil then
-    signature.win:close()
-    return
-  end
-  vim.api.nvim_buf_set_lines(signature.win:get_buf(), 0, -1, true, lines)
-  vim.api.nvim_set_option_value('modified', false, { buf = signature.win:get_buf() })
-
-  -- highlight active parameter
   if active_highlight ~= nil then
     vim.api.nvim_buf_add_highlight(
       signature.win:get_buf(),
       require('blink.cmp.config').highlight.ns,
       'BlinkCmpSignatureHelpActiveParameter',
-      1,
+      0,
       active_highlight[1],
       active_highlight[2]
     )
@@ -112,7 +116,11 @@ function signature.update_position(context)
   local is_space_above = cursor_screen_position.distance_from_top > height
 
   -- fixes issue where the signature window would cover the cursor
-  if is_space_above then direction = 'n' else direction = 's' end
+  if is_space_above then
+    direction = 'n'
+  else
+    direction = 's'
+  end
 
   -- default to the user's preference but attempt to use the other options
   local row = direction == 's' and 1 or -height

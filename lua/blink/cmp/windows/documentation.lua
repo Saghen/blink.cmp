@@ -1,5 +1,4 @@
 local config = require('blink.cmp.config').windows.documentation
-local utils = require('blink.cmp.utils')
 local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')
 local docs = {}
@@ -48,58 +47,21 @@ function docs.show_item(item)
 
   -- todo: cancellation
   -- todo: only resolve if documentation does not exist
-  sources.resolve(item, function(resolved_item)
-    if resolved_item ~= nil and resolved_item.documentation == nil then
-      resolved_item.documentation = item.documentation
-    end
-    if resolved_item ~= nil and resolved_item.detail == nil then resolved_item.detail = item.detail end
-
-    item = resolved_item or item
+  sources.resolve(item):map(function(item)
     if item.documentation == nil and item.detail == nil then
       docs.win:close()
       return
     end
 
-    local detail_lines = {}
-    if item.detail and item.detail ~= '' then detail_lines = utils.split_lines(item.detail) end
-
-    local doc_lines = {}
-    if item.documentation ~= nil then
-      local doc = type(item.documentation) == 'string' and item.documentation or item.documentation.value
-      doc_lines = utils.split_lines(doc)
-      if type(item.documentation) ~= 'string' and item.documentation.kind == 'markdown' then
-        -- if the rendering seems bugged, it's likely due to this function
-        doc_lines = utils.combine_markdown_lines(doc_lines)
-      end
+    if docs.shown_item ~= item then
+      require('blink.cmp.windows.lib.docs').render_detail_and_documentation(
+        docs.win:get_buf(),
+        item.detail,
+        item.documentation,
+        docs.win.config.max_width
+      )
     end
-
-    local combined_lines = vim.list_extend({}, detail_lines)
-    -- add a blank line for the --- separator
-    if #detail_lines > 0 and #doc_lines > 0 then table.insert(combined_lines, '') end
-    vim.list_extend(combined_lines, doc_lines)
-
-    vim.api.nvim_buf_set_lines(docs.win:get_buf(), 0, -1, true, combined_lines)
-    vim.api.nvim_set_option_value('modified', false, { buf = docs.win:get_buf() })
-
-    -- Highlight with treesitter
-    vim.api.nvim_buf_clear_namespace(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, 0, -1)
-
-    if #detail_lines > 0 then utils.highlight_with_treesitter(docs.win:get_buf(), vim.bo.filetype, 0, #detail_lines) end
-
-    -- Only add the separator if there are documentation lines (otherwise only display the detail)
-    if #detail_lines > 0 and #doc_lines > 0 then
-      vim.api.nvim_buf_set_extmark(docs.win:get_buf(), require('blink.cmp.config').highlight.ns, #detail_lines, 0, {
-        virt_text = { { string.rep('─', docs.win.config.max_width) } },
-        virt_text_pos = 'overlay',
-        hl_eol = true,
-        hl_group = 'BlinkCmpDocDetail',
-      })
-    end
-
-    if #doc_lines > 0 then
-      local start = #detail_lines + (#detail_lines > 0 and 1 or 0)
-      utils.highlight_with_treesitter(docs.win:get_buf(), 'markdown', start, start + #doc_lines)
-    end
+    docs.shown_item = item
 
     if autocomplete.win:get_win() then
       docs.win:open()
