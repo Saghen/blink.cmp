@@ -41,6 +41,10 @@ local function accept(item)
     else
       table.insert(all_text_edits, item.textEdit)
       text_edits_lib.apply_text_edits(item.client_id, all_text_edits)
+      vim.api.nvim_win_set_cursor(0, {
+        vim.api.nvim_win_get_cursor(0)[1],
+        item.textEdit.range.start.character + #item.textEdit.newText + offset,
+      })
     end
 
     -- Check semantic tokens for brackets, if needed, and apply additional text edits
