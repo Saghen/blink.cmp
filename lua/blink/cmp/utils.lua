@@ -92,10 +92,9 @@ function utils.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
   if root_lang == nil then return end
 
   local success, trees = pcall(vim.treesitter.get_parser, bufnr, root_lang)
-  if not success then return end
+  if not success or not trees then return end
 
   trees:parse({ start_line, end_line })
-  if not trees then return end
 
   trees:for_each_tree(function(tree, tstree)
     local lang = tstree:lang()
