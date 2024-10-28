@@ -60,6 +60,27 @@ function autocomplete.setup()
     end,
   })
 
+  -- prefetch the resolved item
+  local last_context_id = nil
+  local last_request = nil
+  local timer = vim.uv.new_timer()
+  autocomplete.listen_on_select(function(item, context)
+    local resolve = vim.schedule_wrap(function()
+      if last_request ~= nil then last_request:cancel() end
+      last_request = require('blink.cmp.sources.lib').resolve(item)
+    end)
+
+    -- immediately resolve if the context has changed
+    if last_context_id ~= context.id then
+      last_context_id = context.id
+      resolve()
+    end
+
+    -- otherwise, wait for the debounce period
+    timer:stop()
+    timer:start(50, 0, resolve)
+  end)
+
   return autocomplete
 end
 
@@ -312,10 +333,11 @@ function autocomplete.render_item_simple(ctx)
     { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
     {
       ctx.label,
-      ctx.kind == 'Snippet' and '~' or nil,
+      ctx.kind == 'Snippet' and '~' or '',
+      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
-      max_width = 50,
+      max_width = 80,
     },
     ' ',
   }
