@@ -5,6 +5,7 @@
 --- @field config blink.cmp.SourceProviderConfigWrapper
 --- @field module blink.cmp.Source
 --- @field last_response blink.cmp.CompletionResponse | nil
+--- @field resolve_tasks table<blink.cmp.CompletionItem, blink.cmp.Task>
 ---
 --- @field new fun(id: string, config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProvider
 --- @field get_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
@@ -35,6 +36,7 @@ function source.new(id, config)
   )
   self.config = require('blink.cmp.sources.lib.provider.config').new(config)
   self.last_response = nil
+  self.resolve_tasks = {}
 
   return self
 end
@@ -100,12 +102,23 @@ end
 --- @param item blink.cmp.CompletionItem
 --- @return blink.cmp.Task
 function source:resolve(item)
-  return async.task.new(function(resolve)
-    if self.module.resolve == nil then return resolve(nil) end
-    return self.module:resolve(item, function(resolved_item)
-      vim.schedule(function() resolve(resolved_item) end)
+  local tasks = self.resolve_tasks
+  if tasks[item] == nil or tasks[item].status == async.STATUS.CANCELLED then
+    tasks[item] = async.task.new(function(resolve)
+      if self.module.resolve == nil then return resolve(nil) end
+      return self.module:resolve(item, function(resolved_item)
+        -- use the item's existing documentation and detail if the LSP didn't return it
+        -- TODO: do we need this? this would be for java but never checked if it's needed
+        if resolved_item ~= nil and resolved_item.documentation == nil then
+          resolved_item.documentation = item.documentation
+        end
+        if resolved_item ~= nil and resolved_item.detail == nil then resolved_item.detail = item.detail end
+
+        vim.schedule(function() resolve(resolved_item or item) end)
+      end)
     end)
-  end)
+  end
+  return tasks[item]
 end
 
 --- Signature help ---
