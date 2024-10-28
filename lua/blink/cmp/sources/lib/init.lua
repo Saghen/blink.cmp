@@ -217,7 +217,7 @@ end
 
 --- For external integrations to force reloading the source
 function sources.reload()
-  for _, source in ipairs(sources.providers) do
+  for _, source in pairs(sources.providers) do
     source:reload()
   end
 end

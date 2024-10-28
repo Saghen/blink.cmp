@@ -13,7 +13,7 @@
 --- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
 --- @field get_signature_help fun(self: blink.cmp.SourceProvider, context: blink.cmp.SignatureHelpContext): blink.cmp.Task
---- @field reload (fun(self: blink.cmp.Source): nil) | nil
+--- @field reload (fun(self: blink.cmp.SourceProvider): nil) | nil
 
 --- @type blink.cmp.SourceProvider
 --- @diagnostic disable-next-line: missing-fields
