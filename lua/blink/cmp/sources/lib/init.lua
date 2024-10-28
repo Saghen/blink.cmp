@@ -15,7 +15,7 @@ local config = require('blink.cmp.config')
 --- @field cancel_completions fun()
 --- @field listen_on_completions fun(callback: fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]))
 --- @field apply_max_items_for_completions fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
---- @field resolve fun(item: blink.cmp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil)): (fun(): nil) | nil
+--- @field resolve fun(item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field get_signature_help_trigger_characters fun(): { trigger_characters: string[], retrigger_characters: string[] }
 --- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil)): (fun(): nil) | nil
 --- @field cancel_signature_help fun()
@@ -143,7 +143,7 @@ end
 
 --- Resolve ---
 
-function sources.resolve(item, callback)
+function sources.resolve(item)
   local item_source = nil
   for _, source in pairs(sources.providers) do
     if source.id == item.source_id then
@@ -151,15 +151,9 @@ function sources.resolve(item, callback)
       break
     end
   end
+  if item_source == nil then return async.task.new(function(resolve) resolve() end) end
 
-  if item_source == nil then
-    callback(nil)
-    return function() end
-  end
-  return item_source:resolve(item):map(function(resolved_item) callback(resolved_item) end):catch(function(err)
-    vim.print('failed to resolve item with error: ' .. err)
-    callback(nil)
-  end)
+  return item_source:resolve(item):catch(function(err) vim.print('failed to resolve item with error: ' .. err) end)
 end
 
 --- Signature help ---
@@ -239,7 +233,6 @@ function sources.get_lsp_capabilities(override, include_nvim_defaults)
               'documentation',
               'detail',
               'additionalTextEdits',
-              'textEdits',
               -- todo: support more properties? should test if it improves latency
             },
           },

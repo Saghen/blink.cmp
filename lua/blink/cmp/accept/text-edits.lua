@@ -56,22 +56,6 @@ function text_edits.undo_text_edit(text_edit)
 end
 
 --- @param item blink.cmp.CompletionItem
-function text_edits.apply_additional_text_edits(item)
-  -- Apply additional text edits
-  -- LSPs can either include these in the initial response or require a resolve
-  -- These are used for things like auto-imports
-  -- todo: if the main text edit was before this text edit, do we need to compensate?
-  if item.additionalTextEdits ~= nil and next(item.additionalTextEdits) ~= nil then
-    text_edits.apply_text_edits(item.client_id, item.additionalTextEdits)
-  else
-    require('blink.cmp.sources.lib').resolve(item, function(resolved_item)
-      resolved_item = resolved_item or item
-      text_edits.apply_text_edits(resolved_item.client_id, resolved_item.additionalTextEdits or {})
-    end)
-  end
-end
-
---- @param item blink.cmp.CompletionItem
 --- todo: doesnt work when the item contains characters not included in the context regex
 function text_edits.guess_text_edit(item)
   local word = item.textEditText or item.insertText or item.label

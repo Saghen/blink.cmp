@@ -6,55 +6,63 @@ local brackets_lib = require('blink.cmp.accept.brackets')
 local function accept(item)
   require('blink.cmp.trigger.completion').hide()
 
-  -- create an undo point
-  if require('blink.cmp.config').accept.create_undo_point then
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
-  end
+  -- start the resolve immediately since text changes can invalidate the item
+  -- with some LSPs (i.e. rust-analyzer) causing them to return the item as-is
+  -- without i.e. auto-imports
+  require('blink.cmp.sources.lib').resolve(item):map(function(resolved_item)
+    local all_text_edits =
+      vim.deepcopy(resolved_item and resolved_item.additionalTextEdits or item.additionalTextEdits or {})
 
-  item = vim.deepcopy(item)
-  item.textEdit = text_edits_lib.get_from_item(item)
+    -- create an undo point
+    if require('blink.cmp.config').accept.create_undo_point then
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
+    end
 
-  -- Add brackets to the text edit if needed
-  local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(vim.bo.filetype, item)
-  item.textEdit = text_edit_with_brackets
+    item = vim.deepcopy(item)
+    item.textEdit = text_edits_lib.get_from_item(item)
 
-  -- Snippet
-  if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
-    -- We want to handle offset_encoding and the text edit api can do this for us
-    -- so we empty the newText and apply
-    local temp_text_edit = vim.deepcopy(item.textEdit)
-    temp_text_edit.newText = ''
-    text_edits_lib.apply_text_edits(item.client_id, { temp_text_edit })
+    -- Add brackets to the text edit if needed
+    local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(vim.bo.filetype, item)
+    item.textEdit = text_edit_with_brackets
 
-    -- Expand the snippet
-    vim.snippet.expand(item.textEdit.newText)
+    -- Snippet
+    if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+      -- We want to handle offset_encoding and the text edit api can do this for us
+      -- so we empty the newText and apply
+      local temp_text_edit = vim.deepcopy(item.textEdit)
+      temp_text_edit.newText = ''
+      table.insert(all_text_edits, temp_text_edit)
+      text_edits_lib.apply_text_edits(item.client_id, all_text_edits)
+
+      -- Expand the snippet
+      vim.snippet.expand(item.textEdit.newText)
 
     -- OR Normal: Apply the text edit and move the cursor
-  else
-    text_edits_lib.apply_text_edits(item.client_id, { item.textEdit })
-    vim.api.nvim_win_set_cursor(0, {
-      item.textEdit.range.start.line + 1,
-      item.textEdit.range.start.character + #item.textEdit.newText + offset,
-    })
-  end
+    else
+      table.insert(all_text_edits, item.textEdit)
+      text_edits_lib.apply_text_edits(item.client_id, all_text_edits)
+      vim.api.nvim_win_set_cursor(0, {
+        item.textEdit.range.start.line + 1,
+        item.textEdit.range.start.character + #item.textEdit.newText + offset,
+      })
+    end
 
-  -- Check semantic tokens for brackets, if needed, and apply additional text edits
-  if brackets_status == 'check_semantic_token' then
-    -- todo: since we apply the additional text edits after, auto imported functions will not
-    -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
-    brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
+    -- Check semantic tokens for brackets, if needed, and apply additional text edits
+    if brackets_status == 'check_semantic_token' then
+      -- todo: since we apply the additional text edits after, auto imported functions will not
+      -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
+      brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
+        require('blink.cmp.trigger.completion').show_if_on_trigger_character()
+        require('blink.cmp.trigger.signature').show_if_on_trigger_character()
+      end)
+    else
       require('blink.cmp.trigger.completion').show_if_on_trigger_character()
       require('blink.cmp.trigger.signature').show_if_on_trigger_character()
-      text_edits_lib.apply_additional_text_edits(item)
-    end)
-  else
-    require('blink.cmp.trigger.completion').show_if_on_trigger_character()
-    require('blink.cmp.trigger.signature').show_if_on_trigger_character()
-    text_edits_lib.apply_additional_text_edits(item)
-  end
+    end
 
-  -- Notify the rust module that the item was accessed
-  require('blink.cmp.fuzzy').access(item)
+    -- Notify the rust module that the item was accessed
+    require('blink.cmp.fuzzy').access(item)
+  end)
 end
 
 return accept
