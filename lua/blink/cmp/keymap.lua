@@ -4,7 +4,7 @@ local keymap = {}
 local default_keymap = {
   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
   ['<C-e>'] = { 'hide' },
-  ['<C-y>'] = { 'select_and_accept' },
+  ['<C-y>'] = { 'accept' },
 
   ['<Up>'] = { 'select_prev', 'fallback' },
   ['<Down>'] = { 'select_next', 'fallback' },
