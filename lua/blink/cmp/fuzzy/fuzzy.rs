@@ -5,7 +5,6 @@ use crate::lsp_item::LspItem;
 use mlua::prelude::*;
 use mlua::FromLua;
 use mlua::Lua;
-use std::cell::LazyCell;
 use std::cmp::Reverse;
 use std::collections::HashSet;
 

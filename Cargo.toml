@@ -13,4 +13,4 @@ lazy_static = "1.5.0"
 frizbee = { git = "https://github.com/saghen/frizbee" }
 serde = { version = "1.0.204", features = ["derive"] }
 heed = "0.20.3"
-mlua = { version = "0.10.0-rc.1", features = ["module", "luajit"] }
+mlua = { version = "0.10.0", features = ["module", "luajit"] }
