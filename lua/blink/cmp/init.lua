@@ -183,6 +183,7 @@ cmp.select_next = function()
 end
 
 cmp.show_documentation = function()
+  if cmp.windows.documentation.win:is_open() then return end
   local item = cmp.windows.autocomplete.get_selected_item()
   if not item then return end
   vim.schedule(function() cmp.windows.documentation.show_item(item) end)
