@@ -1,4 +1,3 @@
-local utils = require('blink.cmp.utils')
 local config = require('blink.cmp.config').windows.signature_help
 local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')
@@ -93,7 +92,7 @@ function signature.scroll_down(amount)
 end
 
 --- @param context blink.cmp.SignatureHelpContext
-function signature.update_position(context)
+function signature.update_position()
   if not signature.win:is_open() then return end
   local winnr = signature.win:get_win()
 
