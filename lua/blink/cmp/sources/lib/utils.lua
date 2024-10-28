@@ -55,7 +55,7 @@ function utils.blink_item_to_lsp_item(item)
   lsp_item.cursor_column = nil
   lsp_item.score_offset = nil
   lsp_item.client_id = nil
-  lsp_item.source = nil
+  lsp_item.source_id = nil
   lsp_item.source_name = nil
   return lsp_item
 end
