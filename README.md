@@ -46,6 +46,12 @@
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
+    -- 'default' for mappings similar to built-in completion
+    -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys to navigate)
+    -- see the "default configuration" section below for full documentation on how to define
+    -- your own keymap
+    keymap = 'default',
+
     highlight = {
       -- sets the fallback highlight groups to nvim-cmp's highlight groups
       -- useful for when your theme doesn't support blink.cmp
@@ -135,24 +141,53 @@ MiniDeps.add({
 
 ```lua
 {
-  -- for keymap, all values may be string | string[]
-  -- use an empty table to disable a keymap
-  keymap = {
-    show = '<C-space>',
-    hide = '<C-e>',
-    accept = '<Tab>',
-    select_and_accept = {},
-    select_prev = { '<Up>', '<C-p>' },
-    select_next = { '<Down>', '<C-n>' },
-
-    show_documentation = '<C-space>',
-    hide_documentation = '<C-space>',
-    scroll_documentation_up = '<C-b>',
-    scroll_documentation_down = '<C-f>',
-
-    snippet_forward = '<Tab>',
-    snippet_backward = '<S-Tab>',
-  },
+  -- the keymap may be a preset ('default' | 'super-tab') or a table of keys => command[]
+  -- additionally, you may pass a function in the command array where returning true 
+  -- will prevent the next command from running
+  --
+  -- "default" keymap
+  --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  --   ['<C-e>'] = { 'hide' },
+  --   ['<C-y>'] = { 'accept' },
+  --
+  --   ['<C-p>'] = { 'select_prev', 'fallback' },
+  --   ['<C-n>'] = { 'select_next', 'fallback' },
+  --
+  --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --
+  --   ['<Tab>'] = { 'snippet_forward', 'fallback' },
+  --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+  --
+  -- "super-tab" keymap
+  --   you may want to set `trigger.show_in_snippet = false` when using "super-tab"
+  --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
+  --
+  --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  --   ['<C-e>'] = { 'hide' },
+  --
+  --   ['<Tab>'] = {
+  --     function(cmp)
+  --       if cmp.is_in_snippet() then return cmp.accept()
+  --       else return cmp.select_and_accept() end
+  --     end,
+  --     'snippet_forward',
+  --     'fallback'
+  --   },
+  --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+  --
+  --   ['<Up>'] = { 'select_prev', 'fallback' },
+  --   ['<Down>'] = { 'select_next', 'fallback' },
+  --   ['<C-p>'] = { 'select_prev', 'fallback' },
+  --   ['<C-n>'] = { 'select_next', 'fallback' },
+  --
+  --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --
+  -- available commands:
+  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
+  --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
+  keymap = 'default',
 
   accept = {
     create_undo_point = true,
@@ -199,7 +234,7 @@ MiniDeps.add({
       -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_blocked_trigger_characters = { "'", '"' },
       -- when false, will not show the completion window when in a snippet
-      show_in_snippet = false,
+      show_in_snippet = true,
     },
 
     signature_help = {

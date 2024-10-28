@@ -1,14 +1,23 @@
---- @class blink.cmp.KeymapConfig
---- @field show? string | string[]
---- @field accept? string | string[]
---- @field select_prev? string | string[]
---- @field select_next? string | string[]
---- @field show_documentation? string | string[]
---- @field hide_documentation? string | string[]
---- @field scroll_documentation_up? string | string[]
---- @field scroll_documentation_down? string | string[]
---- @field snippet_forward? string | string[]
---- @field snippet_backward? string | string[]
+--- @alias blink.cmp.KeymapCommand
+--- | 'fallback' Fallback to the built-in behavior
+--- | 'show' Show the completion window
+--- | 'hide' Hide the completion window
+--- | 'accept' Accept the current completion item
+--- | 'select_and_accept' Select the current completion item and accept it
+--- | 'select_prev' Select the previous completion item
+--- | 'select_next' Select the next completion item
+--- | 'show_documentation' Show the documentation window
+--- | 'hide_documentation' Hide the documentation window
+--- | 'scroll_documentation_up' Scroll the documentation window up
+--- | 'scroll_documentation_down' Scroll the documentation window down
+--- | 'snippet_forward' Move the cursor forward to the next snippet placeholder
+--- | 'snippet_backward' Move the cursor backward to the previous snippet placeholder
+--- | (fun(cmp: table): boolean?) Custom function where returning true will prevent the next command from running
+---
+--- @alias blink.cmp.KeymapConfig
+--- | table<string, blink.cmp.KeymapCommand[]> Table of keys => commands[]
+--- | 'default' mappings similar to built-in completion
+--- | 'super-tab' mappings similar to vscode (tab to accept, arrow keys to navigate)
 
 --- @class blink.cmp.AcceptConfig
 --- @field create_undo_point? boolean Create an undo point when accepting a completion item
@@ -142,7 +151,7 @@
 --- @field enabled? boolean
 
 --- @class blink.cmp.Config
---- @field keymap? blink.cmp.KeymapConfig
+--- @field keymap? blink.cmp.KeymapConfig | 'default' | 'super-tab'
 --- @field accept? blink.cmp.AcceptConfig
 --- @field trigger? blink.cmp.TriggerConfig
 --- @field fuzzy? blink.cmp.FuzzyConfig
@@ -155,24 +164,53 @@
 
 --- @type blink.cmp.Config
 local config = {
-  -- for keymap, all values may be string | string[]
-  -- use an empty table to disable a keymap
-  keymap = {
-    show = '<C-space>',
-    hide = '<C-e>',
-    accept = '<Tab>',
-    select_and_accept = {},
-    select_prev = { '<Up>', '<C-p>' },
-    select_next = { '<Down>', '<C-n>' },
-
-    show_documentation = '<C-space>',
-    hide_documentation = '<C-space>',
-    scroll_documentation_up = '<C-b>',
-    scroll_documentation_down = '<C-f>',
-
-    snippet_forward = '<Tab>',
-    snippet_backward = '<S-Tab>',
-  },
+  -- the keymap may be a preset ('default' | 'super-tab') or a table of keys => command[]
+  -- additionally, you may pass a function in the command array where returning true
+  -- will prevent the next command from running
+  --
+  -- "default" keymap
+  --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  --   ['<C-e>'] = { 'hide' },
+  --   ['<C-y>'] = { 'accept' },
+  --
+  --   ['<C-p>'] = { 'select_prev', 'fallback' },
+  --   ['<C-n>'] = { 'select_next', 'fallback' },
+  --
+  --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --
+  --   ['<Tab>'] = { 'snippet_forward', 'fallback' },
+  --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+  --
+  -- "super-tab" keymap
+  --   you may want to set `trigger.show_in_snippet = false` when using "super-tab"
+  --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
+  --
+  --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  --   ['<C-e>'] = { 'hide' },
+  --
+  --   ['<Tab>'] = {
+  --     function(cmp)
+  --       if cmp.is_in_snippet() then return cmp.accept()
+  --       else return cmp.select_and_accept() end
+  --     end,
+  --     'snippet_forward',
+  --     'fallback'
+  --   },
+  --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+  --
+  --   ['<Up>'] = { 'select_prev', 'fallback' },
+  --   ['<Down>'] = { 'select_next', 'fallback' },
+  --   ['<C-p>'] = { 'select_prev', 'fallback' },
+  --   ['<C-n>'] = { 'select_next', 'fallback' },
+  --
+  --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --
+  -- available commands:
+  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
+  --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
+  keymap = 'default',
 
   accept = {
     create_undo_point = true,

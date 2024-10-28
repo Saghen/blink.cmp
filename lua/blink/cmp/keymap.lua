@@ -1,42 +1,86 @@
 local utils = require('blink.cmp.utils')
 local keymap = {}
 
-local insert_commands = {
-  'show',
-  'hide',
-  'accept',
-  'select_and_accept',
-  'select_prev',
-  'select_next',
-  'show_documentation',
-  'hide_documentation',
-  'scroll_documentation_up',
-  'scroll_documentation_down',
+local default_keymap = {
+  ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  ['<C-e>'] = { 'hide' },
+  ['<C-y>'] = { 'select_and_accept' },
+
+  ['<Up>'] = { 'select_prev', 'fallback' },
+  ['<Down>'] = { 'select_next', 'fallback' },
+  ['<C-p>'] = { 'select_prev', 'fallback' },
+  ['<C-n>'] = { 'select_next', 'fallback' },
+
+  ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+
+  ['<Tab>'] = { 'snippet_forward', 'fallback' },
+  ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
 }
+
+local super_tab_keymap = {
+  ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  ['<C-e>'] = { 'hide' },
+
+  ['<Tab>'] = {
+    function(cmp)
+      if cmp.is_in_snippet() then
+        return cmp.accept()
+      else
+        return cmp.select_and_accept()
+      end
+    end,
+    'snippet_forward',
+    'fallback',
+  },
+  ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+
+  ['<Up>'] = { 'select_prev', 'fallback' },
+  ['<Down>'] = { 'select_next', 'fallback' },
+  ['<C-p>'] = { 'select_prev', 'fallback' },
+  ['<C-n>'] = { 'select_next', 'fallback' },
+
+  ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+}
+
 local snippet_commands = { 'snippet_forward', 'snippet_backward' }
 
 --- @param opts blink.cmp.KeymapConfig
 function keymap.setup(opts)
-  local insert_keys_to_commands = {}
-  local snippet_keys_to_commands = {}
-  for command, keys in pairs(opts) do
-    local is_snippet_command = vim.tbl_contains(snippet_commands, command)
-    local is_insert_command = vim.tbl_contains(insert_commands, command)
-    if not is_snippet_command and not is_insert_command then error('Invalid command in keymap config: ' .. command) end
+  local mappings = opts
 
-    -- convert string to string[] for consistency
-    if type(keys) == 'string' then keys = { keys } end
+  -- notice for users on old config
+  if type(opts) == 'table' then
+    local commands = {
+      'show',
+      'hide',
+      'accept',
+      'select_and_accept',
+      'select_prev',
+      'select_next',
+      'show_documentation',
+      'hide_documentation',
+      'scroll_documentation_up',
+      'scroll_documentation_down',
+      'snippet_forward',
+      'snippet_backward',
+    }
+    for key, _ in pairs(opts) do
+      if vim.tbl_contains(commands, key) then
+        error('The blink.cmp keymap recently got reworked. Please see the README for the updated configuration')
+      end
+    end
+  end
 
-    -- reverse the command -> key[] mapping into key -> command[]
-    for _, key in ipairs(keys) do
-      if is_insert_command then
-        if insert_keys_to_commands[key] == nil then insert_keys_to_commands[key] = {} end
-        table.insert(insert_keys_to_commands[key], command)
-      end
-      if is_snippet_command then
-        if snippet_keys_to_commands[key] == nil then snippet_keys_to_commands[key] = {} end
-        table.insert(snippet_keys_to_commands[key], command)
-      end
+  -- handle presets
+  if type(opts) == 'string' then
+    if opts == 'default' then
+      mappings = default_keymap
+    elseif opts == 'super-tab' then
+      mappings = super_tab_keymap
+    else
+      error('Invalid blink.cmp keymap preset: ' .. opts)
     end
   end
 
@@ -46,46 +90,65 @@ function keymap.setup(opts)
   vim.api.nvim_create_autocmd('InsertEnter', {
     callback = function()
       if utils.is_blocked_buffer() then return end
-      keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands)
+      keymap.apply_keymap_to_current_buffer(mappings)
     end,
   })
 end
 
 --- Applies the keymaps to the current buffer
---- @param insert_keys_to_commands table<string, string[]>
---- @param snippet_keys_to_commands table<string, string[]>
-function keymap.apply_keymap_to_current_buffer(insert_keys_to_commands, snippet_keys_to_commands)
+--- @param keys_to_commands table<string, blink.cmp.KeymapCommand[]>
+function keymap.apply_keymap_to_current_buffer(keys_to_commands)
   -- skip if we've already applied the keymaps
   for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(0, 'i')) do
     if mapping.desc == 'blink.cmp' then return end
   end
 
   -- insert mode: uses both snippet and insert commands
-  for _, key in ipairs(utils.union_keys(insert_keys_to_commands, snippet_keys_to_commands)) do
+  for key, commands in pairs(keys_to_commands) do
     keymap.set('i', key, function()
-      for _, command in ipairs(insert_keys_to_commands[key] or {}) do
-        local did_run = require('blink.cmp')[command]()
-        if did_run then return end
-      end
-      for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
-        local did_run = require('blink.cmp')[command]()
-        if did_run then return end
-      end
+      for _, command in ipairs(commands) do
+        -- special case for fallback
+        if command == 'fallback' then
+          return keymap.run_non_blink_keymap('i', key)
 
-      return keymap.run_non_blink_keymap('i', key)
+        -- run user defined functions
+        elseif type(command) == 'function' then
+          if command(require('blink.cmp')) then return end
+
+        -- otherwise, run the built-in command
+        elseif require('blink.cmp')[command]() then
+          return
+        end
+      end
     end)
   end
 
   -- snippet mode
-  for key, _ in pairs(snippet_keys_to_commands) do
-    keymap.set('s', key, function()
-      for _, command in ipairs(snippet_keys_to_commands[key] or {}) do
-        local did_run = require('blink.cmp')[command]()
-        if did_run then return end
-      end
+  for key, commands in pairs(keys_to_commands) do
+    local has_snippet_command = false
+    for _, command in ipairs(commands) do
+      if vim.tbl_contains(snippet_commands, command) then has_snippet_command = true end
+    end
 
-      return keymap.run_non_blink_keymap('s', key)
-    end)
+    if has_snippet_command then
+      keymap.set('s', key, function()
+        for _, command in ipairs(keys_to_commands[key] or {}) do
+          -- special case for fallback
+          if command == 'fallback' then
+            return keymap.run_non_blink_keymap('s', key)
+
+          -- run user defined functions
+          elseif type(command) == 'function' then
+            if command(require('blink.cmp')) then return end
+
+          -- only run snippet commands
+          elseif vim.tbl_contains(snippet_commands, command) then
+            local did_run = require('blink.cmp')[command]()
+            if did_run then return end
+          end
+        end
+      end)
+    end
   end
 end
 

@@ -208,6 +208,8 @@ cmp.scroll_documentation_down = function()
   return true
 end
 
+cmp.is_in_snippet = function() return vim.snippet.active() end
+
 cmp.snippet_forward = function()
   if not vim.snippet.active({ direction = 1 }) then return end
   vim.schedule(function() vim.snippet.jump(1) end)
