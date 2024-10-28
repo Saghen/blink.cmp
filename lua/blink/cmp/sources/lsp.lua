@@ -205,6 +205,7 @@ function lsp:get_signature_help(context, callback)
   }
 
   -- otherwise, we call all clients
+  -- TODO: some LSPs never response (typescript-tools.nvim)
   return vim.lsp.buf_request_all(0, 'textDocument/signatureHelp', params, function(result)
     local signature_helps = {}
     for client_id, res in pairs(result) do
