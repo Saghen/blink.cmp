@@ -41,6 +41,7 @@ local function accept(item)
     else
       table.insert(all_text_edits, item.textEdit)
       text_edits_lib.apply_text_edits(item.client_id, all_text_edits)
+      -- TODO: should move the cursor only by the offset since text edit handles everything else?
       vim.api.nvim_win_set_cursor(0, {
         vim.api.nvim_win_get_cursor(0)[1],
         item.textEdit.range.start.character + #item.textEdit.newText + offset,
@@ -49,7 +50,7 @@ local function accept(item)
 
     -- Check semantic tokens for brackets, if needed, and apply additional text edits
     if brackets_status == 'check_semantic_token' then
-      -- todo: since we apply the additional text edits after, auto imported functions will not
+      -- TODO: since we apply the additional text edits after, auto imported functions will not
       -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
       brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
         require('blink.cmp.trigger.completion').show_if_on_trigger_character()

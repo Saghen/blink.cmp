@@ -221,7 +221,7 @@ MiniDeps.add({
       keyword_range = 'prefix',
       -- regex used to get the text when fuzzy matching
       -- changing this may break some sources, so please report if you run into issues
-      -- todo: shouldnt this also affect the accept command? should this also be per language?
+      -- TODO: shouldnt this also affect the accept command? should this also be per language?
       keyword_regex = '[%w_\\-]',
       -- after matching with keyword_regex, any characters matching this regex at the prefix will be excluded
       exclude_from_prefix_regex = '[\\-]',
@@ -458,7 +458,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 **Fuzzy:** Rust <-> Lua FFI which performs both filtering and sorting of the items
 
-&nbsp;&nbsp;&nbsp;&nbsp;**Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (todo: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
+&nbsp;&nbsp;&nbsp;&nbsp;**Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (TODO: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
 
 &nbsp;&nbsp;&nbsp;&nbsp;**Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking precedence over the LSP source. The parameters here still need to be tuned, so please let me know if you find some magical parameters!
 

@@ -244,7 +244,7 @@ local config = {
       keyword_range = 'prefix',
       -- regex used to get the text when fuzzy matching
       -- changing this may break some sources, so please report if you run into issues
-      -- todo: shouldnt this also affect the accept command? should this also be per language?
+      -- TODO: shouldnt this also affect the accept command? should this also be per language?
       keyword_regex = '[%w_\\-]',
       -- after matching with keyword_regex, any characters matching this regex at the prefix will be excluded
       exclude_from_prefix_regex = '[\\-]',
@@ -331,7 +331,7 @@ local config = {
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
       -- keep the cursor X lines away from the top/bottom of the window
       scrolloff = 2,
-      -- todo: implement
+      -- TODO: implement
       order = 'top_down',
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space

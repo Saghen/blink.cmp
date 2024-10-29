@@ -176,7 +176,7 @@ end
 function keymap.run_non_blink_keymap(mode, key)
   local mapping = keymap.get_non_blink_mapping_for_key(mode, key) or {}
 
-  -- todo: there's likely many edge cases here. the nvim-cmp version is lacking documentation
+  -- TODO: there's likely many edge cases here. the nvim-cmp version is lacking documentation
   -- and is quite complex. we should look to see if we can simplify their logic
   -- https://github.com/hrsh7th/nvim-cmp/blob/ae644feb7b67bf1ce4260c231d1d4300b19c6f30/lua/cmp/utils/keymap.lua
   if type(mapping.callback) == 'function' then

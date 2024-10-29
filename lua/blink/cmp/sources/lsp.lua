@@ -44,8 +44,8 @@ function lsp:get_clients_with_capability(capability, filter)
 end
 
 function lsp:get_completions(context, callback)
-  -- todo: offset encoding is global but should be per-client
-  -- todo: should make separate LSP requests to return results earlier, in the case of slow LSPs
+  -- TODO: offset encoding is global but should be per-client
+  -- TODO: should make separate LSP requests to return results earlier, in the case of slow LSPs
 
   -- no providers with completion support
   if not self:has_capability('completionProvider') then
@@ -71,8 +71,8 @@ function lsp:get_completions(context, callback)
   -- this also avoids having to make multiple calls to the LSP server in case characters are deleted
   -- for these special cases
   -- i.e. hello.wor| would be sent as hello.|wor
-  -- todo: should we still make two calls to the LSP server and merge?
-  -- todo: breaks the textEdit resolver since it assumes the request was made from the cursor
+  -- TODO: should we still make two calls to the LSP server and merge?
+  -- TODO: breaks the textEdit resolver since it assumes the request was made from the cursor
   -- local trigger_characters = self:get_trigger_characters()
   -- local trigger_character_block_list = { ' ', '\n', '\t' }
   -- local bounds = context.bounds

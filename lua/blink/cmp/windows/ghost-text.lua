@@ -10,7 +10,7 @@ local ghost_text = {
 }
 
 function ghost_text.setup()
-  autocomplete.listen_on_select(function(item, context)
+  autocomplete.listen_on_select(function(item)
     if ghost_text.enabled ~= true then return end
     ghost_text.show_preview(item)
   end)

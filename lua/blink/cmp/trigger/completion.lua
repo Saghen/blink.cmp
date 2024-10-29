@@ -133,8 +133,8 @@ function trigger.activate_autocmds()
 end
 
 --- Suppresses on_hide and on_show events for the duration of the callback
---- todo: extract into an autocmd module
---- hack: there's likely edge cases with this since we can't know for sure
+--- TODO: extract into an autocmd module
+--- HACK: there's likely edge cases with this since we can't know for sure
 --- if the autocmds will fire for cursor_moved afaik
 function trigger.suppress_events_for_callback(cb)
   local cursor_before = vim.api.nvim_win_get_cursor(0)
@@ -147,7 +147,7 @@ function trigger.suppress_events_for_callback(cb)
 
   local is_insert_mode = vim.api.nvim_get_mode().mode == 'i'
   trigger.ignore_next_text_changed = changed_tick_after ~= changed_tick_before and is_insert_mode
-  -- todo: does this guarantee that the CursorMovedI event will fire?
+  -- TODO: does this guarantee that the CursorMovedI event will fire?
   trigger.ignore_next_cursor_moved = (cursor_after[1] ~= cursor_before[1] or cursor_after[2] ~= cursor_before[2])
     and is_insert_mode
 end

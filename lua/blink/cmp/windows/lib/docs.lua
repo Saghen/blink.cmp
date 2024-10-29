@@ -52,6 +52,7 @@ end
 --- @param start_line number
 --- @param end_line number
 --- TODO: fallback to regex highlighting if treesitter fails
+--- TODO: only render what's visible
 function docs.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
   local Range = require('vim.treesitter._range')
 
@@ -123,6 +124,8 @@ function docs.combine_markdown_lines(lines)
   local prev_is_special = false
   for _, line in ipairs(lines) do
     if line:match('^%s*```') then in_code_block = not in_code_block end
+    -- skip separators
+    if line:match('^[%s\\-]+$') then goto continue end
 
     local is_special = line:match('^%s*[' .. table.concat(special_starting_chars) .. ']') or line:match('^%s*%d\\.$')
     local is_empty = line:match('^%s*$')
@@ -131,12 +134,13 @@ function docs.combine_markdown_lines(lines)
     if #combined_lines == 0 or in_code_block or is_special or prev_is_special or is_empty or has_linebreak then
       table.insert(combined_lines, line)
     elseif line:match('^%s*$') then
-      table.insert(combined_lines, '')
+      if combined_lines[#combined_lines] ~= '' then table.insert(combined_lines, '') end
     else
       combined_lines[#combined_lines] = combined_lines[#combined_lines] .. '' .. line
     end
 
     prev_is_special = is_special
+    ::continue::
   end
 
   return combined_lines

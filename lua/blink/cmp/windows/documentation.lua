@@ -45,29 +45,32 @@ function docs.show_item(item)
     return
   end
 
-  -- todo: cancellation
-  -- todo: only resolve if documentation does not exist
-  sources.resolve(item):map(function(item)
-    if item.documentation == nil and item.detail == nil then
-      docs.win:close()
-      return
-    end
+  -- TODO: cancellation
+  -- TODO: only resolve if documentation does not exist
+  sources
+    .resolve(item)
+    :map(function(item)
+      if item.documentation == nil and item.detail == nil then
+        docs.win:close()
+        return
+      end
 
-    if docs.shown_item ~= item then
-      require('blink.cmp.windows.lib.docs').render_detail_and_documentation(
-        docs.win:get_buf(),
-        item.detail,
-        item.documentation,
-        docs.win.config.max_width
-      )
-    end
-    docs.shown_item = item
+      if docs.shown_item ~= item then
+        require('blink.cmp.windows.lib.docs').render_detail_and_documentation(
+          docs.win:get_buf(),
+          item.detail,
+          item.documentation,
+          docs.win.config.max_width
+        )
+      end
+      docs.shown_item = item
 
-    if autocomplete.win:get_win() then
-      docs.win:open()
-      docs.update_position()
-    end
-  end)
+      if autocomplete.win:get_win() then
+        docs.win:open()
+        docs.update_position()
+      end
+    end)
+    :catch(function(err) vim.notify(err, vim.log.levels.ERROR) end)
 end
 
 function docs.scroll_up(amount)

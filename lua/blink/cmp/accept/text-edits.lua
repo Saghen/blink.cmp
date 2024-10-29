@@ -56,7 +56,7 @@ function text_edits.undo_text_edit(text_edit)
 end
 
 --- @param item blink.cmp.CompletionItem
---- todo: doesnt work when the item contains characters not included in the context regex
+--- TODO: doesnt work when the item contains characters not included in the context regex
 function text_edits.guess_text_edit(item)
   local word = item.textEditText or item.insertText or item.label
 
