@@ -65,6 +65,8 @@ function autocomplete.setup()
   local last_request = nil
   local timer = vim.uv.new_timer()
   autocomplete.listen_on_select(function(item, context)
+    if not item then return end
+
     local resolve = vim.schedule_wrap(function()
       if last_request ~= nil then last_request:cancel() end
       last_request = require('blink.cmp.sources.lib').resolve(item)
