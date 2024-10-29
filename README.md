@@ -494,3 +494,5 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 [@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing
 
 [@scottmckendry](https://github.com/scottmckendry) Actively contributing to the project
+
+[@balssh](https://github.com/Balssh) Manages nixpkg and nixvim
