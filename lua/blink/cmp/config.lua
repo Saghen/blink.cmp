@@ -165,6 +165,7 @@
 --- @type blink.cmp.Config
 local config = {
   -- the keymap may be a preset ('default' | 'super-tab') or a table of keys => command[]
+  -- when defining your own, no keybinds will be assigned automatically.
   -- additionally, you may pass a function in the command array where returning true
   -- will prevent the next command from running
   --

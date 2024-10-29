@@ -49,7 +49,7 @@
     -- 'default' for mappings similar to built-in completion
     -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys to navigate)
     -- see the "default configuration" section below for full documentation on how to define
-    -- your own keymap
+    -- your own keymap. when defining your own, no keybinds will be assigned automatically.
     keymap = 'default',
 
     highlight = {
@@ -141,7 +141,8 @@ MiniDeps.add({
 
 ```lua
 {
-  -- the keymap may be a preset ('default' | 'super-tab') or a table of keys => command[]
+  -- the keymap may be a preset ('default' | 'super-tab') OR a table of keys => command[]
+  -- when defining your own, no keybinds will be assigned automatically.
   -- additionally, you may pass a function in the command array where returning true 
   -- will prevent the next command from running
   --
