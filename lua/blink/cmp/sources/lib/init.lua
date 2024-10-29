@@ -49,7 +49,7 @@ function sources.get_enabled_providers(context)
   --- @type table<string, blink.cmp.SourceProvider>
   local providers = {}
   for key, provider in pairs(sources.providers) do
-    if provider.config.enabled(context) and vim.tbl_contains(mode_providers, key) then providers[key] = provider end
+    if provider:enabled(context) and vim.tbl_contains(mode_providers, key) then providers[key] = provider end
   end
   return providers
 end
@@ -144,6 +144,7 @@ end
 --- Resolve ---
 
 function sources.resolve(item)
+  --- @type blink.cmp.SourceProvider?
   local item_source = nil
   for _, source in pairs(sources.providers) do
     if source.id == item.source_id then
