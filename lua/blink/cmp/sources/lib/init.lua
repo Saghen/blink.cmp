@@ -152,7 +152,7 @@ function sources.resolve(item)
       break
     end
   end
-  if item_source == nil then return async.task.new(function(resolve) resolve() end) end
+  if item_source == nil then return async.task.new(function(resolve) resolve(item) end) end
 
   return item_source:resolve(item):catch(function(err) vim.print('failed to resolve item with error: ' .. err) end)
 end

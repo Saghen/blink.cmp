@@ -118,7 +118,7 @@ function source:resolve(item)
   local tasks = self.resolve_tasks
   if tasks[item] == nil or tasks[item].status == async.STATUS.CANCELLED then
     tasks[item] = async.task.new(function(resolve)
-      if self.module.resolve == nil then return resolve(nil) end
+      if self.module.resolve == nil then return resolve(item) end
       return self.module:resolve(item, function(resolved_item)
         -- use the item's existing documentation and detail if the LSP didn't return it
         -- TODO: do we need this? this would be for java but never checked if it's needed
