@@ -1,4 +1,4 @@
-local download_config = require('blink.cmp.config').fuzzy.prebuiltBinaries
+local download_config = require('blink.cmp.config').fuzzy.prebuilt_binaries
 
 local download = {}
 
@@ -15,40 +15,40 @@ local version_path = root_dir .. '../../../../target/release/version.txt'
 
 --- @param callback fun(err: string | nil)
 function download.ensure_downloaded(callback)
-  local function cb(err)
-    vim.schedule(function() callback(err) end)
-  end
+  callback = vim.schedule_wrap(callback)
 
-  if not download_config.download then return cb() end
+  if not download_config.download then return callback() end
 
   download.get_git_tag(function(git_version_err, git_version)
-    if git_version_err then return cb(git_version_err) end
+    if git_version_err then return callback(git_version_err) end
 
     download.get_downloaded_version(function(version_err, version)
       download.is_downloaded(function(downloaded)
-        local target_version = download_config.forceVersion or git_version
+        local target_version = download_config.force_version or git_version
 
         -- not built locally, not a git tag, error
         if not downloaded and not target_version then
-          return cb(
-            "Can't download from github due to not being on a git tag and no fuzzy.prebuiltBinaries.forceVersion set, but found no built version of the library. "
-              .. 'Either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuiltBinaries.forceVersion` in config. '
+          return callback(
+            "Can't download from github due to not being on a git tag and no fuzzy.prebuilt_binaries.force_version set, but found no built version of the library. "
+              .. 'Either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
               .. 'See the README for more info.'
           )
         end
         -- built locally, ignore
-        if downloaded and (version_err or version == nil) then return cb() end
+        if downloaded and (version_err or version == nil) then return callback() end
         -- already downloaded and the correct version
-        if version == target_version and downloaded then return cb() end
+        if version == target_version and downloaded then return callback() end
         -- unknown state
-        if not target_version then return cb('Unknown error while getting pre-built binary. Consider re-installing') end
+        if not target_version then
+          return callback('Unknown error while getting pre-built binary. Consider re-installing')
+        end
 
         -- download from github and set version
         download.from_github(target_version, function(download_err)
-          if download_err then return cb(download_err) end
+          if download_err then return callback(download_err) end
           download.set_downloaded_version(target_version, function(set_err)
-            if set_err then return cb(set_err) end
-            cb()
+            if set_err then return callback(set_err) end
+            callback()
           end)
         end)
       end)
@@ -85,22 +85,23 @@ end
 --- @param tag string
 --- @param cb fun(err: string | nil)
 function download.from_github(tag, cb)
-  local system_triple = download.get_system_triple()
-  if not system_triple then
-    return cb(
-      'Your system is not supported by pre-built binaries. You must run cargo build --release via your package manager with rust nightly. See the README for more info.'
-    )
-  end
+  download.get_system_triple(function(system_triple)
+    if not system_triple then
+      return cb(
+        'Your system is not supported by pre-built binaries. You must run cargo build --release via your package manager with rust nightly. See the README for more info.'
+      )
+    end
 
-  local url = 'https://github.com/saghen/blink.cmp/releases/download/'
-    .. tag
-    .. '/'
-    .. system_triple
-    .. download.get_lib_extension()
+    local url = 'https://github.com/saghen/blink.cmp/releases/download/'
+      .. tag
+      .. '/'
+      .. system_triple
+      .. download.get_lib_extension()
 
-  vim.system({ 'curl', '--create-dirs', '-fLo', download.lib_path, url }, {}, function(out)
-    if out.code ~= 0 then cb('Failed to download pre-build binaries: ' .. out.stderr) end
-    cb()
+    vim.system({ 'curl', '--create-dirs', '-fLo', download.lib_path, url }, {}, function(out)
+      if out.code ~= 0 then cb('Failed to download pre-build binaries: ' .. out.stderr) end
+      cb()
+    end)
   end)
 end
 
@@ -129,18 +130,44 @@ function download.set_downloaded_version(version, cb)
   end)
 end
 
---- @return string | nil
-function download.get_system_triple()
+--- @param cb fun(triple: string | nil)
+function download.get_system_triple(cb)
+  if download_config.force_system_triple then return cb(download_config.force_system_triple) end
+
+  if jit.os:lower() == 'mac' or jit.os:lower() == 'osx' then
+    if jit.arch:lower():match('arm') then return cb('aarch64-apple-darwin') end
+    if jit.arch:lower():match('x64') then return cb('x86_64-apple-darwin') end
+  elseif jit.os:lower() == 'windows' then
+    if jit.arch:lower():match('x64') then return cb('x86_64-pc-windows-msvc') end
+  elseif jit.os:lower() == 'linux' then
+    vim.system({ 'uname', '-a' }, {}, function(out)
+      local libc = 'gnu'
+      if out.stdout:lower():match('alpine') then libc = 'musl' end
+
+      if jit.arch:lower():match('arm') then return cb('aarch64-unknown-linux-' .. libc) end
+      if jit.arch:lower():match('x64') then return cb('x86_64-unknown-linux-' .. libc) end
+      return cb(nil)
+    end)
+  else
+    return cb(nil)
+  end
+end
+
+function download.get_system_triple_sync()
+  if download_config.force_system_triple then return download_config.force_system_triple end
+
   if jit.os:lower() == 'mac' or jit.os:lower() == 'osx' then
     if jit.arch:lower():match('arm') then return 'aarch64-apple-darwin' end
     if jit.arch:lower():match('x64') then return 'x86_64-apple-darwin' end
-  end
-  if jit.os:lower() == 'windows' then
+  elseif jit.os:lower() == 'windows' then
     if jit.arch:lower():match('x64') then return 'x86_64-pc-windows-msvc' end
-  end
-  if jit.os:lower() ~= 'windows' then
-    if jit.arch:lower():match('arm') then return 'aarch64-unknown-linux-gnu' end
-    if jit.arch:lower():match('x64') then return 'x86_64-unknown-linux-gnu' end
+  elseif jit.os:lower() == 'linux' then
+    local libc = 'gnu'
+    local out = vim.system({ 'uname', '-a' }, {}):wait()
+    if out.stdout:lower():match('alpine') then libc = 'musl' end
+
+    if jit.arch:lower():match('arm') then return 'aarch64-unknown-linux-' .. libc end
+    if jit.arch:lower():match('x64') then return 'x86_64-unknown-linux-' .. libc end
   end
 end
 

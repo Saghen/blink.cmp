@@ -86,7 +86,8 @@
 
 --- @class blink.cmp.PrebuiltBinariesConfig
 --- @field download? boolean
---- @field forceVersion? string | nil
+--- @field force_version? string | nil
+--- @field force_system_triple? string | nil
 
 --- @class blink.cmp.FuzzyConfig
 --- @field use_typo_resistance? boolean
@@ -94,7 +95,7 @@
 --- @field use_proximity? boolean
 --- @field max_items? number
 --- @field sorts? ("label" | "kind" | "score")[]
---- @field prebuiltBinaries? blink.cmp.PrebuiltBinariesConfig
+--- @field prebuilt_binaries? blink.cmp.PrebuiltBinariesConfig
 
 --- @class blink.cmp.WindowConfig
 --- @field autocomplete? blink.cmp.AutocompleteConfig
@@ -285,7 +286,7 @@ local config = {
     -- controls which sorts to use and in which order, these three are currently the only allowed options
     sorts = { 'label', 'kind', 'score' },
 
-    prebuiltBinaries = {
+    prebuilt_binaries = {
       -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
       -- you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
       download = true,
@@ -293,7 +294,12 @@ local config = {
       -- then the downloader will attempt to infer the version from the checked out git tag (if any).
       --
       -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
-      forceVersion = nil,
+      force_version = nil,
+      -- When downloading a prebuilt binary, force the downloader to use this system triple. If this is unset
+      -- then the downloader will attempt to infer the system triple from `jit.os` and `jit.arch`.
+      --
+      -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
+      force_system_triple = nil,
     },
   },
 

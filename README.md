@@ -258,15 +258,20 @@ MiniDeps.add({
     -- controls which sorts to use and in which order, these three are currently the only allowed options
     sorts = { 'label', 'kind', 'score' },
 
-    prebuiltBinaries = {
+    prebuilt_binaries = {
       -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
       -- you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
       download = true,
-      -- When downloading a prebuilt binary force the downloader to resolve this version. If this is uset
+      -- When downloading a prebuilt binary, force the downloader to resolve this version. If this is unset
       -- then the downloader will attempt to infer the version from the checked out git tag (if any).
       --
       -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
-      forceVersion = nil,
+      force_version = nil,
+      -- When downloading a prebuilt binary, force the downloader to use this system triple. If this is unset
+      -- then the downloader will attempt to infer the system triple from `jit.os` and `jit.arch`.
+      --
+      -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
+      force_system_triple = nil,
     },
   },
 
