@@ -161,7 +161,7 @@ MiniDeps.add({
   --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
   --
   -- "super-tab" keymap
-  --   you may want to set `trigger.show_in_snippet = false` when using "super-tab"
+  --   you may want to set `trigger.completion.show_in_snippet = false` when using "super-tab"
   --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
   --
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
