@@ -143,7 +143,7 @@ MiniDeps.add({
 {
   -- the keymap may be a preset ('default' | 'super-tab') OR a table of keys => command[]
   -- when defining your own, no keybinds will be assigned automatically.
-  -- additionally, you may pass a function in the command array where returning true 
+  -- you may pass a function in the command array where returning true 
   -- will prevent the next command from running
   --
   -- "default" keymap
@@ -227,7 +227,7 @@ MiniDeps.add({
       -- after matching with keyword_regex, any characters matching this regex at the prefix will be excluded
       exclude_from_prefix_regex = '[\\-]',
       -- LSPs can indicate when to show the completion window via trigger characters
-      -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
+      -- however, some LSPs (i.e. tsserver) return characters that would essentially
       -- always show the window. We block these by default
       blocked_trigger_characters = { ' ', '\n', '\t' },
       -- when true, will show the completion window when the cursor comes after a trigger character after accepting an item
@@ -252,7 +252,7 @@ MiniDeps.add({
   fuzzy = {
     -- frencency tracks the most recently/frequently used items and boosts the score of the item
     use_frecency = true,
-    -- proximity bonus boosts the score of items with a value in the buffer
+    -- proximity bonus boosts the score of items matching nearby words
     use_proximity = true,
     max_items = 200,
     -- controls which sorts to use and in which order, these three are currently the only allowed options
