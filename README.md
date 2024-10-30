@@ -14,7 +14,7 @@
 - Typo resistant fuzzy with frecency and proximity bonus
 - Extensive LSP support ([tracker](./LSP_TRACKER.md))
 - Native `vim.snippet` support (including `friendly-snippets`)
-- External sources support (currently incompatible with `nvim-cmp` sources)
+- External sources support (including [compatibility with `nvim-cmp` sources](https://github.com/Saghen/blink.compat))
 - Auto-bracket support based on semantic tokens (experimental, opt-in)
 - Signature help (experimental, opt-in)
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
@@ -279,9 +279,10 @@ MiniDeps.add({
   sources = {
     -- list of enabled providers
     completion = { 
-      enabled_providers = {'lsp', 'path', 'snippets', 'buffer' },
+      enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
     }
 
+    -- Please see https://github.com/Saghen/blink.compat for using `nvim-cmp` sources
     providers = {
       lsp = {
         name = 'LSP',
@@ -501,6 +502,8 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 [@redxtech](https://github.com/redxtech) Help with design and testing
 
 [@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing
+
+[@stefanboca](https://github.com/stefanboca) Author of [blink.compat](https://github.com/saghen/blink.compat)
 
 [@scottmckendry](https://github.com/scottmckendry) Actively contributing to the project
 
