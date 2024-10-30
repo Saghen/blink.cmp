@@ -42,6 +42,7 @@ function win:get_buf()
     self.buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_set_option_value('tabstop', 1, { buf = self.buf }) -- prevents tab widths from being unpredictable
     vim.api.nvim_set_option_value('filetype', self.config.filetype, { buf = self.buf })
+    vim.treesitter.stop(self.buf)
   end
   return self.buf
 end
