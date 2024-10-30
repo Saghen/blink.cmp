@@ -116,6 +116,7 @@ function docs.update_position()
 
   local space_above = autocomplete_win_config.row - 1 > height
   local space_below = screen_height - autocomplete_win_height - autocomplete_win_config.row > height
+  -- todo: check if there's vertical space available, need to check the direction of the autocomplete window
   local space_left = autocomplete_win_config.col > width
   local space_right = screen_width - autocomplete_win_width - autocomplete_win_config.col > width
 
