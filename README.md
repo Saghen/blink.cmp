@@ -269,6 +269,8 @@ MiniDeps.add({
       force_version = nil,
       -- When downloading a prebuilt binary, force the downloader to use this system triple. If this is unset
       -- then the downloader will attempt to infer the system triple from `jit.os` and `jit.arch`.
+      -- For old glibc (>= 2.17), set this to `x86_64-unknown-linux-gnu-legacy` or `aarch64-unknown-linux-gnu-legacy`
+      -- Check the latest release for all available system triples
       --
       -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
       force_system_triple = nil,
