@@ -230,11 +230,13 @@ MiniDeps.add({
       -- however, some LSPs (*cough* tsserver *cough*) return characters that would essentially
       -- always show the window. We block these by default
       blocked_trigger_characters = { ' ', '\n', '\t' },
+      -- when true, will show the completion window when the cursor comes after a trigger character after accepting an item
+      show_on_accept_on_trigger_character = true,
       -- when true, will show the completion window when the cursor comes after a trigger character when entering insert mode
       show_on_insert_on_trigger_character = true,
-      -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode
-      show_on_insert_blocked_trigger_characters = { "'", '"' },
-      -- when false, will not show the completion window when in a snippet
+      -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode/accepting an item
+      show_on_x_blocked_trigger_characters = { "'", '"', '(' },
+      -- when false, will not show the completion window automatically when in a snippet
       show_in_snippet = true,
     },
 

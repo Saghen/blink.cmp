@@ -53,11 +53,11 @@ local function accept(item)
       -- TODO: since we apply the additional text edits after, auto imported functions will not
       -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
       brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
-        require('blink.cmp.trigger.completion').show_if_on_trigger_character()
+        require('blink.cmp.trigger.completion').show_if_on_trigger_character({ is_accept = true })
         require('blink.cmp.trigger.signature').show_if_on_trigger_character()
       end)
     else
-      require('blink.cmp.trigger.completion').show_if_on_trigger_character()
+      require('blink.cmp.trigger.completion').show_if_on_trigger_character({ is_accept = true })
       require('blink.cmp.trigger.signature').show_if_on_trigger_character()
     end
 

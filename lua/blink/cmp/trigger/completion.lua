@@ -86,7 +86,7 @@ function trigger.activate_autocmds()
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
       local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
       local is_on_trigger_for_show_on_insert = is_on_trigger
-        and not vim.tbl_contains(config.show_on_insert_blocked_trigger_characters, char_under_cursor)
+        and not vim.tbl_contains(config.show_on_x_blocked_trigger_characters, char_under_cursor)
       local is_on_context_char = char_under_cursor:match(config.keyword_regex) ~= nil
 
       local insert_enter_on_trigger_character = config.show_on_insert_on_trigger_character
@@ -152,10 +152,15 @@ function trigger.suppress_events_for_callback(cb)
     and is_insert_mode
 end
 
-function trigger.show_if_on_trigger_character()
+--- @param opts { is_accept?: boolean } | nil
+function trigger.show_if_on_trigger_character(opts)
+  if opts and opts.is_accept and not config.show_on_accept_on_trigger_character then return end
+
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
   local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
+    and not vim.tbl_contains(config.show_on_x_blocked_trigger_characters, char_under_cursor)
+
   if is_on_trigger then trigger.show({ trigger_character = char_under_cursor }) end
   return is_on_trigger
 end
