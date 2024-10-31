@@ -61,16 +61,17 @@ function autocomplete.setup()
           inputMatchIndex = string.find(current_buf_content, input:lower():gsub('%s+', ''))
         end
 
-        local inputNonWord = string.match(input, '%.(.*)')
-
         -- Making sure that symbols like dot, comma and space doesn't break it
+        local inputNonWord = string.match(input, '%.(.*)')
         if inputNonWord == nil then inputNonWord = string.match(input, '%:(.*)') end
         if inputNonWord == nil then inputNonWord = string.match(input, '[^%s+]+(.*)') end
+
+        -- Break out if we got nothing to match at all
         if inputMatchIndex == nil then
           if inputNonWord == nil or inputNonWord == '' then return false end
         end
 
-        -- skip to next section of the label e.g. if input is "net.buddy", it will match "buddy" instead
+        -- Skip to next section of the label e.g. if input is "net.buddy", it will match "buddy" instead
         if inputMatchIndex == nil and inputNonWord ~= nil then
           if string.match(inputNonWord, '.') then
             input = inputNonWord
@@ -78,11 +79,11 @@ function autocomplete.setup()
           end
         end
 
-        -- only highlight if we have a match
+        -- Only highlight if we have a match
         if inputMatchIndex then
           vim.api.nvim_buf_set_extmark(buf, config.highlight.ns, i, inputMatchIndex - 1, {
             end_row = i,
-            end_col = string.len(string.sub(input, autocomplete.context.bounds.start_col)) + inputMatchIndex - 1,
+            end_col = string.len(string.sub(input, input_start_col)) + inputMatchIndex - 1,
             hl_group = 'BlinkCmpLabelMatch',
             hl_mode = 'combine',
             ephemeral = true,
