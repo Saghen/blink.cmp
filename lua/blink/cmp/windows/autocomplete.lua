@@ -43,9 +43,54 @@ function autocomplete.setup()
   -- which will only render highlights of the visible lines. This also avoids having to do virtual scroll
   -- like nvim-cmp does, which breaks on UIs like neovide
   vim.api.nvim_set_decoration_provider(config.highlight.ns, {
-    on_win = function(_, winnr, bufnr)
-      return autocomplete.win:get_win() == winnr and bufnr == autocomplete.win:get_buf()
+    on_win = function(_, win, buf, top, bot)
+      if autocomplete.win:get_win() == nil or buf == autocomplete.win:get_buf() == nil then return false end
+      if autocomplete.win:get_win() ~= win or buf ~= autocomplete.win:get_buf() then return false end
+
+      for i = top, bot do
+        local input = vim.api.nvim_get_current_line()
+
+        local current_buf = vim.api.nvim_win_get_buf(autocomplete.win:get_win())
+        local buf_content = vim.api.nvim_buf_get_lines(current_buf, 0, vim.api.nvim_buf_line_count(current_buf), false)
+        local input_start_col = autocomplete.context.bounds.start_col
+
+        local current_buf_content = buf_content[i + 1]:lower()
+        local inputMatchIndex = string.find(current_buf_content, string.sub(input, input_start_col):lower())
+
+        if inputMatchIndex == nil then
+          inputMatchIndex = string.find(current_buf_content, input:lower():gsub('%s+', ''))
+        end
+
+        local inputNonWord = string.match(input, '%.(.*)')
+
+        -- Making sure that symbols like dot, comma and space doesn't break it
+        if inputNonWord == nil then inputNonWord = string.match(input, '%:(.*)') end
+        if inputNonWord == nil then inputNonWord = string.match(input, '[^%s+]+(.*)') end
+        if inputMatchIndex == nil then
+          if inputNonWord == nil or inputNonWord == '' then return false end
+        end
+
+        -- skip to next section of the label e.g. if input is "net.buddy", it will match "buddy" instead
+        if inputMatchIndex == nil and inputNonWord ~= nil then
+          if string.match(inputNonWord, '.') then
+            input = inputNonWord
+            inputMatchIndex = string.find(current_buf_content, inputNonWord:lower())
+          end
+        end
+
+        -- only highlight if we have a match
+        if inputMatchIndex then
+          vim.api.nvim_buf_set_extmark(buf, config.highlight.ns, i, inputMatchIndex - 1, {
+            end_row = i,
+            end_col = string.len(string.sub(input, autocomplete.context.bounds.start_col)) + inputMatchIndex - 1,
+            hl_group = 'BlinkCmpLabelMatch',
+            hl_mode = 'combine',
+            ephemeral = true,
+          })
+        end
+      end
     end,
+
     on_line = function(_, _, bufnr, line_number)
       local rendered_item = autocomplete.rendered_items[line_number + 1]
       if rendered_item == nil then return end

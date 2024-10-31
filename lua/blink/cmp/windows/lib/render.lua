@@ -31,6 +31,7 @@ end
 --- @param rendered blink.cmp.RenderedComponentTree
 function renderer.draw_highlights(rendered, bufnr, ns, line_number)
   for _, highlight in ipairs(rendered.highlights) do
+    if highlight.group == "BlinkCmpLabel" then return end
     vim.api.nvim_buf_set_extmark(bufnr, ns, line_number, highlight.start - 1, {
       end_col = highlight.stop - 1,
       hl_group = highlight.group,
