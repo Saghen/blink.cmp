@@ -68,7 +68,7 @@
     -- experimental signature help support
     -- trigger = { signature_help = { enabled = true } }
   }
-}
+},
 
 -- LSP servers and clients communicate what features they support through "capabilities".
 --  By default, Neovim support a subset of the LSP specification.
