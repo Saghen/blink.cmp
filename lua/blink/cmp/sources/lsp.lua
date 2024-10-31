@@ -16,6 +16,11 @@ function lsp:has_capability(capability)
   return false
 end
 
+--- @param method string
+--- @return boolean Whether at least one LSP client supports `method`
+--- @private
+function lsp:has_method(method) return #vim.lsp.get_clients({ bufnr = 0, method = method }) > 0 end
+
 --- Completion ---
 
 function lsp:get_trigger_characters()
@@ -48,7 +53,7 @@ function lsp:get_completions(context, callback)
   -- TODO: should make separate LSP requests to return results earlier, in the case of slow LSPs
 
   -- no providers with completion support
-  if not self:has_capability('completionProvider') then
+  if not self:has_capability('completionProvider') or not self:has_method('textDocument/completion') then
     callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
     return function() end
   end
@@ -196,6 +201,12 @@ function lsp:get_signature_help_trigger_characters()
 end
 
 function lsp:get_signature_help(context, callback)
+  -- no providers with signature help support
+  if not self:has_method('textDocument/signatureHelp') then
+    callback(nil)
+    return function() end
+  end
+
   local params = vim.lsp.util.make_position_params()
   params.context = {
     triggerKind = context.trigger.kind,
