@@ -140,10 +140,8 @@ function download.get_system_triple(cb)
   elseif jit.os:lower() == 'windows' then
     if jit.arch:lower():match('x64') then return cb('x86_64-pc-windows-msvc') end
   elseif jit.os:lower() == 'linux' then
-    vim.system({ 'uname', '-a' }, {}, function(out)
-      local libc = 'gnu'
-      if out.stdout:lower():match('alpine') then libc = 'musl' end
-
+    vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
+      local libc = (not err and is_alpine) and 'musl' or 'gnu'
       if jit.arch:lower():match('arm') then return cb('aarch64-unknown-linux-' .. libc) end
       if jit.arch:lower():match('x64') then return cb('x86_64-unknown-linux-' .. libc) end
       return cb(nil)
@@ -162,9 +160,8 @@ function download.get_system_triple_sync()
   elseif jit.os:lower() == 'windows' then
     if jit.arch:lower():match('x64') then return 'x86_64-pc-windows-msvc' end
   elseif jit.os:lower() == 'linux' then
-    local libc = 'gnu'
-    local out = vim.system({ 'uname', '-a' }, {}):wait()
-    if out.stdout:lower():match('alpine') then libc = 'musl' end
+    local success, is_alpine = pcall(vim.uv.fs_stat, '/etc/alpine-release')
+    local libc = (success and is_alpine) and 'musl' or 'gnu'
 
     if jit.arch:lower():match('arm') then return 'aarch64-unknown-linux-' .. libc end
     if jit.arch:lower():match('x64') then return 'x86_64-unknown-linux-' .. libc end
