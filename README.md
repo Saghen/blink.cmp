@@ -537,7 +537,6 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 ### Planned missing features
 
 - Significantly less testing and documentation
-- Ghost text
 - Matched character highlighting
 - Cmdline completions
 
