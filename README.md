@@ -73,7 +73,7 @@
 
 -- LSP servers and clients communicate what features they support through "capabilities".
 --  By default, Neovim support a subset of the LSP specification.
---  With blink.cmp, Neovim has *more* capabilities which must be communicated to the LSP servers.
+--  With blink.cmp, Neovim has *more* capabilities which are communicated to the LSP servers.
 --  Explanation from TJ: https://youtu.be/m8C0Cq9Uv9o?t=1275
 --
 -- This can vary by config, but in-general for nvim-lspconfig:
