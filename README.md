@@ -48,6 +48,7 @@
   opts = {
     -- 'default' for mappings similar to built-in completion
     -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys to navigate)
+    -- 'enter' for mappings similar to 'super-tab' but with 'enter' to accept
     -- see the "default configuration" section below for full documentation on how to define
     -- your own keymap. when defining your own, no keybinds will be assigned automatically.
     keymap = 'default',
@@ -160,10 +161,15 @@ MiniDeps.add({
 
 ```lua
 {
-  -- the keymap may be a preset ('default' | 'super-tab') OR a table of keys => command[]
+  -- the keymap may be a preset ('default' | 'super-tab' | 'enter') OR a table of keys => command[]
   -- when defining your own, no keybinds will be assigned automatically.
   -- you may pass a function in the command array where returning true 
   -- will prevent the next command from running
+  -- 
+  -- The "fallback" command will run the next non-blink keymap.
+  --   For example, to accept the current completion item with "enter", or create a new line, 
+  --   when the blink window is closed, you would define it as: 
+  --   ['<CR>'] = { 'accept', 'fallback' }
   --
   -- "default" keymap
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
@@ -184,7 +190,7 @@ MiniDeps.add({
   --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
   --
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-  --   ['<C-e>'] = { 'hide' },
+  --   ['<C-e>'] = { 'hide', 'fallback' },
   --
   --   ['<Tab>'] = {
   --     function(cmp)
@@ -194,6 +200,24 @@ MiniDeps.add({
   --     'snippet_forward',
   --     'fallback'
   --   },
+  --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+  --
+  --   ['<Up>'] = { 'select_prev', 'fallback' },
+  --   ['<Down>'] = { 'select_next', 'fallback' },
+  --   ['<C-p>'] = { 'select_prev', 'fallback' },
+  --   ['<C-n>'] = { 'select_next', 'fallback' },
+  --
+  --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --
+  -- "enter" keymap
+  --   you may want to set `window.autocomplete.selection = "manual" | "auto_insert"`
+  --
+  --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  --   ['<C-e>'] = { 'hide', 'fallback' },
+  --   ['<CR>'] = { 'accept', 'fallback' },
+  --
+  --   ['<Tab>'] = { 'snippet_forward', 'fallback' },
   --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
   --
   --   ['<Up>'] = { 'select_prev', 'fallback' },
