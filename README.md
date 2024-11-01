@@ -161,15 +161,27 @@ MiniDeps.add({
 
 ```lua
 {
-  -- the keymap may be a preset ('default' | 'super-tab' | 'enter') OR a table of keys => command[]
-  -- when defining your own, no keybinds will be assigned automatically.
-  -- you may pass a function in the command array where returning true 
-  -- will prevent the next command from running
-  -- 
-  -- The "fallback" command will run the next non-blink keymap.
-  --   For example, to accept the current completion item with "enter", or create a new line, 
-  --   when the blink window is closed, you would define it as: 
-  --   ['<CR>'] = { 'accept', 'fallback' }
+  -- The keymap can be:
+  --   - A preset ('default' | 'super-tab' | 'enter')
+  --   - A table of keys => command[]
+  --   - A table that includes a 'preset' key and custom key mappings
+  --
+  -- When specifying 'preset' in the keymap table, the custom key mappings are merged with the preset,
+  -- and any conflicting keys will overwrite the preset mappings.
+  --
+  -- Example:
+  --
+  -- keymap = {
+  --   preset = 'default',
+  --   ['<cr>'] = { 'select_and_accept', 'fallback' },
+  -- },
+  --
+  -- In this example, the 'default' preset is used, and the `<cr>` key mapping is added or overwrites the existing one from the preset.
+  -- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
+  --
+  -- Available commands:
+  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
+  --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
   --
   -- "default" keymap
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
@@ -227,10 +239,6 @@ MiniDeps.add({
   --
   --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
   --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
-  --
-  -- available commands:
-  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
-  --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
   keymap = 'default',
 
   accept = {
