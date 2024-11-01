@@ -64,7 +64,8 @@ local function accept(item)
       end
 
       -- Notify the rust module that the item was accessed
-      require('blink.cmp.fuzzy').access(item)
+      -- TODO: why is this so slow? (10ms)
+      vim.schedule(function() require('blink.cmp.fuzzy').access(item) end)
     end)
     :catch(function(err) vim.notify(err, vim.log.levels.ERROR) end)
 end
