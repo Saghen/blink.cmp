@@ -74,18 +74,10 @@ function keymap.setup(opts)
 
     -- Handle preset inside table
     if opts.preset then
-      local preset_keymap
-      if opts.preset == 'default' then
-        preset_keymap = default_keymap
-      elseif opts.preset == 'super-tab' then
-        preset_keymap = super_tab_keymap
-      else
-        error('Invalid blink.cmp keymap preset: ' .. opts.preset)
-      end
+      local preset_keymap = keymap.get_preset_keymap(opts.preset)
 
       -- Remove 'preset' key from opts to prevent it from being treated as a keymap
       opts.preset = nil
-
       -- Merge the preset keymap with the user-defined keymaps
       -- User-defined keymaps overwrite the preset keymaps
       mappings = vim.tbl_extend('force', preset_keymap, opts)
@@ -94,13 +86,7 @@ function keymap.setup(opts)
 
   -- handle presets
   if type(opts) == 'string' then
-    if opts == 'default' then
-      mappings = default_keymap
-    elseif opts == 'super-tab' then
-      mappings = super_tab_keymap
-    else
-      error('Invalid blink.cmp keymap preset: ' .. opts)
-    end
+    mappings = keymap.get_preset_keymap(opts)
   end
 
   -- we set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
@@ -112,6 +98,19 @@ function keymap.setup(opts)
       keymap.apply_keymap_to_current_buffer(mappings)
     end,
   })
+end
+
+--- Gets the preset keymap for the given preset name
+--- @param preset_name string
+--- @return table
+function keymap.get_preset_keymap(preset_name)
+  if preset_name == 'default' then
+    return default_keymap
+  elseif preset_name == 'super-tab' then
+    return super_tab_keymap
+  else
+    error('Invalid blink.cmp keymap preset: ' .. preset_name)
+  end
 end
 
 --- Applies the keymaps to the current buffer
