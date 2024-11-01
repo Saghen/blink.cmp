@@ -18,6 +18,7 @@
 --- | table<string, blink.cmp.KeymapCommand[]> Table of keys => commands[]
 --- | 'default' mappings similar to built-in completion
 --- | 'super-tab' mappings similar to vscode (tab to accept, arrow keys to navigate)
+--- | 'enter' mappings similar to 'super-tab' but with 'enter' to accept
 
 --- @class blink.cmp.AcceptConfig
 --- @field create_undo_point? boolean Create an undo point when accepting a completion item
