@@ -51,6 +51,7 @@
 --- @field draw_item_minimal blink.cmp.CompletionDrawFn
 
 local config = require('blink.cmp.config')
+local utils = require('blink.cmp.utils')
 local renderer = require('blink.cmp.windows.lib.render')
 local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
@@ -358,7 +359,11 @@ end
 function autocomplete.draw_item_simple(ctx)
   return {
     ' ',
-    { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    {
+      ctx.kind_icon,
+      ctx.icon_gap,
+      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
+    },
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or '',
@@ -384,7 +389,12 @@ function autocomplete.draw_item_reversed(ctx)
       max_width = 50,
     },
     ' ',
-    { ctx.kind_icon, ctx.icon_gap, ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    {
+      ctx.kind_icon,
+      ctx.icon_gap,
+      ctx.kind,
+      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
+    },
     ' ',
   }
 end
@@ -402,7 +412,10 @@ function autocomplete.draw_item_minimal(ctx)
       max_width = 50,
     },
     ' ',
-    { ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    {
+      ctx.kind,
+      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
+    },
     ' ',
   }
 end
