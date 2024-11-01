@@ -71,6 +71,25 @@ function keymap.setup(opts)
         error('The blink.cmp keymap recently got reworked. Please see the README for the updated configuration')
       end
     end
+
+    -- Handle preset inside table
+    if opts.preset then
+      local preset_keymap
+      if opts.preset == 'default' then
+        preset_keymap = default_keymap
+      elseif opts.preset == 'super-tab' then
+        preset_keymap = super_tab_keymap
+      else
+        error('Invalid blink.cmp keymap preset: ' .. opts.preset)
+      end
+
+      -- Remove 'preset' key from opts to prevent it from being treated as a keymap
+      opts.preset = nil
+
+      -- Merge the preset keymap with the user-defined keymaps
+      -- User-defined keymaps overwrite the preset keymaps
+      mappings = vim.tbl_extend('force', preset_keymap, opts)
+    end
   end
 
   -- handle presets
