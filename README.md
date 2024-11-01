@@ -48,6 +48,7 @@
   opts = {
     -- 'default' for mappings similar to built-in completion
     -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys to navigate)
+    -- 'enter' for mappings similar to 'super-tab' but with 'enter' to accept
     -- see the "default configuration" section below for full documentation on how to define
     -- your own keymap. when defining your own, no keybinds will be assigned automatically.
     keymap = 'default',
@@ -72,7 +73,7 @@
 
 -- LSP servers and clients communicate what features they support through "capabilities".
 --  By default, Neovim support a subset of the LSP specification.
---  With blink.cmp, Neovim has *more* capabilities which must be communicated to the LSP servers.
+--  With blink.cmp, Neovim has *more* capabilities which are communicated to the LSP servers.
 --  Explanation from TJ: https://youtu.be/m8C0Cq9Uv9o?t=1275
 --
 -- This can vary by config, but in-general for nvim-lspconfig:
@@ -161,7 +162,7 @@ MiniDeps.add({
 ```lua
 {
   -- The keymap can be:
-  --   - A preset ('default' | 'super-tab')
+  --   - A preset ('default' | 'super-tab' | 'enter')
   --   - A table of keys => command[]
   --   - A table that includes a 'preset' key and custom key mappings
   --
@@ -201,7 +202,7 @@ MiniDeps.add({
   --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
   --
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-  --   ['<C-e>'] = { 'hide' },
+  --   ['<C-e>'] = { 'hide', 'fallback' },
   --
   --   ['<Tab>'] = {
   --     function(cmp)
@@ -220,6 +221,28 @@ MiniDeps.add({
   --
   --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
   --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --
+  -- "enter" keymap
+  --   you may want to set `window.autocomplete.selection = "manual" | "auto_insert"`
+  --
+  --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  --   ['<C-e>'] = { 'hide', 'fallback' },
+  --   ['<CR>'] = { 'accept', 'fallback' },
+  --
+  --   ['<Tab>'] = { 'snippet_forward', 'fallback' },
+  --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+  --
+  --   ['<Up>'] = { 'select_prev', 'fallback' },
+  --   ['<Down>'] = { 'select_next', 'fallback' },
+  --   ['<C-p>'] = { 'select_prev', 'fallback' },
+  --   ['<C-n>'] = { 'select_next', 'fallback' },
+  --
+  --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --
+  -- available commands:
+  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
+  --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
   keymap = 'default',
 
   accept = {
@@ -422,6 +445,10 @@ MiniDeps.add({
       max_height = 10,
       border = 'padded',
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
+
+      -- which directions to show the window,
+      -- falling back to the next direction when there's not enough space
+      direction_priority = { 'n', 's' },
     },
     ghost_text = {
       enabled = false,
@@ -485,6 +512,7 @@ MiniDeps.add({
 <details>
 <summary><strong>Community Sources</strong></summary>
 
+- [lazydev](https://github.com/folke/lazydev.nvim)
 - [ctags](https://github.com/netmute/blink-cmp-ctags)
 - [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 
@@ -521,7 +549,6 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 ### Planned missing features
 
 - Significantly less testing and documentation
-- Ghost text
 - Matched character highlighting
 - Cmdline completions
 

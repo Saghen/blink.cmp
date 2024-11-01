@@ -6,25 +6,68 @@
 --- @field icon_gap string
 --- @field deprecated boolean
 
+--- @alias blink.cmp.CompletionDrawFn fun(ctx: blink.cmp.CompletionRenderContext): blink.cmp.Component[]
+
+--- @class blink.cmp.CompletionWindowEventTargets
+--- @field on_open table<fun()>
+--- @field on_close table<fun()>
+--- @field on_position_update table<fun()>
+--- @field on_select table<fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)>
+
+--- @class blink.cmp.CompletionWindow
+--- @field win blink.cmp.Window
+--- @field items blink.cmp.CompletionItem[]
+--- @field rendered_items? blink.cmp.RenderedComponentTree[]
+--- @field has_selected? boolean
+--- @field auto_show boolean
+--- @field context blink.cmp.Context?
+--- @field event_targets blink.cmp.CompletionWindowEventTargets
+---
+--- @field setup fun(): blink.cmp.CompletionWindow
+---
+--- @field open_with_items fun(context: blink.cmp.CompletionRenderContext, items: blink.cmp.CompletionItem[])
+--- @field open fun()
+--- @field close fun()
+--- @field listen_on_open fun(callback: fun())
+--- @field listen_on_close fun(callback: fun())
+---
+--- @field update_position fun(context: blink.cmp.Context)
+--- @field listen_on_position_update fun(callback: fun())
+---
+--- @field accept fun(): boolean?
+---
+--- @field select fun(line: number, skip_auto_insert?: boolean)
+--- @field select_next fun(opts?: { skip_auto_insert?: boolean })
+--- @field select_prev fun(opts?: { skip_auto_insert?: boolean })
+--- @field get_selected_item fun(): blink.cmp.CompletionItem?
+--- @field set_has_selected fun(selected: boolean)
+--- @field listen_on_select fun(callback: fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context))
+--- @field emit_on_select fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)
+---
+--- @field draw fun()
+--- @field get_draw_fn fun(): blink.cmp.CompletionDrawFn
+--- @field draw_item_simple blink.cmp.CompletionDrawFn
+--- @field draw_item_reversed blink.cmp.CompletionDrawFn
+--- @field draw_item_minimal blink.cmp.CompletionDrawFn
+
 local config = require('blink.cmp.config')
+local utils = require('blink.cmp.utils')
 local renderer = require('blink.cmp.windows.lib.render')
 local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
+
+--- @type blink.cmp.CompletionWindow
+--- @diagnostic disable-next-line: missing-fields
 local autocomplete = {
-  ---@type blink.cmp.CompletionItem[]
   items = {},
   has_selected = nil,
   -- hack: ideally this doesn't get mutated by the public API
   auto_show = autocmp_config.auto_show,
-  ---@type blink.cmp.Context?
   context = nil,
   event_targets = {
     on_position_update = {},
-    --- @type table<fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)>
     on_select = {},
-    --- @type table<fun()>
     on_close = {},
-    --- @type table<fun()>
     on_open = {},
   },
 }
@@ -55,8 +98,7 @@ function autocomplete.setup()
 
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
     callback = function()
-      if autocomplete.context == nil then return end
-      autocomplete.update_position(autocomplete.context)
+      if autocomplete.context ~= nil then autocomplete.update_position(autocomplete.context) end
     end,
   })
 
@@ -106,7 +148,7 @@ function autocomplete.open_with_items(context, items)
   -- todo: some logic to maintain the selection if the user moved the cursor?
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { 1, 0 })
 
-  autocomplete.on_select_callbacks(autocomplete.get_selected_item(), context)
+  autocomplete.emit_on_select(autocomplete.get_selected_item(), context)
 end
 
 function autocomplete.open()
@@ -125,17 +167,13 @@ function autocomplete.close()
   vim.iter(autocomplete.event_targets.on_close):each(function(callback) callback() end)
 end
 
---- Add a listener for when the autocomplete window closes
---- @param callback fun()
-function autocomplete.listen_on_close(callback) table.insert(autocomplete.event_targets.on_close, callback) end
-
 --- Add a listener for when the autocomplete window opens
 --- This is useful for hiding GitHub Copilot ghost text and similar functionality.
----
---- @param callback fun()
 function autocomplete.listen_on_open(callback) table.insert(autocomplete.event_targets.on_open, callback) end
 
---- @param context blink.cmp.Context
+--- Add a listener for when the autocomplete window closes
+function autocomplete.listen_on_close(callback) table.insert(autocomplete.event_targets.on_close, callback) end
+
 --- TODO: Don't switch directions if the context is the same
 function autocomplete.update_position(context)
   local win = autocomplete.win
@@ -144,34 +182,22 @@ function autocomplete.update_position(context)
 
   win:update_size()
 
-  local height = win:get_height()
-  local cursor_screen_position = win.get_cursor_screen_position()
+  local border_size = win:get_border_size()
+  local pos = win:get_vertical_direction_and_height(autocmp_config.direction_priority)
 
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  local cursor_col = cursor[2]
+  -- couldn't find anywhere to place the window
+  if not pos then
+    win:close()
+    return
+  end
 
   -- place the window at the start col of the current text we're fuzzy matching against
   -- so the window doesnt move around as we type
-  local col = context.bounds.start_col - cursor_col - (context.bounds.start_col == 0 and 0 or 1)
-
-  -- detect if there's space above/below the cursor
-  -- todo: should pick the largest space if both are false and limit height of the window
-  local is_space_below = cursor_screen_position.distance_from_bottom > height
-  local is_space_above = cursor_screen_position.distance_from_top > height
-
-  -- default to the user's preference but attempt to use the other options
-  local row = autocmp_config.direction_priority[1] == 's' and 1 or -height
-  for _, direction in ipairs(autocmp_config.direction_priority) do
-    if direction == 's' and is_space_below then
-      row = 1
-      break
-    elseif direction == 'n' and is_space_above then
-      row = -height
-      break
-    end
-  end
-
+  local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
+  local col = context.bounds.start_col - cursor_col - (context.bounds.length == 0 and 0 or 1)
+  local row = pos.direction == 's' and 1 or -pos.height - border_size.vertical
   vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col })
+  vim.api.nvim_win_set_height(winnr, pos.height)
 
   for _, callback in ipairs(autocomplete.event_targets.on_position_update) do
     callback()
@@ -198,8 +224,6 @@ function autocomplete.accept()
   return true
 end
 
---- @param line number
---- @param skip_auto_insert? boolean
 function autocomplete.select(line, skip_auto_insert)
   autocomplete.set_has_selected(true)
   vim.api.nvim_win_set_cursor(autocomplete.win:get_win(), { line, 0 })
@@ -216,10 +240,9 @@ function autocomplete.select(line, skip_auto_insert)
     end)
   end
 
-  autocomplete.on_select_callbacks(selected_item, autocomplete.context)
+  autocomplete.emit_on_select(selected_item, autocomplete.context)
 end
 
---- @params opts? { skip_auto_insert?: boolean }
 function autocomplete.select_next(opts)
   if not autocomplete.win:is_open() then return end
 
@@ -241,7 +264,6 @@ function autocomplete.select_next(opts)
   autocomplete.select(line, opts and opts.skip_auto_insert)
 end
 
---- @params opts? { skip_auto_insert?: boolean }
 function autocomplete.select_prev(opts)
   if not autocomplete.win:is_open() then return end
 
@@ -259,23 +281,28 @@ function autocomplete.select_prev(opts)
   autocomplete.select(line, opts and opts.skip_auto_insert)
 end
 
+function autocomplete.get_selected_item()
+  if not autocomplete.win:is_open() then return end
+  if not autocomplete.has_selected then return end
+  local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
+  return autocomplete.items[line]
+end
+
+function autocomplete.set_has_selected(selected)
+  if not autocomplete.win:is_open() then return end
+  autocomplete.has_selected = selected
+  autocomplete.win:set_option_value('cursorline', selected)
+end
+
 function autocomplete.listen_on_select(callback) table.insert(autocomplete.event_targets.on_select, callback) end
 
---- @param item? blink.cmp.CompletionItem
---- @param context blink.cmp.Context
-function autocomplete.on_select_callbacks(item, context)
+function autocomplete.emit_on_select(item, context)
   for _, callback in ipairs(autocomplete.event_targets.on_select) do
     callback(item, context)
   end
 end
 
 ---------- Rendering ----------
-
-function autocomplete.set_has_selected(selected)
-  if not autocomplete.win:is_open() then return end
-  autocomplete.has_selected = selected
-  autocomplete.win:set_option_values('cursorline', selected)
-end
 
 function autocomplete.draw()
   local draw_fn = autocomplete.get_draw_fn()
@@ -318,21 +345,25 @@ function autocomplete.get_draw_fn()
   if type(autocmp_config.draw) == 'function' then
     return autocmp_config.draw
   elseif autocmp_config.draw == 'simple' then
-    return autocomplete.render_item_simple
+    return autocomplete.draw_item_simple
   elseif autocmp_config.draw == 'reversed' then
-    return autocomplete.render_item_reversed
+    return autocomplete.draw_item_reversed
   elseif autocmp_config.draw == 'minimal' then
-    return autocomplete.render_item_minimal
+    return autocomplete.draw_item_minimal
   end
   error('Invalid autocomplete window draw config')
 end
 
 --- @param ctx blink.cmp.CompletionRenderContext
 --- @return blink.cmp.Component[]
-function autocomplete.render_item_simple(ctx)
+function autocomplete.draw_item_simple(ctx)
   return {
     ' ',
-    { ctx.kind_icon, ctx.icon_gap, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    {
+      ctx.kind_icon,
+      ctx.icon_gap,
+      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
+    },
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or '',
@@ -347,7 +378,7 @@ end
 
 --- @param ctx blink.cmp.CompletionRenderContext
 --- @return blink.cmp.Component[]
-function autocomplete.render_item_reversed(ctx)
+function autocomplete.draw_item_reversed(ctx)
   return {
     ' ',
     {
@@ -358,14 +389,19 @@ function autocomplete.render_item_reversed(ctx)
       max_width = 50,
     },
     ' ',
-    { ctx.kind_icon, ctx.icon_gap, ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    {
+      ctx.kind_icon,
+      ctx.icon_gap,
+      ctx.kind,
+      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
+    },
     ' ',
   }
 end
 
 --- @param ctx blink.cmp.CompletionRenderContext
 --- @return blink.cmp.Component[]
-function autocomplete.render_item_minimal(ctx)
+function autocomplete.draw_item_minimal(ctx)
   return {
     ' ',
     {
@@ -376,17 +412,12 @@ function autocomplete.render_item_minimal(ctx)
       max_width = 50,
     },
     ' ',
-    { ctx.kind, hl_group = 'BlinkCmpKind' .. ctx.kind },
+    {
+      ctx.kind,
+      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
+    },
     ' ',
   }
-end
-
----@return blink.cmp.CompletionItem?
-function autocomplete.get_selected_item()
-  if not autocomplete.win:is_open() then return end
-  if not autocomplete.has_selected then return end
-  local line = vim.api.nvim_win_get_cursor(autocomplete.win:get_win())[1]
-  return autocomplete.items[line]
 end
 
 return autocomplete

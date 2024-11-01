@@ -14,9 +14,16 @@ function signature.setup()
     filetype = 'markdown',
   })
 
+  -- todo: deduplicate this
   autocomplete.listen_on_position_update(function()
     if signature.context then signature.update_position(signature.context) end
   end)
+
+  vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
+    callback = function()
+      if signature.context then signature.update_position(signature.context) end
+    end,
+  })
 
   return signature
 end
@@ -93,37 +100,37 @@ end
 
 --- @param context blink.cmp.SignatureHelpContext
 function signature.update_position()
-  if not signature.win:is_open() then return end
-  local winnr = signature.win:get_win()
+  local win = signature.win
+  if not win:is_open() then return end
+  local winnr = win:get_win()
 
-  signature.win:update_size()
+  win:update_size()
 
-  local autocomplete_winnr = autocomplete.win:get_win()
-  local autocomplete_win_config = autocomplete_winnr and vim.api.nvim_win_get_config(autocomplete_winnr)
+  local direction_priority = config.direction_priority
 
-  -- TODO: why doesnt vim.fn.screenrow work? it randomly gives a value of 1
-  local cursor_screen_row = vim.fn.winline()
-  local autocomplete_win_is_up = autocomplete_win_config and autocomplete_win_config.row - cursor_screen_row < 0
-  local direction = autocomplete_win_is_up and 's' or 'n'
+  -- if the autocomplete window is open, we want to place the signature window on the opposite side
+  local autocomplete_win_config = autocomplete.win:get_win() and vim.api.nvim_win_get_config(autocomplete.win:get_win())
+  if autocomplete.win:is_open() then
+    local cursor_screen_row = vim.fn.winline()
+    local autocomplete_win_is_up = autocomplete_win_config.row - cursor_screen_row < 0
+    direction_priority = autocomplete_win_is_up and { 's' } or { 'n' }
+  end
 
-  local height = signature.win:get_height()
-  local cursor_screen_position = signature.win.get_cursor_screen_position()
+  local height = win:get_height()
+  local pos = win:get_vertical_direction_and_height(direction_priority)
 
-  -- detect if there's space above/below the cursor
-  local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
-  local is_space_below = cursor_screen_position.distance_from_bottom > height
-  local is_space_above = cursor_screen_position.distance_from_top > height
-
-  -- fixes issue where the signature window would cover the cursor
-  if is_space_above then
-    direction = 'n'
-  else
-    direction = 's'
+  -- couldn't find anywhere to place the window
+  if not pos then
+    win:close()
+    return
   end
 
   -- default to the user's preference but attempt to use the other options
-  local row = direction == 's' and 1 or -height
-  vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = -1 })
+  local row = pos.direction == 's' and 1 or -height
+  local screenpos = vim.fn.screenpos(0, unpack(vim.api.nvim_win_get_cursor(0)))
+  local col = autocomplete_win_config and (autocomplete_win_config.col - screenpos.col) or 0
+  vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col })
+  vim.api.nvim_win_set_height(winnr, pos.height)
 end
 
 return signature

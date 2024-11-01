@@ -116,6 +116,7 @@ function trigger.activate_autocmds()
   })
 
   -- definitely leaving the context
+  -- TODO: handle leaving snippet mode
   vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufLeave' }, { callback = trigger.hide })
 
   -- manually hide when exiting insert mode with ctrl+c, since it doesn't trigger InsertLeave

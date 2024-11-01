@@ -44,6 +44,23 @@ local super_tab_keymap = {
   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 }
 
+local enter_keymap = {
+  ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  ['<C-e>'] = { 'hide' },
+  ['<CR>'] = { 'accept', 'fallback' },
+
+  ['<Tab>'] = { 'snippet_forward', 'fallback' },
+  ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+
+  ['<Up>'] = { 'select_prev', 'fallback' },
+  ['<Down>'] = { 'select_next', 'fallback' },
+  ['<C-p>'] = { 'select_prev', 'fallback' },
+  ['<C-n>'] = { 'select_next', 'fallback' },
+
+  ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+}
+
 local snippet_commands = { 'snippet_forward', 'snippet_backward' }
 
 --- @param opts blink.cmp.KeymapConfig
@@ -104,13 +121,18 @@ end
 --- @param preset_name string
 --- @return table
 function keymap.get_preset_keymap(preset_name)
+  local mappings
   if preset_name == 'default' then
-    return default_keymap
+    mappings = default_keymap
   elseif preset_name == 'super-tab' then
-    return super_tab_keymap
+    mappings = super_tab_keymap
+  elseif preset_name == 'enter' then
+    mappings = enter_keymap
   else
     error('Invalid blink.cmp keymap preset: ' .. preset_name)
   end
+
+  return mappings
 end
 
 --- Applies the keymaps to the current buffer
