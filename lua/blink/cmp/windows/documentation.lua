@@ -111,7 +111,7 @@ function docs.update_position()
     or config.direction_priority.autocomplete_south
 
   -- remove the direction priority of the signature window if it's open
-  if signature.win:is_open() then
+  if signature.win and signature.win:is_open() then
     direction_priority = vim.tbl_filter(
       function(dir) return dir ~= (autocomplete_win_is_up and 's' or 'n') end,
       direction_priority

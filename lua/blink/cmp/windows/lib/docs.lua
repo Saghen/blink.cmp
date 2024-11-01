@@ -17,6 +17,13 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
     end
   end
 
+  -- don't show the detail if it's part of the documentation
+  local detail_str = table.concat(detail_lines, '\n')
+  local doc_str = table.concat(doc_lines, '\n')
+  if doc_str:find(detail_str, 1, true) then
+    detail_lines = {}
+  end
+
   local combined_lines = vim.list_extend({}, detail_lines)
   -- add a blank line for the --- separator
   if #detail_lines > 0 and #doc_lines > 0 then table.insert(combined_lines, '') end
