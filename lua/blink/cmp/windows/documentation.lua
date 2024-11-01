@@ -1,6 +1,7 @@
 local config = require('blink.cmp.config').windows.documentation
 local sources = require('blink.cmp.sources.lib')
 local autocomplete = require('blink.cmp.windows.autocomplete')
+local signature = require('blink.cmp.windows.signature')
 local docs = {}
 
 function docs.setup()
@@ -99,65 +100,71 @@ function docs.update_position()
   local autocomplete_winnr = autocomplete.win:get_win()
   if not autocomplete_winnr then return end
   local autocomplete_win_config = vim.api.nvim_win_get_config(autocomplete_winnr)
-  local autocomplete_win_width = autocomplete.win:get_width()
   local autocomplete_win_height = autocomplete.win:get_height()
   local autocomplete_border_size = autocomplete.win:get_border_size()
 
-  local screen_width = vim.api.nvim_win_get_width(0)
-  local screen_height = vim.api.nvim_win_get_height(0)
-  local cursor_screen_row = vim.fn.screenrow()
+  local cursor_screen_row = vim.fn.screenpos(0, unpack(vim.api.nvim_win_get_cursor(0))).row
 
+  -- decide direction priority based on the autocomplete window's position
   local autocomplete_win_is_up = autocomplete_win_config.row - cursor_screen_row < 0
   local direction_priority = autocomplete_win_is_up and config.direction_priority.autocomplete_north
     or config.direction_priority.autocomplete_south
 
+  -- remove the direction priority of the signature window if it's open
+  if signature.win:is_open() then
+    direction_priority = vim.tbl_filter(
+      function(dir) return dir ~= (autocomplete_win_is_up and 's' or 'n') end,
+      direction_priority
+    )
+  end
+
+  -- decide direction, width and height of window
+  local pos = docs.win:get_direction_with_window_constraints(autocomplete.win, direction_priority)
+
+  -- couldn't find anywhere to place the window
+  if not pos then
+    docs.win:close()
+    return
+  end
+
+  -- set width and height based on available space
+  vim.api.nvim_win_set_height(docs.win:get_win(), pos.height)
+  vim.api.nvim_win_set_width(docs.win:get_win(), pos.width)
+
+  -- set position based on provided direction
+
   local height = docs.win:get_height()
   local width = docs.win:get_width()
-
-  local space_above = autocomplete_win_config.row - 1 > height
-  local space_below = screen_height - autocomplete_win_height - autocomplete_win_config.row > height
-  -- todo: check if there's vertical space available, need to check the direction of the autocomplete window
-  local space_left = autocomplete_win_config.col > width
-  local space_right = screen_width - autocomplete_win_width - autocomplete_win_config.col > width
 
   local function set_config(opts)
     vim.api.nvim_win_set_config(winnr, { relative = 'win', win = autocomplete_winnr, row = opts.row, col = opts.col })
   end
-  for _, direction in ipairs(direction_priority) do
-    if direction == 'n' and space_above then
-      if autocomplete_win_is_up then
-        set_config({ row = -height - autocomplete_border_size.top, col = -autocomplete_border_size.left })
-      else
-        set_config({ row = -1 - height - autocomplete_border_size.top, col = -autocomplete_border_size.left })
-      end
-      return
-    elseif direction == 's' and space_below then
-      if autocomplete_win_is_up then
-        set_config({
-          row = 1 + autocomplete_win_height - autocomplete_border_size.top,
-          col = -autocomplete_border_size.left,
-        })
-      else
-        set_config({
-          row = autocomplete_win_height - autocomplete_border_size.top,
-          col = -autocomplete_border_size.left,
-        })
-      end
-      return
-    elseif direction == 'e' and space_right then
-      set_config({
-        row = -autocomplete_border_size.top,
-        col = autocomplete_win_config.width + autocomplete_border_size.left,
-      })
-      return
-    elseif direction == 'w' and space_left then
-      set_config({ row = -autocomplete_border_size.top, col = -width - autocomplete_border_size.left })
-      return
+  if pos.direction == 'n' then
+    if autocomplete_win_is_up then
+      set_config({ row = -height - autocomplete_border_size.top, col = -autocomplete_border_size.left })
+    else
+      set_config({ row = -1 - height - autocomplete_border_size.top, col = -autocomplete_border_size.left })
     end
+  elseif pos.direction == 's' then
+    if autocomplete_win_is_up then
+      set_config({
+        row = 1 + autocomplete_win_height - autocomplete_border_size.top,
+        col = -autocomplete_border_size.left,
+      })
+    else
+      set_config({
+        row = autocomplete_win_height - autocomplete_border_size.top,
+        col = -autocomplete_border_size.left,
+      })
+    end
+  elseif pos.direction == 'e' then
+    set_config({
+      row = -autocomplete_border_size.top,
+      col = autocomplete_win_config.width + autocomplete_border_size.left,
+    })
+  elseif pos.direction == 'w' then
+    set_config({ row = -autocomplete_border_size.top, col = -width - autocomplete_border_size.left })
   end
-
-  -- failed to find a direction to place the window so close it
-  docs.win:close()
 end
 
 return docs

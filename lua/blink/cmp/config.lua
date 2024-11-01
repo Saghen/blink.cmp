@@ -117,7 +117,7 @@
 --- @field selection? "preselect" | "manual" | "auto_insert"
 --- @field winhighlight? string
 --- @field scrolloff? number
---- @field draw? 'simple' | 'reversed' | 'minimal' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
+--- @field draw? 'simple' | 'reversed' | 'minimal' | blink.cmp.CompletionDrawFn
 --- @field cycle? blink.cmp.AutocompleteConfig.CycleConfig
 
 --- @class blink.cmp.AutocompleteConfig.CycleConfig
@@ -148,6 +148,7 @@
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
 --- @field winhighlight? string
+--- @field direction_priority? ("n" | "s")[]
 
 --- @class GhostTextConfig
 --- @field enabled? boolean
@@ -391,6 +392,10 @@ local config = {
       max_height = 10,
       border = 'padded',
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
+
+      -- which directions to show the window,
+      -- falling back to the next direction when there's not enough space
+      direction_priority = { 'n', 's' },
     },
     ghost_text = {
       enabled = false,

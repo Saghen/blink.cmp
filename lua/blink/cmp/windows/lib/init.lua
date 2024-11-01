@@ -1,25 +1,46 @@
-local win = {}
-
 --- @class blink.cmp.WindowOptions
 --- @field min_width? number
 --- @field max_width? number
---- @field max_height number
---- @field cursorline boolean
---- @field border blink.cmp.WindowBorder
---- @field wrap boolean
---- @field filetype string
---- @field winhighlight string
---- @field scrolloff number
+--- @field max_height? number
+--- @field cursorline? boolean
+--- @field border? blink.cmp.WindowBorder
+--- @field wrap? boolean
+--- @field filetype? string
+--- @field winhighlight? string
+--- @field scrolloff? number
 
 --- @class blink.cmp.Window
 --- @field id? number
+--- @field buf? number
 --- @field config blink.cmp.WindowOptions
 ---
+--- @field new fun(config: blink.cmp.WindowOptions): blink.cmp.Window
+--- @field get_buf fun(self: blink.cmp.Window): number
+--- @field get_win fun(self: blink.cmp.Window): number
+--- @field is_open fun(self: blink.cmp.Window): boolean
+--- @field open fun(self: blink.cmp.Window)
+--- @field close fun(self: blink.cmp.Window)
+--- @field set_option_value fun(self: blink.cmp.Window, option: string, value: any)
+--- @field update_size fun(self: blink.cmp.Window)
+--- @field get_content_height fun(self: blink.cmp.Window): number
+--- @field get_border_size fun(self: blink.cmp.Window, border?: 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | string[]): { vertical: number, horizontal: number, left: number, right: number, top: number, bottom: number }
+--- @field get_height fun(self: blink.cmp.Window): number
+--- @field get_content_width fun(self: blink.cmp.Window): number
+--- @field get_width fun(self: blink.cmp.Window): number
+--- @field get_cursor_screen_position fun(): { distance_from_top: number, distance_from_bottom: number }
+--- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: ("n" | "s")[]): { height: number, direction: 'n' | 's' }?
+--- @field get_direction_with_window_constraints fun(self: blink.cmp.Window, anchor_win: blink.cmp.Window, direction_priority: ("n" | "s" | "e" | "w")[]): { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
+
+--- @type blink.cmp.Window
+--- @diagnostic disable-next-line: missing-fields
+local win = {}
+
 --- @param config blink.cmp.WindowOptions
 function win.new(config)
   local self = setmetatable({}, { __index = win })
 
   self.id = nil
+  self.buf = nil
   self.config = {
     min_width = config.min_width,
     max_width = config.max_width,
@@ -35,7 +56,6 @@ function win.new(config)
   return self
 end
 
---- @return number
 function win:get_buf()
   -- create buffer if it doesn't exist
   if self.buf == nil or not vim.api.nvim_buf_is_valid(self.buf) then
@@ -47,13 +67,11 @@ function win:get_buf()
   return self.buf
 end
 
---- @return number
 function win:get_win()
   if self.id ~= nil and not vim.api.nvim_win_is_valid(self.id) then self.id = nil end
   return self.id
 end
 
---- @return boolean
 function win:is_open() return self.id ~= nil and vim.api.nvim_win_is_valid(self.id) end
 
 function win:open()
@@ -82,7 +100,7 @@ function win:open()
   vim.api.nvim_set_option_value('scrolloff', self.config.scrolloff, { win = self.id })
 end
 
-function win:set_option_values(option, value) vim.api.nvim_set_option_value(option, value, { win = self.id }) end
+function win:set_option_value(option, value) vim.api.nvim_set_option_value(option, value, { win = self.id }) end
 
 function win:close()
   if self.id ~= nil then
@@ -91,6 +109,7 @@ function win:close()
   end
 end
 
+--- Updates the size of the window to match the max width and height of the content/config
 function win:update_size()
   if not self:is_open() then return end
   local winnr = self:get_win()
@@ -116,11 +135,15 @@ function win:get_content_height()
   return vim.api.nvim_win_text_height(self:get_win(), {}).all
 end
 
+--- Gets the size of the borders around the window
+--- @param border? 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | string[]
 --- @return { vertical: number, horizontal: number, left: number, right: number, top: number, bottom: number }
-function win:get_border_size()
-  if not self:is_open() then return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 } end
+function win:get_border_size(border)
+  if not border and not self:is_open() then
+    return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
+  end
 
-  local border = self.config.border
+  border = border or self.config.border
   if border == 'none' then
     return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
   elseif border == 'padded' then
@@ -150,13 +173,13 @@ function win:get_border_size()
   return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
 end
 
---- @return number
+--- Gets the height of the window, taking into account the border
 function win:get_height()
   if not self:is_open() then return 0 end
   return vim.api.nvim_win_get_height(self:get_win()) + self:get_border_size().vertical
 end
 
---- @return number
+--- Gets the width of the longest line in the window
 function win:get_content_width()
   if not self:is_open() then return 0 end
   local max_width = 0
@@ -166,35 +189,111 @@ function win:get_content_width()
   return max_width
 end
 
---- @return number
+--- Gets the width of the window, taking into account the border
 function win:get_width()
   if not self:is_open() then return 0 end
   return vim.api.nvim_win_get_width(self:get_win()) + self:get_border_size().horizontal
 end
 
---- Gets the cursor's distance from the top and bottom of the window
---- @return { distance_from_top: number, distance_from_bottom: number }
+--- Gets the cursor's distance from all sides of the screen
 function win.get_cursor_screen_position()
-  local win_height = vim.api.nvim_win_get_height(0)
-  local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
+  local screen_height = vim.o.lines
+  local screen_width = vim.o.columns
 
-  -- Calculate the visual distance from top of the window sinc the vim.fn.line()
-  -- func gives the literal line number but there can be folds.
-  -- HACK: ideally there's a more generic solution since vertical conceal
-  -- will be added in the future
-  local distance_from_top = 0
-  local line = math.max(1, vim.fn.line('w0'))
-  while line < cursor_line do
-    distance_from_top = distance_from_top + 1
-    if vim.fn.foldclosedend(line) ~= -1 then line = vim.fn.foldclosedend(line) end
-    line = line + 1
-  end
-
-  local distance_from_bottom = win_height - distance_from_top - 1
+  local cursor_line, cursor_column = unpack(vim.api.nvim_win_get_cursor(0))
+  -- todo: convert cursor_column to byte index
+  local pos = vim.fn.screenpos(vim.api.nvim_win_get_number(0), cursor_line, cursor_column)
 
   return {
-    distance_from_bottom = distance_from_bottom,
-    distance_from_top = distance_from_top,
+    distance_from_top = pos.row - 1,
+    distance_from_bottom = screen_height - pos.row,
+    distance_from_left = pos.col,
+    distance_from_right = screen_width - pos.col,
+  }
+end
+
+--- Gets the direction with the most space available, prioritizing the directions in the order of the
+--- direction_priority list
+function win:get_vertical_direction_and_height(direction_priority)
+  local constraints = self.get_cursor_screen_position()
+  local max_height = self:get_height()
+  local border_size = self:get_border_size()
+  local function get_distance(direction)
+    return direction == 's' and constraints.distance_from_bottom or constraints.distance_from_top
+  end
+
+  local direction_priority_by_space = vim.fn.sort(vim.deepcopy(direction_priority), function(a, b)
+    local distance_a = math.min(max_height, get_distance(a))
+    local distance_b = math.min(max_height, get_distance(b))
+    return distance_a < distance_b
+  end)
+
+  local direction = direction_priority_by_space[1]
+  local height = math.min(max_height, get_distance(direction))
+  if height <= border_size.vertical then return end
+  return { height = height - border_size.vertical, direction = direction }
+end
+
+function win:get_direction_with_window_constraints(anchor_win, direction_priority)
+  local cursor_constraints = self.get_cursor_screen_position()
+  local anchor_config = vim.fn.screenpos(anchor_win:get_win(), 1, 1)
+  local anchor_border_size = self:get_border_size(anchor_config.border)
+  local anchor_col = anchor_config.col - anchor_border_size.left
+  local anchor_row = anchor_config.row - anchor_border_size.top
+  local anchor_height = anchor_win:get_height()
+  local anchor_width = anchor_win:get_width()
+
+  -- we want to avoid covering the cursor line, so we need to get the direction of the window
+  -- that we're anchoring against
+  local cursor_screen_row = vim.fn.winline()
+  local anchor_is_above_cursor = anchor_config.row - cursor_screen_row < 0
+
+  local screen_height = vim.o.lines
+  local screen_width = vim.o.columns
+
+  local direction_constraints = {
+    n = {
+      vertical = anchor_is_above_cursor and (anchor_row - 1) or cursor_constraints.distance_from_top,
+      horizontal = screen_width - anchor_col + 1,
+    },
+    s = {
+      vertical = anchor_is_above_cursor and cursor_constraints.distance_from_bottom
+        or (screen_height - (anchor_height + anchor_row - 1)),
+      horizontal = screen_width - anchor_col + 1,
+    },
+    e = {
+      vertical = anchor_is_above_cursor and cursor_constraints.distance_from_top
+        or cursor_constraints.distance_from_bottom,
+      horizontal = screen_width - (anchor_col + anchor_width - 1),
+    },
+    w = {
+      vertical = anchor_is_above_cursor and cursor_constraints.distance_from_top
+        or cursor_constraints.distance_from_bottom,
+      horizontal = anchor_col - 1,
+    },
+  }
+
+  local max_height = self:get_height()
+  local max_width = self:get_width()
+  local direction_priority_by_space = vim.fn.sort(vim.deepcopy(direction_priority), function(a, b)
+    local constraints_a = direction_constraints[a]
+    local constraints_b = direction_constraints[b]
+    local distance_a = math.min(max_height, constraints_a.vertical, constraints_a.horizontal)
+    local distance_b = math.min(max_height, constraints_b.vertical, constraints_b.horizontal)
+    return distance_a < distance_b
+  end)
+
+  local border_size = self:get_border_size()
+  local direction = direction_priority_by_space[1]
+  local height = math.min(max_height, direction_constraints[direction].vertical)
+  if height <= border_size.vertical then return end
+  local width = math.min(max_width, direction_constraints[direction].horizontal)
+  if width <= border_size.horizontal then return end
+
+  return {
+    width = width - border_size.horizontal,
+    height = height - border_size.vertical,
+    direction = direction,
   }
 end
 

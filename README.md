@@ -409,6 +409,10 @@ MiniDeps.add({
       max_height = 10,
       border = 'padded',
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
+
+      -- which directions to show the window,
+      -- falling back to the next direction when there's not enough space
+      direction_priority = { 'n', 's' },
     },
     ghost_text = {
       enabled = false,
