@@ -34,6 +34,7 @@ function autocomplete.setup()
     min_width = autocmp_config.min_width,
     max_height = autocmp_config.max_height,
     border = autocmp_config.border,
+    winblend = autocmp_config.winblend,
     winhighlight = autocmp_config.winhighlight,
     cursorline = false,
     scrolloff = autocmp_config.scrolloff,

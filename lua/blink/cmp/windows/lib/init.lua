@@ -28,6 +28,7 @@ function win.new(config)
     border = config.border or 'none',
     wrap = config.wrap or false,
     filetype = config.filetype or 'cmp_menu',
+    winblend = config.winblend or vim.o.pumblend,
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
   }
@@ -72,6 +73,7 @@ function win:open()
     zindex = 1001,
     border = self.config.border == 'padded' and { ' ', '', '', ' ', '', '', ' ', ' ' } or self.config.border,
   })
+  vim.api.nvim_set_option_value('winblend', self.config.winblend, { win = self.id })
   vim.api.nvim_set_option_value('winhighlight', self.config.winhighlight, { win = self.id })
   vim.api.nvim_set_option_value('wrap', self.config.wrap, { win = self.id })
   vim.api.nvim_set_option_value('foldenable', false, { win = self.id })
