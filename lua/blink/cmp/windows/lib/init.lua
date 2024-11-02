@@ -147,7 +147,7 @@ function win:get_border_size(border)
   if border == 'none' then
     return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
   elseif border == 'padded' then
-    return { vertical = 0, horizontal = 1, left = 1, right = 0, top = 0, bottom = 0 }
+    return { vertical = 0, horizontal = 2, left = 1, right = 1, top = 0, bottom = 0 }
   elseif border == 'shadow' then
     return { vertical = 1, horizontal = 1, left = 0, right = 1, top = 0, bottom = 1 }
   elseif type(border) == 'string' then
@@ -225,7 +225,7 @@ function win:get_vertical_direction_and_height(direction_priority)
   local direction_priority_by_space = vim.fn.sort(vim.deepcopy(direction_priority), function(a, b)
     local distance_a = math.min(max_height, get_distance(a))
     local distance_b = math.min(max_height, get_distance(b))
-    return distance_a < distance_b
+    return distance_a < distance_b and -1 or distance_a > distance_b and 1 or 0
   end)
 
   local direction = direction_priority_by_space[1]
@@ -237,7 +237,7 @@ end
 function win:get_direction_with_window_constraints(anchor_win, direction_priority)
   local cursor_constraints = self.get_cursor_screen_position()
   local anchor_config = vim.fn.screenpos(anchor_win:get_win(), 1, 1)
-  local anchor_border_size = self:get_border_size(anchor_config.border)
+  local anchor_border_size = anchor_win:get_border_size()
   local anchor_col = anchor_config.col - anchor_border_size.left
   local anchor_row = anchor_config.row - anchor_border_size.top
   local anchor_height = anchor_win:get_height()
@@ -254,17 +254,17 @@ function win:get_direction_with_window_constraints(anchor_win, direction_priorit
   local direction_constraints = {
     n = {
       vertical = anchor_is_above_cursor and (anchor_row - 1) or cursor_constraints.distance_from_top,
-      horizontal = screen_width - anchor_col + 1,
+      horizontal = screen_width - (anchor_col - 1),
     },
     s = {
       vertical = anchor_is_above_cursor and cursor_constraints.distance_from_bottom
         or (screen_height - (anchor_height + anchor_row - 1)),
-      horizontal = screen_width - anchor_col + 1,
+      horizontal = screen_width - (anchor_col - 1),
     },
     e = {
       vertical = anchor_is_above_cursor and cursor_constraints.distance_from_top
         or cursor_constraints.distance_from_bottom,
-      horizontal = screen_width - (anchor_col + anchor_width - 1),
+      horizontal = screen_width - (anchor_col - 1) - anchor_width,
     },
     w = {
       vertical = anchor_is_above_cursor and cursor_constraints.distance_from_top
@@ -280,7 +280,7 @@ function win:get_direction_with_window_constraints(anchor_win, direction_priorit
     local constraints_b = direction_constraints[b]
     local distance_a = math.min(max_height, constraints_a.vertical, constraints_a.horizontal)
     local distance_b = math.min(max_height, constraints_b.vertical, constraints_b.horizontal)
-    return distance_a < distance_b
+    return distance_a < distance_b and -1 or distance_a > distance_b and 1 or 0
   end)
 
   local border_size = self:get_border_size()
