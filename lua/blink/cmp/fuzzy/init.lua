@@ -21,10 +21,12 @@ function fuzzy.access(item) fuzzy.rust.access(item) end
 ---@param lines string
 function fuzzy.get_words(lines) return fuzzy.rust.get_words(lines) end
 
+function fuzzy.fuzzy_matched_indices(needle, haystack) return fuzzy.rust.fuzzy_matched_indices(needle, haystack) end
+
 ---@param needle string
 ---@param haystack blink.cmp.CompletionItem[]?
 ---@return blink.cmp.CompletionItem[]
-function fuzzy.filter_items(needle, haystack)
+function fuzzy.fuzzy(needle, haystack)
   haystack = haystack or {}
 
   -- get the nearby words

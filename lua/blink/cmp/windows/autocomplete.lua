@@ -1,7 +1,11 @@
 --- @class blink.cmp.CompletionRenderContext
 --- @field item blink.cmp.CompletionItem
 --- @field label string
+<<<<<<< HEAD
 --- @field detail string
+=======
+--- @field label_matched_indices number[]
+>>>>>>> 52d9519 (feat: matched character highlighting)
 --- @field kind string
 --- @field kind_icon string
 --- @field icon_gap string
@@ -322,7 +326,14 @@ function autocomplete.draw()
   local draw_fn = autocomplete.get_draw_fn()
   local icon_gap = config.nerd_font_variant == 'mono' and ' ' or '  '
   local components_list = {}
-  for _, item in ipairs(autocomplete.items) do
+
+  local fuzzy = require('blink.cmp.fuzzy')
+  local matched_indices = fuzzy.fuzzy_matched_indices(
+    fuzzy.get_query(),
+    vim.tbl_map(function(item) return item.label end, autocomplete.items)
+  )
+
+  for idx, item in ipairs(autocomplete.items) do
     local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
     local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
     -- Some LSPs can return labels and details with newlines.
@@ -337,6 +348,7 @@ function autocomplete.draw()
         item = item,
         label = label,
         detail = detail,
+        label_matched_indices = matched_indices[idx],
         kind = kind,
         kind_icon = kind_icon,
         icon_gap = icon_gap,
@@ -386,6 +398,10 @@ function autocomplete.draw_item_simple(ctx)
       ctx.detail,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
+      highlights = vim.tbl_map(
+        function(idx) return { start = idx + 1, stop = idx + 2, group = 'BlinkCmpLabelMatch' } end,
+        ctx.label_matched_indices
+      ),
       max_width = 80,
     },
     ' ',

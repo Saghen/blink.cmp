@@ -4,6 +4,7 @@
 --- @field max_width? number
 --- @field hl_group? string
 --- @field hl_params? table
+--- @field highlights? { start: number, stop: number, group?: string, params?: table }[]
 
 --- @class blink.cmp.RenderedComponentTree
 --- @field text string
@@ -77,6 +78,15 @@ function renderer.render(components, lengths)
         group = component.hl_group,
         params = component.hl_params,
       })
+
+      for _, highlight in ipairs(component.highlights or {}) do
+        table.insert(highlights, {
+          start = offset + highlight.start,
+          stop = offset + highlight.stop,
+          group = highlight.group,
+          params = highlight.params,
+        })
+      end
 
       text = text .. concatenated.text
       offset = offset + #concatenated.text

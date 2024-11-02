@@ -69,6 +69,16 @@ pub fn fuzzy(
         .collect())
 }
 
+pub fn fuzzy_matched_indices(
+    _lua: &Lua,
+    (needle, haystack): (String, Vec<String>),
+) -> LuaResult<Vec<Vec<usize>>> {
+    Ok(frizbee::match_list_for_matched_indices(
+        &needle,
+        &haystack.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
+    ))
+}
+
 pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
     Ok(REGEX
         .find_iter(&text)
@@ -84,6 +94,10 @@ pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
 fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
     exports.set("fuzzy", lua.create_function(fuzzy)?)?;
+    exports.set(
+        "fuzzy_matched_indices",
+        lua.create_function(fuzzy_matched_indices)?,
+    )?;
     exports.set("get_words", lua.create_function(get_words)?)?;
     exports.set("init_db", lua.create_function(init_db)?)?;
     exports.set("destroy_db", lua.create_function(destroy_db)?)?;
