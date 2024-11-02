@@ -392,6 +392,7 @@ function autocomplete.draw_item_reversed(ctx)
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
+      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
@@ -415,6 +416,7 @@ function autocomplete.draw_item_minimal(ctx)
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
+      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
