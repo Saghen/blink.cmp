@@ -123,20 +123,17 @@ end
 
 --- Gets the preset keymap for the given preset name
 --- @param preset_name string
---- @return table
+--- @return table<string, blink.cmp.KeymapCommand[]>
 function keymap.get_preset_keymap(preset_name)
-  local mappings
   if preset_name == 'default' then
-    mappings = default_keymap
+    return default_keymap
   elseif preset_name == 'super-tab' then
-    mappings = super_tab_keymap
+    return super_tab_keymap
   elseif preset_name == 'enter' then
-    mappings = enter_keymap
-  else
-    error('Invalid blink.cmp keymap preset: ' .. preset_name)
+    return enter_keymap
   end
 
-  return mappings
+  error('Invalid blink.cmp keymap preset: ' .. preset_name)
 end
 
 --- Applies the keymaps to the current buffer
