@@ -1,13 +1,16 @@
+--- @alias blink.cmp.Highlight { start: number, stop: number, group?: string, params?: table }
+
 --- @class blink.cmp.Component
 --- @field [number] blink.cmp.Component | string
 --- @field fill? boolean
 --- @field max_width? number
 --- @field hl_group? string
 --- @field hl_params? table
+--- @field highlights? blink.cmp.Highlight[]
 
 --- @class blink.cmp.RenderedComponentTree
 --- @field text string
---- @field highlights { start: number, stop: number, group?: string, params?: table }[]
+--- @field highlights blink.cmp.Highlight[]
 
 --- @class blink.cmp.StringsBuild
 --- @field text string
@@ -77,6 +80,17 @@ function renderer.render(components, lengths)
         group = component.hl_group,
         params = component.hl_params,
       })
+
+      for _, highlight in ipairs(component.highlights or {}) do
+        if highlight.stop > highlight.start then
+          table.insert(highlights, {
+            start = offset + highlight.start + 1,
+            stop = offset + highlight.stop + 1,
+            group = highlight.group,
+            params = highlight.params,
+          })
+        end
+      end
 
       text = text .. concatenated.text
       offset = offset + #concatenated.text

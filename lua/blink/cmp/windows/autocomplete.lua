@@ -5,6 +5,7 @@
 --- @field kind_icon string
 --- @field icon_gap string
 --- @field deprecated boolean
+--- @field match string
 
 --- @alias blink.cmp.CompletionDrawFn fun(ctx: blink.cmp.CompletionRenderContext): blink.cmp.Component[]
 
@@ -308,6 +309,8 @@ function autocomplete.draw()
   local draw_fn = autocomplete.get_draw_fn()
   local icon_gap = config.nerd_font_variant == 'mono' and ' ' or '  '
   local components_list = {}
+  local match =
+    autocomplete.context.line:sub(autocomplete.context.bounds.start_col, autocomplete.context.bounds.end_col)
   for _, item in ipairs(autocomplete.items) do
     local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
     local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
@@ -320,6 +323,7 @@ function autocomplete.draw()
       components_list,
       draw_fn({
         item = item,
+        match = label:find(match, 1, true) and match or '',
         label = label,
         kind = kind,
         kind_icon = kind_icon,
@@ -371,6 +375,9 @@ function autocomplete.draw_item_simple(ctx)
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 80,
+      highlights = {
+        { start = 0, stop = #ctx.match, group = 'BlinkCmpLabelMatch' },
+      },
     },
     ' ',
   }
@@ -387,6 +394,9 @@ function autocomplete.draw_item_reversed(ctx)
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
+      highlights = {
+        { start = 0, stop = #ctx.match, group = 'BlinkCmpLabelMatch' },
+      },
     },
     ' ',
     {
@@ -410,6 +420,9 @@ function autocomplete.draw_item_minimal(ctx)
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
+      highlights = {
+        { start = 0, stop = #ctx.match, group = 'BlinkCmpLabelMatch' },
+      },
     },
     ' ',
     {
