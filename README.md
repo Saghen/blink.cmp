@@ -91,12 +91,6 @@
 }
 ```
 
-For LazyVim/distro users, you can disable nvim-cmp via:
-
-```lua
-{ 'hrsh7th/nvim-cmp', enabled = false }
-```
-
 <details>
 <summary><strong>mini.deps</strong></summary>
 
