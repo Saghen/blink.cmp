@@ -102,9 +102,7 @@ function keymap.setup(opts)
   end
 
   -- handle presets
-  if type(opts) == 'string' then
-    mappings = keymap.get_preset_keymap(opts)
-  end
+  if type(opts) == 'string' then mappings = keymap.get_preset_keymap(opts) end
 
   -- we set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
   -- from overriding our mappings. We also use InsertEnter to avoid conflicts with keymaps
@@ -115,6 +113,10 @@ function keymap.setup(opts)
       keymap.apply_keymap_to_current_buffer(mappings)
     end,
   })
+
+  if vim.api.nvim_get_mode().mode == 'i' and not utils.is_blocked_buffer() then
+    keymap.apply_keymap_to_current_buffer(mappings)
+  end
 end
 
 --- Gets the preset keymap for the given preset name
