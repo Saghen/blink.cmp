@@ -141,9 +141,14 @@ function autocomplete.open_with_items(context, items)
   vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 
   if not autocomplete.auto_show then return end
-  autocomplete.win:open()
 
+  autocomplete.win:open()
   autocomplete.update_position(context)
+
+  -- it's possible for the window to close after updating the position
+  -- if there was nowhere to place the window
+  if not autocomplete.win:is_open() then return end
+
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
@@ -154,9 +159,11 @@ end
 
 function autocomplete.open()
   if autocomplete.win:is_open() then return end
-  vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
+
   autocomplete.win:open()
   autocomplete.set_has_selected(autocmp_config.selection == 'preselect')
+
+  vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 end
 
 function autocomplete.close()
