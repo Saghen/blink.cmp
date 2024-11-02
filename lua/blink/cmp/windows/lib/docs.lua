@@ -188,6 +188,8 @@ end
 ---@param detail_lines string[]
 ---@param doc_lines string[]
 ---@return string[], string[]
+--- TODO: Also move the code block into detail if it's at the start of the doc
+--- and we have no detail
 function docs.extract_detail_from_doc(detail_lines, doc_lines)
   local detail_str = table.concat(detail_lines, '\n')
   local doc_str = table.concat(doc_lines, '\n')
