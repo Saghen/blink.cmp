@@ -116,6 +116,7 @@
 --- @field direction_priority? ("n" | "s")[]
 --- @field auto_show? boolean
 --- @field selection? "preselect" | "manual" | "auto_insert"
+--- @field winblend? number
 --- @field winhighlight? string
 --- @field scrolloff? number
 --- @field draw? 'simple' | 'reversed' | 'minimal' | blink.cmp.CompletionDrawFn
@@ -141,6 +142,7 @@
 --- @field auto_show? boolean
 --- @field auto_show_delay_ms? number Delay before showing the documentation window
 --- @field update_delay_ms? number Delay before updating the documentation window
+--- @field winblend? number
 --- @field winhighlight? string
 
 --- @class blink.cmp.SignatureHelpConfig
@@ -148,6 +150,7 @@
 --- @field max_width? number
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
+--- @field winblend? number
 --- @field winhighlight? string
 --- @field direction_priority? ("n" | "s")[]
 
@@ -363,6 +366,7 @@ local config = {
       min_width = 15,
       max_height = 10,
       border = 'none',
+      winblend = 0,
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
       -- keep the cursor X lines away from the top/bottom of the window
       scrolloff = 2,
@@ -397,6 +401,7 @@ local config = {
       max_width = 80,
       max_height = 20,
       border = 'padded',
+      winblend = 0,
       winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
       -- which directions to show the documentation window,
       -- for each of the possible autocomplete window directions,
@@ -415,6 +420,7 @@ local config = {
       max_width = 100,
       max_height = 10,
       border = 'padded',
+      winblend = 0,
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
 
       -- which directions to show the window,

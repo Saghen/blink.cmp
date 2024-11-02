@@ -9,6 +9,7 @@ function signature.setup()
     max_width = config.max_width,
     max_height = config.max_height,
     border = config.border,
+    winblend = config.winblend,
     winhighlight = config.winhighlight,
     wrap = true,
     filetype = 'markdown',

@@ -329,7 +329,7 @@ MiniDeps.add({
 
   sources = {
     -- list of enabled providers
-    completion = { 
+    completion = {
       enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
     }
 
@@ -390,6 +390,7 @@ MiniDeps.add({
       min_width = 15,
       max_height = 10,
       border = 'none',
+      winblend = 0,
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
       -- keep the cursor X lines away from the top/bottom of the window
       scrolloff = 2,
@@ -422,6 +423,7 @@ MiniDeps.add({
       max_width = 60,
       max_height = 20,
       border = 'padded',
+      winblend = 0,
       winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
       -- which directions to show the documentation window,
       -- for each of the possible autocomplete window directions,
@@ -440,6 +442,7 @@ MiniDeps.add({
       max_width = 100,
       max_height = 10,
       border = 'padded',
+      winblend = 0,
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
 
       -- which directions to show the window,
