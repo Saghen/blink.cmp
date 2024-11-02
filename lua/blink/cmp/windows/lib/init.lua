@@ -28,7 +28,7 @@ function win.new(config)
     border = config.border or 'none',
     wrap = config.wrap or false,
     filetype = config.filetype or 'cmp_menu',
-    winblend = config.winblend or vim.o.pumblend,
+    winblend = config.winblend or 0,
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
   }
