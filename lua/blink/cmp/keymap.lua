@@ -44,6 +44,23 @@ local super_tab_keymap = {
   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 }
 
+local enter_keymap = {
+  ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  ['<C-e>'] = { 'hide' },
+  ['<CR>'] = { 'accept', 'fallback' },
+
+  ['<Tab>'] = { 'snippet_forward', 'fallback' },
+  ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+
+  ['<Up>'] = { 'select_prev', 'fallback' },
+  ['<Down>'] = { 'select_next', 'fallback' },
+  ['<C-p>'] = { 'select_prev', 'fallback' },
+  ['<C-n>'] = { 'select_next', 'fallback' },
+
+  ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+}
+
 local snippet_commands = { 'snippet_forward', 'snippet_backward' }
 
 --- @param opts blink.cmp.KeymapConfig
@@ -71,17 +88,22 @@ function keymap.setup(opts)
         error('The blink.cmp keymap recently got reworked. Please see the README for the updated configuration')
       end
     end
+
+    -- Handle preset inside table
+    if opts.preset then
+      local preset_keymap = keymap.get_preset_keymap(opts.preset)
+
+      -- Remove 'preset' key from opts to prevent it from being treated as a keymap
+      opts.preset = nil
+      -- Merge the preset keymap with the user-defined keymaps
+      -- User-defined keymaps overwrite the preset keymaps
+      mappings = vim.tbl_extend('force', preset_keymap, opts)
+    end
   end
 
   -- handle presets
   if type(opts) == 'string' then
-    if opts == 'default' then
-      mappings = default_keymap
-    elseif opts == 'super-tab' then
-      mappings = super_tab_keymap
-    else
-      error('Invalid blink.cmp keymap preset: ' .. opts)
-    end
+    mappings = keymap.get_preset_keymap(opts)
   end
 
   -- we set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
@@ -93,6 +115,24 @@ function keymap.setup(opts)
       keymap.apply_keymap_to_current_buffer(mappings)
     end,
   })
+end
+
+--- Gets the preset keymap for the given preset name
+--- @param preset_name string
+--- @return table
+function keymap.get_preset_keymap(preset_name)
+  local mappings
+  if preset_name == 'default' then
+    mappings = default_keymap
+  elseif preset_name == 'super-tab' then
+    mappings = super_tab_keymap
+  elseif preset_name == 'enter' then
+    mappings = enter_keymap
+  else
+    error('Invalid blink.cmp keymap preset: ' .. preset_name)
+  end
+
+  return mappings
 end
 
 --- Applies the keymaps to the current buffer

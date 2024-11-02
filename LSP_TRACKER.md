@@ -8,28 +8,26 @@
 
 - [ ] `dynamicRegistration`
 - [ ] `CompletionItem`
-    - [x] `snippetSupport` <- Are we advertising this?
+    - [x] `snippetSupport`
     - [ ] `commitCharacterSupport`
-    - [x] `documentationFormat` <- Are we advertising this?
-    - [x] `deprecatedSupport` <- Are we advertising this?
+    - [x] `documentationFormat`
+    - [x] `deprecatedSupport`
     - [ ] `preselectSupport`
-    - [x] `tagSupport` <- Are we advertising this?
+    - [x] `tagSupport`
     - [ ] `insertReplaceSupport`
-    - [ ] `resolveSupport` <- Allows LSPs to resolve additional properties lazily, potentially improving latency
-    - [ ] `insertTextModeSupport`
-    - [ ] `labelDetailsSupport`
-- [ ] `completionItemKind` <- Seems like we might not need to support this?
-- [x] `contextSupport` <- Are we advertising this?
-- [ ] `CompletionList`
-    - [ ] `itemDefaults`
+    - [x] `resolveSupport` <- Allows LSPs to resolve additional properties lazily, potentially improving latency
+    - [x] `insertTextModeSupport`
+    - [x] `labelDetailsSupport`
+- [x] `completionItemKind`
+- [x] `contextSupport`
 
 ### Server Capabilities
 
 - [x] `triggerCharacters`
 - [ ] `allCommitCharacters`
-- [ ] `resolveProvider` <- we always assume it can
-- [ ] `CompletionItem`
-    - [ ] `labelDetailsSupport`
+- [x] `resolveProvider`
+- [x] `CompletionItem`
+    - [x] `labelDetailsSupport`
 
 ### Request Params
 
@@ -40,18 +38,18 @@
 ### List
 
 - [x] `isIncomplete`
-- [ ] `itemDefaults`
-    - [ ] `commitCharacters`
+- [x] `itemDefaults`
+    - [x] `commitCharacters`
     - [ ] `editRange`
-    - [ ] `insertTextFormat`
-    - [ ] `insertTextMode`
-    - [ ] `data`
+    - [x] `insertTextFormat`
+    - [x] `insertTextMode`
+    - [x] `data`
 - [x] `items`
 
 ### Item
 
 - [x] `label`
-- [ ] `labelDetails`
+- [x] `labelDetails`
 - [x] `kind`
 - [x] `tags`
 - [x] `detail`
@@ -59,12 +57,12 @@
 - [x] `deprecated`
 - [ ] `preselect`
 - [ ] `sortText`
-- [ ] `filterText`
+- [x] `filterText`
 - [x] `insertText`
 - [x] `insertTextFormat` <- regular or snippet
-- [ ] `insertTextMode`
-- [ ] `textEdit` <- we support `TextEdit` (typical) but not the rare `InsertReplaceEdit`
-- [ ] `textEditText` <- add support when supporting defaults
+- [ ] `insertTextMode` <- asIs only, not sure we'll support adjustIndentation
+- [x] `textEdit`
+- [x] `textEditText`
 - [x] `additionalTextEdits` <- known issue where applying the main text edit will cause this to be wrong if the additional text edit comes after since the indices will be offset
 - [ ] `commitCharacters`
 - [ ] `command`

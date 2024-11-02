@@ -20,7 +20,7 @@ body:
     id: user-config
     attributes:
       label: Relevant configuration
-      description: Copypaste the part of the config relevant to the bug. Do NOT paste the entire default config.
+      description: Copypaste the part of the config relevant to the bug. Do not paste the entire default config.
       render: lua
       placeholder: |
         sources = {
@@ -33,7 +33,7 @@ body:
     id: version-info
     attributes:
       label: neovim version
-      placeholder: "output for `nvim --version`"
+      placeholder: "output of `nvim --version`"
     validations: { required: true }
   - type: input
     id: branch-or-tag

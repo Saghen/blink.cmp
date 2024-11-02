@@ -17,6 +17,8 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
     end
   end
 
+  detail_lines, doc_lines = docs.extract_detail_from_doc(detail_lines, doc_lines)
+
   local combined_lines = vim.list_extend({}, detail_lines)
   -- add a blank line for the --- separator
   if #detail_lines > 0 and #doc_lines > 0 then table.insert(combined_lines, '') end
@@ -119,7 +121,7 @@ end
 function docs.combine_markdown_lines(lines)
   local combined_lines = {}
 
-  local special_starting_chars = { '#', '>', '-', '|' }
+  local special_starting_chars = { '#', '>', '-', '|', '*', '•' }
   local in_code_block = false
   local prev_is_special = false
   for _, line in ipairs(lines) do
@@ -144,6 +146,85 @@ function docs.combine_markdown_lines(lines)
   end
 
   return combined_lines
+end
+
+--- Gets the start and end row of the code block for the given row
+--- Or returns nil if there's no code block
+--- @param lines string[]
+--- @param row number
+--- @return number?, number?
+function docs.get_code_block_range(lines, row)
+  -- get the start of the code block
+  local code_block_start = nil
+  for i = 1, row do
+    local line = lines[i]
+    if line:match('^%s*```') then
+      if code_block_start == nil then
+        code_block_start = i
+      else
+        code_block_start = nil
+      end
+    end
+  end
+  if code_block_start == nil then return end
+
+  -- get the end of the code block
+  local code_block_end = nil
+  for i = row, #lines do
+    local line = lines[i]
+    if line:match('^%s*```') then
+      code_block_end = i
+      break
+    end
+  end
+  if code_block_end == nil then return end
+
+  return code_block_start, code_block_end
+end
+
+--- Avoids showing the detail if it's part of the documentation
+--- or, if the detail is in a code block in the doc,
+--- extracts the code block into the detail
+---@param detail_lines string[]
+---@param doc_lines string[]
+---@return string[], string[]
+function docs.extract_detail_from_doc(detail_lines, doc_lines)
+  local detail_str = table.concat(detail_lines, '\n')
+  local doc_str = table.concat(doc_lines, '\n')
+  local doc_str_detail_row = doc_str:find(detail_str, 1, true)
+
+  -- didn't find the detail in the doc, so return as is
+  if doc_str_detail_row == nil then
+    return detail_lines, doc_lines
+  end
+
+  -- get the line of the match
+  -- hack: surely there's a better way to do this but it's late 
+  -- and I can't be bothered
+  local offset = 1
+  local detail_line = 1
+  for line_num, line in ipairs(doc_lines) do
+    if #line + offset > doc_str_detail_row then
+      detail_line = line_num
+      break
+    end
+    offset = offset + #line + 1
+  end
+
+  -- extract the code block, if it exists, and use it as the detail
+  local code_block_start, code_block_end = docs.get_code_block_range(doc_lines, detail_line)
+  if code_block_start ~= nil and code_block_end ~= nil then
+    detail_lines = vim.list_slice(doc_lines, code_block_start + 1, code_block_end - 1)
+
+    local doc_lines_start = vim.list_slice(doc_lines, 1, code_block_start - 1)
+    local doc_lines_end = vim.list_slice(doc_lines, code_block_end + 1, #doc_lines)
+    vim.list_extend(doc_lines_start, doc_lines_end)
+    doc_lines = doc_lines_start
+  else
+    detail_lines = {}
+  end
+
+  return detail_lines, doc_lines
 end
 
 function docs.split_lines(text)

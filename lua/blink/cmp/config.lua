@@ -18,6 +18,7 @@
 --- | table<string, blink.cmp.KeymapCommand[]> Table of keys => commands[]
 --- | 'default' mappings similar to built-in completion
 --- | 'super-tab' mappings similar to vscode (tab to accept, arrow keys to navigate)
+--- | 'enter' mappings similar to 'super-tab' but with 'enter' to accept
 
 --- @class blink.cmp.AcceptConfig
 --- @field create_undo_point? boolean Create an undo point when accepting a completion item
@@ -67,8 +68,8 @@
 --- @field enabled_providers? string[] | fun(ctx?: blink.cmp.Context): string[]
 ---
 --- @class blink.cmp.SourceProviderConfig
---- @field name string
---- @field module string
+--- @field name? string
+--- @field module? string
 --- @field enabled? boolean | fun(ctx?: blink.cmp.Context): boolean
 --- @field opts? table
 --- @field transform_items? fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
@@ -118,7 +119,7 @@
 --- @field winblend? number
 --- @field winhighlight? string
 --- @field scrolloff? number
---- @field draw? 'simple' | 'reversed' | 'minimal' | function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]
+--- @field draw? 'simple' | 'reversed' | 'minimal' | blink.cmp.CompletionDrawFn
 --- @field cycle? blink.cmp.AutocompleteConfig.CycleConfig
 
 --- @class blink.cmp.AutocompleteConfig.CycleConfig
@@ -151,6 +152,7 @@
 --- @field border? blink.cmp.WindowBorder
 --- @field winblend? number
 --- @field winhighlight? string
+--- @field direction_priority? ("n" | "s")[]
 
 --- @class GhostTextConfig
 --- @field enabled? boolean
@@ -169,10 +171,15 @@
 
 --- @type blink.cmp.Config
 local config = {
-  -- the keymap may be a preset ('default' | 'super-tab') or a table of keys => command[]
+  -- the keymap may be a preset ('default' | 'super-tab' | 'enter') OR a table of keys => command[]
   -- when defining your own, no keybinds will be assigned automatically.
-  -- additionally, you may pass a function in the command array where returning true
+  -- you may pass a function in the command array where returning true
   -- will prevent the next command from running
+  --
+  -- The "fallback" command will run the next non-blink keymap.
+  --   For example, to accept the current completion item with "enter", or create a new line,
+  --   when the blink window is closed, you would define it as:
+  --   ['<CR>'] = { 'accept', 'fallback' }
   --
   -- "default" keymap
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
@@ -189,11 +196,11 @@ local config = {
   --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
   --
   -- "super-tab" keymap
-  --   you may want to set `trigger.show_in_snippet = false` when using "super-tab"
+  --   you may want to set `trigger.completion.show_in_snippet = false` when using "super-tab"
   --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
   --
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-  --   ['<C-e>'] = { 'hide' },
+  --   ['<C-e>'] = { 'hide', 'fallback' },
   --
   --   ['<Tab>'] = {
   --     function(cmp)
@@ -203,6 +210,24 @@ local config = {
   --     'snippet_forward',
   --     'fallback'
   --   },
+  --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+  --
+  --   ['<Up>'] = { 'select_prev', 'fallback' },
+  --   ['<Down>'] = { 'select_next', 'fallback' },
+  --   ['<C-p>'] = { 'select_prev', 'fallback' },
+  --   ['<C-n>'] = { 'select_next', 'fallback' },
+  --
+  --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+  --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+  --
+  -- "enter" keymap
+  --   you may want to set `window.autocomplete.selection = "manual" | "auto_insert"`
+  --
+  --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+  --   ['<C-e>'] = { 'hide', 'fallback' },
+  --   ['<CR>'] = { 'accept', 'fallback' },
+  --
+  --   ['<Tab>'] = { 'snippet_forward', 'fallback' },
   --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
   --
   --   ['<Up>'] = { 'select_prev', 'fallback' },
@@ -265,7 +290,7 @@ local config = {
       -- list of additional trigger characters that won't trigger the completion window when the cursor comes after a trigger character when entering insert mode/accepting an item
       show_on_x_blocked_trigger_characters = { "'", '"', '(' },
       -- when false, will not show the completion window when in a snippet
-      show_in_snippet = false,
+      show_in_snippet = true,
     },
 
     signature_help = {
@@ -373,7 +398,7 @@ local config = {
     },
     documentation = {
       min_width = 10,
-      max_width = 60,
+      max_width = 80,
       max_height = 20,
       border = 'padded',
       winblend = 0,
@@ -397,6 +422,10 @@ local config = {
       border = 'padded',
       winblend = 0,
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
+
+      -- which directions to show the window,
+      -- falling back to the next direction when there's not enough space
+      direction_priority = { 'n', 's' },
     },
     ghost_text = {
       enabled = false,
