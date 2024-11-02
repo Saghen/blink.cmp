@@ -163,20 +163,20 @@ MiniDeps.add({
 {
   -- The keymap can be:
   --   - A preset ('default' | 'super-tab' | 'enter')
-  --   - A table of keys => command[]
-  --   - A table that includes a 'preset' key and custom key mappings
+  --   - A table of keys => command[] (optionally with a "preset" key to merge with a preset)
   --
   -- When specifying 'preset' in the keymap table, the custom key mappings are merged with the preset,
   -- and any conflicting keys will overwrite the preset mappings.
+  -- The "fallback" command will run the next non blink keymap.
   --
   -- Example:
   --
   -- keymap = {
   --   preset = 'default',
-  --   ['<cr>'] = { 'select_and_accept', 'fallback' },
+  --   ['<Up>'] = { 'select_prev', 'fallback' },
+  --   ['<Down>'] = { 'select_next', 'fallback' },
   -- },
   --
-  -- In this example, the 'default' preset is used, and the `<cr>` key mapping is added or overwrites the existing one from the preset.
   -- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
   --
   -- Available commands:
@@ -198,7 +198,7 @@ MiniDeps.add({
   --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
   --
   -- "super-tab" keymap
-  --   you may want to set `trigger.completion.show_in_snippet = false` when using "super-tab"
+  --   you may want to set `trigger.completion.show_in_snippet = false`
   --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
   --
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
