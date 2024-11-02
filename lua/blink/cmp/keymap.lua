@@ -114,6 +114,8 @@ function keymap.setup(opts)
     end,
   })
 
+  -- This is not called when the plugin loads since it first checks if the binary is
+  -- installed. As a result, when lazy-loaded on InsertEnter, the event may be missed
   if vim.api.nvim_get_mode().mode == 'i' and not utils.is_blocked_buffer() then
     keymap.apply_keymap_to_current_buffer(mappings)
   end
