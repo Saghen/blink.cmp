@@ -394,7 +394,7 @@ local config = {
     },
     documentation = {
       min_width = 10,
-      max_width = 60,
+      max_width = 80,
       max_height = 20,
       border = 'padded',
       winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
