@@ -207,7 +207,7 @@ function autocomplete.update_position(context)
   vim.api.nvim_win_set_config(winnr, {
     relative = 'cursor',
     row = row,
-    col = col - (vim.tbl_contains({ 'minimal', 'reversed' }, autocmp_config.draw) and 1 or 0),
+    col = col - (vim.tbl_contains({ 'minimal', 'reversed' }, autocmp_config.draw) and 2 or 0),
   })
   vim.api.nvim_win_set_height(winnr, pos.height)
 
