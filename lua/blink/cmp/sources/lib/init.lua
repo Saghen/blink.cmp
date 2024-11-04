@@ -46,6 +46,16 @@ function sources.get_enabled_providers(context)
     or config.sources.completion.enabled_providers
   --- @cast mode_providers string[]
 
+  for _, provider in ipairs(mode_providers) do
+    assert(
+      sources.providers[provider] ~= nil,
+      'Requested provider "'
+        .. provider
+        .. '" has not been configured. Available providers: '
+        .. vim.fn.join(vim.tbl_keys(sources.providers), ', ')
+    )
+  end
+
   --- @type table<string, blink.cmp.SourceProvider>
   local providers = {}
   for key, provider in pairs(sources.providers) do
