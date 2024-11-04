@@ -29,7 +29,7 @@ local function get_win_buf_height(target_win)
 end
 
 --- @param target_win number
---- @return { should_hide: boolean, thumb: blink.cmp.ScrollbarGeometry, gutter: blink.cmp.ScrollbarGeometry }
+--- @return { should_hide_thumb: boolean, thumb: blink.cmp.ScrollbarGeometry, gutter: blink.cmp.ScrollbarGeometry }
 function M.get_geometry(target_win)
   local width = vim.api.nvim_win_get_width(target_win)
   local height = vim.api.nvim_win_get_height(target_win)
@@ -52,7 +52,7 @@ function M.get_geometry(target_win)
   }
 
   return {
-    should_hide = height >= buf_height,
+    should_hide_thumb = height >= buf_height,
     thumb = vim.tbl_deep_extend('force', common_geometry, { height = thumb_height, zindex = zindex + 2 }),
     gutter = vim.tbl_deep_extend('force', common_geometry, { row = 0, height = height, zindex = zindex + 1 }),
   }
