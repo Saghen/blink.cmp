@@ -238,7 +238,16 @@ end
 
 function win:get_direction_with_window_constraints(anchor_win, direction_priority)
   local cursor_constraints = self.get_cursor_screen_position()
+
   local anchor_config = vim.fn.screenpos(anchor_win:get_win(), 1, 1)
+  -- hack: sometimes vin.fn.screenpos returns 0,0
+  -- https://github.com/neovim/neovim/pull/30681
+  if anchor_config.row == 0 and anchor_config.col == 0 then
+    local row, col = unpack(vim.fn.win_screenpos(anchor_win:get_win()))
+    anchor_config.row = row
+    anchor_config.col = col
+  end
+
   local anchor_border_size = anchor_win:get_border_size()
   local anchor_col = anchor_config.col - anchor_border_size.left
   local anchor_row = anchor_config.row - anchor_border_size.top
