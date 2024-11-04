@@ -1,23 +1,18 @@
 local config = require('blink.cmp.config')
 local autocomplete = require('blink.cmp.windows.autocomplete')
+local text_edits_lib = require('blink.cmp.accept.text-edits')
+local snippets_utils = require('blink.cmp.sources.snippets.utils')
 
 local ghost_text_config = config.windows.ghost_text
 
+--- @class blink.cmp.windows.ghost_text
+--- @field win integer?
+--- @field selected_item blink.cmp.CompletionItem?
+--- @field extmark_id integer?
 local ghost_text = {
-  enabled = ghost_text_config and ghost_text_config.enabled,
-  extmark_id = 1,
-  ns_id = config.highlight.ns,
+  win = nil,
+  selected_item = nil,
 }
-
-function ghost_text.setup()
-  autocomplete.listen_on_select(function(item)
-    if ghost_text.enabled ~= true then return end
-    ghost_text.show_preview(item)
-  end)
-  autocomplete.listen_on_close(function() ghost_text.clear_preview() end)
-
-  return ghost_text
-end
 
 --- @param textEdit lsp.TextEdit
 local function get_still_untyped_text(textEdit)
@@ -26,31 +21,63 @@ local function get_still_untyped_text(textEdit)
   return result
 end
 
+function ghost_text.setup()
+  -- immediately re-draw the preview when the cursor moves/text changes
+  vim.api.nvim_create_autocmd({ 'CursorMovedI', 'TextChangedI' }, {
+    callback = function()
+      if not ghost_text_config.enabled or ghost_text.win == nil then return end
+      ghost_text.draw_preview(vim.api.nvim_win_get_buf(ghost_text.win))
+    end,
+  })
+
+  autocomplete.listen_on_select(function(item)
+    if ghost_text_config.enabled then ghost_text.show_preview(item) end
+  end)
+  autocomplete.listen_on_close(function() ghost_text.clear_preview() end)
+
+  return ghost_text
+end
+
 --- @param selected_item? blink.cmp.CompletionItem
 function ghost_text.show_preview(selected_item)
-  if selected_item == nil then return end
-  local text_edits_lib = require('blink.cmp.accept.text-edits')
-  local text_edit = text_edits_lib.get_from_item(selected_item)
+  -- nothing to show, clear the preview
+  if not selected_item then
+    ghost_text.clear_preview()
+    return
+  end
 
-  if selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
-    local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(text_edit.newText)
+  -- update state and redraw
+  local changed = ghost_text.selected_item ~= selected_item
+  ghost_text.selected_item = selected_item
+  ghost_text.win = vim.api.nvim_get_current_win()
+  if changed then ghost_text.draw_preview(vim.api.nvim_win_get_buf(ghost_text.win)) end
+end
+
+function ghost_text.clear_preview()
+  ghost_text.selected_item = nil
+  ghost_text.win = nil
+  if ghost_text.extmark_id ~= nil then
+    vim.api.nvim_buf_del_extmark(0, config.highlight.ns, ghost_text.extmark_id)
+    ghost_text.extmark_id = nil
+  end
+end
+
+function ghost_text.draw_preview(bufnr)
+  if not ghost_text.selected_item then return end
+
+  local text_edit = text_edits_lib.get_from_item(ghost_text.selected_item)
+
+  if ghost_text.selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+    local expanded_snippet = snippets_utils.safe_parse(text_edit.newText)
     text_edit.newText = expanded_snippet and tostring(expanded_snippet) or text_edit.newText
   end
 
   local display_lines = vim.split(get_still_untyped_text(text_edit), '\n', { plain = true }) or {}
 
-  --- @type vim.api.keyset.set_extmark
-  local extmark = {
-    id = ghost_text.extmark_id,
-    virt_text_pos = 'inline',
-    virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
-    hl_mode = 'combine',
-  }
-
+  local virt_lines = {}
   if #display_lines > 1 then
-    extmark.virt_lines = {}
     for i = 2, #display_lines do
-      extmark.virt_lines[i - 1] = { { display_lines[i], 'BlinkCmpGhostText' } }
+      virt_lines[i - 1] = { { display_lines[i], 'BlinkCmpGhostText' } }
     end
   end
 
@@ -58,9 +85,14 @@ function ghost_text.show_preview(selected_item)
     text_edit.range.start.line,
     text_edit.range['end'].character,
   }
-  vim.api.nvim_buf_set_extmark(0, ghost_text.ns_id, cursor_pos[1], cursor_pos[2], extmark)
-end
 
-function ghost_text.clear_preview() vim.api.nvim_buf_del_extmark(0, ghost_text.ns_id, ghost_text.extmark_id) end
+  ghost_text.extmark_id = vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, cursor_pos[1], cursor_pos[2], {
+    id = ghost_text.extmark_id,
+    virt_text_pos = 'inline',
+    virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
+    virt_lines = virt_lines,
+    hl_mode = 'combine',
+  })
+end
 
 return ghost_text
