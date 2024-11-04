@@ -121,7 +121,13 @@ function docs.update_position()
   end
 
   -- decide direction, width and height of window
-  local pos = docs.win:get_direction_with_window_constraints(autocomplete.win, direction_priority)
+  local width = docs.win:get_width()
+  local height = docs.win:get_height()
+  local pos = docs.win:get_direction_with_window_constraints(
+    autocomplete.win,
+    direction_priority,
+    { width = math.min(width, config.desired_min_width), height = math.min(height, config.desired_min_height) }
+  )
 
   -- couldn't find anywhere to place the window
   if not pos then

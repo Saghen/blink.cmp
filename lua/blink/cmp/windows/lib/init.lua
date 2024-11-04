@@ -29,7 +29,7 @@
 --- @field get_width fun(self: blink.cmp.Window): number
 --- @field get_cursor_screen_position fun(): { distance_from_top: number, distance_from_bottom: number }
 --- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: ("n" | "s")[]): { height: number, direction: 'n' | 's' }?
---- @field get_direction_with_window_constraints fun(self: blink.cmp.Window, anchor_win: blink.cmp.Window, direction_priority: ("n" | "s" | "e" | "w")[]): { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
+--- @field get_direction_with_window_constraints fun(self: blink.cmp.Window, anchor_win: blink.cmp.Window, direction_priority: ("n" | "s" | "e" | "w")[], desired_min_size?: { width: number, height: number }): { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
 
 --- @type blink.cmp.Window
 --- @diagnostic disable-next-line: missing-fields
@@ -236,7 +236,7 @@ function win:get_vertical_direction_and_height(direction_priority)
   return { height = height - border_size.vertical, direction = direction }
 end
 
-function win:get_direction_with_window_constraints(anchor_win, direction_priority)
+function win:get_direction_with_window_constraints(anchor_win, direction_priority, desired_min_size)
   local cursor_constraints = self.get_cursor_screen_position()
 
   local anchor_config = vim.fn.screenpos(anchor_win:get_win(), 1, 1)
@@ -289,6 +289,19 @@ function win:get_direction_with_window_constraints(anchor_win, direction_priorit
   local direction_priority_by_space = vim.fn.sort(vim.deepcopy(direction_priority), function(a, b)
     local constraints_a = direction_constraints[a]
     local constraints_b = direction_constraints[b]
+
+    local is_desired_a = desired_min_size.height <= constraints_a.vertical
+      and desired_min_size.width <= constraints_a.horizontal
+    local is_desired_b = desired_min_size.height <= constraints_b.vertical
+      and desired_min_size.width <= constraints_b.horizontal
+
+    -- prioritize "a" if it has the desired size
+    if is_desired_a then return -1 end
+
+    -- prioritize "b" if it has the desired size and "a" doesn't
+    if not is_desired_a and is_desired_b then return 1 end
+
+    -- neither have the desired size, so pick based on which has the most space
     local distance_a = math.min(max_height, constraints_a.vertical, constraints_a.horizontal)
     local distance_b = math.min(max_height, constraints_b.vertical, constraints_b.horizontal)
     return distance_a < distance_b and 1 or distance_a > distance_b and -1 or 0

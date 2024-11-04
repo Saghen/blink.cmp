@@ -134,9 +134,10 @@
 --- @alias blink.cmp.WindowBorder 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | 'none' | blink.cmp.WindowBorderChar[]
 ---
 --- @class blink.cmp.DocumentationConfig
---- @field min_width? number
 --- @field max_width? number
 --- @field max_height? number
+--- @field desired_min_width? number
+--- @field desired_min_height? number
 --- @field border? blink.cmp.WindowBorder
 --- @field direction_priority? blink.cmp.DocumentationDirectionPriorityConfig
 --- @field auto_show? boolean
@@ -397,9 +398,10 @@ local config = {
       },
     },
     documentation = {
-      min_width = 10,
       max_width = 80,
       max_height = 20,
+      desired_min_width = 40,
+      desired_min_height = 10,
       border = 'padded',
       winblend = 0,
       winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
