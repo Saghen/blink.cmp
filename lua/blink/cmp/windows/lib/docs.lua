@@ -196,7 +196,7 @@ function docs.extract_detail_from_doc(detail_lines, doc_lines)
   local doc_str_detail_row = doc_str:find(detail_str, 1, true)
 
   -- didn't find the detail in the doc, so return as is
-  if doc_str_detail_row == nil then
+  if doc_str_detail_row == nil or #detail_str == 0 or #doc_str == 0 then
     return detail_lines, doc_lines
   end
 
