@@ -7,6 +7,7 @@
 --- @field buf? number
 ---
 --- @field new fun(opts: blink.cmp.ScrollbarConfig): blink.cmp.ScrollbarWin
+--- @field is_visible fun(self: blink.cmp.ScrollbarWin): boolean
 --- @field show_thumb fun(self: blink.cmp.ScrollbarWin, geometry: blink.cmp.ScrollbarGeometry)
 --- @field show_gutter fun(self: blink.cmp.ScrollbarWin, geometry: blink.cmp.ScrollbarGeometry)
 --- @field hide_thumb fun(self: blink.cmp.ScrollbarWin)
@@ -17,6 +18,8 @@
 local scrollbar_win = {}
 
 function scrollbar_win.new(opts) return setmetatable(opts, { __index = scrollbar_win }) end
+
+function scrollbar_win:is_visible() return self.thumb_win ~= nil and vim.api.nvim_win_is_valid(self.thumb_win) end
 
 function scrollbar_win:show_thumb(geometry)
   -- create window if it doesn't exist

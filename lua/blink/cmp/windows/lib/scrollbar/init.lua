@@ -7,6 +7,7 @@
 --- @field autocmd? number
 ---
 --- @field new fun(opts: blink.cmp.ScrollbarConfig): blink.cmp.Scrollbar
+--- @field is_visible fun(self: blink.cmp.Scrollbar): boolean
 --- @field is_mounted fun(self: blink.cmp.Scrollbar): boolean
 --- @field mount fun(self: blink.cmp.Scrollbar, target_win: number)
 --- @field unmount fun(self: blink.cmp.Scrollbar)
@@ -20,6 +21,8 @@ function scrollbar.new(opts)
   self.win = require('blink.cmp.windows.lib.scrollbar.win').new(opts)
   return self
 end
+
+function scrollbar:is_visible() return self.win:is_visible() end
 
 function scrollbar:is_mounted() return self.autocmd ~= nil end
 
@@ -40,12 +43,10 @@ function scrollbar:mount(target_win)
     if not vim.api.nvim_win_is_valid(target_win) then return self:unmount() end
 
     local updated_geometry = require('blink.cmp.windows.lib.scrollbar.geometry').get_geometry(target_win)
+    if updated_geometry.should_hide then return self.win:hide() end
+
+    self.win:show_thumb(updated_geometry.thumb)
     self.win:show_gutter(updated_geometry.gutter)
-    if updated_geometry.should_hide_thumb then
-      self.win:hide_thumb()
-    else
-      self.win:show_thumb(updated_geometry.thumb)
-    end
   end
   -- HACK: for some reason, the autocmds don't fire on the initial mount
   -- so we apply after on the next event loop iteration after the windows are definitely setup

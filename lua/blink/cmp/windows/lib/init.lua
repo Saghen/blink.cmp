@@ -155,7 +155,9 @@ function win:get_border_size()
 
   local border = self.config.border
   if border == 'none' then
-    if self.config.scrollbar then return { vertical = 0, horizontal = 1, left = 0, right = 1, top = 0, bottom = 0 } end
+    if self.scrollbar and self.scrollbar:is_visible() then
+      return { vertical = 0, horizontal = 1, left = 0, right = 1, top = 0, bottom = 0 }
+    end
     return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
   elseif border == 'padded' then
     return { vertical = 0, horizontal = 2, left = 1, right = 1, top = 0, bottom = 0 }
@@ -182,7 +184,9 @@ function win:get_border_size()
     return { vertical = top + bottom, horizontal = left + right, left = left, right = right, top = top, bottom = bottom }
   end
 
-  if self.config.scrollbar then return { vertical = 0, horizontal = 1, left = 0, right = 1, top = 0, bottom = 0 } end
+  if self.scrollbar and self.scrollbar:is_visible() then
+    return { vertical = 0, horizontal = 1, left = 0, right = 1, top = 0, bottom = 0 }
+  end
   return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
 end
 
