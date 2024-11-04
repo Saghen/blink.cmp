@@ -69,6 +69,7 @@ function docs.show_item(item)
 
       if autocomplete.win:get_win() then
         docs.win:open()
+        vim.api.nvim_win_set_cursor(docs.win:get_win(), { 1, 0 }) -- reset scroll
         docs.update_position()
       end
     end)
