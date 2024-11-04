@@ -112,6 +112,7 @@
 --- @field min_width? number
 --- @field max_height? number
 --- @field border? blink.cmp.WindowBorder
+--- @field scrollbar? boolean
 --- @field order? "top_down" | "bottom_up"
 --- @field direction_priority? ("n" | "s")[]
 --- @field auto_show? boolean
@@ -139,12 +140,13 @@
 --- @field desired_min_width? number
 --- @field desired_min_height? number
 --- @field border? blink.cmp.WindowBorder
+--- @field winblend? number
+--- @field winhighlight? string
+--- @field scrollbar? boolean
 --- @field direction_priority? blink.cmp.DocumentationDirectionPriorityConfig
 --- @field auto_show? boolean
 --- @field auto_show_delay_ms? number Delay before showing the documentation window
 --- @field update_delay_ms? number Delay before updating the documentation window
---- @field winblend? number
---- @field winhighlight? string
 
 --- @class blink.cmp.SignatureHelpConfig
 --- @field min_width? number
@@ -153,6 +155,7 @@
 --- @field border? blink.cmp.WindowBorder
 --- @field winblend? number
 --- @field winhighlight? string
+--- @field scrollbar? boolean
 --- @field direction_priority? ("n" | "s")[]
 
 --- @class GhostTextConfig
@@ -371,6 +374,8 @@ local config = {
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
       -- keep the cursor X lines away from the top/bottom of the window
       scrolloff = 2,
+      -- note that the gutter will be disabled when border ~= 'none'
+      scrollbar = true,
       -- TODO: implement
       order = 'top_down',
       -- which directions to show the window,
@@ -405,6 +410,8 @@ local config = {
       border = 'padded',
       winblend = 0,
       winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
+      -- note that the gutter will be disabled when border ~= 'none'
+      scrollbar = true,
       -- which directions to show the documentation window,
       -- for each of the possible autocomplete window directions,
       -- falling back to the next direction when there's not enough space
@@ -424,6 +431,8 @@ local config = {
       border = 'padded',
       winblend = 0,
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
+      -- note that the gutter will be disabled when border ~= 'none'
+      scrollbar = false,
 
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space

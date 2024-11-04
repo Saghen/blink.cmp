@@ -6,13 +6,16 @@
 --- @field border? blink.cmp.WindowBorder
 --- @field wrap? boolean
 --- @field filetype? string
+--- @field winblend? number
 --- @field winhighlight? string
 --- @field scrolloff? number
+--- @field scrollbar? boolean
 
 --- @class blink.cmp.Window
 --- @field id? number
 --- @field buf? number
 --- @field config blink.cmp.WindowOptions
+--- @field scrollbar? blink.cmp.Scrollbar
 ---
 --- @field new fun(config: blink.cmp.WindowOptions): blink.cmp.Window
 --- @field get_buf fun(self: blink.cmp.Window): number
@@ -52,7 +55,12 @@ function win.new(config)
     winblend = config.winblend or 0,
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
+    scrollbar = config.scrollbar,
   }
+
+  if self.config.scrollbar then
+    self.scrollbar = require('blink.cmp.windows.lib.scrollbar').new({ enable_gutter = self.config.border == 'none' })
+  end
 
   return self
 end
@@ -100,6 +108,8 @@ function win:open()
   vim.api.nvim_set_option_value('cursorlineopt', 'line', { win = self.id })
   vim.api.nvim_set_option_value('cursorline', self.config.cursorline, { win = self.id })
   vim.api.nvim_set_option_value('scrolloff', self.config.scrolloff, { win = self.id })
+
+  if self.scrollbar then self.scrollbar:mount(self.id) end
 end
 
 function win:set_option_value(option, value) vim.api.nvim_set_option_value(option, value, { win = self.id }) end
@@ -109,6 +119,7 @@ function win:close()
     vim.api.nvim_win_close(self.id, true)
     self.id = nil
   end
+  if self.scrollbar then self.scrollbar:unmount() end
 end
 
 --- Updates the size of the window to match the max width and height of the content/config
@@ -138,15 +149,13 @@ function win:get_content_height()
 end
 
 --- Gets the size of the borders around the window
---- @param border? 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | string[]
 --- @return { vertical: number, horizontal: number, left: number, right: number, top: number, bottom: number }
-function win:get_border_size(border)
-  if not border and not self:is_open() then
-    return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
-  end
+function win:get_border_size()
+  if not self:is_open() then return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 } end
 
-  border = border or self.config.border
+  local border = self.config.border
   if border == 'none' then
+    if self.config.scrollbar then return { vertical = 0, horizontal = 1, left = 0, right = 1, top = 0, bottom = 0 } end
     return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
   elseif border == 'padded' then
     return { vertical = 0, horizontal = 2, left = 1, right = 1, top = 0, bottom = 0 }
@@ -158,6 +167,7 @@ function win:get_border_size(border)
     -- borders can be a table of strings and act differently with different # of chars
     -- so we normalize it: https://neovim.io/doc/user/api.html#nvim_open_win()
     -- based on nvim-cmp
+    -- TODO: doesn't handle scrollbar
     local resolved_border = {}
     while #resolved_border <= 8 do
       for _, b in ipairs(border) do
@@ -172,6 +182,7 @@ function win:get_border_size(border)
     return { vertical = top + bottom, horizontal = left + right, left = left, right = right, top = top, bottom = bottom }
   end
 
+  if self.config.scrollbar then return { vertical = 0, horizontal = 1, left = 0, right = 1, top = 0, bottom = 0 } end
   return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
 end
 

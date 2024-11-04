@@ -81,6 +81,7 @@ function autocomplete.setup()
     winhighlight = autocmp_config.winhighlight,
     cursorline = false,
     scrolloff = autocmp_config.scrolloff,
+    scrollbar = autocmp_config.scrollbar,
   })
 
   -- Setting highlights is slow and we update on every keystroke so we instead use a decoration provider

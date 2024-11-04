@@ -11,6 +11,7 @@ function signature.setup()
     border = config.border,
     winblend = config.winblend,
     winhighlight = config.winhighlight,
+    scrollbar = config.scrollbar,
     wrap = true,
     filetype = 'markdown',
   })

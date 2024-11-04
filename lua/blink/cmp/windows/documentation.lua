@@ -12,6 +12,7 @@ function docs.setup()
     border = config.border,
     winblend = config.winblend,
     winhighlight = config.winhighlight,
+    scrollbar = config.scrollbar,
     wrap = true,
     filetype = 'markdown',
   })
@@ -168,7 +169,7 @@ function docs.update_position()
   elseif pos.direction == 'e' then
     set_config({
       row = -autocomplete_border_size.top,
-      col = autocomplete_win_config.width + autocomplete_border_size.left,
+      col = autocomplete_win_config.width + autocomplete_border_size.right,
     })
   elseif pos.direction == 'w' then
     set_config({ row = -autocomplete_border_size.top, col = -width - autocomplete_border_size.left })
