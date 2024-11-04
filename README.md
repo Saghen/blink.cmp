@@ -137,6 +137,7 @@ MiniDeps.add({
 | `BlinkCmpLabel` | Pmenu | Label of the completion item |
 | `BlinkCmpLabelDeprecated` | Comment | Deprecated label of the completion item |
 | `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
+| `BlinkCmpGhostText` | Comment | Preview item with ghost text  |
 | `BlinkCmpKind` | Special | Kind icon/text of the completion item |
 | `BlinkCmpKind<kind>` | Special | Kind icon/text of the completion item |
 | `BlinkCmpDoc` | NormalFloat | The documentation window |
