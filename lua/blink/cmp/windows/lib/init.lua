@@ -8,11 +8,13 @@
 --- @field filetype? string
 --- @field winhighlight? string
 --- @field scrolloff? number
+--- @field scrollbar? boolean
 
 --- @class blink.cmp.Window
 --- @field id? number
 --- @field buf? number
 --- @field config blink.cmp.WindowOptions
+--- @field scrollbar? blink.cmp.Scrollbar
 ---
 --- @field new fun(config: blink.cmp.WindowOptions): blink.cmp.Window
 --- @field get_buf fun(self: blink.cmp.Window): number
@@ -52,7 +54,10 @@ function win.new(config)
     winblend = config.winblend or 0,
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
+    scrollbar = config.scrollbar,
   }
+
+  if self.config.scrollbar then self.scrollbar = require('blink.cmp.windows.lib.scrollbar').new() end
 
   return self
 end
@@ -100,6 +105,11 @@ function win:open()
   vim.api.nvim_set_option_value('cursorlineopt', 'line', { win = self.id })
   vim.api.nvim_set_option_value('cursorline', self.config.cursorline, { win = self.id })
   vim.api.nvim_set_option_value('scrolloff', self.config.scrolloff, { win = self.id })
+
+  if self.scrollbar then
+    self.scrollbar.target = self.id
+    self.scrollbar:update()
+  end
 end
 
 function win:set_option_value(option, value) vim.api.nvim_set_option_value(option, value, { win = self.id }) end
@@ -109,6 +119,7 @@ function win:close()
     vim.api.nvim_win_close(self.id, true)
     self.id = nil
   end
+  if self.scrollbar then self.scrollbar:unmount() end
 end
 
 --- Updates the size of the window to match the max width and height of the content/config
@@ -128,6 +139,8 @@ function win:update_size()
   -- set height to current line count, bounded by max
   local height = math.min(self:get_content_height(), config.max_height)
   vim.api.nvim_win_set_height(winnr, height)
+
+  if self.scrollbar then self.scrollbar:update() end
 end
 
 -- todo: fix nvim_win_text_height
