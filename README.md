@@ -390,6 +390,8 @@ MiniDeps.add({
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
       -- keep the cursor X lines away from the top/bottom of the window
       scrolloff = 2,
+      -- note that the gutter will be disabled when border ~= 'none'
+      scrollbar = true,
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 's', 'n' },
@@ -421,6 +423,8 @@ MiniDeps.add({
       border = 'padded',
       winblend = 0,
       winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
+      -- note that the gutter will be disabled when border ~= 'none'
+      scrollbar = true,
       -- which directions to show the documentation window,
       -- for each of the possible autocomplete window directions,
       -- falling back to the next direction when there's not enough space
@@ -440,6 +444,8 @@ MiniDeps.add({
       border = 'padded',
       winblend = 0,
       winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
+      -- note that the gutter will be disabled when border ~= 'none'
+      scrollbar = false,
 
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
