@@ -370,6 +370,8 @@ end
 --- @param ctx blink.cmp.CompletionRenderContext
 --- @return blink.cmp.Component[]
 function autocomplete.draw_item_simple(ctx)
+  local detail = (ctx.item.labelDetails and ctx.item.labelDetails.detail) and
+      ctx.item.labelDetails.detail:gsub('\n', '\\n') or ''
   return {
     ' ',
     {
@@ -380,7 +382,7 @@ function autocomplete.draw_item_simple(ctx)
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or '',
-      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
+      detail,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 80,
@@ -392,12 +394,14 @@ end
 --- @param ctx blink.cmp.CompletionRenderContext
 --- @return blink.cmp.Component[]
 function autocomplete.draw_item_reversed(ctx)
+  local detail = (ctx.item.labelDetails and ctx.item.labelDetails.detail) and
+      ctx.item.labelDetails.detail:gsub('\n', '\\n') or ''
   return {
     ' ',
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
-      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
+      detail,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
@@ -416,12 +420,14 @@ end
 --- @param ctx blink.cmp.CompletionRenderContext
 --- @return blink.cmp.Component[]
 function autocomplete.draw_item_minimal(ctx)
+  local detail = (ctx.item.labelDetails and ctx.item.labelDetails.detail) and
+      ctx.item.labelDetails.detail:gsub('\n', '\\n') or ''
   return {
     ' ',
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
-      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
+      detail,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
