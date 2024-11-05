@@ -1,6 +1,7 @@
 --- @class blink.cmp.CompletionRenderContext
 --- @field item blink.cmp.CompletionItem
 --- @field label string
+--- @field detail string
 --- @field kind string
 --- @field kind_icon string
 --- @field icon_gap string
@@ -324,9 +325,11 @@ function autocomplete.draw()
   for _, item in ipairs(autocomplete.items) do
     local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
     local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
-    -- Some LSPs can return labels with newlines.
+    -- Some LSPs can return labels and details with newlines.
     -- Escape them to avoid errors in nvim_buf_set_lines when rendering the autocomplete menu.
     local label = item.label:gsub('\n', '\\n')
+    local detail = (item.labelDetails and item.labelDetails.detail) and
+        item.labelDetails.detail:gsub('\n', '\\n') or ''
     if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
     table.insert(
@@ -334,6 +337,7 @@ function autocomplete.draw()
       draw_fn({
         item = item,
         label = label,
+        detail = detail,
         kind = kind,
         kind_icon = kind_icon,
         icon_gap = icon_gap,
@@ -380,7 +384,7 @@ function autocomplete.draw_item_simple(ctx)
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or '',
-      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
+      ctx.detail,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 80,
@@ -397,7 +401,7 @@ function autocomplete.draw_item_reversed(ctx)
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
-      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
+      ctx.detail,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
@@ -421,7 +425,7 @@ function autocomplete.draw_item_minimal(ctx)
     {
       ctx.label,
       ctx.kind == 'Snippet' and '~' or nil,
-      (ctx.item.labelDetails and ctx.item.labelDetails.detail) and ctx.item.labelDetails.detail or '',
+      ctx.detail,
       fill = true,
       hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
       max_width = 50,
