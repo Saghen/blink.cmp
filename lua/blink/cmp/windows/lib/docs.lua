@@ -154,6 +154,7 @@ end
 --- @param row number
 --- @return number?, number?
 function docs.get_code_block_range(lines, row)
+  if row < 1 or row > #lines then return end
   -- get the start of the code block
   local code_block_start = nil
   for i = 1, row do
