@@ -39,9 +39,11 @@ function M.get_geometry(target_win)
 
   local thumb_height = math.max(1, math.floor(height * height / buf_height + 0.5) - 1)
 
-  local start_line = math.max(1, vim.fn.line('w0', target_win) - 1)
-  local pct = (start_line - 1) / buf_height
-  local thumb_offset = math.ceil(pct * (height - thumb_height))
+  local start_line = math.max(1, vim.fn.line('w0', target_win))
+
+  local pct = (start_line - 1) / (buf_height - height)
+
+  local thumb_offset = math.floor((pct * (height - thumb_height)) + 0.5)
 
   local common_geometry = {
     width = 1,
