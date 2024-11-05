@@ -8,9 +8,7 @@ function override.new(module, override_config)
 
   return setmetatable({}, {
     __index = function(_, key)
-      if override_config[key] ~= nil then
-        return function(self, ...) return override_config[key](self.module, ...) end
-      end
+      if override_config[key] ~= nil then return function(_, ...) return override_config[key](module, ...) end end
       return module[key]
     end,
   })
