@@ -4,7 +4,7 @@ local function preview(item, previous_text_edit)
   local text_edit = text_edits_lib.get_from_item(item)
 
   -- with auto_insert, we may have to undo the previous preview
-  if previous_text_edit ~= nil then text_edit.range = text_edits_lib.get_undo_text_edit_range(previous_text_edit) end
+  if previous_text_edit ~= nil then text_edit.range = text_edits_lib.get_undo_range(previous_text_edit) end
 
   -- for snippets, expand them with the default property names
   local cursor_pos = {
@@ -23,7 +23,7 @@ local function preview(item, previous_text_edit)
     end
   end
 
-  text_edits_lib.apply_text_edits(item.client_id, { text_edit })
+  text_edits_lib.apply(item.client_id, { text_edit })
   vim.api.nvim_win_set_cursor(0, cursor_pos)
 
   -- return so that it can be undone in the future

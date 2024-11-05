@@ -1,6 +1,38 @@
 local config = require('blink.cmp.config')
 local text_edits = {}
 
+--- Applies one or more text edits to the current buffer, assuming utf-8 encoding
+--- @param edits lsp.TextEdit[]
+function text_edits.apply(edits) vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8') end
+
+------- Undo -------
+
+--- Gets the range for undoing an applied text edit
+--- @param text_edit lsp.TextEdit
+function text_edits.get_undo_range(text_edit)
+  text_edit = vim.deepcopy(text_edit)
+  local lines = vim.split(text_edit.newText, '\n')
+  local last_line_len = lines[#lines] and #lines[#lines] or 0
+
+  local range = text_edit.range
+  range['end'].line = range.start.line + #lines - 1
+  range['end'].character = #lines > 1 and last_line_len or range.start.character + last_line_len
+
+  return range
+end
+
+--- Undoes a text edit
+--- @param text_edit lsp.TextEdit
+function text_edits.undo(text_edit)
+  text_edit = vim.deepcopy(text_edit)
+  text_edit.range = text_edits.get_undo_range(text_edit)
+  text_edit.newText = ''
+
+  text_edits.apply({ text_edit })
+end
+
+------- Get -------
+
 --- Grabbed from vim.lsp.utils. Converts an offset_encoding to byte offset
 --- @param position lsp.Position
 --- @param offset_encoding string|nil utf-8|utf-16|utf-32
@@ -19,6 +51,8 @@ local function get_line_byte_from_position(position, offset_encoding)
   return col
 end
 
+--- Gets the text edit from an item, handling insert/replace ranges and converts
+--- offset encodings (utf-16 | utf-32) to byte offset (equivalent to utf-8)
 --- @param item blink.cmp.CompletionItem
 --- @return lsp.TextEdit
 function text_edits.get_from_item(item)
@@ -50,38 +84,13 @@ function text_edits.get_from_item(item)
   end
 
   -- No text edit so we fallback to our own resolution
-  return text_edits.guess_text_edit(item)
+  return text_edits.guess(item)
 end
 
---- @param edits lsp.TextEdit[]
-function text_edits.apply_text_edits(edits)
-  vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8')
-end
-
---- @param text_edit lsp.TextEdit
-function text_edits.get_undo_text_edit_range(text_edit)
-  text_edit = vim.deepcopy(text_edit)
-  local lines = vim.split(text_edit.newText, '\n')
-  local last_line_len = lines[#lines] and #lines[#lines] or 0
-
-  local range = text_edit.range
-  range['end'].line = range.start.line + #lines - 1
-  range['end'].character = #lines > 1 and last_line_len or range.start.character + last_line_len
-
-  return range
-end
-
-function text_edits.undo_text_edit(text_edit)
-  text_edit = vim.deepcopy(text_edit)
-  text_edit.range = text_edits.get_undo_text_edit_range(text_edit)
-  text_edit.newText = ''
-
-  text_edits.apply_text_edits({ text_edit })
-end
-
+--- Uses the keyword_regex to guess the text edit ranges
 --- @param item blink.cmp.CompletionItem
 --- TODO: doesnt work when the item contains characters not included in the context regex
-function text_edits.guess_text_edit(item)
+function text_edits.guess(item)
   local word = item.textEditText or item.insertText or item.label
 
   local cmp_config = config.trigger.completion
@@ -93,15 +102,13 @@ function text_edits.guess_text_edit(item)
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
 
   -- convert to 0-index
-  local text_edit = {
+  return {
     range = {
       start = { line = current_line - 1, character = range.start_col - 1 },
       ['end'] = { line = current_line - 1, character = range.start_col - 1 + range.length },
     },
     newText = word,
   }
-
-  return text_edit
 end
 
 return text_edits
