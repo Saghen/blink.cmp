@@ -1,6 +1,24 @@
 local config = require('blink.cmp.config')
 local text_edits = {}
 
+--- Position is a https://microsoft.github.io/language-server-protocol/specifications/specification-current/#position
+--- @param position lsp.Position
+--- @param offset_encoding string|nil utf-8|utf-16|utf-32
+--- @return integer
+local function get_line_byte_from_position(position, offset_encoding)
+  local bufnr = vim.api.nvim_get_current_buf()
+  -- LSP's line and characters are 0-indexed
+  -- Vim's line and columns are 1-indexed
+  local col = position.character
+  -- When on the first character, we can ignore the difference between byte and
+  -- character
+  if col > 0 then
+    local line = vim.api.nvim_buf_get_lines(bufnr, position.line, position.line + 1, true)[1] or ''
+    return vim.lsp.util._str_byteindex_enc(line, col, offset_encoding or 'utf-16')
+  end
+  return col
+end
+
 --- @param item blink.cmp.CompletionItem
 --- @return lsp.TextEdit
 function text_edits.get_from_item(item)
@@ -17,6 +35,15 @@ function text_edits.get_from_item(item)
     end
 
     local text_edit = vim.deepcopy(item.textEdit)
+
+    local client = vim.lsp.get_client_by_id(client_id)
+    local offset_encoding = client ~= nil and client.offset_encoding or 'utf-8'
+
+    if offset_encoding ~= 'utf-8' then
+      text_edit.range.start.character = get_line_byte_from_position(text_edit.range.start, offset_encoding)
+      text_edit.range['end'].character = get_line_byte_from_position(text_edit.range['end'], offset_encoding)
+    end
+
     local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
     text_edit.range['end'].character = text_edit.range['end'].character + offset
     return text_edit
@@ -26,12 +53,9 @@ function text_edits.get_from_item(item)
   return text_edits.guess_text_edit(item)
 end
 
---- @param client_id number
 --- @param edits lsp.TextEdit[]
-function text_edits.apply_text_edits(client_id, edits)
-  local client = vim.lsp.get_client_by_id(client_id)
-  local offset_encoding = client ~= nil and client.offset_encoding or 'utf-16'
-  vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), offset_encoding)
+function text_edits.apply_text_edits(edits)
+  vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8')
 end
 
 --- @param text_edit lsp.TextEdit
@@ -52,7 +76,7 @@ function text_edits.undo_text_edit(text_edit)
   text_edit.range = text_edits.get_undo_text_edit_range(text_edit)
   text_edit.newText = ''
 
-  vim.lsp.util.apply_text_edits({ text_edit }, vim.api.nvim_get_current_buf(), 'utf-16')
+  text_edits.apply_text_edits({ text_edit })
 end
 
 --- @param item blink.cmp.CompletionItem
@@ -69,13 +93,15 @@ function text_edits.guess_text_edit(item)
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
 
   -- convert to 0-index
-  return {
+  local text_edit = {
     range = {
       start = { line = current_line - 1, character = range.start_col - 1 },
       ['end'] = { line = current_line - 1, character = range.start_col - 1 + range.length },
     },
     newText = word,
   }
+
+  return text_edit
 end
 
 return text_edits

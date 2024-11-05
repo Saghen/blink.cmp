@@ -34,7 +34,7 @@ local function accept(item)
         local temp_text_edit = vim.deepcopy(item.textEdit)
         temp_text_edit.newText = ''
         table.insert(all_text_edits, temp_text_edit)
-        text_edits_lib.apply_text_edits(item.client_id, all_text_edits)
+        text_edits_lib.apply_text_edits(all_text_edits)
 
         -- Expand the snippet
         vim.snippet.expand(item.textEdit.newText)
@@ -42,7 +42,7 @@ local function accept(item)
       -- OR Normal: Apply the text edit and move the cursor
       else
         table.insert(all_text_edits, item.textEdit)
-        text_edits_lib.apply_text_edits(item.client_id, all_text_edits)
+        text_edits_lib.apply_text_edits(all_text_edits)
         -- TODO: should move the cursor only by the offset since text edit handles everything else?
         vim.api.nvim_win_set_cursor(0, {
           vim.api.nvim_win_get_cursor(0)[1],
