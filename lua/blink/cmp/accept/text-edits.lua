@@ -1,7 +1,7 @@
 local config = require('blink.cmp.config')
 local text_edits = {}
 
---- Position is a https://microsoft.github.io/language-server-protocol/specifications/specification-current/#position
+--- Grabbed from vim.lsp.utils. Converts an offset_encoding to byte offset
 --- @param position lsp.Position
 --- @param offset_encoding string|nil utf-8|utf-16|utf-32
 --- @return integer
