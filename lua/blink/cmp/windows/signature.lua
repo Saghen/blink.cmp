@@ -129,9 +129,16 @@ function signature.update_position()
 
   -- default to the user's preference but attempt to use the other options
   local row = pos.direction == 's' and 1 or -height
-  local screenpos = vim.fn.screenpos(0, unpack(vim.api.nvim_win_get_cursor(0)))
-  local col = autocomplete_win_config and (autocomplete_win_config.col - screenpos.col) or 0
-  vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col })
+  if autocomplete_win_config then
+    vim.api.nvim_win_set_config(winnr, {
+      relative = autocomplete_win_config.relative,
+      win = autocomplete_win_config.win,
+      row = row,
+      col = autocomplete_win_config.col,
+    })
+  else
+    vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = 0 })
+  end
   vim.api.nvim_win_set_height(winnr, pos.height)
 end
 

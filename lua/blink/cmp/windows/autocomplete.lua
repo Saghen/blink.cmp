@@ -1,18 +1,3 @@
---- @class blink.cmp.CompletionRenderContext
---- @field item blink.cmp.CompletionItem
---- @field label string
-<<<<<<< HEAD
---- @field detail string
-=======
---- @field label_matched_indices number[]
->>>>>>> 52d9519 (feat: matched character highlighting)
---- @field kind string
---- @field kind_icon string
---- @field icon_gap string
---- @field deprecated boolean
-
---- @alias blink.cmp.CompletionDrawFn fun(ctx: blink.cmp.CompletionRenderContext): blink.cmp.Component[]
-
 --- @class blink.cmp.CompletionWindowEventTargets
 --- @field on_open table<fun()>
 --- @field on_close table<fun()>
@@ -22,7 +7,6 @@
 --- @class blink.cmp.CompletionWindow
 --- @field win blink.cmp.Window
 --- @field items blink.cmp.CompletionItem[]
---- @field rendered_items? blink.cmp.RenderedComponentTree[]
 --- @field has_selected? boolean
 --- @field auto_show boolean
 --- @field context blink.cmp.Context?
@@ -30,7 +14,7 @@
 ---
 --- @field setup fun(): blink.cmp.CompletionWindow
 ---
---- @field open_with_items fun(context: blink.cmp.CompletionRenderContext, items: blink.cmp.CompletionItem[])
+--- @field open_with_items fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
 --- @field open fun()
 --- @field close fun()
 --- @field listen_on_open fun(callback: fun())

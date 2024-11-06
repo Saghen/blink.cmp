@@ -254,13 +254,18 @@ end
 function win:get_direction_with_window_constraints(anchor_win, direction_priority, desired_min_size)
   local cursor_constraints = self.get_cursor_screen_position()
 
-  local anchor_config = vim.fn.screenpos(anchor_win:get_win(), 1, 1)
-  -- hack: sometimes vin.fn.screenpos returns 0,0
-  -- https://github.com/neovim/neovim/pull/30681
-  if anchor_config.row == 0 and anchor_config.col == 0 then
-    local row, col = unpack(vim.fn.win_screenpos(anchor_win:get_win()))
-    anchor_config.row = row
-    anchor_config.col = col
+  -- nvim.api.nvim_win_get_position doesn't return the correct position most of the time
+  -- so we calculate the position ourselves, and assume the anchor window uses relative = 'win'
+  local anchor_win_config = vim.api.nvim_win_get_config(anchor_win:get_win())
+  assert(anchor_win_config.relative == 'win', 'The anchor window must be relative to a window')
+  local anchor_relative_win_position = vim.api.nvim_win_get_position(anchor_win_config.win)
+  local anchor_config = {
+    row = anchor_win_config.row + anchor_relative_win_position[1] + 1,
+    col = anchor_win_config.col + anchor_relative_win_position[2] + 1,
+  }
+  -- compensate for the anchor window being too wide given the screen width and configured column
+  if anchor_config.col + anchor_win_config.width > vim.o.columns then
+    anchor_config.col = vim.o.columns - anchor_win_config.width
   end
 
   local anchor_border_size = anchor_win:get_border_size()
