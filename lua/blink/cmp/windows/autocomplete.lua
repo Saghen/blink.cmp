@@ -48,16 +48,8 @@
 --- @field set_has_selected fun(selected: boolean)
 --- @field listen_on_select fun(callback: fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context))
 --- @field emit_on_select fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)
----
---- @field draw fun()
---- @field get_draw_fn fun(): blink.cmp.CompletionDrawFn
---- @field draw_item_simple blink.cmp.CompletionDrawFn
---- @field draw_item_reversed blink.cmp.CompletionDrawFn
---- @field draw_item_minimal blink.cmp.CompletionDrawFn
 
 local config = require('blink.cmp.config')
-local utils = require('blink.cmp.utils')
-local renderer = require('blink.cmp.windows.lib.render')
 local text_edits_lib = require('blink.cmp.accept.text-edits')
 local autocmp_config = config.windows.autocomplete
 
@@ -87,20 +79,6 @@ function autocomplete.setup()
     cursorline = false,
     scrolloff = autocmp_config.scrolloff,
     scrollbar = autocmp_config.scrollbar,
-  })
-
-  -- Setting highlights is slow and we update on every keystroke so we instead use a decoration provider
-  -- which will only render highlights of the visible lines. This also avoids having to do virtual scroll
-  -- like nvim-cmp does, which breaks on UIs like neovide
-  vim.api.nvim_set_decoration_provider(config.highlight.ns, {
-    on_win = function(_, winnr, bufnr)
-      return autocomplete.win:get_win() == winnr and bufnr == autocomplete.win:get_buf()
-    end,
-    on_line = function(_, _, bufnr, line_number)
-      local rendered_item = autocomplete.rendered_items[line_number + 1]
-      if rendered_item == nil then return end
-      renderer.draw_highlights(rendered_item, bufnr, config.highlight.ns, line_number)
-    end,
   })
 
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
@@ -142,7 +120,8 @@ end
 function autocomplete.open_with_items(context, items)
   autocomplete.context = context
   autocomplete.items = items
-  autocomplete.draw()
+  if not autocomplete.renderer then autocomplete.renderer = require('blink.cmp.windows.render').new() end
+  autocomplete.renderer:render(autocomplete.win:get_buf(), items)
 
   vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 
@@ -205,16 +184,14 @@ function autocomplete.update_position(context)
     return
   end
 
+  local start_col = autocomplete.renderer:get_component_start_col('label')
+
   -- place the window at the start col of the current text we're fuzzy matching against
   -- so the window doesnt move around as we type
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local col = context.bounds.start_col - cursor_col - (context.bounds.length == 0 and 0 or 1)
   local row = pos.direction == 's' and 1 or -pos.height - border_size.vertical
-  vim.api.nvim_win_set_config(winnr, {
-    relative = 'cursor',
-    row = row,
-    col = col - (vim.tbl_contains({ 'minimal', 'reversed' }, autocmp_config.draw) and 1 or 0),
-  })
+  vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col - start_col })
   vim.api.nvim_win_set_height(winnr, pos.height)
 
   for _, callback in ipairs(autocomplete.event_targets.on_position_update) do
@@ -318,140 +295,6 @@ function autocomplete.emit_on_select(item, context)
   for _, callback in ipairs(autocomplete.event_targets.on_select) do
     callback(item, context)
   end
-end
-
----------- Rendering ----------
-
-function autocomplete.draw()
-  local draw_fn = autocomplete.get_draw_fn()
-  local icon_gap = config.nerd_font_variant == 'mono' and ' ' or '  '
-  local components_list = {}
-
-  local fuzzy = require('blink.cmp.fuzzy')
-  local matched_indices = fuzzy.fuzzy_matched_indices(
-    fuzzy.get_query(),
-    vim.tbl_map(function(item) return item.label end, autocomplete.items)
-  )
-
-  for idx, item in ipairs(autocomplete.items) do
-    local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
-    local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
-    -- Some LSPs can return labels and details with newlines.
-    -- Escape them to avoid errors in nvim_buf_set_lines when rendering the autocomplete menu.
-    local label = item.label:gsub('\n', '\\n')
-    local detail = (item.labelDetails and item.labelDetails.detail) and item.labelDetails.detail:gsub('\n', '\\n') or ''
-    if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
-
-    table.insert(
-      components_list,
-      draw_fn({
-        item = item,
-        label = label,
-        detail = detail,
-        label_matched_indices = matched_indices[idx],
-        kind = kind,
-        kind_icon = kind_icon,
-        icon_gap = icon_gap,
-        deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) or false,
-      })
-    )
-  end
-
-  local max_lengths = renderer.get_max_lengths(components_list, autocmp_config.min_width)
-  autocomplete.rendered_items = vim.tbl_map(
-    function(component) return renderer.render(component, max_lengths) end,
-    components_list
-  )
-
-  local lines = vim.tbl_map(function(rendered) return rendered.text end, autocomplete.rendered_items)
-  local bufnr = autocomplete.win:get_buf()
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-  vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
-end
-
-function autocomplete.get_draw_fn()
-  if type(autocmp_config.draw) == 'function' then
-    return autocmp_config.draw
-  elseif autocmp_config.draw == 'simple' then
-    return autocomplete.draw_item_simple
-  elseif autocmp_config.draw == 'reversed' then
-    return autocomplete.draw_item_reversed
-  elseif autocmp_config.draw == 'minimal' then
-    return autocomplete.draw_item_minimal
-  end
-  error('Invalid autocomplete window draw config')
-end
-
---- @param ctx blink.cmp.CompletionRenderContext
---- @return blink.cmp.Component[]
-function autocomplete.draw_item_simple(ctx)
-  return {
-    ' ',
-    {
-      ctx.kind_icon,
-      ctx.icon_gap,
-      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
-    },
-    {
-      ctx.label,
-      ctx.kind == 'Snippet' and '~' or '',
-      ctx.detail,
-      fill = true,
-      hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
-      highlights = vim.tbl_map(
-        function(idx) return { start = idx + 1, stop = idx + 2, group = 'BlinkCmpLabelMatch' } end,
-        ctx.label_matched_indices
-      ),
-      max_width = 80,
-    },
-    ' ',
-  }
-end
-
---- @param ctx blink.cmp.CompletionRenderContext
---- @return blink.cmp.Component[]
-function autocomplete.draw_item_reversed(ctx)
-  return {
-    ' ',
-    {
-      ctx.label,
-      ctx.kind == 'Snippet' and '~' or nil,
-      ctx.detail,
-      fill = true,
-      hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
-      max_width = 50,
-    },
-    ' ',
-    {
-      ctx.kind_icon,
-      ctx.icon_gap,
-      ctx.kind,
-      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
-    },
-    ' ',
-  }
-end
-
---- @param ctx blink.cmp.CompletionRenderContext
---- @return blink.cmp.Component[]
-function autocomplete.draw_item_minimal(ctx)
-  return {
-    ' ',
-    {
-      ctx.label,
-      ctx.kind == 'Snippet' and '~' or nil,
-      ctx.detail,
-      fill = true,
-      hl_group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel',
-      max_width = 50,
-    },
-    ' ',
-    {
-      ctx.kind,
-      hl_group = utils.try_get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind),
-    },
-    ' ',
-  }
 end
 
 return autocomplete
