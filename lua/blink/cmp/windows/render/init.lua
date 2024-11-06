@@ -13,7 +13,7 @@ local ns = vim.api.nvim_create_namespace('blink_cmp_renderer')
 local draw = {
   padding = 1,
   gap = 1,
-  columns = { { 'kind_icon' }, { 'label', 'detail' } },
+  columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
   components = {
     kind_icon = {
       ellipsis = false,
@@ -22,15 +22,15 @@ local draw = {
     },
 
     label = {
-      width = { fill = true, min = 20, max = 60 },
-      text = function(ctx) return ctx.label .. (ctx.label_details or '') end,
+      width = { fill = true, max = 60 },
+      text = function(ctx) return ctx.label .. (ctx.label_detail or '') end,
       highlight = function(ctx)
         -- label and label details
         local highlights = {
           { 0, #ctx.label, group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
         }
-        if ctx.label_details then
-          table.insert(highlights, { #ctx.label + 1, #ctx.label + #ctx.label_details, group = 'BlinkCmpLabelDetails' })
+        if ctx.label_detail then
+          table.insert(highlights, { #ctx.label + 1, #ctx.label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
         end
 
         -- characters matched on the label by the fuzzy matcher
@@ -46,10 +46,10 @@ local draw = {
       end,
     },
 
-    detail = {
-      width = { max = 40 },
-      text = function(ctx) return ctx.item.detail or '' end,
-      highlight = 'BlinkCmpLabelDetail',
+    label_description = {
+      width = { max = 30 },
+      text = function(ctx) return ctx.label_description or '' end,
+      highlight = 'BlinkCmpLabelDescription',
     },
   },
 }
@@ -61,12 +61,18 @@ local renderer = {}
 function renderer.new(_)
   --- Convert the component names in the columns to the component definitions
   --- @type blink.cmp.DrawComponent[][]
-  local columns_components = vim.tbl_map(function(column)
-    return vim.tbl_map(function(component_name)
+  local columns_definitions = vim.tbl_map(function(column)
+    local components = {}
+    for _, component_name in ipairs(column) do
       local component = draw.components[component_name]
       assert(component ~= nil, 'No component definition found for component: "' .. component_name .. '"')
-      return component
-    end, column)
+      table.insert(components, draw.components[component_name])
+    end
+
+    return {
+      components = components,
+      gap = column.gap or 0,
+    }
   end, draw.columns)
 
   local padding = type(draw.padding) == 'number' and { draw.padding, draw.padding } or draw.padding
@@ -77,15 +83,17 @@ function renderer.new(_)
   self.gap = draw.gap
   self.draw = draw
   self.columns = vim.tbl_map(
-    function(components) return require('blink.cmp.windows.render.column').new(components) end,
-    columns_components
+    function(column_definition)
+      return require('blink.cmp.windows.render.column').new(column_definition.components, column_definition.gap)
+    end,
+    columns_definitions
   )
   return self
 end
 
 function renderer:render(bufnr, items)
   -- gather contexts
-  local ctxs = require('blink.cmp.windows.render.context').get_from_items(items)
+  local ctxs = require('blink.cmp.windows.render.context').get_from_items(self.draw, items)
 
   -- render the columns
   for _, column in ipairs(self.columns) do

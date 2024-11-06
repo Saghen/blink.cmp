@@ -1,10 +1,11 @@
 --- @class blink.cmp.DrawColumn
 --- @field components blink.cmp.DrawComponent[]
+--- @field gap number
 --- @field lines string[][]
 --- @field width number
 --- @field ctxs blink.cmp.CompletionRenderContext[]
 ---
---- @field new fun(components: blink.cmp.DrawComponent[]): blink.cmp.DrawColumn
+--- @field new fun(components: blink.cmp.DrawComponent[], gap: number): blink.cmp.DrawColumn
 --- @field render fun(self: blink.cmp.DrawColumn, ctxs: blink.cmp.DrawItemContext[])
 --- @field get_line_text fun(self: blink.cmp.DrawColumn, line_idx: number): string[]
 --- @field get_line_highlights fun(self: blink.cmp.DrawColumn, line_idx: number): blink.cmp.DrawHighlight[]
@@ -15,9 +16,10 @@ local text_lib = require('blink.cmp.windows.render.text')
 --- @diagnostic disable-next-line: missing-fields
 local column = {}
 
-function column.new(components)
+function column.new(components, gap)
   local self = setmetatable({}, { __index = column })
   self.components = components
+  self.gap = gap
   self.lines = {}
   self.width = 0
   self.ctxs = {}
@@ -46,6 +48,7 @@ function column:render(ctxs)
   for _, max_component_width in ipairs(max_component_widths) do
     column_width = column_width + max_component_width
   end
+  column_width = column_width + self.gap * (#self.components - 1)
 
   --- find the component that will fill the empty space
   local fill_idx = -1
@@ -60,8 +63,8 @@ function column:render(ctxs)
   --- and add extra spaces until we reach the column width
   for _, line in ipairs(lines) do
     local line_width = 0
-    for _, component_text in ipairs(line) do
-      line_width = line_width + vim.api.nvim_strwidth(component_text)
+    for idx, component_text in ipairs(line) do
+      line_width = line_width + vim.api.nvim_strwidth(component_text) + (idx == #line and 0 or self.gap)
     end
     local remaining_width = column_width - line_width
     line[fill_idx] = text_lib.pad(line[fill_idx], vim.api.nvim_strwidth(line[fill_idx]) + remaining_width)
@@ -76,8 +79,8 @@ end
 function column:get_line_text(line_idx)
   local line = self.lines[line_idx]
   local concatenated = ''
-  for _, component in ipairs(line) do
-    concatenated = concatenated .. component
+  for idx, component in ipairs(line) do
+    concatenated = concatenated .. component .. string.rep(' ', idx == #line and 0 or self.gap)
   end
   return concatenated
 end
@@ -106,7 +109,7 @@ function column:get_line_highlights(line_idx)
       end
     end
 
-    offset = offset + #text
+    offset = offset + #text + self.gap
   end
 
   return highlights

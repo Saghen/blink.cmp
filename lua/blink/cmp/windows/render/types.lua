@@ -1,7 +1,7 @@
 --- @class blink.cmp.Draw
 --- @field padding number | number[] Padding on the left and right of the grid
 --- @field gap number Gap between columns
---- @field columns string[][] Components to render, grouped by column
+--- @field columns { [number]: string, gap?: number }[] Components to render, grouped by column
 --- @field components table<string, blink.cmp.DrawComponent> Component definitions
 ---
 --- @class blink.cmp.DrawHighlight
