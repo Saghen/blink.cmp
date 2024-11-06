@@ -118,7 +118,6 @@ function signature.update_position()
     direction_priority = autocomplete_win_is_up and { 's' } or { 'n' }
   end
 
-  local height = win:get_height()
   local pos = win:get_vertical_direction_and_height(direction_priority)
 
   -- couldn't find anywhere to place the window
@@ -127,19 +126,25 @@ function signature.update_position()
     return
   end
 
+  -- set height
+  vim.api.nvim_win_set_height(winnr, pos.height)
+  local height = win:get_height()
+
   -- default to the user's preference but attempt to use the other options
-  local row = pos.direction == 's' and 1 or -height
   if autocomplete_win_config then
+    assert(autocomplete_win_config.relative == 'win', 'The autocomplete window must be relative to a window')
+    local cursor_screen_row = vim.fn.winline()
+    local autocomplete_win_is_up = autocomplete_win_config.row - cursor_screen_row < 0
     vim.api.nvim_win_set_config(winnr, {
       relative = autocomplete_win_config.relative,
       win = autocomplete_win_config.win,
-      row = row,
+      row = autocomplete_win_is_up and autocomplete_win_config.row + autocomplete.win:get_height() + 1
+        or autocomplete_win_config.row - height - 1,
       col = autocomplete_win_config.col,
     })
   else
-    vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = 0 })
+    vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = pos.direction == 's' and 1 or -height, col = 0 })
   end
-  vim.api.nvim_win_set_height(winnr, pos.height)
 end
 
 return signature
