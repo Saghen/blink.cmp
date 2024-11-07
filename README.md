@@ -240,6 +240,12 @@ MiniDeps.add({
 
   accept = {
     create_undo_point = true,
+    -- Function used to expand snippets, some possible values:
+    -- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+    -- require('snippy').expand_snippet(args.body) -- For `snippy` users.
+    -- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+    expand_snippet = vim.snippet.expand,
+
     auto_brackets = {
       enabled = false,
       default_brackets = { '(', ')' },

@@ -21,6 +21,7 @@
 --- | 'enter' mappings similar to 'super-tab' but with 'enter' to accept
 
 --- @class blink.cmp.AcceptConfig
+--- @field expand_snippet? fun(string)
 --- @field create_undo_point? boolean Create an undo point when accepting a completion item
 --- @field auto_brackets? blink.cmp.AutoBracketsConfig
 
@@ -269,6 +270,7 @@ local config = {
         timeout_ms = 400,
       },
     },
+    expand_snippet = vim.snippet.expand
   },
 
   trigger = {
