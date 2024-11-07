@@ -1,64 +1,23 @@
 --- @class blink.cmp.Renderer
---- @field draw blink.cmp.Draw
+--- @field def blink.cmp.Draw
 --- @field padding number[]
 --- @field gap number
 --- @field columns blink.cmp.DrawColumn[]
 ---
 --- @field new fun(draw: blink.cmp.Draw): blink.cmp.Renderer
---- @field render fun(self: blink.cmp.Renderer, bufnr: number, items: blink.cmp.CompletionItem[])
+--- @field draw fun(self: blink.cmp.Renderer, bufnr: number, items: blink.cmp.CompletionItem[])
+--- @field get_component_column_location fun(self: blink.cmp.Renderer, component_name: string): { column_idx: number, component_idx: number }
+--- @field get_component_start_col fun(self: blink.cmp.Renderer, component_name: string): number
+--- @field get_alignment_start_col fun(self: blink.cmp.Renderer): number
 
 local ns = vim.api.nvim_create_namespace('blink_cmp_renderer')
-
---- @type blink.cmp.Draw
-local draw = {
-  padding = 1,
-  gap = 1,
-  columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
-  components = {
-    kind_icon = {
-      ellipsis = false,
-      text = function(ctx) return ctx.kind_icon .. ' ' end,
-      highlight = function(ctx) return 'BlinkCmpKind' .. ctx.kind end,
-    },
-
-    label = {
-      width = { fill = true, max = 60 },
-      text = function(ctx) return ctx.label .. (ctx.label_detail or '') end,
-      highlight = function(ctx)
-        -- label and label details
-        local highlights = {
-          { 0, #ctx.label, group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
-        }
-        if ctx.label_detail then
-          table.insert(highlights, { #ctx.label + 1, #ctx.label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
-        end
-
-        -- characters matched on the label by the fuzzy matcher
-        if ctx.label_matched_indices ~= nil then
-          for _, idx in ipairs(ctx.label_matched_indices) do
-            table.insert(highlights, { idx, idx + 1, group = 'BlinkCmpLabelMatch' })
-          end
-        end
-
-        -- TODO: treesitter highlighting
-
-        return highlights
-      end,
-    },
-
-    label_description = {
-      width = { max = 30 },
-      text = function(ctx) return ctx.label_description or '' end,
-      highlight = 'BlinkCmpLabelDescription',
-    },
-  },
-}
 
 --- @type blink.cmp.Renderer
 --- @diagnostic disable-next-line: missing-fields
 local renderer = {}
 
-function renderer.new(_)
+function renderer.new(draw)
+  vim.print(draw)
   --- Convert the component names in the columns to the component definitions
   --- @type blink.cmp.DrawComponent[][]
   local columns_definitions = vim.tbl_map(function(column)
@@ -81,7 +40,7 @@ function renderer.new(_)
   local self = setmetatable({}, { __index = renderer })
   self.padding = padding
   self.gap = draw.gap
-  self.draw = draw
+  self.def = draw
   self.columns = vim.tbl_map(
     function(column_definition)
       return require('blink.cmp.windows.render.column').new(column_definition.components, column_definition.gap)
@@ -91,9 +50,9 @@ function renderer.new(_)
   return self
 end
 
-function renderer:render(bufnr, items)
+function renderer:draw(bufnr, items)
   -- gather contexts
-  local ctxs = require('blink.cmp.windows.render.context').get_from_items(self.draw, items)
+  local ctxs = require('blink.cmp.windows.render.context').get_from_items(self.def, items)
 
   -- render the columns
   for _, column in ipairs(self.columns) do
@@ -153,8 +112,8 @@ function renderer:render(bufnr, items)
   })
 end
 
-function renderer:get_component_location(component_name)
-  for column_idx, column in ipairs(self.draw.columns) do
+function renderer:get_component_column_location(component_name)
+  for column_idx, column in ipairs(self.def.columns) do
     for component_idx, other_component_name in ipairs(column) do
       if other_component_name == component_name then return { column_idx, component_idx } end
     end
@@ -163,7 +122,7 @@ function renderer:get_component_location(component_name)
 end
 
 function renderer:get_component_start_col(component_name)
-  local column_idx, component_idx = unpack(self:get_component_location(component_name))
+  local column_idx, component_idx = unpack(self:get_component_column_location(component_name))
 
   -- add previous columns
   local start_col = self.padding[1]
@@ -179,6 +138,12 @@ function renderer:get_component_start_col(component_name)
   end
 
   return start_col
+end
+
+function renderer:get_alignment_start_col()
+  local component_name = self.def.align_to_component
+  if component_name == nil or component_name == 'none' then return 0 end
+  return self:get_component_start_col(component_name)
 end
 
 return renderer

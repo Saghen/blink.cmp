@@ -7,6 +7,7 @@
 --- @class blink.cmp.CompletionWindow
 --- @field win blink.cmp.Window
 --- @field items blink.cmp.CompletionItem[]
+--- @field renderer blink.cmp.Renderer
 --- @field has_selected? boolean
 --- @field auto_show boolean
 --- @field context blink.cmp.Context?
@@ -104,8 +105,10 @@ end
 function autocomplete.open_with_items(context, items)
   autocomplete.context = context
   autocomplete.items = items
-  if not autocomplete.renderer then autocomplete.renderer = require('blink.cmp.windows.render').new() end
-  autocomplete.renderer:render(autocomplete.win:get_buf(), items)
+  if not autocomplete.renderer then
+    autocomplete.renderer = require('blink.cmp.windows.render').new(autocmp_config.draw)
+  end
+  autocomplete.renderer:draw(autocomplete.win:get_buf(), items)
 
   vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 
@@ -168,7 +171,7 @@ function autocomplete.update_position(context)
     return
   end
 
-  local start_col = autocomplete.renderer:get_component_start_col('label')
+  local start_col = autocomplete.renderer:get_alignment_start_col()
 
   -- place the window at the start col of the current text we're fuzzy matching against
   -- so the window doesnt move around as we type
