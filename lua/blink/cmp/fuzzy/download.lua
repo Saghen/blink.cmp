@@ -10,7 +10,6 @@ function download.get_lib_extension()
 end
 
 local root_dir = debug.getinfo(1).source:match('@?(.*/)')
-local repo_dir = vim.fs.root(root_dir, '.git')
 download.lib_path = root_dir .. '../../../../target/release/libblink_cmp_fuzzy' .. download.get_lib_extension()
 local version_path = root_dir .. '../../../../target/release/version.txt'
 
@@ -72,6 +71,10 @@ end
 
 --- @param cb fun(err: string | nil, tag: string | nil)
 function download.get_git_tag(cb)
+  -- If repo_dir is nil, no git reposiory is found, similar to `out.code == 128`
+  local repo_dir = vim.fs.root(root_dir, '.git')
+  if not repo_dir then return vim.schedule(function() return cb() end) end
+
   vim.system({ 'git', '--git-dir', vim.fs.joinpath(repo_dir, '.git'), "--work-tree", repo_dir, 'describe', '--tags', '--exact-match' }, { cwd = root_dir }, function(out)
     if out.code == 128 then return cb() end
     if out.code ~= 0 then
