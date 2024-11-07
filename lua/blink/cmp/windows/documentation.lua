@@ -167,12 +167,26 @@ function docs.update_position()
       })
     end
   elseif pos.direction == 'e' then
-    set_config({
-      row = -autocomplete_border_size.top,
-      col = autocomplete_win_config.width + autocomplete_border_size.right,
-    })
+    if autocomplete_win_is_up and autocomplete_win_height < height then
+      set_config({
+        row = autocomplete_win_height - autocomplete_border_size.top - height,
+        col = autocomplete_win_config.width + autocomplete_border_size.right,
+      })
+    else
+      set_config({
+        row = -autocomplete_border_size.top,
+        col = autocomplete_win_config.width + autocomplete_border_size.right,
+      })
+    end
   elseif pos.direction == 'w' then
-    set_config({ row = -autocomplete_border_size.top, col = -width - autocomplete_border_size.left })
+    if autocomplete_win_is_up and autocomplete_win_height < height then
+      set_config({
+        row = autocomplete_win_height - autocomplete_border_size.top - height,
+        col = -width - autocomplete_border_size.left,
+      })
+    else
+      set_config({ row = -autocomplete_border_size.top, col = -width - autocomplete_border_size.left })
+    end
   end
 end
 

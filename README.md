@@ -404,11 +404,65 @@ MiniDeps.add({
       -- 'auto_insert' will not select any item by default, and insert the completion items automatically when selecting them
       selection = 'preselect',
       -- Controls how the completion items are rendered on the popup window
-      -- 'simple' will render the item's kind icon the left alongside the label
-      -- 'reversed' will render the label on the left and the kind icon + name on the right
-      -- 'minimal' will render the label on the left and the kind name on the right
-      -- 'function(blink.cmp.CompletionRenderContext): blink.cmp.Component[]' for custom rendering
-      draw = 'simple',
+      draw = {
+        align_to_component = 'label', -- or 'none' to disable
+        -- Left and right padding, optionally { left, right } for different padding on each side
+        padding = 1,
+        -- Gap between columns
+        gap = 1,
+        -- Components to render, grouped by column
+        columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
+        -- Definitions for possible components to render. Each component defines:
+        --   ellipsis: whether to add an ellipsis when truncating the text
+        --   width: control the min, max and fill behavior of the component
+        --   text function: will be called for each item
+        --   highlight function: will be called only when the line appears on screen
+        components = {
+          kind_icon = {
+            ellipsis = false,
+            text = function(ctx) return ctx.kind_icon .. ' ' end,
+            highlight = function(ctx) return 'BlinkCmpKind' .. ctx.kind end,
+          },
+
+          kind = {
+            ellipsis = false,
+            text = function(ctx) return ctx.kind .. ' ' end,
+            highlight = function(ctx) return 'BlinkCmpKind' .. ctx.kind end,
+          },
+
+          label = {
+            width = { fill = true, max = 60 },
+            text = function(ctx) return ctx.label .. (ctx.label_detail or '') end,
+            highlight = function(ctx)
+              -- label and label details
+              local highlights = {
+                { 0, #ctx.label, group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
+              }
+              if ctx.label_detail then
+                table.insert(
+                  highlights,
+                  { #ctx.label + 1, #ctx.label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' }
+                )
+              end
+
+              -- characters matched on the label by the fuzzy matcher
+              if ctx.label_matched_indices ~= nil then
+                for _, idx in ipairs(ctx.label_matched_indices) do
+                  table.insert(highlights, { idx, idx + 1, group = 'BlinkCmpLabelMatch' })
+                end
+              end
+
+              return highlights
+            end,
+          },
+
+          label_description = {
+            width = { max = 30 },
+            text = function(ctx) return ctx.label_description or '' end,
+            highlight = 'BlinkCmpLabelDescription',
+          },
+        },
+      },
       -- Controls the cycling behavior when reaching the beginning or end of the completion list.
       cycle = {
         -- When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.

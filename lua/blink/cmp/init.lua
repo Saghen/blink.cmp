@@ -51,7 +51,7 @@ cmp.setup = function(opts)
       vim.schedule(function()
         if cmp.trigger.context == nil or cmp.trigger.context.id ~= context.id then return end
 
-        local filtered_items = cmp.fuzzy.filter_items(cmp.fuzzy.get_query(), items)
+        local filtered_items = cmp.fuzzy.fuzzy(cmp.fuzzy.get_query(), items)
         filtered_items = cmp.sources.apply_max_items_for_completions(context, filtered_items)
         if #filtered_items > 0 then
           cmp.windows.autocomplete.open_with_items(context, filtered_items)
