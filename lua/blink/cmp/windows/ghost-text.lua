@@ -86,13 +86,19 @@ function ghost_text.draw_preview(bufnr)
     text_edit.range['end'].character,
   }
 
-  ghost_text.extmark_id = vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, cursor_pos[1], cursor_pos[2], {
-    id = ghost_text.extmark_id,
-    virt_text_pos = 'inline',
-    virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
-    virt_lines = virt_lines,
-    hl_mode = 'combine',
-  })
+  local success, id = pcall(
+    function()
+      return vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, cursor_pos[1], cursor_pos[2], {
+        id = ghost_text.extmark_id,
+        virt_text_pos = 'inline',
+        virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
+        virt_lines = virt_lines,
+        hl_mode = 'combine',
+      })
+    end
+  )
+
+  if success then ghost_text.extmark_id = id end
 end
 
 return ghost_text
