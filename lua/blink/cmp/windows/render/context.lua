@@ -37,7 +37,7 @@ function context.new(draw, item, matched_indices)
   local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
   -- Some LSPs can return labels with newlines.
   -- Escape them to avoid errors in nvim_buf_set_lines when rendering the autocomplete menu.
-  local label = item.label:gsub('\n', '\\n')
+  local label = item.label:gsub('\n', '\\n') .. (kind == 'Snippet' and '~' or '')
   if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
   return {

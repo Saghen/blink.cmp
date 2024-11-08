@@ -420,11 +420,12 @@ local config = {
             text = function(ctx) return ctx.label .. (ctx.label_detail or '') end,
             highlight = function(ctx)
               -- label and label details
+              local label = ctx.label
               local highlights = {
-                { 0, #ctx.label, group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
+                { 0, #label, group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
               }
               if ctx.label_detail then
-                table.insert(highlights, { #ctx.label, #ctx.label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
+                table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
               end
 
               -- characters matched on the label by the fuzzy matcher
