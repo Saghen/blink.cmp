@@ -17,7 +17,6 @@ local ns = vim.api.nvim_create_namespace('blink_cmp_renderer')
 local renderer = {}
 
 function renderer.new(draw)
-  vim.print(draw)
   --- Convert the component names in the columns to the component definitions
   --- @type blink.cmp.DrawComponent[][]
   local columns_definitions = vim.tbl_map(function(column)
