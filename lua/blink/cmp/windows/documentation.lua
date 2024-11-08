@@ -14,7 +14,6 @@ function docs.setup()
     winhighlight = config.winhighlight,
     scrollbar = config.scrollbar,
     wrap = true,
-    filetype = 'markdown',
   })
 
   autocomplete.listen_on_position_update(function()

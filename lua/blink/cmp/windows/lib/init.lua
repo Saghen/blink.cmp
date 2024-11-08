@@ -5,7 +5,6 @@
 --- @field cursorline? boolean
 --- @field border? blink.cmp.WindowBorder
 --- @field wrap? boolean
---- @field filetype? string
 --- @field winblend? number
 --- @field winhighlight? string
 --- @field scrolloff? number
@@ -51,7 +50,6 @@ function win.new(config)
     cursorline = config.cursorline or false,
     border = config.border or 'none',
     wrap = config.wrap or false,
-    filetype = config.filetype or 'cmp_menu',
     winblend = config.winblend or 0,
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
@@ -70,8 +68,6 @@ function win:get_buf()
   if self.buf == nil or not vim.api.nvim_buf_is_valid(self.buf) then
     self.buf = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_set_option_value('tabstop', 1, { buf = self.buf }) -- prevents tab widths from being unpredictable
-    vim.api.nvim_set_option_value('filetype', self.config.filetype, { buf = self.buf })
-    vim.treesitter.stop(self.buf)
   end
   return self.buf
 end

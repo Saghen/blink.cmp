@@ -13,7 +13,6 @@ function signature.setup()
     winhighlight = config.winhighlight,
     scrollbar = config.scrollbar,
     wrap = true,
-    filetype = 'markdown',
   })
 
   -- todo: deduplicate this
