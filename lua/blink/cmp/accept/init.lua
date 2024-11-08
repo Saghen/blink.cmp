@@ -15,13 +15,16 @@ local function accept(item)
       local all_text_edits =
         vim.deepcopy(resolved_item and resolved_item.additionalTextEdits or item.additionalTextEdits or {})
 
-      -- create an undo point
-      if require('blink.cmp.config').accept.create_undo_point then
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
-      end
-
       item = vim.deepcopy(item)
       item.textEdit = text_edits_lib.get_from_item(item)
+
+      -- Create an undo point, if it's not a snippet, since the snippet engine should handle undo
+      if
+        item.insertTextFormat ~= vim.lsp.protocol.InsertTextFormat.Snippet
+        and require('blink.cmp.config').accept.create_undo_point
+      then
+        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
+      end
 
       -- Add brackets to the text edit if needed
       local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(vim.bo.filetype, item)
