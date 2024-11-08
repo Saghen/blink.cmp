@@ -134,8 +134,8 @@ MiniDeps.add({
 | `BlinkCmpMenu` | Pmenu | The completion menu window |
 | `BlinkCmpMenuBorder` | Pmenu | The completion menu window border |
 | `BlinkCmpMenuSelection` | PmenuSel | The completion menu window selected item |
-| `BlinkCmpScrollBarThumb` | Visual | The scrollbar thumb |
-| `BlinkCmpScrollBarGutter` | Pmenu | The scrollbar gutter |
+| `BlinkCmpScrollBarThumb` | PmenuThumb | The scrollbar thumb |
+| `BlinkCmpScrollBarGutter` | PmenuSbar | The scrollbar gutter |
 | `BlinkCmpLabel` | Pmenu | Label of the completion item |
 | `BlinkCmpLabelDeprecated` | Comment | Deprecated label of the completion item |
 | `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
