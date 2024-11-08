@@ -23,7 +23,7 @@ local function preview(item, previous_text_edit)
     end
   end
 
-  text_edits_lib.apply(item.client_id, { text_edit })
+  text_edits_lib.apply({ text_edit })
   vim.api.nvim_win_set_cursor(0, cursor_pos)
 
   -- return so that it can be undone in the future
