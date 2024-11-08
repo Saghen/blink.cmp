@@ -69,8 +69,8 @@ function signature.open_with_signature_help(context, signature_help)
       require('blink.cmp.config').highlight.ns,
       'BlinkCmpSignatureHelpActiveParameter',
       0,
-      active_highlight[1],
-      active_highlight[2]
+      active_highlight[2],
+      active_highlight[4]
     )
   end
 
