@@ -70,7 +70,7 @@ function text_edits.get_from_item(item)
 
     local text_edit = vim.deepcopy(item.textEdit)
 
-    local client = vim.lsp.get_client_by_id(client_id)
+    local client = vim.lsp.get_client_by_id(item.client_id)
     local offset_encoding = client ~= nil and client.offset_encoding or 'utf-8'
 
     if offset_encoding ~= 'utf-8' then
