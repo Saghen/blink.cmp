@@ -11,10 +11,10 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
   if documentation ~= nil then
     local doc = type(documentation) == 'string' and documentation or documentation.value
     doc_lines = docs.split_lines(doc)
-    if type(documentation) ~= 'string' and documentation.kind == 'markdown' then
-      -- if the rendering seems bugged, it's likely due to this function
-      doc_lines = docs.combine_markdown_lines(doc_lines)
-    end
+    -- if type(documentation) ~= 'string' and documentation.kind == 'markdown' then
+    --   -- if the rendering seems bugged, it's likely due to this function
+    --   doc_lines = docs.combine_markdown_lines(doc_lines)
+    -- end
   end
 
   detail_lines, doc_lines = docs.extract_detail_from_doc(detail_lines, doc_lines)
