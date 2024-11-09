@@ -83,7 +83,7 @@ function utils.get_regex_around_cursor(range, regex, exclude_from_prefix_regex)
   return { start_col = start_col, length = length }
 end
 
---- @param ctx blink.cmp.CompletionRenderContext
+--- @param ctx blink.cmp.DrawItemContext
 --- @return string|nil
 function utils.try_get_tailwind_hl(ctx)
   local doc = ctx.item.documentation
@@ -91,9 +91,7 @@ function utils.try_get_tailwind_hl(ctx)
     local content = type(doc) == 'string' and doc or doc.value
     if ctx.kind == 'Color' and content and content:match('^#%x%x%x%x%x%x$') then
       local hl_name = 'HexColor' .. content:sub(2)
-      if #vim.api.nvim_get_hl(0, { name = hl_name }) == 0 then
-        vim.api.nvim_set_hl(0, hl_name, { fg = content })
-      end
+      if #vim.api.nvim_get_hl(0, { name = hl_name }) == 0 then vim.api.nvim_set_hl(0, hl_name, { fg = content }) end
       return hl_name
     end
   end

@@ -270,7 +270,7 @@ local config = {
         timeout_ms = 400,
       },
     },
-    expand_snippet = vim.snippet.expand
+    expand_snippet = vim.snippet.expand,
   },
 
   trigger = {
@@ -407,34 +407,31 @@ local config = {
         components = {
           kind_icon = {
             ellipsis = false,
-            text = function(ctx) return ctx.kind_icon .. ' ' end,
+            text = function(ctx) return ctx.kind_icon end,
             highlight = function(ctx) return 'BlinkCmpKind' .. ctx.kind end,
           },
 
           kind = {
             ellipsis = false,
-            text = function(ctx) return ctx.kind .. ' ' end,
+            width = { fill = true },
+            text = function(ctx) return ctx.kind end,
             highlight = function(ctx) return 'BlinkCmpKind' .. ctx.kind end,
           },
 
           label = {
             width = { fill = true, max = 60 },
-            text = function(ctx) return ctx.label .. (ctx.label_detail or '') end,
+            text = function(ctx) return ctx.label .. ctx.label_detail end,
             highlight = function(ctx)
               -- label and label details
               local label = ctx.label
               local highlights = {
                 { 0, #label, group = ctx.deprecated and 'BlinkCmpLabelDeprecated' or 'BlinkCmpLabel' },
               }
-              if ctx.label_detail then
-                table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
-              end
+              table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
 
               -- characters matched on the label by the fuzzy matcher
-              if ctx.label_matched_indices ~= nil then
-                for _, idx in ipairs(ctx.label_matched_indices) do
-                  table.insert(highlights, { idx, idx + 1, group = 'BlinkCmpLabelMatch' })
-                end
+              for _, idx in ipairs(ctx.label_matched_indices) do
+                table.insert(highlights, { idx, idx + 1, group = 'BlinkCmpLabelMatch' })
               end
 
               return highlights
@@ -443,7 +440,7 @@ local config = {
 
           label_description = {
             width = { max = 30 },
-            text = function(ctx) return ctx.label_description or '' end,
+            text = function(ctx) return ctx.label_description end,
             highlight = 'BlinkCmpLabelDescription',
           },
         },
