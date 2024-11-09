@@ -68,7 +68,10 @@
 
     -- experimental signature help support
     -- trigger = { signature_help = { enabled = true } }
-  }
+  },
+  -- allows extending the enabled_providers array elsewhere in your config
+  -- without having to redefining it
+  opts_extend = { "sources.completion.enabled_providers" }
 },
 
 -- LSP servers and clients communicate what features they support through "capabilities".
