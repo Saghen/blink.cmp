@@ -63,18 +63,24 @@ function signature.open_with_signature_help(context, signature_help)
     sources.get_signature_help_trigger_characters().trigger_characters
   )
   if active_highlight ~= nil then
+    local start_region = active_highlight[1]
+    local end_region = active_highlight[2]
+    if vim.fn.has('nvim-0.11.0') == 1 then
+      start_region = active_highlight[2]
+      end_region = active_highlight[4]
+    end
     vim.api.nvim_buf_add_highlight(
       signature.win:get_buf(),
       require('blink.cmp.config').highlight.ns,
       'BlinkCmpSignatureHelpActiveParameter',
       0,
-      active_highlight[1],
-      active_highlight[2]
+      start_region,
+      end_region
     )
   end
 
   signature.win:open()
-  signature.update_position(context)
+  signature.update_position()
 end
 
 function signature.close()
@@ -99,7 +105,6 @@ function signature.scroll_down(amount)
   vim.api.nvim_win_set_cursor(signature.win:get_win(), { desired_line, 0 })
 end
 
---- @param context blink.cmp.SignatureHelpContext
 function signature.update_position()
   local win = signature.win
   if not win:is_open() then return end
