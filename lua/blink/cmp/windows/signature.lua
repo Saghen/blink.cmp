@@ -105,7 +105,6 @@ function signature.scroll_down(amount)
   vim.api.nvim_win_set_cursor(signature.win:get_win(), { desired_line, 0 })
 end
 
---- @param context blink.cmp.SignatureHelpContext
 function signature.update_position()
   local win = signature.win
   if not win:is_open() then return end
