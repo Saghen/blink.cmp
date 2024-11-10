@@ -63,12 +63,10 @@ function signature.open_with_signature_help(context, signature_help)
     sources.get_signature_help_trigger_characters().trigger_characters
   )
   if active_highlight ~= nil then
-    local start_region = active_highlight[1]
-    local end_region = active_highlight[2]
-    if vim.fn.has('nvim-0.11.0') == 1 then
-      start_region = active_highlight[2]
-      end_region = active_highlight[4]
-    end
+    -- TODO: nvim 0.11+ returns the start and end line which we should use
+    local start_region = vim.fn.has('nvim-0.11.0') == 1 and active_highlight[2] or active_highlight[1]
+    local end_region = vim.fn.has('nvim-0.11.0') == 1 and active_highlight[4] or active_highlight[2]
+
     vim.api.nvim_buf_add_highlight(
       signature.win:get_buf(),
       require('blink.cmp.config').highlight.ns,
