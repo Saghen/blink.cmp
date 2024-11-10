@@ -64,10 +64,11 @@ function renderer:draw(bufnr, items)
     local line = ''
     if self.padding[1] > 0 then line = string.rep(' ', self.padding[1]) end
 
-    for column_idx, column in ipairs(self.columns) do
-      line = line .. column:get_line_text(idx)
-      if column_idx ~= #self.columns then line = line .. string.rep(' ', self.gap) end
+    for _, column in ipairs(self.columns) do
+      local text = column:get_line_text(idx)
+      if #text > 0 then line = line .. text .. string.rep(' ', self.gap) end
     end
+    line = line:sub(1, -self.gap - 1)
 
     if self.padding[2] > 0 then line = line .. string.rep(' ', self.padding[2]) end
 
@@ -81,31 +82,25 @@ function renderer:draw(bufnr, items)
   -- like nvim-cmp does, which breaks on UIs like neovide
   vim.api.nvim_set_decoration_provider(ns, {
     on_win = function(_, _, win_bufnr) return bufnr == win_bufnr end,
-    on_line = function(_, _, _, line_number)
+    on_line = function(_, _, _, line)
       local offset = self.padding[1]
-      local highlights = {}
-
       for _, column in ipairs(self.columns) do
-        local highlights_for_column = column:get_line_highlights(line_number + 1)
-        for _, highlight in ipairs(highlights_for_column) do
-          table.insert(highlights, {
-            offset + highlight[1],
-            offset + highlight[2],
-            group = highlight.group,
-            params = highlight.params,
-          })
+        local text = column:get_line_text(line + 1)
+        if #text > 0 then
+          local highlights = column:get_line_highlights(line + 1)
+          for _, highlight in ipairs(highlights) do
+            local col = offset + highlight[1]
+            local end_col = offset + highlight[2]
+            vim.api.nvim_buf_set_extmark(bufnr, ns, line, col, {
+              end_col = end_col,
+              hl_group = highlight.group,
+              hl_mode = 'combine',
+              hl_eol = true,
+              ephemeral = true,
+            })
+          end
+          offset = offset + #text + self.gap
         end
-        offset = offset + #column:get_line_text(line_number + 1) + self.gap
-      end
-
-      for _, highlight in ipairs(highlights) do
-        vim.api.nvim_buf_set_extmark(bufnr, ns, line_number, highlight[1], {
-          end_col = highlight[2],
-          hl_group = highlight.group,
-          hl_mode = 'combine',
-          hl_eol = true,
-          ephemeral = true,
-        })
       end
     end,
   })

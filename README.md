@@ -429,19 +429,20 @@ MiniDeps.add({
         components = {
           kind_icon = {
             ellipsis = false,
-            text = function(ctx) return ctx.kind_icon .. ' ' end,
+            text = function(ctx) return ctx.kind_icon end,
             highlight = function(ctx) return 'BlinkCmpKind' .. ctx.kind end,
           },
 
           kind = {
             ellipsis = false,
-            text = function(ctx) return ctx.kind .. ' ' end,
+            width = { fill = true },
+            text = function(ctx) return ctx.kind end,
             highlight = function(ctx) return 'BlinkCmpKind' .. ctx.kind end,
           },
 
           label = {
             width = { fill = true, max = 60 },
-            text = function(ctx) return ctx.label .. (ctx.label_detail or '') end,
+            text = function(ctx) return ctx.label .. ctx.label_detail end,
             highlight = function(ctx)
               -- label and label details
               local highlights = {
@@ -452,10 +453,8 @@ MiniDeps.add({
               end
 
               -- characters matched on the label by the fuzzy matcher
-              if ctx.label_matched_indices ~= nil then
-                for _, idx in ipairs(ctx.label_matched_indices) do
-                  table.insert(highlights, { idx, idx + 1, group = 'BlinkCmpLabelMatch' })
-                end
+              for _, idx in ipairs(ctx.label_matched_indices) do
+                table.insert(highlights, { idx, idx + 1, group = 'BlinkCmpLabelMatch' })
               end
 
               return highlights
@@ -464,7 +463,7 @@ MiniDeps.add({
 
           label_description = {
             width = { max = 30 },
-            text = function(ctx) return ctx.label_description or '' end,
+            text = function(ctx) return ctx.label_description end,
             highlight = 'BlinkCmpLabelDescription',
           },
         },
