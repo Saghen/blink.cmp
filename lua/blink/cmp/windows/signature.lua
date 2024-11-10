@@ -63,18 +63,25 @@ function signature.open_with_signature_help(context, signature_help)
     sources.get_signature_help_trigger_characters().trigger_characters
   )
   if active_highlight ~= nil then
+    local start_region, end_region
+    if vim.version.gt(vim.version(), {0, 10, 0}) then
+            start_region = active_highlight[2]
+            end_region = active_highlight[4]
+    else
+            start_region = active_highlight[1]
+            end_region = active_highlight[2]
+    end
     vim.api.nvim_buf_add_highlight(
       signature.win:get_buf(),
       require('blink.cmp.config').highlight.ns,
       'BlinkCmpSignatureHelpActiveParameter',
       0,
-      active_highlight[1],
-      active_highlight[2]
+            start_region, end_region
     )
   end
 
   signature.win:open()
-  signature.update_position(context)
+  signature.update_position()
 end
 
 function signature.close()
