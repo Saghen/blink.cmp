@@ -577,6 +577,7 @@ MiniDeps.add({
 - [lazydev](https://github.com/folke/lazydev.nvim)
 - [ctags](https://github.com/netmute/blink-cmp-ctags)
 - [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
+- [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
 - [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
 
 </details>
