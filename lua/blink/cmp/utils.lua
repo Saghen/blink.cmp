@@ -83,7 +83,7 @@ function utils.get_regex_around_cursor(range, regex, exclude_from_prefix_regex)
   return { start_col = start_col, length = length }
 end
 
---- @param ctx blink.cmp.CompletionRenderContext
+--- @param ctx blink.cmp.DrawItemContext
 --- @return string|nil
 function utils.get_tailwind_hl(ctx)
   local doc = ctx.item.documentation
