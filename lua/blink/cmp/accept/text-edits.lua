@@ -46,10 +46,10 @@ local function get_line_byte_from_position(position, offset_encoding)
   -- character
   if col > 0 then
     local line = vim.api.nvim_buf_get_lines(bufnr, position.line, position.line + 1, true)[1] or ''
-    if vim.version.gt(vim.version(), {0, 10, 0}) then
-        return vim.str_byteindex(line, offset_encoding, col, false)
+    if vim.fn.has('nvim-0.11.0') == 1 then
+      return vim.str_byteindex(line, offset_encoding or 'utf-16', col, false)
     else
-        return vim.lsp.util._str_byteindex_enc(line, col, offset_encoding or 'utf-16')
+      return vim.lsp.util._str_byteindex_enc(line, col, offset_encoding or 'utf-16')
     end
   end
   return col
