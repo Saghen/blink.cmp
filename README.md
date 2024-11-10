@@ -419,8 +419,12 @@ MiniDeps.add({
         padding = 1,
         -- Gap between columns
         gap = 1,
+
         -- Components to render, grouped by column
         columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
+        -- for a setup similar to nvim-cmp: https://github.com/Saghen/blink.cmp/pull/245#issuecomment-2463659508
+        -- columns = { { "label", "label_description", gap = 1 }, { "kind_icon", "kind" } },
+
         -- Definitions for possible components to render. Each component defines:
         --   ellipsis: whether to add an ellipsis when truncating the text
         --   width: control the min, max and fill behavior of the component
