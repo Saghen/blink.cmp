@@ -48,7 +48,7 @@ function column:render(ctxs)
   for _, max_component_width in ipairs(max_component_widths) do
     if max_component_width > 0 then column_width = column_width + max_component_width + self.gap end
   end
-  column_width = column_width - self.gap
+  column_width = math.max(column_width - self.gap, 0)
 
   --- find the component that will fill the empty space
   local fill_idx = -1
@@ -91,8 +91,8 @@ function column:get_line_highlights(line_idx)
   local offset = 0
   local highlights = {}
 
-  for idx, component in ipairs(self.components) do
-    local text = self.lines[line_idx][idx]
+  for component_idx, component in ipairs(self.components) do
+    local text = self.lines[line_idx][component_idx]
     if #text > 0 then
       local column_highlights = type(component.highlight) == 'function' and component.highlight(ctx, text)
         or component.highlight
