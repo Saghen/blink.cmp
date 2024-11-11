@@ -433,7 +433,7 @@ MiniDeps.add({
         components = {
           kind_icon = {
             ellipsis = false,
-            text = function(ctx) return ctx.kind_icon end,
+            text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
             highlight = function(ctx) return utils.get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind end,
           },
 

@@ -49,7 +49,7 @@ function context.new(draw, item, matched_indices)
     label_matched_indices = matched_indices,
     kind = kind,
     kind_icon = kind_icon,
-    icon_gap = config.nerd_font_variant == 'mono' and ' ' or '  ',
+    icon_gap = config.nerd_font_variant == 'mono' and '' or ' ',
     deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) or false,
   }
 end
