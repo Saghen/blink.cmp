@@ -57,7 +57,9 @@ function win.new(config)
   }
 
   if self.config.scrollbar then
-    self.scrollbar = require('blink.cmp.windows.lib.scrollbar').new({ enable_gutter = self.config.border == 'none' })
+    self.scrollbar = require('blink.cmp.windows.lib.scrollbar').new({
+      enable_gutter = self.config.border == 'none' or self.config.border == 'padded',
+    })
   end
 
   return self
@@ -149,19 +151,24 @@ end
 function win:get_border_size()
   if not self:is_open() then return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 } end
 
+  local left = 0
+  local right = 0
+  local top = 0
+  local bottom = 0
+
   local border = self.config.border
-  if border == 'none' then
-    if self.scrollbar and self.scrollbar:is_visible() then
-      return { vertical = 0, horizontal = 1, left = 0, right = 1, top = 0, bottom = 0 }
-    end
-    return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
-  elseif border == 'padded' then
-    return { vertical = 0, horizontal = 2, left = 1, right = 1, top = 0, bottom = 0 }
+  if border == 'padded' then
+    left = 1
+    right = 1
   elseif border == 'shadow' then
-    return { vertical = 1, horizontal = 1, left = 0, right = 1, top = 0, bottom = 1 }
-  elseif type(border) == 'string' then
-    return { vertical = 2, horizontal = 2, left = 1, right = 1, top = 1, bottom = 1 }
-  elseif type(border) == 'table' and border ~= nil then
+    right = 1
+    bottom = 1
+  elseif type(border) == 'string' and border ~= 'none' then
+    left = 1
+    right = 1
+    top = 1
+    bottom = 1
+  elseif type(border) == 'table' then
     -- borders can be a table of strings and act differently with different # of chars
     -- so we normalize it: https://neovim.io/doc/user/api.html#nvim_open_win()
     -- based on nvim-cmp
@@ -173,17 +180,18 @@ function win:get_border_size()
       end
     end
 
-    local top = resolved_border[2] == '' and 0 or 1
-    local bottom = resolved_border[6] == '' and 0 or 1
-    local left = resolved_border[8] == '' and 0 or 1
-    local right = resolved_border[4] == '' and 0 or 1
-    return { vertical = top + bottom, horizontal = left + right, left = left, right = right, top = top, bottom = bottom }
+    top = resolved_border[2] == '' and 0 or 1
+    bottom = resolved_border[6] == '' and 0 or 1
+    left = resolved_border[8] == '' and 0 or 1
+    right = resolved_border[4] == '' and 0 or 1
   end
 
   if self.scrollbar and self.scrollbar:is_visible() then
-    return { vertical = 0, horizontal = 1, left = 0, right = 1, top = 0, bottom = 0 }
+    local offset = (border == 'none' or border == 'padded') and 1 or 0
+    right = right + offset
   end
-  return { vertical = 0, horizontal = 0, left = 0, right = 0, top = 0, bottom = 0 }
+
+  return { vertical = top + bottom, horizontal = left + right, left = left, right = right, top = top, bottom = bottom }
 end
 
 --- Gets the height of the window, taking into account the border

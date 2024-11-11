@@ -146,10 +146,10 @@ MiniDeps.add({
 | `BlinkCmpKind` | Special | Kind icon/text of the completion item |
 | `BlinkCmpKind<kind>` | Special | Kind icon/text of the completion item |
 | `BlinkCmpDoc` | NormalFloat | The documentation window |
-| `BlinkCmpDocBorder` | FloatBorder | The documentation window border |
+| `BlinkCmpDocBorder` | NormalFloat | The documentation window border |
 | `BlinkCmpDocCursorLine` | Visual | The documentation window cursor line |
 | `BlinkCmpSignatureHelp` | NormalFloat | The signature help window |
-| `BlinkCmpSignatureHelpBorder` | FloatBorder | The signature help window border |
+| `BlinkCmpSignatureHelpBorder` | NormalFloat | The signature help window border |
 | `BlinkCmpSignatureHelpActiveParameter` | LspSignatureActiveParameter | Active parameter of the signature help |
 
 </details>

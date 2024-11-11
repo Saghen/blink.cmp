@@ -28,27 +28,34 @@ local function get_win_buf_height(target_win)
   return height
 end
 
+--- @param border string|string[]
+--- @return number
+local function get_col_offset(border)
+  -- we only need an extra offset when working with a padded window
+  if type(border) == 'table' and border[1] == ' ' and border[4] == ' ' and border[7] == ' ' and border[8] == ' ' then
+    return 1
+  end
+  return 0
+end
+
 --- @param target_win number
 --- @return { should_hide: boolean, thumb: blink.cmp.ScrollbarGeometry, gutter: blink.cmp.ScrollbarGeometry }
 function M.get_geometry(target_win)
-  local width = vim.api.nvim_win_get_width(target_win)
-  local height = vim.api.nvim_win_get_height(target_win)
-  local zindex = vim.api.nvim_win_get_config(target_win).zindex or 1
+  local config = vim.api.nvim_win_get_config(target_win)
+  local width = config.width
+  local height = config.height
+  local zindex = config.zindex
 
   local buf_height = get_win_buf_height(target_win)
-
-  local thumb_height = math.max(1, math.floor(height * height / buf_height + 0.5) - 1)
-
   local start_line = math.max(1, vim.fn.line('w0', target_win))
-
   local pct = (start_line - 1) / (buf_height - height)
-
+  local thumb_height = math.max(1, math.floor(height * height / buf_height + 0.5) - 1)
   local thumb_offset = math.floor((pct * (height - thumb_height)) + 0.5)
 
   local common_geometry = {
     width = 1,
     row = thumb_offset,
-    col = width,
+    col = width + get_col_offset(config.border),
     relative = 'win',
     win = target_win,
   }

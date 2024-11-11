@@ -2,9 +2,9 @@
 --- @field enable_gutter boolean
 
 --- @class blink.cmp.Scrollbar
---- @field target_win? number
---- @field win? blink.cmp.ScrollbarWin
+--- @field win blink.cmp.ScrollbarWin
 --- @field autocmd? number
+--- @field target_win? number
 ---
 --- @field new fun(opts: blink.cmp.ScrollbarConfig): blink.cmp.Scrollbar
 --- @field is_visible fun(self: blink.cmp.Scrollbar): boolean
@@ -56,6 +56,7 @@ function scrollbar:mount(target_win)
     { 'WinScrolled', 'WinClosed', 'WinResized', 'CursorMoved', 'CursorMovedI' },
     { callback = update }
   )
+  self.target_win = target_win
 end
 
 function scrollbar:unmount()
@@ -63,6 +64,7 @@ function scrollbar:unmount()
 
   if self.autocmd then vim.api.nvim_del_autocmd(self.autocmd) end
   self.autocmd = nil
+  self.target_win = nil
 end
 
 return scrollbar
