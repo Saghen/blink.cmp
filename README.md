@@ -632,8 +632,12 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 [@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing
 
+### Contributors
+
 [@stefanboca](https://github.com/stefanboca) Author of [blink.compat](https://github.com/saghen/blink.compat)
 
-[@scottmckendry](https://github.com/scottmckendry) Actively contributing to the project
+[@lopi-py](https://github.com/lopi-py) Contributes to the windowing code
+
+[@scottmckendry](https://github.com/scottmckendry) Contributes to the CI and prebuilt binaries
 
 [@balssh](https://github.com/Balssh) Manages nixpkg and nixvim
