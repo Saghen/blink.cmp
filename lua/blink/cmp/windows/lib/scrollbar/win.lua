@@ -25,12 +25,12 @@ function scrollbar_win:show_thumb(geometry)
   -- create window if it doesn't exist
   if self.thumb_win == nil or not vim.api.nvim_win_is_valid(self.thumb_win) then
     self.thumb_win = self:_make_win(geometry, 'BlinkCmpScrollBarThumb')
+  else
+    -- update with the geometry
+    local thumb_existing_config = vim.api.nvim_win_get_config(self.thumb_win)
+    local thumb_config = vim.tbl_deep_extend('force', thumb_existing_config, geometry)
+    vim.api.nvim_win_set_config(self.thumb_win, thumb_config)
   end
-
-  -- update with the geometry
-  local thumb_existing_config = vim.api.nvim_win_get_config(self.thumb_win)
-  local thumb_config = vim.tbl_deep_extend('force', thumb_existing_config, geometry)
-  vim.api.nvim_win_set_config(self.thumb_win, thumb_config)
 end
 
 function scrollbar_win:show_gutter(geometry)
@@ -39,12 +39,12 @@ function scrollbar_win:show_gutter(geometry)
   -- create window if it doesn't exist
   if self.gutter_win == nil or not vim.api.nvim_win_is_valid(self.gutter_win) then
     self.gutter_win = self:_make_win(geometry, 'BlinkCmpScrollBarGutter')
+  else
+    -- update with the geometry
+    local gutter_existing_config = vim.api.nvim_win_get_config(self.gutter_win)
+    local gutter_config = vim.tbl_deep_extend('force', gutter_existing_config, geometry)
+    vim.api.nvim_win_set_config(self.gutter_win, gutter_config)
   end
-
-  -- update with the geometry
-  local gutter_existing_config = vim.api.nvim_win_get_config(self.gutter_win)
-  local gutter_config = vim.tbl_deep_extend('force', gutter_existing_config, geometry)
-  vim.api.nvim_win_set_config(self.gutter_win, gutter_config)
 end
 
 function scrollbar_win:hide_thumb()

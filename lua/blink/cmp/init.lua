@@ -110,11 +110,11 @@ cmp.add_default_highlights = function()
   set_hl('BlinkCmpMenuSelection', { link = 'PmenuSel' })
 
   set_hl('BlinkCmpDoc', { link = 'NormalFloat' })
-  set_hl('BlinkCmpDocBorder', { link = 'FloatBorder' })
+  set_hl('BlinkCmpDocBorder', { link = 'NormalFloat' })
   set_hl('BlinkCmpDocCursorLine', { link = 'Visual' })
 
   set_hl('BlinkCmpSignatureHelp', { link = 'NormalFloat' })
-  set_hl('BlinkCmpSignatureHelpBorder', { link = 'FloatBorder' })
+  set_hl('BlinkCmpSignatureHelpBorder', { link = 'NormalFloat' })
   set_hl('BlinkCmpSignatureHelpActiveParameter', { link = 'LspSignatureActiveParameter' })
 end
 
