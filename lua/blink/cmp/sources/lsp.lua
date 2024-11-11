@@ -110,16 +110,16 @@ function lsp:get_completions(context, callback)
 
       -- convert full response to our internal format
       else
+        -- add defaults to the items
         local defaults = response.result and response.result.itemDefaults or {}
-        -- TODO: excluding editRange for now
         local known_defaults = {
           'commitCharacters',
+          'editRange',
           'insertTextFormat',
           'insertTextMode',
           'data',
         }
         for _, item in ipairs(response.result.items) do
-          -- add defaults to the item
           for key, value in pairs(defaults) do
             if vim.tbl_contains(known_defaults, key) then item[key] = item[key] or value end
           end

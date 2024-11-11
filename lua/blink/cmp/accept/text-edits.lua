@@ -56,46 +56,54 @@ local function get_line_byte_from_position(position, offset_encoding)
 end
 
 --- Gets the text edit from an item, handling insert/replace ranges and converts
---- offset encodings (utf-16 | utf-32) to byte offset (equivalent to utf-8)
+--- offset encodings (utf-16 | utf-32) to utf-8
 --- @param item blink.cmp.CompletionItem
 --- @return lsp.TextEdit
 function text_edits.get_from_item(item)
+  local text_edit = vim.deepcopy(item.textEdit)
+
+  -- Fallback to default edit range if defined, and no text edit was set
+  if text_edit == nil and item.editRange ~= nil then
+    text_edit = {
+      newText = item.textEditText or item.insertText or item.label,
+      -- FIXME: temporarily convert insertReplaceEdit to regular textEdit
+      range = item.editRange.insert or item.editRange.replace or item.editRange,
+    }
+  end
+
+  -- Guess the text edit if the item doesn't define it
+  if text_edit == nil then return text_edits.guess(item) end
+
+  -- FIXME: temporarily convert insertReplaceEdit to regular textEdit
+  text_edit.range = text_edit.range or text_edit.insert or text_edit.replace
+  text_edit.insert = nil
+  text_edit.replace = nil
+  --- @cast text_edit lsp.TextEdit
+
+  local client = vim.lsp.get_client_by_id(item.client_id)
+  local offset_encoding = client ~= nil and client.offset_encoding or 'utf-8'
+
+  -- convert the offset encoding to utf-8 if necessary
+  if offset_encoding ~= 'utf-8' then
+    text_edit.range.start.character = get_line_byte_from_position(text_edit.range.start, offset_encoding)
+    text_edit.range['end'].character = get_line_byte_from_position(text_edit.range['end'], offset_encoding)
+  end
+
   -- Adjust the position of the text edit to be the current cursor position
   -- since the data might be outdated. We compare the cursor column position
   -- from when the items were fetched versus the current.
-  -- hack: is there a better way?
-  if item.textEdit ~= nil then
-    -- FIXME: temporarily convert insertReplaceEdit to regular textEdit
-    if item.textEdit.insert ~= nil then
-      item.textEdit.range = item.textEdit.insert
-    elseif item.textEdit.replace ~= nil then
-      item.textEdit.range = item.textEdit.replace
-    end
-
-    local text_edit = vim.deepcopy(item.textEdit)
-
-    local client = vim.lsp.get_client_by_id(item.client_id)
-    local offset_encoding = client ~= nil and client.offset_encoding or 'utf-8'
-
-    if offset_encoding ~= 'utf-8' then
-      text_edit.range.start.character = get_line_byte_from_position(text_edit.range.start, offset_encoding)
-      text_edit.range['end'].character = get_line_byte_from_position(text_edit.range['end'], offset_encoding)
-    end
-
-    local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
-    text_edit.range['end'].character = text_edit.range['end'].character + offset
-    return text_edit
-  end
-
-  -- No text edit so we fallback to our own resolution
-  return text_edits.guess(item)
+  -- HACK: is there a better way?
+  -- TODO: take into account the offset_encoding
+  local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
+  text_edit.range['end'].character = text_edit.range['end'].character + offset
+  return text_edit
 end
 
 --- Uses the keyword_regex to guess the text edit ranges
 --- @param item blink.cmp.CompletionItem
 --- TODO: doesnt work when the item contains characters not included in the context regex
 function text_edits.guess(item)
-  local word = item.textEditText or item.insertText or item.label
+  local word = item.insertText or item.label
 
   local cmp_config = config.trigger.completion
   local range = require('blink.cmp.utils').get_regex_around_cursor(
