@@ -2,7 +2,7 @@
   description = "Set of simple, performant neovim plugins";
 
   inputs = {
-    nixpkgs.url = "github:cachix/devenv-nixpkgs/rolling";
+    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     fenix.url = "github:nix-community/fenix";
     fenix.inputs.nixpkgs.follows = "nixpkgs";
@@ -31,7 +31,7 @@
           };
 
           src = ./.;
-          version = "2024-08-02";
+          version = "2024-11-11";
 
           blink-fuzzy-lib = rustPlatform.buildRustPackage {
             pname = "blink-fuzzy-lib";
