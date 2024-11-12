@@ -175,6 +175,9 @@ MiniDeps.add({
   --   preset = 'default',
   --   ['<Up>'] = { 'select_prev', 'fallback' },
   --   ['<Down>'] = { 'select_next', 'fallback' },
+  -- 
+  --   -- disable a keymap from the preset
+  --   ['<C-e>'] = {},
   -- },
   --
   -- When defining your own keymaps without a preset, no keybinds will be assigned automatically.

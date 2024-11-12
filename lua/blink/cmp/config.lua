@@ -178,15 +178,30 @@ local utils = require('blink.cmp.utils')
 
 --- @type blink.cmp.Config
 local config = {
-  -- the keymap may be a preset ('default' | 'super-tab' | 'enter') OR a table of keys => command[]
-  -- when defining your own, no keybinds will be assigned automatically.
-  -- you may pass a function in the command array where returning true
-  -- will prevent the next command from running
+  -- The keymap can be:
+  --   - A preset ('default' | 'super-tab' | 'enter')
+  --   - A table of keys => command[] (optionally with a "preset" key to merge with a preset)
   --
-  -- The "fallback" command will run the next non-blink keymap.
-  --   For example, to accept the current completion item with "enter", or create a new line,
-  --   when the blink window is closed, you would define it as:
-  --   ['<CR>'] = { 'accept', 'fallback' }
+  -- When specifying 'preset' in the keymap table, the custom key mappings are merged with the preset,
+  -- and any conflicting keys will overwrite the preset mappings.
+  -- The "fallback" command will run the next non blink keymap.
+  --
+  -- Example:
+  --
+  -- keymap = {
+  --   preset = 'default',
+  --   ['<Up>'] = { 'select_prev', 'fallback' },
+  --   ['<Down>'] = { 'select_next', 'fallback' },
+  --
+  --   -- disable a keymap from the preset
+  --   ['<C-e>'] = {},
+  -- },
+  --
+  -- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
+  --
+  -- Available commands:
+  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
+  --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
   --
   -- "default" keymap
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
@@ -203,7 +218,7 @@ local config = {
   --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
   --
   -- "super-tab" keymap
-  --   you may want to set `trigger.completion.show_in_snippet = false` when using "super-tab"
+  --   you may want to set `trigger.completion.show_in_snippet = false`
   --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
   --
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
@@ -244,10 +259,6 @@ local config = {
   --
   --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
   --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
-  --
-  -- available commands:
-  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
-  --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
   keymap = 'default',
 
   accept = {
