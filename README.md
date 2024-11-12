@@ -590,7 +590,11 @@ MiniDeps.add({
 
 ## How it works
 
-The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
+The plugin use a 4 stage pipeline:
+```mermaid
+flowchart LR;
+  trigger --> sources --> fuzzy --> render;
+```
 
 **Trigger:** Controls when to request completion items from the sources and provides a context downstream with the current query (i.e. `hello.wo|`, the query would be `wo`) and the treesitter object under the cursor (i.e. for intelligently enabling/disabling sources). It respects trigger characters passed by the LSP (or any other source) and includes it in the context for sending to the LSP.
 
