@@ -35,24 +35,22 @@ end
 
 --- Grabbed from vim.lsp.utils. Converts an offset_encoding to byte offset
 --- @param position lsp.Position
---- @param offset_encoding string|nil utf-8|utf-16|utf-32
+--- @param offset_encoding? 'utf-8'|'utf-16'|'utf-32'
 --- @return integer
 local function get_line_byte_from_position(position, offset_encoding)
   local bufnr = vim.api.nvim_get_current_buf()
-  -- LSP's line and characters are 0-indexed
-  -- Vim's line and columns are 1-indexed
   local col = position.character
-  -- When on the first character, we can ignore the difference between byte and
-  -- character
-  if col > 0 then
-    local line = vim.api.nvim_buf_get_lines(bufnr, position.line, position.line + 1, true)[1] or ''
-    if vim.fn.has('nvim-0.11.0') == 1 then
-      return vim.str_byteindex(line, offset_encoding or 'utf-16', col, false)
-    else
-      return vim.lsp.util._str_byteindex_enc(line, col, offset_encoding or 'utf-16')
-    end
+
+  -- When on the first character, we can ignore the difference between byte and character
+  if col == 0 then return 0 end
+
+  local line = vim.api.nvim_buf_get_lines(bufnr, position.line, position.line + 1, false)[1] or ''
+  if vim.fn.has('nvim-0.11.0') == 1 then
+    col = vim.str_byteindex(line, offset_encoding or 'utf-16', col, false)
+  else
+    col = vim.lsp.util._str_byteindex_enc(line, col, offset_encoding or 'utf-16')
   end
-  return col
+  return math.min(col, #line)
 end
 
 --- Gets the text edit from an item, handling insert/replace ranges and converts
@@ -67,7 +65,7 @@ function text_edits.get_from_item(item)
     text_edit = {
       newText = item.textEditText or item.insertText or item.label,
       -- FIXME: temporarily convert insertReplaceEdit to regular textEdit
-      range = item.editRange.insert or item.editRange.replace or item.editRange,
+      range = vim.deepcopy(item.editRange.insert or item.editRange.replace or item.editRange),
     }
   end
 
@@ -83,12 +81,6 @@ function text_edits.get_from_item(item)
   local client = vim.lsp.get_client_by_id(item.client_id)
   local offset_encoding = client ~= nil and client.offset_encoding or 'utf-8'
 
-  -- convert the offset encoding to utf-8 if necessary
-  if offset_encoding ~= 'utf-8' then
-    text_edit.range.start.character = get_line_byte_from_position(text_edit.range.start, offset_encoding)
-    text_edit.range['end'].character = get_line_byte_from_position(text_edit.range['end'], offset_encoding)
-  end
-
   -- Adjust the position of the text edit to be the current cursor position
   -- since the data might be outdated. We compare the cursor column position
   -- from when the items were fetched versus the current.
@@ -96,6 +88,15 @@ function text_edits.get_from_item(item)
   -- TODO: take into account the offset_encoding
   local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
   text_edit.range['end'].character = text_edit.range['end'].character + offset
+
+  -- convert the offset encoding to utf-8 if necessary
+  -- TODO: we have to do this last because it applies a max on the position based on the length of the line
+  -- so it would break the offset code when removing characters at the end of the line
+  if offset_encoding ~= 'utf-8' then
+    text_edit.range.start.character = get_line_byte_from_position(text_edit.range.start, offset_encoding)
+    text_edit.range['end'].character = get_line_byte_from_position(text_edit.range['end'], offset_encoding)
+  end
+
   return text_edit
 end
 

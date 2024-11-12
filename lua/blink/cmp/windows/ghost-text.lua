@@ -17,8 +17,7 @@ local ghost_text = {
 --- @param textEdit lsp.TextEdit
 local function get_still_untyped_text(textEdit)
   local type_text_length = textEdit.range['end'].character - textEdit.range.start.character
-  local result = textEdit.newText:sub(type_text_length + 1)
-  return result
+  return textEdit.newText:sub(type_text_length + 1)
 end
 
 function ghost_text.setup()
