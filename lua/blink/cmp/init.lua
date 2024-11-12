@@ -93,8 +93,10 @@ cmp.add_default_highlights = function()
   end
 
   set_hl('BlinkCmpLabel', { link = use_nvim_cmp and 'CmpItemAbbr' or 'Pmenu' })
-  set_hl('BlinkCmpLabelDeprecated', { link = use_nvim_cmp and 'CmpItemAbbrDeprecated' or 'Comment' })
+  set_hl('BlinkCmpLabelDeprecated', { link = use_nvim_cmp and 'CmpItemAbbrDeprecated' or 'NonText' })
   set_hl('BlinkCmpLabelMatch', { link = use_nvim_cmp and 'CmpItemAbbrMatch' or 'Pmenu' })
+  set_hl('BlinkCmpLabelDetail', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
+  set_hl('BlinkCmpLabelDescription', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
   set_hl('BlinkCmpKind', { link = use_nvim_cmp and 'CmpItemKind' or 'Special' })
   for _, kind in ipairs(require('blink.cmp.types').CompletionItemKind) do
     set_hl('BlinkCmpKind' .. kind, { link = use_nvim_cmp and 'CmpItemKind' .. kind or 'BlinkCmpKind' })
@@ -103,7 +105,7 @@ cmp.add_default_highlights = function()
   set_hl('BlinkCmpScrollBarThumb', { link = 'PmenuThumb' })
   set_hl('BlinkCmpScrollBarGutter', { link = 'PmenuSbar' })
 
-  set_hl('BlinkCmpGhostText', { link = use_nvim_cmp and 'CmpGhostText' or 'Comment' })
+  set_hl('BlinkCmpGhostText', { link = use_nvim_cmp and 'CmpGhostText' or 'NonText' })
 
   set_hl('BlinkCmpMenu', { link = 'Pmenu' })
   set_hl('BlinkCmpMenuBorder', { link = 'Pmenu' })
