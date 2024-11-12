@@ -17,8 +17,7 @@ local ghost_text = {
 --- @param textEdit lsp.TextEdit
 local function get_still_untyped_text(textEdit)
   local type_text_length = textEdit.range['end'].character - textEdit.range.start.character
-  local result = textEdit.newText:sub(type_text_length + 1)
-  return result
+  return textEdit.newText:sub(type_text_length + 1)
 end
 
 function ghost_text.setup()
@@ -86,19 +85,13 @@ function ghost_text.draw_preview(bufnr)
     text_edit.range['end'].character,
   }
 
-  local success, id = pcall(
-    function()
-      return vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, cursor_pos[1], cursor_pos[2], {
-        id = ghost_text.extmark_id,
-        virt_text_pos = 'inline',
-        virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
-        virt_lines = virt_lines,
-        hl_mode = 'combine',
-      })
-    end
-  )
-
-  if success then ghost_text.extmark_id = id end
+  ghost_text.extmark_id = vim.api.nvim_buf_set_extmark(bufnr, config.highlight.ns, cursor_pos[1], cursor_pos[2], {
+    id = ghost_text.extmark_id,
+    virt_text_pos = 'inline',
+    virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
+    virt_lines = virt_lines,
+    hl_mode = 'combine',
+  })
 end
 
 return ghost_text
