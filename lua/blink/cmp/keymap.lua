@@ -146,22 +146,24 @@ function keymap.apply_keymap_to_current_buffer(keys_to_commands)
 
   -- insert mode: uses both snippet and insert commands
   for key, commands in pairs(keys_to_commands) do
-    keymap.set('i', key, function()
-      for _, command in ipairs(commands) do
-        -- special case for fallback
-        if command == 'fallback' then
-          return keymap.run_non_blink_keymap('i', key)
+    if #commands > 0 then
+      keymap.set('i', key, function()
+        for _, command in ipairs(commands) do
+          -- special case for fallback
+          if command == 'fallback' then
+            return keymap.run_non_blink_keymap('i', key)
 
-        -- run user defined functions
-        elseif type(command) == 'function' then
-          if command(require('blink.cmp')) then return end
+          -- run user defined functions
+          elseif type(command) == 'function' then
+            if command(require('blink.cmp')) then return end
 
-        -- otherwise, run the built-in command
-        elseif require('blink.cmp')[command]() then
-          return
+          -- otherwise, run the built-in command
+          elseif require('blink.cmp')[command]() then
+            return
+          end
         end
-      end
-    end)
+      end)
+    end
   end
 
   -- snippet mode
@@ -171,7 +173,7 @@ function keymap.apply_keymap_to_current_buffer(keys_to_commands)
       if vim.tbl_contains(snippet_commands, command) then has_snippet_command = true end
     end
 
-    if has_snippet_command then
+    if has_snippet_command and #commands > 0 then
       keymap.set('s', key, function()
         for _, command in ipairs(keys_to_commands[key] or {}) do
           -- special case for fallback
