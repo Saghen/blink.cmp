@@ -28,7 +28,7 @@
 --- @class blink.cmp.AutoBracketsConfig
 --- @field enabled? boolean
 --- @field default_brackets? string[]
---- @field override_brackets_for_filetypes? table<string, string[] | function(item: blink.cmp.CompletionItem): string[]>
+--- @field override_brackets_for_filetypes? table<string, string[] | fun(item: blink.cmp.CompletionItem): string[]>
 --- @field force_allow_filetypes? string[] Overrides the default blocked filetypes
 --- @field blocked_filetypes? string[]
 --- @field kind_resolution? blink.cmp.AutoBracketResolutionConfig Synchronously use the kind of the item to determine if brackets should be added
