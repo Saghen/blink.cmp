@@ -105,10 +105,10 @@ function docs.update_position()
   local autocomplete_win_height = autocomplete.win:get_height()
   local autocomplete_border_size = autocomplete.win:get_border_size()
 
-  local cursor_screen_row = vim.fn.screenpos(0, unpack(vim.api.nvim_win_get_cursor(0))).row
+  local cursor_win_row = vim.fn.winline()
 
   -- decide direction priority based on the autocomplete window's position
-  local autocomplete_win_is_up = autocomplete_win_config.row - cursor_screen_row < 0
+  local autocomplete_win_is_up = autocomplete_win_config.row - cursor_win_row < 0
   local direction_priority = autocomplete_win_is_up and config.direction_priority.autocomplete_north
     or config.direction_priority.autocomplete_south
 
