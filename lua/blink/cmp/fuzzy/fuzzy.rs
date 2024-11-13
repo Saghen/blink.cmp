@@ -56,7 +56,10 @@ pub fn fuzzy(
     opts: FuzzyOptions,
 ) -> Vec<usize> {
     let nearby_words: HashSet<String> = HashSet::from_iter(opts.nearby_words.unwrap_or_default());
-    let haystack_labels = haystack.iter().map(|s| s.label.clone()).collect::<Vec<_>>();
+    let haystack_labels = haystack
+        .iter()
+        .map(|s| s.filter_text.clone().unwrap_or(s.label.clone()))
+        .collect::<Vec<_>>();
 
     // Fuzzy match with fzrs
     let options = frizbee::Options {
