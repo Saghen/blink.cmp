@@ -293,18 +293,18 @@ function win:get_direction_with_window_constraints(anchor_win, direction_priorit
     },
     s = {
       vertical = anchor_is_above_cursor and cursor_constraints.distance_from_bottom
-        or (screen_height - (anchor_height + anchor_row - 1)),
+        or (screen_height - (anchor_height + anchor_row - 1 + anchor_border_size.vertical)),
       horizontal = screen_width - (anchor_col - 1),
     },
     e = {
       vertical = anchor_is_above_cursor and cursor_constraints.distance_from_top
         or cursor_constraints.distance_from_bottom,
-      horizontal = screen_width - (anchor_col - 1) - anchor_width,
+      horizontal = screen_width - (anchor_col - 1) - anchor_width - anchor_border_size.right,
     },
     w = {
       vertical = anchor_is_above_cursor and cursor_constraints.distance_from_top
         or cursor_constraints.distance_from_bottom,
-      horizontal = anchor_col - 1,
+      horizontal = anchor_col - 1 + anchor_border_size.left,
     },
   }
 
