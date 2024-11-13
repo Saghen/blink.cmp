@@ -176,7 +176,7 @@ function autocomplete.update_position(context)
   -- place the window at the start col of the current text we're fuzzy matching against
   -- so the window doesnt move around as we type
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
-  local col = context.bounds.start_col - cursor_col - (context.bounds.length == 0 and 0 or 1)
+  local col = context.bounds.start_col - cursor_col - (context.bounds.length == 0 and 0 or 1) - border_size.left
   local row = pos.direction == 's' and 1 or -pos.height - border_size.vertical
   vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col - start_col })
   vim.api.nvim_win_set_height(winnr, pos.height)
