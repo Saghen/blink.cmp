@@ -13,12 +13,15 @@
 --- | 'snippet_forward' Move the cursor forward to the next snippet placeholder
 --- | 'snippet_backward' Move the cursor backward to the previous snippet placeholder
 --- | (fun(cmp: table): boolean?) Custom function where returning true will prevent the next command from running
----
---- @alias blink.cmp.KeymapConfig
---- | table<string, blink.cmp.KeymapCommand[]> Table of keys => commands[]
+
+--- @alias blink.cmp.KeymapPreset
 --- | 'default' mappings similar to built-in completion
 --- | 'super-tab' mappings similar to vscode (tab to accept, arrow keys to navigate)
 --- | 'enter' mappings similar to 'super-tab' but with 'enter' to accept
+
+--- @class blink.cmp.KeymapConfig
+--- @field preset? blink.cmp.KeymapPreset
+--- @field [string]? blink.cmp.KeymapCommand[]> Table of keys => commands[]
 
 --- @class blink.cmp.AcceptConfig
 --- @field expand_snippet? fun(string)
@@ -163,7 +166,7 @@
 --- @field enabled? boolean
 
 --- @class blink.cmp.Config
---- @field keymap? blink.cmp.KeymapConfig | 'default' | 'super-tab'
+--- @field keymap? blink.cmp.KeymapConfig | blink.cmp.KeymapPreset
 --- @field accept? blink.cmp.AcceptConfig
 --- @field trigger? blink.cmp.TriggerConfig
 --- @field fuzzy? blink.cmp.FuzzyConfig
