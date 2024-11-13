@@ -139,6 +139,7 @@
 --- @alias blink.cmp.WindowBorder 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | 'none' | blink.cmp.WindowBorderChar[]
 ---
 --- @class blink.cmp.DocumentationConfig
+--- @field min_width? number
 --- @field max_width? number
 --- @field max_height? number
 --- @field desired_min_width? number
