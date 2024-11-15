@@ -51,7 +51,8 @@ function signature.open_with_signature_help(context, signature_help)
       signature.win:get_buf(),
       active_signature.label,
       active_signature.documentation,
-      config.max_width
+      config.max_width,
+      config.treesitter_highlighting
     )
   end
   signature.shown_signature = active_signature

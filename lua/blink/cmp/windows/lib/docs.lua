@@ -3,7 +3,9 @@ local docs = {}
 --- @param bufnr number
 --- @param detail? string
 --- @param documentation? lsp.MarkupContent | string
-function docs.render_detail_and_documentation(bufnr, detail, documentation, max_width)
+--- @param max_width number
+--- @param use_treesitter_highlighting boolean
+function docs.render_detail_and_documentation(bufnr, detail, documentation, max_width, use_treesitter_highlighting)
   local detail_lines = {}
   if detail and detail ~= '' then detail_lines = docs.split_lines(detail) end
 
@@ -30,7 +32,7 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
   -- Highlight with treesitter
   vim.api.nvim_buf_clear_namespace(bufnr, require('blink.cmp.config').highlight.ns, 0, -1)
 
-  if #detail_lines > 0 then docs.highlight_with_treesitter(bufnr, vim.bo.filetype, 0, #detail_lines) end
+  if #detail_lines > 0 and use_treesitter_highlighting then docs.highlight_with_treesitter(bufnr, vim.bo.filetype, 0, #detail_lines) end
 
   -- Only add the separator if there are documentation lines (otherwise only display the detail)
   if #detail_lines > 0 and #doc_lines > 0 then
@@ -42,7 +44,7 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
     })
   end
 
-  if #doc_lines > 0 then
+  if #doc_lines > 0 and use_treesitter_highlighting then
     local start = #detail_lines + (#detail_lines > 0 and 1 or 0)
     docs.highlight_with_treesitter(bufnr, 'markdown', start, start + #doc_lines)
   end

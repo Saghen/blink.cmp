@@ -152,6 +152,7 @@
 --- @field auto_show? boolean
 --- @field auto_show_delay_ms? number Delay before showing the documentation window
 --- @field update_delay_ms? number Delay before updating the documentation window
+--- @field treesitter_highlighting? boolean Whether to use treesitter highlighting for the documentation window, disable if you run into performance issues
 
 --- @class blink.cmp.SignatureHelpConfig
 --- @field min_width? number
@@ -162,6 +163,7 @@
 --- @field winhighlight? string
 --- @field scrollbar? boolean
 --- @field direction_priority? ("n" | "s")[]
+--- @field treesitter_highlighting? boolean Whether to use treesitter highlighting for the documentation window, disable if you run into performance issues
 
 --- @class GhostTextConfig
 --- @field enabled? boolean
@@ -493,6 +495,9 @@ local config = {
       auto_show = false,
       auto_show_delay_ms = 500,
       update_delay_ms = 50,
+      -- whether to use treesitter highlighting for the documentation window, disable if you run into performance issues
+      -- WARN: temporary, eventually blink will support regex highlighting
+      treesitter_highlighting = true,
     },
     signature_help = {
       min_width = 1,
@@ -507,6 +512,9 @@ local config = {
       -- which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 'n', 's' },
+      -- whether to use treesitter highlighting for the documentation window, disable if you run into performance issues
+      -- WARN: temporary, eventually blink will support regex highlighting
+      treesitter_highlighting = true,
     },
     ghost_text = {
       enabled = false,

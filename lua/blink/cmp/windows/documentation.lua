@@ -62,7 +62,8 @@ function docs.show_item(item)
           docs.win:get_buf(),
           item.detail,
           item.documentation,
-          docs.win.config.max_width
+          docs.win.config.max_width,
+          config.treesitter_highlighting
         )
       end
       docs.shown_item = item
