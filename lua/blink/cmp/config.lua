@@ -459,7 +459,7 @@ local config = {
 
           label_description = {
             width = { max = 30 },
-            text = function(ctx) return (ctx.label_description:gsub('\n%s*', ' ')) end,
+            text = function(ctx) return ctx.label_description end,
             highlight = 'BlinkCmpLabelDescription',
           },
         },

@@ -35,17 +35,22 @@ function context.new(draw, item, matched_indices)
   local config = require('blink.cmp.config')
   local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
   local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
+
   -- Some LSPs can return labels with newlines.
   -- Escape them to avoid errors in nvim_buf_set_lines when rendering the autocomplete menu.
-  local label = item.label:gsub('\n', '\\n') .. (kind == 'Snippet' and '~' or '')
+  local icon_spacing = config.nerd_font_variant == 'mono' and '' or ' '
+  local newline_char = '↲' .. icon_spacing
+  local label = item.label:gsub('\n', newline_char) .. (kind == 'Snippet' and '~' or '')
+  local label_detail = (item.labelDetails and item.labelDetails.detail or ''):gsub('\n', newline_char)
+  local label_description = (item.labelDetails and item.labelDetails.description or ''):gsub('\n', newline_char)
   if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
   return {
     self = draw,
     item = item,
     label = label,
-    label_detail = item.labelDetails and item.labelDetails.detail or '',
-    label_description = item.labelDetails and item.labelDetails.description or '',
+    label_detail = label_detail,
+    label_description = label_description,
     label_matched_indices = matched_indices,
     kind = kind,
     kind_icon = kind_icon,
