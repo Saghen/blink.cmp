@@ -343,7 +343,7 @@ MiniDeps.add({
     -- list of enabled providers
     completion = {
       enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
-    }
+    },
 
     -- Please see https://github.com/Saghen/blink.compat for using `nvim-cmp` sources
     providers = {
