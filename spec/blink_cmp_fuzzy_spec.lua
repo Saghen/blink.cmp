@@ -1,0 +1,5 @@
+describe("rust-mlua library", function()
+  it("can load blink_cmp_fuzzy module", function()
+    require("blink_cmp_fuzzy")
+  end)
+end)

@@ -17,7 +17,10 @@ local version_path = root_dir .. '../../../../target/release/version.txt'
 function download.ensure_downloaded(callback)
   callback = vim.schedule_wrap(callback)
 
-  if not download_config.download then return callback() end
+  if not download_config.download or pcall(require, 'blink_cmp_fuzzy') then
+    -- download disabled or already loaded (built with luarocks)
+    return callback()
+  end
 
   download.get_git_tag(function(git_version_err, git_version)
     if git_version_err then return callback(git_version_err) end

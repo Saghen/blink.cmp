@@ -1,3 +1,11 @@
+local ok, rust = pcall(require, 'blink_cmp_fuzzy')
+
+if ok then
+  return rust
+end
+
+-- Set up the path do use the downloaded binary
+
 --- @return string
 local function get_lib_extension()
   if jit.os:lower() == 'mac' or jit.os:lower() == 'osx' then return '.dylib' end

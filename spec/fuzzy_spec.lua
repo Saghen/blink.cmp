@@ -1,0 +1,17 @@
+local tempdir = vim.fn.tempname()
+vim.system({ "rm", "-r", tempdir }):wait()
+vim.system({ "mkdir", "-p", tempdir }):wait()
+
+describe("blink.cmp.fuzzy", function()
+  local fuzzy = require("blink.cmp.fuzzy")
+  it("init_db", function()
+    local db_path = vim.fs.joinpath(tempdir, "fuzzy.db")
+    fuzzy.init_db(db_path)
+    assert.is_not_nil(vim.uv.fs_stat(db_path))
+  end)
+  it("get_words", function()
+    local result = fuzzy.get_words("first\nsecond\tthird")
+    table.sort(result) -- make sure it's not flaky
+    assert.same({"first", "second", "third"}, result)
+  end)
+end)
