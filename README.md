@@ -384,6 +384,9 @@ MiniDeps.add({
           global_snippets = { 'all' },
           extended_filetypes = {},
           ignored_filetypes = {},
+          get_filetype = function(context)
+            return vim.bo.filetype
+          end
         }
 
         --- Example usage for disabling the snippet provider after pressing trigger characters (i.e. ".")
