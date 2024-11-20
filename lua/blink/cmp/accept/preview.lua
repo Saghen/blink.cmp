@@ -6,22 +6,17 @@ local function preview(item, previous_text_edit)
   -- with auto_insert, we may have to undo the previous preview
   if previous_text_edit ~= nil then text_edit.range = text_edits_lib.get_undo_range(previous_text_edit) end
 
-  -- for snippets, expand them with the default property names
+  if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+    local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(text_edit.newText)
+    text_edit.newText = require('blink.cmp.utils').get_prefix_before_brackets_and_quotes(
+      expanded_snippet and tostring(expanded_snippet) or text_edit.newText
+    )
+  end
+
   local cursor_pos = {
     text_edit.range.start.line + 1,
     text_edit.range.start.character + #text_edit.newText,
   }
-  if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
-    local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(text_edit.newText)
-    text_edit.newText = expanded_snippet and tostring(expanded_snippet) or text_edit.newText
-
-    -- place the cursor at the first tab stop
-    local tabstops = require('blink.cmp.sources.snippets.utils').get_tab_stops(text_edit.newText)
-    if tabstops and #tabstops > 0 then
-      cursor_pos[1] = text_edit.range.start.line + tabstops[1].line
-      cursor_pos[2] = text_edit.range.start.character + tabstops[1].character
-    end
-  end
 
   text_edits_lib.apply({ text_edit })
   vim.api.nvim_win_set_cursor(0, cursor_pos)
