@@ -343,7 +343,7 @@ MiniDeps.add({
     -- list of enabled providers
     completion = {
       enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
-    }
+    },
 
     -- Please see https://github.com/Saghen/blink.compat for using `nvim-cmp` sources
     providers = {
@@ -443,14 +443,18 @@ MiniDeps.add({
           kind_icon = {
             ellipsis = false,
             text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
-            highlight = function(ctx) return utils.get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind end,
+            highlight = function(ctx)
+              return require('blink.cmp.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+            end,
           },
 
           kind = {
             ellipsis = false,
             width = { fill = true },
             text = function(ctx) return ctx.kind end,
-            highlight = function(ctx) return utils.get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind end,
+            highlight = function(ctx)
+              return require('blink.cmp.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+            end,
           },
 
           label = {
