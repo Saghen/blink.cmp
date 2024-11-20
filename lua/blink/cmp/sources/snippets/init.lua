@@ -9,11 +9,12 @@
 local snippets = {}
 
 function snippets.new(opts)
+  opts = opts or {}
   local self = setmetatable({}, { __index = snippets })
   --- @type table<string, blink.cmp.CompletionItem[]>
   self.cache = {}
   --- @type blink.cmp.SnippetsOpts
-  self.registry = require('blink.cmp.sources.snippets.registry').new(opts or {})
+  self.registry = require('blink.cmp.sources.snippets.registry').new(opts)
   self.get_filetype = opts.get_filetype or function() return vim.bo.filetype end
   return self
 end
