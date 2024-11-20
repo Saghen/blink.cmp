@@ -440,14 +440,18 @@ MiniDeps.add({
           kind_icon = {
             ellipsis = false,
             text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
-            highlight = function(ctx) return utils.get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind end,
+            highlight = function(ctx)
+              return require('blink.cmp.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+            end,
           },
 
           kind = {
             ellipsis = false,
             width = { fill = true },
             text = function(ctx) return ctx.kind end,
-            highlight = function(ctx) return utils.get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind end,
+            highlight = function(ctx)
+              return require('blink.cmp.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+            end,
           },
 
           label = {
