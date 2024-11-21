@@ -129,6 +129,8 @@ MiniDeps.add({
 
 </details>
 
+## Configuration
+
 <details>
 <summary><strong>Highlight groups</strong></summary>
 
@@ -246,10 +248,9 @@ MiniDeps.add({
 
   accept = {
     create_undo_point = true,
-    -- Function used to expand snippets, some possible values:
-    -- require('luasnip').lsp_expand     -- For `luasnip` users.
-    -- require('snippy').expand_snippet  -- For `snippy` users.
-    -- vim.fn["UltiSnips#Anon"]          -- For `ultisnips` users.
+    -- Function used to expand snippets, for luasnip users, you may use::
+    -- function(...) require('luasnip').lsp_expand(...) end
+    -- See the "Luasnip" section for info on setting up the luasnip source
     expand_snippet = vim.snippet.expand,
 
     auto_brackets = {
@@ -603,6 +604,46 @@ MiniDeps.add({
 - [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
 
 </details>
+
+### Luasnip
+
+There's currently no `blink.cmp` native source for [luasnip](https://github.com/L3MON4D3/LuaSnip). You may use [blink.compat](https://github.com/saghen/blink.compat) plugin with the [cmp-luasnip](https://github.com/saadparwaiz1/cmp_luasnip) nvim-cmp source in the meantime.
+
+```lua
+{
+  'saghen/blink.cmp',
+  dependencies = { 
+    'L3MON4D3/LuaSnip',
+    'saadparwaiz1/cmp_luasnip',
+    { 'saghen/blink.compat', opts = { impersonate_nvim_cmp = true } } },
+  opts = {
+    accept = {
+      expand_snippet = function(...) require('luasnip').lsp_expand(...) end,
+    }
+    sources = {
+      completion = {
+        -- WARN: add the rest of your providers here, unless you're using `opts_extend` 
+        -- and defining this outside of your primary `blink.cmp` config
+        -- see the default configuration for the default providers
+        enabled_providers = { 'luasnip' },
+      },
+      providers = {
+        luasnip = {
+          name = 'luasnip',
+          module = 'blink.compat.source',
+
+          score_offset = -3,
+
+          opts = {
+            use_show_condition = false,
+            show_autosnippets = true,
+          },
+        },
+      },
+    },
+  }
+}
+```
 
 ## How it works
 
