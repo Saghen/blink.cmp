@@ -249,7 +249,7 @@ MiniDeps.add({
   accept = {
     create_undo_point = true,
     -- Function used to expand snippets, for luasnip users, you may use::
-    -- function(...) require('luasnip').lsp_expand(...) end
+    -- function(snippet) require('luasnip').lsp_expand(snippet) end
     -- See the "Luasnip" section for info on setting up the luasnip source
     expand_snippet = vim.snippet.expand,
 
@@ -618,7 +618,7 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
     { 'saghen/blink.compat', opts = { impersonate_nvim_cmp = true } } },
   opts = {
     accept = {
-      expand_snippet = function(...) require('luasnip').lsp_expand(...) end,
+      expand_snippet = function(snippet) require('luasnip').lsp_expand(snippet) end,
     },
     sources = {
       completion = {
