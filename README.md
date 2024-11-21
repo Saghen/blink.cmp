@@ -27,6 +27,14 @@
 
 ## Installation
 
+> [!NOTE]
+>
+> `lazy.nvim` (with luarocks enabled) and `rocks.nvim` will configure luarocks
+> to fetch a pre-built package with the fuzzy binary included.
+> If you are using a platform for which there are no pre-built packages,
+> luarocks needs a [nightly rust toolchain](https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust)
+> to build the fuzzy binary.
+
 `lazy.nvim`
 
 ```lua
@@ -39,7 +47,8 @@
   -- recommended: use a release tag for stable releases and prebuilt binaries, when not using luarocks
   version = 'v0.*',
 
-  -- optionally: build from source, requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust
+  -- optionally: build from source, when not using luarocks
+  -- (requires nightly: https://rust-lang.github.io/rustup/concepts/channels.html#working-with-nightly-rust)
   -- build = 'cargo build --release',
   -- If you use nix, you can build from source using latest nightly rust with:
   -- build = 'nix run .#build-plugin',
@@ -93,6 +102,12 @@
     end
   end
 }
+```
+
+`rocks.nvim`
+
+```vim
+:Rocks install blink.cmp
 ```
 
 <details>
@@ -328,14 +343,10 @@ MiniDeps.add({
       download = true,
       -- When downloading a prebuilt binary, force the downloader to resolve this version. If this is unset
       -- then the downloader will attempt to infer the version from the checked out git tag (if any).
-      --
-      -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
       force_version = nil,
       -- When downloading a prebuilt binary, force the downloader to use this system triple. If this is unset
       -- then the downloader will attempt to infer the system triple from `jit.os` and `jit.arch`.
       -- Check the latest release for all available system triples
-      --
-      -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
       force_system_triple = nil,
     },
   },
@@ -613,7 +624,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 **Sources:** Provides a common interface for and merges the results of completion, trigger character, resolution of additional information and cancellation. Some sources are builtin: `LSP`, `buffer`, `path`, `snippets`
 
-**Fuzzy:** Rust <-> Lua FFI which performs both filtering and sorting of the items
+**Fuzzy:** Native Lua library written in Rust, which performs both filtering and sorting of the items
 
 &nbsp;&nbsp;&nbsp;&nbsp;**Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (TODO: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
 

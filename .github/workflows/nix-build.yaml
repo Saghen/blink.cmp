@@ -21,4 +21,4 @@ jobs:
       - uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Build with Nix
-        run: nix build .#blink-cmp
+        run: nix build .#blink-cmp -Lv
