@@ -607,7 +607,7 @@ MiniDeps.add({
 
 ### Luasnip
 
-There's currently no `blink.cmp` native source for [luasnip](https://github.com/L3MON4D3/LuaSnip). You may use [blink.compat](https://github.com/saghen/blink.compat) plugin with the [cmp-luasnip](https://github.com/saadparwaiz1/cmp_luasnip) nvim-cmp source in the meantime.
+There's currently no `blink.cmp` native source for [luasnip](https://github.com/L3MON4D3/LuaSnip). You may use [blink.compat](https://github.com/saghen/blink.compat) plugin with the [cmp_luasnip](https://github.com/saadparwaiz1/cmp_luasnip) nvim-cmp source in the meantime.
 
 ```lua
 {
@@ -619,7 +619,7 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
   opts = {
     accept = {
       expand_snippet = function(...) require('luasnip').lsp_expand(...) end,
-    }
+    },
     sources = {
       completion = {
         -- WARN: add the rest of your providers here, unless you're using `opts_extend` 
