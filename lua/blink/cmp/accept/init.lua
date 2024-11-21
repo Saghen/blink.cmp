@@ -2,14 +2,22 @@ local text_edits_lib = require('blink.cmp.accept.text-edits')
 local brackets_lib = require('blink.cmp.accept.brackets')
 
 --- Applies a completion item to the current buffer
+--- @param ctx blink.cmp.Context
 --- @param item blink.cmp.CompletionItem
-local function accept(item)
+local function accept(ctx, item)
+  local sources = require('blink.cmp.sources.lib')
   require('blink.cmp.trigger.completion').hide()
+
+  -- let the source execute the item itself if it indicates it can
+  if sources.should_execute(item) then
+    sources.execute(ctx, item)
+    return
+  end
 
   -- start the resolve immediately since text changes can invalidate the item
   -- with some LSPs (i.e. rust-analyzer) causing them to return the item as-is
   -- without i.e. auto-imports
-  require('blink.cmp.sources.lib')
+  sources
     .resolve(item)
     :map(function(resolved_item)
       local all_text_edits =

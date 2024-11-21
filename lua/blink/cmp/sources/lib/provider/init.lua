@@ -13,6 +13,8 @@
 --- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, enabled_sources: string[]): blink.cmp.Task
 --- @field should_show_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, enabled_sources: string[], response: blink.cmp.CompletionResponse): boolean
 --- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
+--- @field should_execute fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): boolean
+--- @field execute fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): blink.cmp.Task
 --- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
 --- @field get_signature_help fun(self: blink.cmp.SourceProvider, context: blink.cmp.SignatureHelpContext): blink.cmp.Task
 --- @field reload (fun(self: blink.cmp.SourceProvider): nil) | nil
@@ -132,6 +134,18 @@ function source:resolve(item)
     end)
   end
   return tasks[item]
+end
+
+--- Execute ---
+
+function source:should_execute(item)
+  if self.module.should_execute == nil then return self.module.execute ~= nil end
+  return self.module:should_execute(item)
+end
+
+function source:execute(context, item)
+  if self.module.execute == nil then return async.task.new(function(resolve) resolve() end) end
+  return async.task.new(function(resolve) self.module:execute(context, item, resolve) end)
 end
 
 --- Signature help ---

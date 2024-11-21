@@ -193,6 +193,9 @@ end
 ---------- Selection/Accept ----------
 
 function autocomplete.accept()
+  local context = autocomplete.context
+  if context == nil then return end
+
   local selected_item = autocomplete.get_selected_item()
   if selected_item == nil then return end
 
@@ -202,7 +205,7 @@ function autocomplete.accept()
   end
 
   -- apply
-  require('blink.cmp.accept')(selected_item)
+  require('blink.cmp.accept')(context, selected_item)
   return true
 end
 

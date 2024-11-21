@@ -152,17 +152,19 @@ cmp.accept = function()
 end
 
 cmp.select_and_accept = function()
-  if not cmp.windows.autocomplete.win:is_open() then return end
+  local autocomplete = require('blink.cmp.windows.autocomplete')
+  if not autocomplete.win:is_open() then return end
 
   vim.schedule(function()
     -- select an item if none is selected
-    if not cmp.windows.autocomplete.get_selected_item() then
+    if not autocomplete.get_selected_item() then
       -- avoid running auto_insert since we're about to accept anyway
-      cmp.windows.autocomplete.select_next({ skip_auto_insert = true })
+      autocomplete.select_next({ skip_auto_insert = true })
     end
 
-    local item = cmp.windows.autocomplete.get_selected_item()
-    if item ~= nil then require('blink.cmp.accept')(item) end
+    local ctx = autocomplete.context
+    local item = autocomplete.get_selected_item()
+    if item ~= nil and ctx ~= nil then require('blink.cmp.accept')(ctx, item) end
   end)
   return true
 end
