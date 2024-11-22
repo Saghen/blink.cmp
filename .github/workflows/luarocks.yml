@@ -1,0 +1,31 @@
+name: Publish to luarocks
+
+on:
+  push:
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+  pull_request: # Will test a local install without uploading to luarocks.org
+  workflow_dispatch: # Allow triggering manually
+
+jobs:
+  luarocks-upload:
+    runs-on: ubuntu-latest
+    name: Publish to luarocks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          rustflags: ""
+          toolchain: nightly
+      - name: LuaRocks upload
+        uses: nvim-neorocks/luarocks-tag-release@v7
+        env:
+          LUAROCKS_API_KEY: ${{ secrets.LUAROCKS_API_KEY }}
+        with:
+          name: blink.cmp
+          summary: "Performant, batteries-included completion plugin for Neovim"
+          template: .github/rockspec.template
