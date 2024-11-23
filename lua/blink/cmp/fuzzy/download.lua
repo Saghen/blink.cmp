@@ -2,6 +2,21 @@ local download_config = require('blink.cmp.config').fuzzy.prebuilt_binaries
 
 local download = {}
 
+download.system_triples = {
+  mac = {
+    arm = 'aarch64-apple-darwin',
+    x64 = 'x86_64-apple-darwin',
+  },
+  windows = {
+    x64 = 'x86_64-pc-windows-msvc',
+  },
+  linux = {
+    android = 'aarch64-linux-android',
+    arm = function(libc) return 'aarch64-unknown-linux-' .. libc end,
+    x64 = function(libc) return 'x86_64-unknown-linux-' .. libc end,
+  },
+}
+
 --- @return string
 function download.get_lib_extension()
   if jit.os:lower() == 'mac' or jit.os:lower() == 'osx' then return '.dylib' end
@@ -134,41 +149,49 @@ function download.set_downloaded_version(version, cb)
   end)
 end
 
---- @param cb fun(triple: string | nil)
+--- @return string, string
+function download.get_system_info()
+  local os = jit.os:lower()
+  if os == 'osx' then os = 'mac' end
+  local arch = jit.arch:lower():match('arm') and 'arm' or jit.arch:lower():match('x64') and 'x64' or nil
+  return os, arch
+end
+
+--- @param cb fun(triple: string | function | nil)
 function download.get_system_triple(cb)
   if download_config.force_system_triple then return cb(download_config.force_system_triple) end
 
-  if jit.os:lower() == 'mac' or jit.os:lower() == 'osx' then
-    if jit.arch:lower():match('arm') then return cb('aarch64-apple-darwin') end
-    if jit.arch:lower():match('x64') then return cb('x86_64-apple-darwin') end
-  elseif jit.os:lower() == 'windows' then
-    if jit.arch:lower():match('x64') then return cb('x86_64-pc-windows-msvc') end
-  elseif jit.os:lower() == 'linux' then
+  local os, arch = download.get_system_info()
+  local triples = download.system_triples[os]
+
+  if os == 'linux' then
+    if vim.fn.has('android') == 1 then return cb(triples.android) end
+
     vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
       local libc = (not err and is_alpine) and 'musl' or 'gnu'
-      if jit.arch:lower():match('arm') then return cb('aarch64-unknown-linux-' .. libc) end
-      if jit.arch:lower():match('x64') then return cb('x86_64-unknown-linux-' .. libc) end
-      return cb(nil)
+      local triple = triples[arch]
+      return cb(triple and type(triple) == 'function' and triple(libc) or triple)
     end)
   else
-    return cb(nil)
+    return cb(triples[arch])
   end
 end
 
 function download.get_system_triple_sync()
   if download_config.force_system_triple then return download_config.force_system_triple end
 
-  if jit.os:lower() == 'mac' or jit.os:lower() == 'osx' then
-    if jit.arch:lower():match('arm') then return 'aarch64-apple-darwin' end
-    if jit.arch:lower():match('x64') then return 'x86_64-apple-darwin' end
-  elseif jit.os:lower() == 'windows' then
-    if jit.arch:lower():match('x64') then return 'x86_64-pc-windows-msvc' end
-  elseif jit.os:lower() == 'linux' then
+  local os, arch = download.get_system_info()
+  local triples = download.system_triples[os]
+
+  if os == 'linux' then
+    if vim.fn.has('android') == 1 then return triples.android end
+
     local success, is_alpine = pcall(vim.uv.fs_stat, '/etc/alpine-release')
     local libc = (success and is_alpine) and 'musl' or 'gnu'
-
-    if jit.arch:lower():match('arm') then return 'aarch64-unknown-linux-' .. libc end
-    if jit.arch:lower():match('x64') then return 'x86_64-unknown-linux-' .. libc end
+    local triple = triples[arch]
+    return triple and type(triple) == 'function' and triple(libc) or triple
+  else
+    return triples[arch]
   end
 end
 
