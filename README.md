@@ -624,10 +624,12 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
 ```lua
 {
   'saghen/blink.cmp',
+  version = '0.*',
   dependencies = { 
     'L3MON4D3/LuaSnip',
     'saadparwaiz1/cmp_luasnip',
-    { 'saghen/blink.compat', opts = { impersonate_nvim_cmp = true } } },
+    -- lock compat to tagged versions, if you've also locked blink.cmp to tagged versions
+    { 'saghen/blink.compat', version = '*', opts = { impersonate_nvim_cmp = true } } },
   opts = {
     accept = {
       expand_snippet = function(snippet) require('luasnip').lsp_expand(snippet) end,
