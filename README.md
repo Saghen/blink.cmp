@@ -192,7 +192,7 @@ MiniDeps.add({
   -- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
   --
   -- Available commands:
-  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
+  --   show, hide, cancel, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
   --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
   --
   -- "default" keymap
@@ -428,6 +428,8 @@ MiniDeps.add({
       -- 'preselect' will automatically select the first item in the completion list
       -- 'manual' will not select any item by default
       -- 'auto_insert' will not select any item by default, and insert the completion items automatically when selecting them
+      -- 
+      -- When using 'auto_insert', you may want to bind a key to the `cancel` command, which will undo the selection
       selection = 'preselect',
       -- Controls how the completion items are rendered on the popup window
       draw = {

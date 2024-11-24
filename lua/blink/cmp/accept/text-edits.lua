@@ -7,6 +7,16 @@ function text_edits.apply(edits) vim.lsp.util.apply_text_edits(edits, vim.api.nv
 
 ------- Undo -------
 
+--- Gets the reverse of the text edit, must be called before applying
+--- @param text_edit lsp.TextEdit
+--- @return lsp.TextEdit
+function text_edits.get_undo_text_edit(text_edit)
+  return {
+    range = text_edits.get_undo_range(text_edit),
+    newText = text_edits.get_text_to_replace(text_edit),
+  }
+end
+
 --- Gets the range for undoing an applied text edit
 --- @param text_edit lsp.TextEdit
 function text_edits.get_undo_range(text_edit)
@@ -21,14 +31,28 @@ function text_edits.get_undo_range(text_edit)
   return range
 end
 
---- Undoes a text edit
+--- Gets the text the text edit will replace
 --- @param text_edit lsp.TextEdit
-function text_edits.undo(text_edit)
-  text_edit = vim.deepcopy(text_edit)
-  text_edit.range = text_edits.get_undo_range(text_edit)
-  text_edit.newText = ''
+--- @return string
+function text_edits.get_text_to_replace(text_edit)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local lines = {}
+  for line = text_edit.range.start.line, text_edit.range['end'].line do
+    local line_text = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
+    local is_start_line = line == text_edit.range.start.line
+    local is_end_line = line == text_edit.range['end'].line
 
-  text_edits.apply({ text_edit })
+    if is_start_line and is_end_line then
+      table.insert(lines, line_text:sub(text_edit.range.start.character + 1, text_edit.range['end'].character))
+    elseif is_start_line then
+      table.insert(lines, line_text:sub(text_edit.range.start.character + 1))
+    elseif is_end_line then
+      table.insert(lines, line_text:sub(1, text_edit.range['end'].character))
+    else
+      table.insert(lines, line_text)
+    end
+  end
+  return table.concat(lines, '\n')
 end
 
 ------- Get -------

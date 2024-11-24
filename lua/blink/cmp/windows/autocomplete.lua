@@ -12,6 +12,8 @@
 --- @field auto_show boolean
 --- @field context blink.cmp.Context?
 --- @field event_targets blink.cmp.CompletionWindowEventTargets
+--- @field preview_undo_text_edit? lsp.TextEdit
+--- @field preview_context_id? number
 ---
 --- @field setup fun(): blink.cmp.CompletionWindow
 ---
@@ -25,6 +27,7 @@
 --- @field listen_on_position_update fun(callback: fun())
 ---
 --- @field accept fun(): boolean?
+--- @field undo_preview fun()
 ---
 --- @field select fun(line: number, skip_auto_insert?: boolean)
 --- @field select_next fun(opts?: { skip_auto_insert?: boolean })
@@ -200,13 +203,23 @@ function autocomplete.accept()
   if selected_item == nil then return end
 
   -- undo the preview if it exists
-  if autocomplete.preview_text_edit ~= nil and autocomplete.preview_context_id == autocomplete.context.id then
-    text_edits_lib.undo(autocomplete.preview_text_edit)
+  if autocomplete.preview_undo_text_edit ~= nil and autocomplete.preview_context_id == autocomplete.context.id then
+    text_edits_lib.apply({ autocomplete.preview_undo_text_edit })
+    autocomplete.preview_undo_text_edit = nil
+    autocomplete.preview_context_id = nil
   end
 
   -- apply
   require('blink.cmp.accept')(context, selected_item)
   return true
+end
+
+function autocomplete.undo_preview()
+  if autocomplete.preview_undo_text_edit ~= nil and autocomplete.preview_context_id == autocomplete.context.id then
+    text_edits_lib.apply({ autocomplete.preview_undo_text_edit })
+    autocomplete.preview_undo_text_edit = nil
+    autocomplete.preview_context_id = nil
+  end
 end
 
 function autocomplete.select(line, skip_auto_insert)
@@ -218,9 +231,12 @@ function autocomplete.select(line, skip_auto_insert)
   -- when auto_insert is enabled, we immediately apply the text edit
   if config.windows.autocomplete.selection == 'auto_insert' and selected_item ~= nil and not skip_auto_insert then
     require('blink.cmp.trigger.completion').suppress_events_for_callback(function()
-      if autocomplete.preview_context_id ~= autocomplete.context.id then autocomplete.preview_text_edit = nil end
-      autocomplete.preview_text_edit =
-        require('blink.cmp.accept.preview')(selected_item, autocomplete.preview_text_edit)
+      -- undo the previous preview if it exists
+      if autocomplete.preview_context_id == autocomplete.context.id and autocomplete.preview_undo_text_edit ~= nil then
+        require('blink.cmp.accept.text-edits').apply({ autocomplete.preview_undo_text_edit })
+      end
+
+      autocomplete.preview_undo_text_edit = require('blink.cmp.accept.preview')(selected_item)
       autocomplete.preview_context_id = autocomplete.context.id
     end)
   end

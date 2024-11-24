@@ -72,6 +72,7 @@ function keymap.setup(opts)
     local commands = {
       'show',
       'hide',
+      'cancel',
       'accept',
       'select_and_accept',
       'select_prev',

@@ -137,6 +137,15 @@ cmp.hide = function()
   return true
 end
 
+cmp.cancel = function()
+  if not cmp.windows.autocomplete.win:is_open() then return end
+  vim.schedule(function()
+    cmp.windows.autocomplete.undo_preview()
+    cmp.trigger.hide()
+  end)
+  return true
+end
+
 --- @param callback fun(context: blink.cmp.Context)
 cmp.on_open = function(callback) cmp.windows.autocomplete.listen_on_open(callback) end
 

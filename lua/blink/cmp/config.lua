@@ -2,6 +2,7 @@
 --- | 'fallback' Fallback to the built-in behavior
 --- | 'show' Show the completion window
 --- | 'hide' Hide the completion window
+--- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
 --- | 'select_and_accept' Select the current completion item and accept it
 --- | 'select_prev' Select the previous completion item
@@ -204,7 +205,7 @@ local config = {
   -- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
   --
   -- Available commands:
-  --   show, hide, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
+  --   show, hide, cancel, accept, select_and_accept, select_prev, select_next, show_documentation, hide_documentation,
   --   scroll_documentation_up, scroll_documentation_down, snippet_forward, snippet_backward, fallback
   --
   -- "default" keymap
