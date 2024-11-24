@@ -1,3 +1,9 @@
+## [0.6.1](https://github.com/Saghen/blink.cmp/compare/v0.6.0...v0.6.1) (2024-11-24)
+
+### Features
+
+* add prebuilt binaries for android ([#362](https://github.com/Saghen/blink.cmp/issues/362)) ([11a50fe](https://github.com/Saghen/blink.cmp/commit/11a50fe006a4482ab5acb5bcd77efa4fb9f944f8))
+
 ## [0.6.0](https://github.com/Saghen/blink.cmp/compare/v0.5.1...v0.6.0) (2024-11-24)
 
 ### BREAKING CHANGES
