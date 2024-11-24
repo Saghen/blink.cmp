@@ -749,6 +749,7 @@ For a setup similar to nvim-cmp, use the following config:
     },
   }
 }
+```
 
 ## How it works
 
