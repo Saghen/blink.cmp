@@ -38,7 +38,11 @@ function path:get_completions(context, callback)
   if not dirname then return callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} }) end
 
   local include_hidden = self.opts.show_hidden_files_by_default
-    or string.sub(context.line, context.bounds.start_col - 1, context.bounds.start_col - 1) == '.'
+    or (string.sub(context.line, context.bounds.start_col, context.bounds.start_col) == '.' and context.bounds.length == 0)
+    or (
+      string.sub(context.line, context.bounds.start_col - 1, context.bounds.start_col - 1) == '.'
+      and context.bounds.length > 0
+    )
   lib
     .candidates(dirname, include_hidden, self.opts)
     :map(
