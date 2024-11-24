@@ -84,7 +84,11 @@
   -- without having to redefine it
   opts_extend = { "sources.completion.enabled_providers" }
 },
+```
 
+Setting capabilities for `nvim-lspconfig`:
+
+```lua
 -- LSP servers and clients communicate what features they support through "capabilities".
 --  By default, Neovim support a subset of the LSP specification.
 --  With blink.cmp, Neovim has *more* capabilities which are communicated to the LSP servers.
@@ -94,20 +98,30 @@
 
 {
   'neovim/nvim-lspconfig',
+  dependencies = { 'saghen/blink.cmp' },
+
+  -- example using `opts` for defining servers
+  opts = {
+    servers = {
+      lua_ls = {}
+    }
+  },
+  config = function(_, opts)
+    local lspconfig = require('lspconfig')
+    for server, config in pairs(opts.servers) do
+      -- passing config.capabilities to blink.cmp merges with the capabilities in your 
+      -- `opts[server].capabilities, if you've defined it
+      config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
+      lspconfig[server].setup(config)
+    end
+  end
+
+ -- example calling setup directly for each LSP
   config = function()
-	local capabilities = require("blink.cmp").get_lsp_capabilities(nil, true)
-	require("lspconfig").["lua_ls"].setup({
-		capabilities = capabilities,
-		settings = {
-			-- ...
-		},
-	})
-	require("lspconfig").["ts_ls"].setup({
-		capabilities = capabilities,
-		settings = {
-			-- ...
-		},
-	})
+    local capabilities = require('blink.cmp').get_lsp_capabilities()
+    local lspconfig = require('lspconfig')
+  
+    lspconfig['lua-ls'].setup({ capabilities = capabilities })
   end
 }
 ```
