@@ -5,3 +5,4 @@ dual/
 result
 .direnv
 .devenv
+.luarocks

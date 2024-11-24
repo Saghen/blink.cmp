@@ -1,0 +1,14 @@
+return {
+    _all = {
+        coverage = false,
+        lpath = "lua/?.lua;lua/?/init.lua",
+        cpath = "./.luarocks/lib/lua/5.1/?.so",
+        lua = "nlua",
+    },
+    default = {
+        verbose = true,
+    },
+    tests = {
+        verbose = true,
+    },
+}
