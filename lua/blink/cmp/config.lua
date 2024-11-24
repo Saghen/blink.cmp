@@ -72,7 +72,7 @@
 --- @field enabled_providers? string[] | fun(ctx?: blink.cmp.Context): string[]
 ---
 --- @class blink.cmp.SourceProviderConfig
---- @field name string
+--- @field name? string
 --- @field module? string
 --- @field enabled? boolean | fun(ctx?: blink.cmp.Context): boolean
 --- @field opts? table
