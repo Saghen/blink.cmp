@@ -2,8 +2,7 @@
 > This plugin is _beta_ quality. Expect breaking changes and many bugs
 
 > [!NOTE]
-> If you're on a release tag, ensure you're viewing the README for your version
-> https://github.com/Saghen/blink.cmp/tags
+> If you're on a release tag, ensure you're viewing the README [for your version](https://github.com/Saghen/blink.cmp/tags)
 
 # Blink Completion (blink.cmp)
 
