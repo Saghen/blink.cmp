@@ -629,9 +629,6 @@ MiniDeps.add({
 
 There's currently no `blink.cmp` native source for [luasnip](https://github.com/L3MON4D3/LuaSnip). You may use [blink.compat](https://github.com/saghen/blink.compat) plugin with the [cmp_luasnip](https://github.com/saadparwaiz1/cmp_luasnip) nvim-cmp source in the meantime.
 
-<details>
-<summary><strong>Config for Luasnip</strong></summary>
-
 ```lua
 {
   'saghen/blink.cmp',
@@ -669,8 +666,6 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
   }
 }
 ```
-
-</details>
 
 ### Menu Appearance/Drawing
 
