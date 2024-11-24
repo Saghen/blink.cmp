@@ -163,8 +163,6 @@ MiniDeps.add({
 
 ## Configuration
 
-### Default configuration
-
 <details>
 <summary><strong>Default configuration</strong></summary>
 
