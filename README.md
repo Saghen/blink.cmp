@@ -84,7 +84,11 @@
   -- without having to redefine it
   opts_extend = { "sources.completion.enabled_providers" }
 },
+```
 
+Setting capabilities for `nvim-lspconfig`:
+
+```lua
 -- LSP servers and clients communicate what features they support through "capabilities".
 --  By default, Neovim support a subset of the LSP specification.
 --  With blink.cmp, Neovim has *more* capabilities which are communicated to the LSP servers.
@@ -95,12 +99,29 @@
 {
   'neovim/nvim-lspconfig',
   dependencies = { 'saghen/blink.cmp' },
+
+  -- example using `opts` for defining servers
+  opts = {
+    servers = {
+      lua_ls = {}
+    }
+  },
   config = function(_, opts)
     local lspconfig = require('lspconfig')
-    for server, config in pairs(opts.servers or {}) do
+    for server, config in pairs(opts.servers) do
+      -- passing config.capabilities to blink.cmp merges with the capabilities in your 
+      -- `opts[server].capabilities, if you've defined it
       config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
       lspconfig[server].setup(config)
     end
+  end
+
+ -- example calling setup directly for each LSP
+  config = function()
+    local capabilities = require('blink.cmp').get_lsp_capabilities()
+    local lspconfig = require('lspconfig')
+  
+    lspconfig['lua-ls'].setup({ capabilities = capabilities })
   end
 }
 ```
@@ -142,30 +163,7 @@ MiniDeps.add({
 
 ## Configuration
 
-<details>
-<summary><strong>Highlight groups</strong></summary>
-
-| Group | Default | Description |
-| ----- | ------- | ----------- |
-| `BlinkCmpMenu` | Pmenu | The completion menu window |
-| `BlinkCmpMenuBorder` | Pmenu | The completion menu window border |
-| `BlinkCmpMenuSelection` | PmenuSel | The completion menu window selected item |
-| `BlinkCmpScrollBarThumb` | PmenuThumb | The scrollbar thumb |
-| `BlinkCmpScrollBarGutter` | PmenuSbar | The scrollbar gutter |
-| `BlinkCmpLabel` | Pmenu | Label of the completion item |
-| `BlinkCmpLabelDeprecated` | Comment | Deprecated label of the completion item |
-| `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
-| `BlinkCmpGhostText` | Comment | Preview item with ghost text  |
-| `BlinkCmpKind` | Special | Kind icon/text of the completion item |
-| `BlinkCmpKind<kind>` | Special | Kind icon/text of the completion item |
-| `BlinkCmpDoc` | NormalFloat | The documentation window |
-| `BlinkCmpDocBorder` | NormalFloat | The documentation window border |
-| `BlinkCmpDocCursorLine` | Visual | The documentation window cursor line |
-| `BlinkCmpSignatureHelp` | NormalFloat | The signature help window |
-| `BlinkCmpSignatureHelpBorder` | NormalFloat | The signature help window border |
-| `BlinkCmpSignatureHelpActiveParameter` | LspSignatureActiveParameter | Active parameter of the signature help |
-
-</details>
+### Default configuration
 
 <details>
 <summary><strong>Default configuration</strong></summary>
@@ -606,16 +604,40 @@ MiniDeps.add({
 
 </details>
 
+
 <details>
-<summary><strong>Community Sources</strong></summary>
+<summary><strong>Highlight groups</strong></summary>
+
+| Group | Default | Description |
+| ----- | ------- | ----------- |
+| `BlinkCmpMenu` | Pmenu | The completion menu window |
+| `BlinkCmpMenuBorder` | Pmenu | The completion menu window border |
+| `BlinkCmpMenuSelection` | PmenuSel | The completion menu window selected item |
+| `BlinkCmpScrollBarThumb` | PmenuThumb | The scrollbar thumb |
+| `BlinkCmpScrollBarGutter` | PmenuSbar | The scrollbar gutter |
+| `BlinkCmpLabel` | Pmenu | Label of the completion item |
+| `BlinkCmpLabelDeprecated` | Comment | Deprecated label of the completion item |
+| `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
+| `BlinkCmpGhostText` | Comment | Preview item with ghost text  |
+| `BlinkCmpKind` | Special | Kind icon/text of the completion item |
+| `BlinkCmpKind<kind>` | Special | Kind icon/text of the completion item |
+| `BlinkCmpDoc` | NormalFloat | The documentation window |
+| `BlinkCmpDocBorder` | NormalFloat | The documentation window border |
+| `BlinkCmpDocCursorLine` | Visual | The documentation window cursor line |
+| `BlinkCmpSignatureHelp` | NormalFloat | The signature help window |
+| `BlinkCmpSignatureHelpBorder` | NormalFloat | The signature help window border |
+| `BlinkCmpSignatureHelpActiveParameter` | LspSignatureActiveParameter | Active parameter of the signature help |
+
+</details>
+
+
+### Community Sources
 
 - [lazydev](https://github.com/folke/lazydev.nvim)
 - [ctags](https://github.com/netmute/blink-cmp-ctags)
 - [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 - [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
 - [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
-
-</details>
 
 ### Luasnip
 
@@ -759,18 +781,12 @@ For a setup similar to nvim-cmp, use the following config:
 ## How it works
 
 The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
-
-**Trigger:** Controls when to request completion items from the sources and provides a context downstream with the current query (i.e. `hello.wo|`, the query would be `wo`) and the treesitter object under the cursor (i.e. for intelligently enabling/disabling sources). It respects trigger characters passed by the LSP (or any other source) and includes it in the context for sending to the LSP.
-
-**Sources:** Provides a common interface for and merges the results of completion, trigger character, resolution of additional information and cancellation. Some sources are builtin: `LSP`, `buffer`, `path`, `snippets`
-
-**Fuzzy:** Rust <-> Lua FFI which performs both filtering and sorting of the items
-
-&nbsp;&nbsp;&nbsp;&nbsp;**Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (TODO: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
-
-&nbsp;&nbsp;&nbsp;&nbsp;**Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking precedence over the LSP source. The parameters here still need to be tuned, so please let me know if you find some magical parameters!
-
-**Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overridden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
+1. **Trigger:** Controls when to request completion items from the sources and provides a context downstream with the current query (i.e. `hello.wo|`, the query would be `wo`) and the treesitter object under the cursor (i.e. for intelligently enabling/disabling sources). It respects trigger characters passed by the LSP (or any other source) and includes it in the context for sending to the LSP.
+2. **Sources:** Provides a common interface for and merges the results of completion, trigger character, resolution of additional information and cancellation. Some sources are builtin: `LSP`, `buffer`, `path`, `snippets`
+3. **Fuzzy:** Rust <-> Lua FFI which performs both filtering and sorting of the items
+	- **Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (TODO: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
+	- **Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking precedence over the LSP source. The parameters here still need to be tuned, so please let me know if you find some magical parameters!
+4. **Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overridden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
 
 ## Compared to nvim-cmp
 
@@ -791,20 +807,14 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 ## Special Thanks
 
-[@hrsh7th](https://github.com/hrsh7th/) nvim-cmp used as inspiration and nvim-path implementation modified for path source
-
-[@garymjr](https://github.com/garymjr) nvim-snippets implementation modified for snippets source
-
-[@redxtech](https://github.com/redxtech) Help with design and testing
-
-[@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing
+- [@hrsh7th](https://github.com/hrsh7th/) nvim-cmp used as inspiration and nvim-path implementation modified for path source
+- [@garymjr](https://github.com/garymjr) nvim-snippets implementation modified for snippets source
+- [@redxtech](https://github.com/redxtech) Help with design and testing
+- [@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing
 
 ### Contributors
 
-[@stefanboca](https://github.com/stefanboca) Author of [blink.compat](https://github.com/saghen/blink.compat)
-
-[@lopi-py](https://github.com/lopi-py) Contributes to the windowing code
-
-[@scottmckendry](https://github.com/scottmckendry) Contributes to the CI and prebuilt binaries
-
-[@balssh](https://github.com/Balssh) Manages nixpkg and nixvim
+- [@stefanboca](https://github.com/stefanboca) Author of [blink.compat](https://github.com/saghen/blink.compat)
+- [@lopi-py](https://github.com/lopi-py) Contributes to the windowing code
+- [@scottmckendry](https://github.com/scottmckendry) Contributes to the CI and prebuilt binaries
+- [@balssh](https://github.com/Balssh) Manages nixpkg and nixvim
