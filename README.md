@@ -638,10 +638,9 @@ MiniDeps.add({
 - [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 - [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
 - [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
+- [blink_luasnip](https://github.com/leiserfg/blink_luasnip)
 
 ### Luasnip
-
-There's currently no `blink.cmp` native source for [luasnip](https://github.com/L3MON4D3/LuaSnip). You may use [blink.compat](https://github.com/saghen/blink.compat) plugin with the [cmp_luasnip](https://github.com/saadparwaiz1/cmp_luasnip) nvim-cmp source in the meantime.
 
 ```lua
 {
@@ -649,9 +648,8 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
   version = '0.*',
   dependencies = { 
     'L3MON4D3/LuaSnip',
-    'saadparwaiz1/cmp_luasnip',
-    -- lock compat to tagged versions, if you've also locked blink.cmp to tagged versions
-    { 'saghen/blink.compat', version = '*', opts = { impersonate_nvim_cmp = true } } },
+    'leiserfg/blink_luasnip',
+    "leiserfg/blink_luasnip" },
   opts = {
     accept = {
       expand_snippet = function(snippet) require('luasnip').lsp_expand(snippet) end,
@@ -659,14 +657,13 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
     sources = {
       completion = {
         -- WARN: add the rest of your providers here, unless you're using `opts_extend` 
-        -- and defining this outside of your primary `blink.cmp` config
         -- see the default configuration for the default providers
         enabled_providers = { 'luasnip' },
       },
       providers = {
         luasnip = {
           name = 'luasnip',
-          module = 'blink.compat.source',
+          module = 'blink_luasnip',
 
           score_offset = -3,
 
