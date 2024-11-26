@@ -49,7 +49,6 @@ function lsp:get_clients_with_capability(capability, filter)
 end
 
 function lsp:get_completions(context, callback)
-  -- TODO: offset encoding is global but should be per-client
   -- TODO: should make separate LSP requests to return results earlier, in the case of slow LSPs
 
   -- no providers with completion support
@@ -58,8 +57,12 @@ function lsp:get_completions(context, callback)
     return function() end
   end
 
+  -- TODO: offset encoding is global but should be per-client
+  local first_client = vim.lsp.get_clients({ bufnr = 0 })[1]
+  local offset_encoding = first_client and first_client.offset_encoding or 'utf-16'
+
   -- completion context with additional info about how it was triggered
-  local params = vim.lsp.util.make_position_params()
+  local params = vim.lsp.util.make_position_params(nil, offset_encoding)
   params.context = {
     triggerKind = context.trigger.kind,
   }
@@ -214,7 +217,11 @@ function lsp:get_signature_help(context, callback)
     return function() end
   end
 
-  local params = vim.lsp.util.make_position_params()
+  -- TODO: offset encoding is global but should be per-client
+  local first_client = vim.lsp.get_clients({ bufnr = 0 })[1]
+  local offset_encoding = first_client and first_client.offset_encoding or 'utf-16'
+
+  local params = vim.lsp.util.make_position_params(nil, offset_encoding)
   params.context = {
     triggerKind = context.trigger.kind,
     triggerCharacter = context.trigger.character,
