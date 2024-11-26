@@ -1,7 +1,7 @@
 --- @class blink.cmp.CompletionWindowEventTargets
 --- @field on_open table<fun()>
 --- @field on_close table<fun()>
---- @field on_position_update table<fun()>
+--- @field on_position_update table<fun(context: blink.cmp.Context)>
 --- @field on_select table<fun(item: blink.cmp.CompletionItem?, context: blink.cmp.Context)>
 
 --- @class blink.cmp.CompletionWindow
@@ -24,7 +24,7 @@
 --- @field listen_on_close fun(callback: fun())
 ---
 --- @field update_position fun(context: blink.cmp.Context)
---- @field listen_on_position_update fun(callback: fun())
+--- @field listen_on_position_update fun(callback: fun(context: blink.cmp.Context))
 ---
 --- @field accept fun(): boolean?
 --- @field undo_preview fun()
@@ -111,7 +111,7 @@ function autocomplete.open_with_items(context, items)
   if not autocomplete.renderer then
     autocomplete.renderer = require('blink.cmp.windows.render').new(autocmp_config.draw)
   end
-  autocomplete.renderer:draw(autocomplete.win:get_buf(), items)
+  autocomplete.renderer:draw(context, autocomplete.win:get_buf(), items)
 
   vim.iter(autocomplete.event_targets.on_open):each(function(callback) callback() end)
 
@@ -181,12 +181,22 @@ function autocomplete.update_position(context)
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local col = context.bounds.start_col - cursor_col - (context.bounds.length == 0 and 0 or 1) - border_size.left
   local row = pos.direction == 's' and 1 or -pos.height - border_size.vertical
-  vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col - start_col })
+  if context.mode == 'cmdline' then
+    vim.api.nvim_win_set_config(winnr, {
+      relative = 'editor',
+      row = vim.o.lines + row - 1,
+      col = math.max(col - start_col, 0),
+    })
+  else
+    vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col - start_col })
+  end
   vim.api.nvim_win_set_height(winnr, pos.height)
 
   for _, callback in ipairs(autocomplete.event_targets.on_position_update) do
-    callback()
+    callback(context)
   end
+
+  if context.mode == 'cmdline' then vim.api.nvim__redraw({ win = autocomplete.win:get_win(), flush = true }) end
 end
 
 function autocomplete.listen_on_position_update(callback)

@@ -1,0 +1,22 @@
+--- @alias blink.cmp.Mode 'cmdline' | 'editor' | 'terminal'
+
+--- @class blink.cmp.ContextBounds
+--- @field line string
+--- @field line_number number
+--- @field start_col number
+--- @field end_col number
+--- @field length number
+
+--- @class blink.cmp.Context
+--- @field id number
+--- @field mode blink.cmp.Mode
+--- @field bufnr? number
+--- @field cursor number[]
+--- @field line string
+--- @field bounds blink.cmp.ContextBounds
+--- @field trigger { kind: number, character: string | nil }
+---
+--- @field new fun(opts: { id?: number, keyword_regex: string, mode: blink.cmp.Mode, trigger_character?: string }): blink.cmp.Context
+--- @field get_bounds fun(cursor: number[], line: string, regex: string): blink.cmp.ContextBounds
+--- @field get_keyword fun(self: blink.cmp.Context): string
+--- @field is_within_bounds fun(self: blink.cmp.Context, cursor: number[]): boolean

@@ -221,6 +221,18 @@ function win.get_cursor_screen_position()
   local screen_height = vim.o.lines
   local screen_width = vim.o.columns
 
+  -- command line
+  if vim.api.nvim_get_mode().mode == 'c' then
+    local cursor_col = vim.fn.getcmdpos()
+    return {
+      distance_from_top = screen_height - 1,
+      distance_from_bottom = 0,
+      distance_from_left = cursor_col,
+      distance_from_right = screen_width - cursor_col,
+    }
+  end
+
+  -- buffer
   local cursor_line, cursor_column = unpack(vim.api.nvim_win_get_cursor(0))
   -- todo: convert cursor_column to byte index
   local pos = vim.fn.screenpos(vim.api.nvim_win_get_number(0), cursor_line, cursor_column)
@@ -260,13 +272,22 @@ function win:get_direction_with_window_constraints(anchor_win, direction_priorit
 
   -- nvim.api.nvim_win_get_position doesn't return the correct position most of the time
   -- so we calculate the position ourselves, and assume the anchor window uses relative = 'win'
+  local anchor_config
   local anchor_win_config = vim.api.nvim_win_get_config(anchor_win:get_win())
-  assert(anchor_win_config.relative == 'win', 'The anchor window must be relative to a window')
-  local anchor_relative_win_position = vim.api.nvim_win_get_position(anchor_win_config.win)
-  local anchor_config = {
-    row = anchor_win_config.row + anchor_relative_win_position[1] + 1,
-    col = anchor_win_config.col + anchor_relative_win_position[2] + 1,
-  }
+  if anchor_win_config.relative == 'win' then
+    local anchor_relative_win_position = vim.api.nvim_win_get_position(anchor_win_config.win)
+    anchor_config = {
+      row = anchor_win_config.row + anchor_relative_win_position[1] + 1,
+      col = anchor_win_config.col + anchor_relative_win_position[2] + 1,
+    }
+  elseif anchor_win_config.relative == 'editor' then
+    anchor_config = {
+      row = anchor_win_config.row + 1,
+      col = anchor_win_config.col + 1,
+    }
+  end
+  assert(anchor_config ~= nil, 'The anchor window must be relative to a window or editor')
+
   -- compensate for the anchor window being too wide given the screen width and configured column
   if anchor_config.col + anchor_win_config.width > vim.o.columns then
     anchor_config.col = vim.o.columns - anchor_win_config.width
@@ -280,7 +301,7 @@ function win:get_direction_with_window_constraints(anchor_win, direction_priorit
 
   -- we want to avoid covering the cursor line, so we need to get the direction of the window
   -- that we're anchoring against
-  local cursor_screen_row = vim.fn.winline()
+  local cursor_screen_row = vim.api.nvim_get_mode().mode == 'c' and vim.o.lines - 1 or vim.fn.winline()
   local anchor_is_above_cursor = anchor_config.row - cursor_screen_row < 0
 
   local screen_height = vim.o.lines

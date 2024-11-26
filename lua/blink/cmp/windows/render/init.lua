@@ -5,7 +5,7 @@
 --- @field columns blink.cmp.DrawColumn[]
 ---
 --- @field new fun(draw: blink.cmp.Draw): blink.cmp.Renderer
---- @field draw fun(self: blink.cmp.Renderer, bufnr: number, items: blink.cmp.CompletionItem[])
+--- @field draw fun(self: blink.cmp.Renderer, completion_context: blink.cmp.Context, bufnr: number, items: blink.cmp.CompletionItem[])
 --- @field get_component_column_location fun(self: blink.cmp.Renderer, component_name: string): { column_idx: number, component_idx: number }
 --- @field get_component_start_col fun(self: blink.cmp.Renderer, component_name: string): number
 --- @field get_alignment_start_col fun(self: blink.cmp.Renderer): number
@@ -49,9 +49,9 @@ function renderer.new(draw)
   return self
 end
 
-function renderer:draw(bufnr, items)
+function renderer:draw(completion_context, bufnr, items)
   -- gather contexts
-  local ctxs = require('blink.cmp.windows.render.context').get_from_items(self.def, items)
+  local ctxs = require('blink.cmp.windows.render.context').get_from_items(completion_context, self.def, items)
 
   -- render the columns
   for _, column in ipairs(self.columns) do

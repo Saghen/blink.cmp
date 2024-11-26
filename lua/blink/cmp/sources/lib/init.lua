@@ -43,9 +43,9 @@ function sources.register()
 end
 
 function sources.get_enabled_providers(context)
-  local mode_providers = type(config.sources.completion.enabled_providers) == 'function'
-      and config.sources.completion.enabled_providers(context)
-    or config.sources.completion.enabled_providers
+  local mode_providers = type(config.sources[context.mode].enabled_providers) == 'function'
+      and config.sources[context.mode].enabled_providers(context)
+    or config.sources[context.mode].enabled_providers
   --- @cast mode_providers string[]
 
   for _, provider in ipairs(mode_providers) do

@@ -12,13 +12,16 @@
 
 local context = {}
 
+--- @param completion_context blink.cmp.Context
 --- @param draw blink.cmp.Draw
 --- @param items blink.cmp.CompletionItem[]
 --- @return blink.cmp.DrawItemContext[]
-function context.get_from_items(draw, items)
+function context.get_from_items(completion_context, draw, items)
   local fuzzy = require('blink.cmp.fuzzy')
-  local matched_indices =
-    fuzzy.fuzzy_matched_indices(fuzzy.get_query(), vim.tbl_map(function(item) return item.label end, items))
+  local matched_indices = fuzzy.fuzzy_matched_indices(
+    completion_context:get_keyword(),
+    vim.tbl_map(function(item) return item.label end, items)
+  )
 
   local ctxs = {}
   for idx, item in ipairs(items) do

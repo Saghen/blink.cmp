@@ -16,8 +16,8 @@ function docs.setup()
     wrap = true,
   })
 
-  autocomplete.listen_on_position_update(function()
-    if autocomplete.win:is_open() then docs.update_position() end
+  autocomplete.listen_on_position_update(function(context)
+    if autocomplete.win:is_open() then docs.update_position(context) end
   end)
 
   local timer = vim.uv.new_timer()
@@ -32,7 +32,7 @@ function docs.setup()
     elseif config.auto_show then
       timer:start(config.auto_show_delay_ms, 0, function()
         last_context_id = context.id
-        vim.schedule(function() docs.show_item(item) end)
+        vim.schedule(function() docs.show_item(context, item) end)
       end)
     end
   end)
@@ -41,7 +41,7 @@ function docs.setup()
   return docs
 end
 
-function docs.show_item(item)
+function docs.show_item(context, item)
   if item == nil then
     docs.win:close()
     return
@@ -71,7 +71,7 @@ function docs.show_item(item)
       if autocomplete.win:get_win() then
         docs.win:open()
         vim.api.nvim_win_set_cursor(docs.win:get_win(), { 1, 0 }) -- reset scroll
-        docs.update_position()
+        docs.update_position(context)
       end
     end)
     :catch(function(err) vim.notify(err, vim.log.levels.ERROR) end)
@@ -94,7 +94,7 @@ function docs.scroll_down(amount)
   vim.api.nvim_win_set_cursor(docs.win:get_win(), { desired_line, 0 })
 end
 
-function docs.update_position()
+function docs.update_position(context)
   if not docs.win:is_open() or not autocomplete.win:is_open() then return end
   local winnr = docs.win:get_win()
 
@@ -188,6 +188,8 @@ function docs.update_position()
       set_config({ row = -autocomplete_border_size.top, col = -width - autocomplete_border_size.left })
     end
   end
+
+  if context.mode == 'cmdline' then vim.api.nvim__redraw({ win = autocomplete.win:get_win(), flush = true }) end
 end
 
 return docs

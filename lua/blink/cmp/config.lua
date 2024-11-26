@@ -357,8 +357,11 @@ local config = {
 
   sources = {
     -- list of enabled providers
-    completion = {
+    editor = {
       enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
+    },
+    cmdline = {
+      enabled_providers = { 'cmdline' },
     },
 
     -- table of providers to configure
@@ -382,6 +385,10 @@ local config = {
         module = 'blink.cmp.sources.buffer',
         fallback_for = { 'lsp' },
       },
+      cmdline = {
+        name = 'Cmdline',
+        module = 'blink.cmp.sources.cmdline',
+      },
     },
   },
 
@@ -395,7 +402,7 @@ local config = {
       -- keep the cursor X lines away from the top/bottom of the window
       scrolloff = 2,
       -- note that the gutter will be disabled when border ~= 'none'
-      scrollbar = true,
+      scrollbar = false,
       -- TODO: implement
       order = 'top_down',
       -- which directions to show the window,

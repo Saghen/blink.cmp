@@ -20,7 +20,7 @@ cmp.setup = function(opts)
 
     -- trigger controls when to show the window and the current context for caching
     -- TODO: add first_trigger event for setting up the rest of the plugin
-    cmp.trigger = require('blink.cmp.trigger.completion').activate_autocmds()
+    cmp.trigger = require('blink.cmp.trigger.completion').activate_events()
 
     -- sources fetch autocomplete items, documentation and signature help
     cmp.sources = require('blink.cmp.sources.lib')
@@ -51,7 +51,7 @@ cmp.setup = function(opts)
       vim.schedule(function()
         if cmp.trigger.context == nil or cmp.trigger.context.id ~= context.id then return end
 
-        local filtered_items = cmp.fuzzy.fuzzy(cmp.fuzzy.get_query(), items)
+        local filtered_items = cmp.fuzzy.fuzzy(context:get_keyword(), items)
         filtered_items = cmp.sources.apply_max_items_for_completions(context, filtered_items)
         if #filtered_items > 0 then
           cmp.windows.autocomplete.open_with_items(context, filtered_items)

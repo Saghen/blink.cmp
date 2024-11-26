@@ -1,0 +1,7 @@
+--- @class blink.cmp.SignatureHelpContext
+--- @field id number
+--- @field bufnr number
+--- @field cursor number[]
+--- @field line string
+--- @field is_retrigger boolean
+--- @field active_signature_help lsp.SignatureHelp | nil
