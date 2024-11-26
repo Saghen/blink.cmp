@@ -2,21 +2,22 @@ local config = require('blink.cmp.config')
 
 local fuzzy = {
   rust = require('blink.cmp.fuzzy.rust'),
+  has_init_db = false,
 }
 
----@param db_path string
-function fuzzy.init_db(db_path)
-  fuzzy.rust.init_db(db_path)
+function fuzzy.init_db()
+  fuzzy.rust.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
 
   vim.api.nvim_create_autocmd('VimLeavePre', {
     callback = fuzzy.rust.destroy_db,
   })
-
-  return fuzzy
 end
 
 ---@param item blink.cmp.CompletionItem
-function fuzzy.access(item) fuzzy.rust.access(item) end
+function fuzzy.access(item)
+  fuzzy.init_db()
+  fuzzy.rust.access(item)
+end
 
 ---@param lines string
 function fuzzy.get_words(lines) return fuzzy.rust.get_words(lines) end
@@ -27,6 +28,8 @@ function fuzzy.fuzzy_matched_indices(needle, haystack) return fuzzy.rust.fuzzy_m
 ---@param haystack blink.cmp.CompletionItem[]?
 ---@return blink.cmp.CompletionItem[]
 function fuzzy.fuzzy(needle, haystack)
+  fuzzy.init_db()
+
   haystack = haystack or {}
 
   -- get the nearby words
@@ -42,7 +45,7 @@ function fuzzy.fuzzy(needle, haystack)
     -- so this should generally be good
     -- TODO: make this configurable
     min_score = config.fuzzy.use_typo_resistance and (6 * needle:len()) or 0,
-    max_items = config.fuzzy.max_items,
+    max_items = config.completion.list.max_items,
     use_typo_resistance = config.fuzzy.use_typo_resistance,
     use_frecency = config.fuzzy.use_frecency,
     use_proximity = config.fuzzy.use_proximity,
@@ -61,12 +64,9 @@ end
 --- @return string
 function fuzzy.get_query()
   local line = vim.api.nvim_get_current_line()
-  local cmp_config = config.trigger.completion
-  local range = require('blink.cmp.utils').get_regex_around_cursor(
-    cmp_config.keyword_range,
-    cmp_config.keyword_regex,
-    cmp_config.exclude_from_prefix_regex
-  )
+  local keyword = config.completion.keyword
+  local range =
+    require('blink.cmp.lib.utils').get_regex_around_cursor(keyword.range, keyword.regex, keyword.exclude_from_prefix_regex)
   return string.sub(line, range.start_col, range.start_col + range.length - 1)
 end
 

@@ -1,4 +1,4 @@
-local async = require('blink.cmp.sources.lib.async')
+local async = require('blink.cmp.lib.async')
 local config = require('blink.cmp.config')
 
 --- @class blink.cmp.Sources
@@ -6,11 +6,12 @@ local config = require('blink.cmp.config')
 --- @field current_signature_help blink.cmp.Task | nil
 --- @field sources_registered boolean
 --- @field providers table<string, blink.cmp.SourceProvider>
---- @field on_completions_callback fun(context: blink.cmp.Context, enabled_sources: table<string, blink.cmp.SourceProvider>, responses: table<string, blink.cmp.CompletionResponse>)
+--- @field completions_emitter blink.cmp.EventEmitter<blink.cmp.SourceCompletionsEvent>
 ---
---- @field register fun()
 --- @field get_enabled_providers fun(context?: blink.cmp.Context): table<string, blink.cmp.SourceProvider>
 --- @field get_trigger_characters fun(): string[]
+---
+--- @field emit_completions fun(context: blink.cmp.Context, enabled_sources: table<string, blink.cmp.SourceProvider>, responses: table<string, blink.cmp.CompletionResponse>)
 --- @field request_completions fun(context: blink.cmp.Context)
 --- @field cancel_completions fun()
 --- @field listen_on_completions fun(callback: fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]))
@@ -18,29 +19,25 @@ local config = require('blink.cmp.config')
 --- @field resolve fun(item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field should_execute fun(item: blink.cmp.CompletionItem): boolean
 --- @field execute fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
+---
 --- @field get_signature_help_trigger_characters fun(): { trigger_characters: string[], retrigger_characters: string[] }
---- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil)): (fun(): nil) | nil
+--- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil))
 --- @field cancel_signature_help fun()
+---
 --- @field reload fun()
 --- @field get_lsp_capabilities fun(override?: lsp.ClientCapabilities, include_nvim_defaults?: boolean): lsp.ClientCapabilities
+
+--- @class blink.cmp.SourceCompletionsEvent
+--- @field context blink.cmp.Context
+--- @field items blink.cmp.CompletionItem[]
 
 --- @type blink.cmp.Sources
 --- @diagnostic disable-next-line: missing-fields
 local sources = {
   current_context = nil,
-  sources_registered = false,
   providers = {},
-  on_completions_callback = function(_, _) end,
+  completions_emitter = require('blink.cmp.lib.event_emitter').new('source_completions', 'BlinkCmpSourceCompletions'),
 }
-
-function sources.register()
-  assert(not sources.sources_registered, 'Sources have already been registered')
-  sources.sources_registered = true
-
-  for key, source_config in pairs(config.sources.providers) do
-    sources.providers[key] = require('blink.cmp.sources.lib.provider').new(key, source_config)
-  end
-end
 
 function sources.get_enabled_providers(context)
   local mode_providers = type(config.sources.completion.enabled_providers) == 'function'
@@ -50,12 +47,17 @@ function sources.get_enabled_providers(context)
 
   for _, provider in ipairs(mode_providers) do
     assert(
-      sources.providers[provider] ~= nil,
+      sources.providers[provider] ~= nil or config.sources.providers[provider] ~= nil,
       'Requested provider "'
         .. provider
         .. '" has not been configured. Available providers: '
         .. vim.fn.join(vim.tbl_keys(sources.providers), ', ')
     )
+    -- initialize the provider if it hasn't been initialized yet
+    if not sources.providers[provider] then
+      sources.providers[provider] =
+        require('blink.cmp.sources.lib.provider').new(provider, config.sources.providers[provider])
+    end
   end
 
   --- @type table<string, blink.cmp.SourceProvider>
@@ -70,31 +72,21 @@ end
 
 function sources.get_trigger_characters()
   local providers = sources.get_enabled_providers()
-  local blocked_trigger_characters = {}
-  for _, char in ipairs(config.trigger.completion.blocked_trigger_characters) do
-    blocked_trigger_characters[char] = true
-  end
-
   local trigger_characters = {}
   for _, source in pairs(providers) do
-    local source_trigger_characters = source:get_trigger_characters()
-    for _, char in ipairs(source_trigger_characters) do
-      if not blocked_trigger_characters[char] then table.insert(trigger_characters, char) end
-    end
+    vim.list_extend(trigger_characters, source:get_trigger_characters())
   end
   return trigger_characters
 end
 
-function sources.listen_on_completions(callback)
-  sources.on_completions_callback = function(context, enabled_sources, responses)
-    local items = {}
-    for id, response in pairs(responses) do
-      if sources.providers[id]:should_show_items(context, enabled_sources, response.items) then
-        vim.list_extend(items, response.items)
-      end
+function sources.emit_completions(context, enabled_sources, responses)
+  local items = {}
+  for id, response in pairs(responses) do
+    if sources.providers[id]:should_show_items(context, enabled_sources, response.items) then
+      vim.list_extend(items, response.items)
     end
-    callback(context, items)
   end
+  sources.completions_emitter:emit({ context = context, items = items })
 end
 
 function sources.request_completions(context)
@@ -105,13 +97,14 @@ function sources.request_completions(context)
     sources.current_context = require('blink.cmp.sources.lib.context').new(
       context,
       sources.get_enabled_providers(context),
-      sources.on_completions_callback
+      sources.emit_completions
     )
   -- send cached completions if they exist to immediately trigger updates
   elseif sources.current_context:get_cached_completions() ~= nil then
-    sources.on_completions_callback(
+    sources.emit_completions(
       context,
       sources.current_context:get_sources(),
+      --- @diagnostic disable-next-line: param-type-mismatch
       sources.current_context:get_cached_completions()
     )
   end
@@ -196,27 +189,14 @@ end
 --- Signature help ---
 
 function sources.get_signature_help_trigger_characters()
-  local blocked_trigger_characters = {}
-  local blocked_retrigger_characters = {}
-  for _, char in ipairs(config.trigger.signature_help.blocked_trigger_characters) do
-    blocked_trigger_characters[char] = true
-  end
-  for _, char in ipairs(config.trigger.signature_help.blocked_retrigger_characters) do
-    blocked_retrigger_characters[char] = true
-  end
-
   local trigger_characters = {}
   local retrigger_characters = {}
 
-  -- todo: should this be all source groups?
-  for _, source in pairs(sources.providers) do
+  -- todo: should this be all sources? or should it follow fallbacks?
+  for _, source in pairs(sources.get_enabled_providers()) do
     local res = source:get_signature_help_trigger_characters()
-    for _, char in ipairs(res.trigger_characters) do
-      if not blocked_trigger_characters[char] then table.insert(trigger_characters, char) end
-    end
-    for _, char in ipairs(res.retrigger_characters) do
-      if not blocked_retrigger_characters[char] then table.insert(retrigger_characters, char) end
-    end
+    vim.list_extend(trigger_characters, res.trigger_characters)
+    vim.list_extend(retrigger_characters, res.retrigger_characters)
   end
   return { trigger_characters = trigger_characters, retrigger_characters = retrigger_characters }
 end
@@ -226,6 +206,7 @@ function sources.get_signature_help(context, callback)
   for _, source in pairs(sources.providers) do
     table.insert(tasks, source:get_signature_help(context))
   end
+
   sources.current_signature_help = async.task.await_all(tasks):map(function(tasks_results)
     local signature_helps = {}
     for _, task_result in ipairs(tasks_results) do

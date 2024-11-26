@@ -1,4 +1,4 @@
-local async = require('blink.cmp.sources.lib.async')
+local async = require('blink.cmp.lib.async')
 local uv = vim.uv
 local fs = {}
 

@@ -15,7 +15,7 @@
 --- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field should_execute fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): boolean
 --- @field execute fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): blink.cmp.Task
---- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
+--- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): { trigger_characters: string[], retrigger_characters: string[] }
 --- @field get_signature_help fun(self: blink.cmp.SourceProvider, context: blink.cmp.SignatureHelpContext): blink.cmp.Task
 --- @field reload (fun(self: blink.cmp.SourceProvider): nil) | nil
 
@@ -24,7 +24,7 @@
 local source = {}
 
 local utils = require('blink.cmp.sources.lib.utils')
-local async = require('blink.cmp.sources.lib.async')
+local async = require('blink.cmp.lib.async')
 
 function source.new(id, config)
   assert(type(config.name) == 'string', 'Each source in config.sources.providers must have a "name" of type string')
@@ -65,7 +65,7 @@ function source:get_completions(context, enabled_sources)
   -- and the data doesn't need to be updated
   if self.last_response ~= nil and self.last_response.context.id == context.id then
     if utils.should_run_request(context, self.last_response) == false then
-      return async.task.new(function(resolve) resolve(require('blink.cmp.utils').shallow_copy(self.last_response)) end)
+      return async.task.new(function(resolve) resolve(require('blink.cmp.lib.utils').shallow_copy(self.last_response)) end)
     end
   end
 
@@ -92,7 +92,7 @@ function source:get_completions(context, enabled_sources)
         response.items = self.config.transform_items(context, response.items)
       end
 
-      self.last_response = require('blink.cmp.utils').shallow_copy(response)
+      self.last_response = require('blink.cmp.lib.utils').shallow_copy(response)
       self.last_response.is_cached = true
       return response
     end)

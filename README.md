@@ -455,7 +455,7 @@ MiniDeps.add({
             ellipsis = false,
             text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
             highlight = function(ctx)
-              return require('blink.cmp.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+              return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
             end,
           },
 
@@ -464,7 +464,7 @@ MiniDeps.add({
             width = { fill = true },
             text = function(ctx) return ctx.kind end,
             highlight = function(ctx)
-              return require('blink.cmp.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+              return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
             end,
           },
 
@@ -713,7 +713,7 @@ windows.autocomplete.draw = {
       ellipsis = false,
       text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
       highlight = function(ctx)
-        return require('blink.cmp.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+        return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
       end,
     },
 
@@ -722,7 +722,7 @@ windows.autocomplete.draw = {
       width = { fill = true },
       text = function(ctx) return ctx.kind end,
       highlight = function(ctx)
-        return require('blink.cmp.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+        return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
       end,
     },
 

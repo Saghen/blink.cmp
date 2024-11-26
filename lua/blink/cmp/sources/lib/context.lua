@@ -1,5 +1,5 @@
 local utils = require('blink.cmp.sources.lib.utils')
-local async = require('blink.cmp.sources.lib.async')
+local async = require('blink.cmp.lib.async')
 
 --- @class blink.cmp.SourcesContext
 --- @field id number
@@ -84,7 +84,7 @@ function sources_context:get_completions_for_sources(sources, context)
       and vim.tbl_contains(source:get_trigger_characters(), context.trigger.character)
 
     -- The TriggerForIncompleteCompletions kind is handled by the source provider itself
-    local source_context = require('blink.cmp.utils').shallow_copy(context)
+    local source_context = require('blink.cmp.lib.utils').shallow_copy(context)
     source_context.trigger = trigger_character
         and { kind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter, character = context.trigger.character }
       or { kind = vim.lsp.protocol.CompletionTriggerKind.Invoked }
