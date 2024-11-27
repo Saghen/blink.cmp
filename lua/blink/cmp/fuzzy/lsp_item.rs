@@ -13,7 +13,7 @@ impl FromLua for LspItem {
     fn from_lua(value: LuaValue, _: &Lua) -> LuaResult<Self> {
         if let Some(tab) = value.as_table() {
             let label = tab.get("label").unwrap_or_default();
-            let filter_text = tab.get("filter_text").ok();
+            let filter_text = tab.get("filterText").ok();
             let kind = tab.get("kind").unwrap_or_default();
             let score_offset = tab.get("score_offset").unwrap_or(0);
             let source_id = tab.get("source_id").unwrap_or_default();
