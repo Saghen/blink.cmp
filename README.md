@@ -56,15 +56,15 @@
     -- your own keymap.
     keymap = { preset = 'default' },
 
-    highlight = {
-      -- sets the fallback highlight groups to nvim-cmp's highlight groups
-      -- useful for when your theme doesn't support blink.cmp
-      -- will be removed in a future release, assuming themes add support
+    appearance = {
+      -- Sets the fallback highlight groups to nvim-cmp's highlight groups
+      -- Useful for when your theme doesn't support blink.cmp
+      -- will be removed in a future release
       use_nvim_cmp_as_default = true,
+      -- Set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+      -- Adjusts spacing to ensure icons are aligned
+      nerd_font_variant = 'mono'
     },
-    -- set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
-    -- adjusts spacing to ensure icons are aligned
-    nerd_font_variant = 'mono',
 
     -- default list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, via `opts_extend`
@@ -75,10 +75,10 @@
     },
 
     -- experimental auto-brackets support
-    -- accept = { auto_brackets = { enabled = true } }
+    -- completion = { accept = { auto_brackets = { enabled = true } } }
 
     -- experimental signature help support
-    -- trigger = { signature_help = { enabled = true } }
+    -- signature = { enabled = true }
   },
   -- allows extending the enabled_providers array elsewhere in your config
   -- without having to redefine it
@@ -206,8 +206,8 @@ MiniDeps.add({
   --   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
   --
   -- "super-tab" keymap
-  --   you may want to set `trigger.completion.show_in_snippet = false`
-  --   or use `window.autocomplete.selection = "manual" | "auto_insert"`
+  --   you may want to set `completion.trigger.show_in_snippet = false`
+  --   or use `completion.list.selection = "manual" | "auto_insert"`
   --
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
   --   ['<C-e>'] = { 'hide', 'fallback' },
@@ -231,7 +231,7 @@ MiniDeps.add({
   --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
   --
   -- "enter" keymap
-  --   you may want to set `window.autocomplete.selection = "manual" | "auto_insert"`
+  --   you may want to set `completion.list.selection = "manual" | "auto_insert"`
   --
   --   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
   --   ['<C-e>'] = { 'hide', 'fallback' },
@@ -319,6 +319,7 @@ MiniDeps.add({
     accept = {
       -- Create an undo point when accepting a completion item
       create_undo_point = true,
+      -- Experimental auto-brackets support
       auto_brackets = {
         -- Whether to auto-insert brackets for functions
         enabled = false,
@@ -456,10 +457,10 @@ MiniDeps.add({
     },
   },
   
+  -- Experimental signature help support
   signature = {
     enabled = false,
     trigger = {
-      enabled = true,
       blocked_trigger_characters = {},
       blocked_retrigger_characters = {},
       -- When true, will show the signature help window when the cursor comes after a trigger character when entering insert mode
@@ -630,7 +631,6 @@ MiniDeps.add({
       TypeParameter = '󰬛',
     },
   },
-
 }
 ```
 
@@ -687,8 +687,15 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
     -- lock compat to tagged versions, if you've also locked blink.cmp to tagged versions
     { 'saghen/blink.compat', version = '*', opts = { impersonate_nvim_cmp = true } } },
   opts = {
-    accept = {
-      expand_snippet = function(snippet) require('luasnip').lsp_expand(snippet) end,
+    snippets = {
+      expand = function(snippet) require('luasnip').lsp_expand(snippet) end,
+      active = function(filter)
+        if filter and filter.direction then
+          return require('luasnip').jumpable(filter.direction)
+        end
+        return require('luasnip').expandable()
+      end,
+      jump = function(direction) require('luasnip').jump(direction) end,
     },
     sources = {
       completion = {
@@ -724,7 +731,7 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
 ```lua
 --- @module 'blink.cmp'
 --- @type blink.cmp.Draw
-windows.autocomplete.draw = {
+completion.menu.draw = {
   -- Aligns the keyword you've typed to a component in the menu
   align_to_component = 'label', -- or 'none' to disable
   -- Left and right padding, optionally { left, right } for different padding on each side
@@ -787,7 +794,7 @@ windows.autocomplete.draw = {
       highlight = 'BlinkCmpLabelDescription',
     },
   },
-},
+}
 ```
 
 <!-- config:end -->
@@ -802,8 +809,8 @@ For a setup similar to nvim-cmp, use the following config:
 
 ```lua
 {
-  windows = {
-    autocomplete = {
+  completion = {
+    menu = {
       draw = {
         columns = { { "label", "label_description", gap = 1 }, { "kind_icon", "kind" } },
       },
@@ -820,7 +827,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 3. **Fuzzy:** Rust <-> Lua FFI which performs both filtering and sorting of the items
 	- **Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (TODO: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
 	- **Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking precedence over the LSP source. The parameters here still need to be tuned, so please let me know if you find some magical parameters!
-4. **Windows:** Responsible for placing the autocomplete, documentation and function parameters windows. All of the rendering can be overridden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
+4. **Windows:** Responsible for placing the menu, documentation and function parameters windows. All of the rendering can be overridden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
 
 ## Compared to nvim-cmp
 

@@ -1,7 +1,7 @@
 local highlights = {}
 
 function highlights.setup()
-  local use_nvim_cmp = require('blink.cmp.config').highlight.use_nvim_cmp_as_default
+  local use_nvim_cmp = require('blink.cmp.config').appearance.use_nvim_cmp_as_default
 
   local set_hl = function(hl_group, opts)
     opts.default = true
