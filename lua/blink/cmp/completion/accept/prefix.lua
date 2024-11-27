@@ -45,7 +45,7 @@ local function get_prefix_before_brackets_and_quotes(text)
       has_alphanumeric = has_alphanumeric or ALPHANUMERIC[char]
     elseif not has_alphanumeric or #closing_pairs_stack ~= 0 then
       add(char)
-      -- if we had an alphanumeric, and the closing pairs stuck *just* emptied,
+      -- if we had an alphanumeric, and the closing pairs stack *just* emptied,
       -- because the current character is a closing pair, we exit
       if has_alphanumeric and #closing_pairs_stack == 0 then break end
     else
