@@ -9,14 +9,7 @@ local function accept(ctx, item, callback)
   local sources = require('blink.cmp.sources.lib')
   require('blink.cmp.completion.trigger').hide()
 
-  -- let the source execute the item itself if it indicates it can
-  if sources.should_execute(item) then
-    sources.execute(ctx, item)
-    callback()
-    return
-  end
-
-  -- start the resolve immediately since text changes can invalidate the item
+  -- Start the resolve immediately since text changes can invalidate the item
   -- with some LSPs (i.e. rust-analyzer) causing them to return the item as-is
   -- without i.e. auto-imports
   sources
@@ -63,24 +56,27 @@ local function accept(ctx, item, callback)
         })
       end
 
-      -- Check semantic tokens for brackets, if needed, and apply additional text edits
-      if brackets_status == 'check_semantic_token' then
-        -- TODO: since we apply the additional text edits after, auto imported functions will not
-        -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
-        brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
+      -- Let the source execute the item itself
+      sources.execute(ctx, item):map(function()
+        -- Check semantic tokens for brackets, if needed, and apply additional text edits
+        if brackets_status == 'check_semantic_token' then
+          -- TODO: since we apply the additional text edits after, auto imported functions will not
+          -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
+          brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
+            require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
+            require('blink.cmp.signature.trigger').show_if_on_trigger_character()
+            callback()
+          end)
+        else
           require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
           require('blink.cmp.signature.trigger').show_if_on_trigger_character()
           callback()
-        end)
-      else
-        require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
-        require('blink.cmp.signature.trigger').show_if_on_trigger_character()
-        callback()
-      end
+        end
 
-      -- Notify the rust module that the item was accessed
-      -- TODO: why is this so slow? (10ms)
-      vim.schedule(function() require('blink.cmp.fuzzy').access(item) end)
+        -- Notify the rust module that the item was accessed
+        -- TODO: why is this so slow? (10ms)
+        vim.schedule(function() require('blink.cmp.fuzzy').access(item) end)
+      end)
     end)
     :catch(function(err) vim.notify(err, vim.log.levels.ERROR) end)
 end

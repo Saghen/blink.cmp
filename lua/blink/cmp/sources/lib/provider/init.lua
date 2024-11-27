@@ -13,7 +13,6 @@
 --- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, enabled_sources: string[]): blink.cmp.Task
 --- @field should_show_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, enabled_sources: string[], response: blink.cmp.CompletionResponse): boolean
 --- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
---- @field should_execute fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): boolean
 --- @field execute fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): blink.cmp.Task
 --- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): { trigger_characters: string[], retrigger_characters: string[] }
 --- @field get_signature_help fun(self: blink.cmp.SourceProvider, context: blink.cmp.SignatureHelpContext): blink.cmp.Task
@@ -65,7 +64,9 @@ function source:get_completions(context, enabled_sources)
   -- and the data doesn't need to be updated
   if self.last_response ~= nil and self.last_response.context.id == context.id then
     if utils.should_run_request(context, self.last_response) == false then
-      return async.task.new(function(resolve) resolve(require('blink.cmp.lib.utils').shallow_copy(self.last_response)) end)
+      return async.task.new(
+        function(resolve) resolve(require('blink.cmp.lib.utils').shallow_copy(self.last_response)) end
+      )
     end
   end
 
@@ -137,11 +138,6 @@ function source:resolve(item)
 end
 
 --- Execute ---
-
-function source:should_execute(item)
-  if self.module.should_execute == nil then return self.module.execute ~= nil end
-  return self.module:should_execute(item)
-end
 
 function source:execute(context, item)
   if self.module.execute == nil then return async.task.new(function(resolve) resolve() end) end

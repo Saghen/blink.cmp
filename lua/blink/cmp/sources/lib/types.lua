@@ -15,7 +15,6 @@
 --- @field get_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, callback: fun(response?: blink.cmp.CompletionResponse)): (fun(): nil) | nil
 --- @field should_show_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, response: blink.cmp.CompletionResponse): boolean
 --- @field resolve? fun(self: blink.cmp.Source, item: blink.cmp.CompletionItem, callback: fun(resolved_item?: lsp.CompletionItem)): ((fun(): nil) | nil)
---- @field should_execute? fun(self: blink.cmp.Source, item: blink.cmp.CompletionItem): boolean Optional function to check if the source should execute the specified item
 --- @field execute? fun(self: blink.cmp.Source, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): (fun(): nil) | nil
 --- @field get_signature_help_trigger_characters? fun(self: blink.cmp.Source): string[]
 --- @field get_signature_help? fun(self: blink.cmp.Source, context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil)): (fun(): nil) | nil
@@ -27,7 +26,6 @@
 --- @field get_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, callback: fun(response: blink.cmp.CompletionResponse | nil)): (fun(): nil) | nil
 --- @field should_show_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, response: blink.cmp.CompletionResponse): boolean
 --- @field resolve? fun(self: blink.cmp.Source, item: blink.cmp.CompletionItem, callback: fun(resolved_item: lsp.CompletionItem | nil)): ((fun(): nil) | nil)
---- @field should_execute? fun(self: blink.cmp.Source, item: blink.cmp.CompletionItem): boolean
 --- @field execute? fun(self: blink.cmp.Source, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): (fun(): nil) | nil
 --- @field get_signature_help_trigger_characters? fun(self: blink.cmp.Source): string[]
 --- @field get_signature_help? fun(self: blink.cmp.Source, context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil)): (fun(): nil) | nil
