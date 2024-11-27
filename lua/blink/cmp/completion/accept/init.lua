@@ -31,7 +31,7 @@ local function accept(ctx, item, callback)
       -- Create an undo point, if it's not a snippet, since the snippet engine should handle undo
       if
         item.insertTextFormat ~= vim.lsp.protocol.InsertTextFormat.Snippet
-        and require('blink.cmp.config').accept.create_undo_point
+        and require('blink.cmp.config').completion.accept.create_undo_point
       then
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
       end
