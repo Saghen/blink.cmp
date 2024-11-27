@@ -113,7 +113,7 @@ function list.select_next()
     if list.config.selection ~= 'preselect' then return list.select(nil) end
 
     -- otherwise, we cycle around
-    list.select(1)
+    return list.select(1)
   end
 
   -- typical case, select the next item
@@ -135,7 +135,7 @@ function list.select_prev()
     if list.config.selection == 'auto_insert' then return list.select(nil) end
 
     -- otherwise, we cycle around
-    list.select(#list.items)
+    return list.select(#list.items)
   end
 
   -- typical case, select the previous item
