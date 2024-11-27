@@ -69,13 +69,13 @@ end
 
 function cmp.select_prev()
   if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
-  require('blink.cmp.completion.list').select_prev()
+  vim.schedule(function() require('blink.cmp.completion.list').select_prev() end)
   return true
 end
 
 function cmp.select_next()
   if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
-  require('blink.cmp.completion.list').select_next()
+  vim.schedule(function() require('blink.cmp.completion.list').select_next() end)
   return true
 end
 

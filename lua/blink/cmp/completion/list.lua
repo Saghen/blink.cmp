@@ -158,7 +158,7 @@ function list.apply_preview(item)
       require('blink.cmp.lib.text_edits').apply({ list.preview_undo_text_edit })
     end
     -- apply the new preview
-    list.preview_undo_text_edit = require('blink.cmp.completion.preview')(item)
+    list.preview_undo_text_edit = require('blink.cmp.completion.accept.preview')(item)
   end)
 end
 
