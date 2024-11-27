@@ -90,7 +90,16 @@ function download.get_git_tag(cb)
   local repo_dir = vim.fs.root(root_dir, '.git')
   if not repo_dir then return vim.schedule(function() return cb() end) end
 
-  vim.system({ 'git', '--git-dir', vim.fs.joinpath(repo_dir, '.git'), "--work-tree", repo_dir, 'describe', '--tags', '--exact-match' }, { cwd = root_dir }, function(out)
+  vim.system({
+    'git',
+    '--git-dir',
+    vim.fs.joinpath(repo_dir, '.git'),
+    '--work-tree',
+    repo_dir,
+    'describe',
+    '--tags',
+    '--exact-match',
+  }, { cwd = root_dir }, function(out)
     if out.code == 128 then return cb() end
     if out.code ~= 0 then
       return cb('While getting git tag, git exited with code ' .. out.code .. ': ' .. out.stderr)
@@ -118,7 +127,7 @@ function download.from_github(tag, cb)
       .. download.get_lib_extension()
 
     vim.system({ 'curl', '--create-dirs', '-fLo', download.lib_path, url }, {}, function(out)
-      if out.code ~= 0 then cb('Failed to download pre-build binaries: ' .. out.stderr) end
+      if out.code ~= 0 then return cb('Failed to download pre-build binaries: ' .. out.stderr) end
       cb()
     end)
   end)
