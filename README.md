@@ -693,7 +693,7 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
         if filter and filter.direction then
           return require('luasnip').jumpable(filter.direction)
         end
-        return require('luasnip').expandable()
+        return require('luasnip').in_snippet()
       end,
       jump = function(direction) require('luasnip').jump(direction) end,
     },
