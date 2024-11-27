@@ -58,9 +58,6 @@ function menu.open_with_items(context, items)
   -- it's possible for the window to close after updating the position
   -- if there was nowhere to place the window
   if not menu.win:is_open() then return end
-
-  -- todo: some logic to maintain the selection if the user moved the cursor?
-  vim.api.nvim_win_set_cursor(menu.win:get_win(), { 1, 0 })
 end
 
 function menu.open()
@@ -82,11 +79,9 @@ function menu.close()
 end
 
 function menu.set_selected_item_idx(idx)
-  if idx == nil then menu.win:set_option_value('cursorline', false) end
-  menu.win:set_option_value('cursorline', true)
-
+  menu.win:set_option_value('cursorline', idx ~= nil)
   menu.selected_item_idx = idx
-  if menu.win:is_open() then vim.api.nvim_win_set_cursor(menu.win:get_win(), { idx, 0 }) end
+  if menu.win:is_open() then vim.api.nvim_win_set_cursor(menu.win:get_win(), { idx or 1, 0 }) end
 end
 
 --- TODO: Don't switch directions if the context is the same

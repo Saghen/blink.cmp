@@ -57,26 +57,24 @@ local list = {
 ---------- State ----------
 
 function list.show(context, items)
+  -- reset state for new context
   local is_new_context = not list.context or list.context.id ~= context.id
+  if is_new_context then list.preview_undo_text_edit = nil end
+
   list.context = context
   list.items = list.fuzzy(context, items or list.items)
-  vim.print(#list.items)
 
   if #list.items == 0 then
     list.hide_emitter:emit({ context = context })
   else
-    vim.print('emitting')
     list.show_emitter:emit({ items = list.items, context = context })
   end
 
-  -- reset state for new context
-  if not is_new_context then return end
+  -- todo: some logic to maintain the selection if the user moved the cursor?
   list.select(list.config.selection == 'preselect' and 1 or nil)
-  list.preview_undo_text_edit = nil
 end
 
 function list.fuzzy(context, items)
-  vim.print(#items)
   local fuzzy = require('blink.cmp.fuzzy')
   local sources = require('blink.cmp.sources.lib')
 
@@ -91,15 +89,13 @@ function list.hide() list.hide_emitter:emit({ context = list.context }) end
 function list.get_selected_item() return list.items[list.selected_item_idx] end
 
 function list.select(idx)
-  if idx ~= nil and not list.items[idx] then
-    error('Invalid index while selecting from the completion list. ' .. idx)
-  end
+  local item = list.items[idx]
 
   list.undo_preview()
-  if list.config.selection == 'auto_insert' then list.apply_preview(list.items[idx]) end
+  if list.config.selection == 'auto_insert' and item then list.apply_preview(item) end
 
   list.selected_item_idx = idx
-  list.select_emitter:emit({ idx = idx, item = list.items[idx], items = list.items, context = list.context })
+  list.select_emitter:emit({ idx = idx, item = item, items = list.items, context = list.context })
 end
 
 function list.select_next()

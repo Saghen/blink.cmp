@@ -8,9 +8,12 @@ function highlights.setup()
     vim.api.nvim_set_hl(0, hl_group, opts)
   end
 
-  set_hl('BlinkCmpLabel', { link = use_nvim_cmp and 'CmpItemAbbr' or 'Pmenu' })
+  if use_nvim_cmp then
+    set_hl('BlinkCmpLabel', { link = 'CmpItemAbbr' })
+    set_hl('BlinkCmpLabelMatch', { link = 'CmpItemAbbrMatch' })
+  end
+
   set_hl('BlinkCmpLabelDeprecated', { link = use_nvim_cmp and 'CmpItemAbbrDeprecated' or 'NonText' })
-  set_hl('BlinkCmpLabelMatch', { link = use_nvim_cmp and 'CmpItemAbbrMatch' or 'Pmenu' })
   set_hl('BlinkCmpLabelDetail', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
   set_hl('BlinkCmpLabelDescription', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
   set_hl('BlinkCmpKind', { link = use_nvim_cmp and 'CmpItemKind' or 'Special' })

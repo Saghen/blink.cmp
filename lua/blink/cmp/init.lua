@@ -81,7 +81,7 @@ end
 
 function cmp.show_documentation()
   local menu = require('blink.cmp.completion.windows.menu')
-  local documentation = require('blink.cmp.windows.documentation')
+  local documentation = require('blink.cmp.completion.windows.documentation')
   if documentation.win:is_open() or not menu.win:is_open() then return end
 
   local item = require('blink.cmp.completion.list').get_selected_item()
@@ -92,7 +92,7 @@ function cmp.show_documentation()
 end
 
 function cmp.hide_documentation()
-  local documentation = require('blink.cmp.windows.documentation')
+  local documentation = require('blink.cmp.completion.windows.documentation')
   if not documentation.win:is_open() then return end
 
   vim.schedule(function() documentation.win:close() end)
@@ -101,7 +101,7 @@ end
 
 --- @param count? number
 function cmp.scroll_documentation_up(count)
-  local documentation = require('blink.cmp.windows.documentation')
+  local documentation = require('blink.cmp.completion.windows.documentation')
   if not documentation.win:is_open() then return end
 
   vim.schedule(function() documentation.scroll_up(count or 4) end)
@@ -110,7 +110,7 @@ end
 
 --- @param count? number
 function cmp.scroll_documentation_down(count)
-  local documentation = require('blink.cmp.windows.documentation')
+  local documentation = require('blink.cmp.completion.windows.documentation')
   if not documentation.win:is_open() then return end
 
   vim.schedule(function() documentation.scroll_down(count or 4) end)

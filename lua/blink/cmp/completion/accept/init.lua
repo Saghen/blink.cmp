@@ -50,7 +50,7 @@ local function accept(ctx, item, callback)
         text_edits_lib.apply(all_text_edits)
 
         -- Expand the snippet
-        require('blink.cmp.config').accept.expand_snippet(item.textEdit.newText)
+        require('blink.cmp.config').snippets.expand(item.textEdit.newText)
 
       -- OR Normal: Apply the text edit and move the cursor
       else
