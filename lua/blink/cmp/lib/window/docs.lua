@@ -1,3 +1,5 @@
+local highlight_ns = require('blink.cmp.config').appearance.highlight_ns
+
 local docs = {}
 
 --- @param bufnr number
@@ -30,13 +32,13 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
   vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
 
   -- Highlight with treesitter
-  vim.api.nvim_buf_clear_namespace(bufnr, require('blink.cmp.config').highlight.ns, 0, -1)
+  vim.api.nvim_buf_clear_namespace(bufnr, highlight_ns, 0, -1)
 
   if #detail_lines > 0 and use_treesitter_highlighting then docs.highlight_with_treesitter(bufnr, vim.bo.filetype, 0, #detail_lines) end
 
   -- Only add the separator if there are documentation lines (otherwise only display the detail)
   if #detail_lines > 0 and #doc_lines > 0 then
-    vim.api.nvim_buf_set_extmark(bufnr, require('blink.cmp.config').highlight.ns, #detail_lines, 0, {
+    vim.api.nvim_buf_set_extmark(bufnr, highlight_ns, #detail_lines, 0, {
       virt_text = { { string.rep('─', max_width) } },
       virt_text_pos = 'overlay',
       hl_eol = true,
@@ -101,7 +103,7 @@ function docs.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
         local conceal = metadata.conceal or metadata[capture] and metadata[capture].conceal
 
         if hl and end_row >= line then
-          vim.api.nvim_buf_set_extmark(bufnr, require('blink.cmp.config').highlight.ns, start_row, start_col, {
+          vim.api.nvim_buf_set_extmark(bufnr, highlight_ns, start_row, start_col, {
             end_line = end_row,
             end_col = end_col,
             hl_group = hl,

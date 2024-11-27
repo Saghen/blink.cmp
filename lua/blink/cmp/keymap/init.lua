@@ -4,7 +4,7 @@ local keymap = {}
 function keymap.setup()
   local mappings = vim.deepcopy(require('blink.cmp.config').keymap)
 
-  -- Handle preset inside table
+  -- Handle preset
   if mappings.preset then
     local preset_keymap = require('blink.cmp.keymap.presets').get(mappings.preset)
 
@@ -16,7 +16,7 @@ function keymap.setup()
     mappings = vim.tbl_extend('force', preset_keymap, mappings)
   end
 
-  -- we set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
+  -- We set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
   -- from overriding our mappings. We also use InsertEnter to avoid conflicts with keymaps
   -- applied on other autocmds, such as LspAttach used by nvim-lspconfig and most configs
   vim.api.nvim_create_autocmd('InsertEnter', {

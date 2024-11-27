@@ -1,3 +1,4 @@
+--- Displays a preview of the selected item on the current line
 --- @class (exact) blink.cmp.CompletionGhostTextConfig
 --- @field enabled boolean
 

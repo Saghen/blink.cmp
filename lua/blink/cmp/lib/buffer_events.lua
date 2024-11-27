@@ -9,7 +9,7 @@
 --- @field ignore_next_cursor_moved boolean
 ---
 --- @field new fun(opts: blink.cmp.BufferEventsOptions): blink.cmp.BufferEvents
---- @field listen_buffer_changed fun(self: blink.cmp.BufferEvents, opts: blink.cmp.BufferEventsListener)
+--- @field listen fun(self: blink.cmp.BufferEvents, opts: blink.cmp.BufferEventsListener)
 --- @field suppress_events_for_callback fun(self: blink.cmp.BufferEvents, cb: fun())
 
 --- @class blink.cmp.BufferEventsOptions
@@ -35,13 +35,14 @@ function buffer_events.new(opts)
 end
 
 --- Normalizes the autocmds + ctrl+c into a common api and handles ignored events
-function buffer_events:listen_buffer_changed(opts)
+function buffer_events:listen(opts)
   local utils = require('blink.cmp.lib.utils')
+  local snippet = require('blink.cmp.config').snippets
 
   local last_char = ''
   vim.api.nvim_create_autocmd('InsertCharPre', {
     callback = function()
-      if vim.snippet.active() and not self.show_in_snippet and not self.has_context() then return end
+      if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
       last_char = vim.v.char
     end,
   })
@@ -49,7 +50,7 @@ function buffer_events:listen_buffer_changed(opts)
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
       if utils.is_blocked_buffer() then return end
-      if vim.snippet.active() and not self.show_in_snippet and not self.has_context() then return end
+      if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
 
       -- no characters added so let cursormoved handle it
       if last_char == '' then return end
@@ -67,7 +68,7 @@ function buffer_events:listen_buffer_changed(opts)
       if last_char ~= '' then return end
 
       if utils.is_blocked_buffer() then return end
-      if vim.snippet.active() and not self.show_in_snippet and not self.has_context() then return end
+      if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
 
       opts.on_cursor_moved(ev.event, ev.event == 'CursorMovedI' and self.ignore_next_cursor_moved)
       if ev.event == 'CursorMovedI' then self.ignore_next_cursor_moved = false end

@@ -3,7 +3,6 @@
 --- @field keymap blink.cmp.KeymapConfig
 --- @field completion blink.cmp.CompletionConfig
 --- @field sources blink.cmp.SourceConfig
---- @field documentation blink.cmp.DocumentationConfig
 --- @field signature blink.cmp.SignatureConfig
 --- @field snippets blink.cmp.SnippetsConfig
 --- @field appearance blink.cmp.AppearanceConfig
@@ -21,7 +20,6 @@ local config = {
   completion = require('blink.cmp.config.completion').default,
   fuzzy = require('blink.cmp.config.fuzzy').default,
   sources = require('blink.cmp.config.sources').default,
-  documentation = require('blink.cmp.config.documentation').default,
   signature = require('blink.cmp.config.signature').default,
   snippets = require('blink.cmp.config.snippets').default,
   appearance = require('blink.cmp.config.appearance').default,
@@ -37,14 +35,12 @@ function M.validate(self)
     keymap = { self.keymap, 'table' },
     completion = { self.completion, 'table' },
     sources = { self.sources, 'table' },
-    documentation = { self.documentation, 'table' },
     signature = { self.signature, 'table' },
     snippets = { self.snippets, 'table' },
     appearance = { self.appearance, 'table' },
   })
   require('blink.cmp.config.completion').validate(self.completion)
   require('blink.cmp.config.sources').validate(self.sources)
-  require('blink.cmp.config.documentation').validate(self.documentation)
   require('blink.cmp.config.signature').validate(self.signature)
   require('blink.cmp.config.snippets').validate(self.snippets)
   require('blink.cmp.config.appearance').validate(self.appearance)

@@ -35,14 +35,17 @@ function completion.setup()
 
   --- list -> windows: ghost text and completion menu
   -- setup completion menu
-  if config.completion.window.enabled then
+  if config.completion.menu.enabled then
     list.show_emitter:on(
       function(event) require('blink.cmp.completion.windows.menu').open_with_items(event.context, event.items) end
     )
     list.hide_emitter:on(function() require('blink.cmp.completion.windows.menu').close() end)
-    list.select_emitter:on(
-      function(event) require('blink.cmp.completion.windows.menu').set_selected_item_idx(event.idx) end
-    )
+    list.select_emitter:on(function(event)
+      require('blink.cmp.completion.windows.menu').set_selected_item_idx(event.idx)
+      if config.completion.documentation.auto_show then
+        require('blink.cmp.completion.windows.documentation').auto_show_item(event.context, event.item)
+      end
+    end)
   end
 
   -- setup ghost text

@@ -1,4 +1,3 @@
-local config = require('blink.cmp.config').completion.accept.auto_brackets
 local utils = require('blink.cmp.completion.brackets.utils')
 
 --- @param filetype string

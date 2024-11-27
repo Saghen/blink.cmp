@@ -80,8 +80,9 @@ function cmp.select_next()
 end
 
 function cmp.show_documentation()
+  local menu = require('blink.cmp.completion.windows.menu')
   local documentation = require('blink.cmp.windows.documentation')
-  if documentation.win:is_open() then return end
+  if documentation.win:is_open() or not menu.win:is_open() then return end
 
   local item = require('blink.cmp.completion.list').get_selected_item()
   if not item then return end

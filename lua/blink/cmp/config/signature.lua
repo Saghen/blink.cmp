@@ -15,9 +15,9 @@
 --- @field border blink.cmp.WindowBorder
 --- @field winblend number
 --- @field winhighlight string
---- @field scrollbar boolean
---- @field direction_priority ("n" | "s")[]
---- @field treesitter_highlighting boolean Whether to use treesitter highlighting, disable if you run into performance issues
+--- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
+--- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space, or another window is in the way.
+--- @field treesitter_highlighting boolean Disable if you run into performance issues
 
 local validate = require('blink.cmp.config.utils').validate
 local signature = {

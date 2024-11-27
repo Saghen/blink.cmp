@@ -3,8 +3,8 @@
 --- @field auto_brackets blink.cmp.AutoBracketsConfig
 
 --- @class (exact) blink.cmp.AutoBracketsConfig
---- @field enabled boolean
---- @field default_brackets string[]
+--- @field enabled boolean Whether to auto-insert brackets for functions
+--- @field default_brackets string[] Default brackets to use for unknown languages
 --- @field override_brackets_for_filetypes table<string, string[] | fun(item: blink.cmp.CompletionItem): string[]>
 --- @field force_allow_filetypes string[] Overrides the default blocked filetypes
 --- @field blocked_filetypes string[]

@@ -1,7 +1,7 @@
 --- @class (exact) blink.cmp.SnippetsConfig
---- @field expand fun(snippet: string)
---- @field active fun(filter?: { direction?: number }): boolean
---- @field jump fun(direction: number)
+--- @field expand fun(snippet: string) Function to use when expanding LSP provided snippets
+--- @field active fun(filter?: { direction?: number }): boolean Function to use when checking if a snippet is active
+--- @field jump fun(direction: number) Function to use when jumping between tab stops in a snippet, where direction can be negative or positive
 
 local validate = require('blink.cmp.config.utils').validate
 local snippets = {

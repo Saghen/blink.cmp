@@ -2,7 +2,7 @@ local signature = {}
 
 function signature.setup()
   local trigger = require('blink.cmp.signature.trigger').activate()
-  local window = require('blink.cmp.windows.signature').setup()
+  local window = require('blink.cmp.signature.window').setup()
 
   local sources = require('blink.cmp.sources.lib')
 

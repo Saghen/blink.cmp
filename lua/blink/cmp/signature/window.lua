@@ -1,10 +1,19 @@
+--- @class blink.cmp.SignatureWindow
+--- @field win blink.cmp.Window
+--- @field context? blink.cmp.SignatureHelpContext
+---
+--- @field open_with_signature_help fun(context: blink.cmp.SignatureHelpContext, signature_help?: lsp.SignatureHelp)
+--- @field close fun()
+--- @field scroll_up fun(amount: number)
+--- @field scroll_down fun(amount: number)
+--- @field update_position fun()
+
 local config = require('blink.cmp.config').signature.window
 local sources = require('blink.cmp.sources.lib')
-local autocomplete = require('blink.cmp.completion.windows.menu')
-local signature = {}
+local menu = require('blink.cmp.completion.windows.menu')
 
-function signature.setup()
-  signature.win = require('blink.cmp.lib.window').new({
+local signature = {
+  win = require('blink.cmp.lib.window').new({
     min_width = config.min_width,
     max_width = config.max_width,
     max_height = config.max_height,
@@ -13,21 +22,17 @@ function signature.setup()
     winhighlight = config.winhighlight,
     scrollbar = config.scrollbar,
     wrap = true,
-  })
+  }),
+  context = nil,
+}
 
-  -- todo: deduplicate this
-  autocomplete.listen_on_position_update(function()
+-- todo: deduplicate this
+menu.position_update_emitter:on(function() signature.update_position(signature.context) end)
+vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
+  callback = function()
     if signature.context then signature.update_position(signature.context) end
-  end)
-
-  vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
-    callback = function()
-      if signature.context then signature.update_position(signature.context) end
-    end,
-  })
-
-  return signature
-end
+  end,
+})
 
 --- @param context blink.cmp.SignatureHelpContext
 --- @param signature_help lsp.SignatureHelp | nil
@@ -113,12 +118,12 @@ function signature.update_position()
 
   local direction_priority = config.direction_priority
 
-  -- if the autocomplete window is open, we want to place the signature window on the opposite side
-  local autocomplete_win_config = autocomplete.win:get_win() and vim.api.nvim_win_get_config(autocomplete.win:get_win())
-  if autocomplete.win:is_open() then
+  -- if the menu window is open, we want to place the signature window on the opposite side
+  local menu_win_config = menu.win:get_win() and vim.api.nvim_win_get_config(menu.win:get_win())
+  if menu.win:is_open() then
     local cursor_screen_row = vim.fn.winline()
-    local autocomplete_win_is_up = autocomplete_win_config.row - cursor_screen_row < 0
-    direction_priority = autocomplete_win_is_up and { 's' } or { 'n' }
+    local menu_win_is_up = menu_win_config.row - cursor_screen_row < 0
+    direction_priority = menu_win_is_up and { 's' } or { 'n' }
   end
 
   local pos = win:get_vertical_direction_and_height(direction_priority)
@@ -134,16 +139,15 @@ function signature.update_position()
   local height = win:get_height()
 
   -- default to the user's preference but attempt to use the other options
-  if autocomplete_win_config then
-    assert(autocomplete_win_config.relative == 'win', 'The autocomplete window must be relative to a window')
+  if menu_win_config then
+    assert(menu_win_config.relative == 'win', 'The menu window must be relative to a window')
     local cursor_screen_row = vim.fn.winline()
-    local autocomplete_win_is_up = autocomplete_win_config.row - cursor_screen_row < 0
+    local menu_win_is_up = menu_win_config.row - cursor_screen_row < 0
     vim.api.nvim_win_set_config(winnr, {
-      relative = autocomplete_win_config.relative,
-      win = autocomplete_win_config.win,
-      row = autocomplete_win_is_up and autocomplete_win_config.row + autocomplete.win:get_height() + 1
-        or autocomplete_win_config.row - height - 1,
-      col = autocomplete_win_config.col,
+      relative = menu_win_config.relative,
+      win = menu_win_config.win,
+      row = menu_win_is_up and menu_win_config.row + menu.win:get_height() + 1 or menu_win_config.row - height - 1,
+      col = menu_win_config.col,
     })
   else
     vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = pos.direction == 's' and 1 or -height, col = 0 })

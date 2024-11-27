@@ -1,7 +1,12 @@
 --- @class (exact) blink.cmp.CompletionListConfig
---- @field max_items number
---- @field selection 'preselect' | 'manual' | 'auto_insert'
+--- @field max_items number Maximum number of items to display
+--- @field selection blink.cmp.CompletionListSelection Controls if completion items will be selected automatically, and whether selection automatically inserts
 --- @field cycle blink.cmp.CompletionListCycleConfig
+
+--- @alias blink.cmp.CompletionListSelection
+--- | 'preselect' Select the first item in the completion list
+--- | 'manual' Don't select any item by default
+--- | 'auto_insert' Don't select any item by default, and insert the completion items automatically when selecting them. You may want to bind a key to the `cancel` command when using this option, which will undo the selection and hide the completiom menu
 
 --- @class (exact) blink.cmp.CompletionListCycleConfig
 --- @field from_bottom boolean When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.

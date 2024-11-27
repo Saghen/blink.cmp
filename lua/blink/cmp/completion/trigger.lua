@@ -18,6 +18,7 @@
 --- @field trigger { kind: number, character: string | nil }
 
 --- @class blink.cmp.CompletionTrigger
+--- @field buffer_events blink.cmp.BufferEvents
 --- @field current_context_id number
 --- @field context? blink.cmp.Context
 --- @field show_emitter blink.cmp.EventEmitter<blink.cmp.Context>
@@ -25,47 +26,38 @@
 ---
 --- @field activate fun()
 --- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
+--- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean }): boolean
 --- @field show fun(opts?: { trigger_character?: string })
 --- @field hide fun()
+--- @field within_query_bounds fun(cursor: number[]): boolean
+--- @field get_context_bounds fun(regex: string): blink.cmp.ContextBounds
 
 local keyword_config = require('blink.cmp.config').completion.keyword
 local config = require('blink.cmp.config').completion.trigger
-local sources = require('blink.cmp.sources.lib')
-local utils = require('blink.cmp.lib.utils')
 
 --- @type blink.cmp.CompletionTrigger
 --- @diagnostic disable-next-line: missing-fields
 local trigger = {
   current_context_id = -1,
-  --- @type blink.cmp.Context | nil
-  context = nil,
   show_emitter = require('blink.cmp.lib.event_emitter').new('show'),
   hide_emitter = require('blink.cmp.lib.event_emitter').new('hide'),
 }
 
---- TODO: sweet mother of mary, massive refactor needed
 function trigger.activate()
-  require('blink.cmp.lib.buffer_events'):listen_buffer_changed({
+  trigger.buffer_events = require('blink.cmp.lib.buffer_events').new({
+    has_context = function() return trigger.context ~= nil end,
+    show_in_snippet = config.show_in_snippet,
+  })
+  trigger.buffer_events:listen({
     on_char_added = function(char, is_ignored)
-      if vim.snippet.active() and not config.show_in_snippet and not trigger.context then
-        return
-
       -- we were told to ignore the text changed event, so we update the context
       -- but don't send an on_show event upstream
-      elseif trigger.ignore_next_text_changed then
+      if is_ignored then
         if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
-        trigger.ignore_next_text_changed = false
-
-      -- ignore if in a special buffer
-      elseif utils.is_blocked_buffer() then
-        trigger.hide()
 
       -- character forces a trigger according to the sources, create a fresh context
-      elseif
-        vim.tbl_contains(sources.get_trigger_characters(), char)
-        and not vim.tbl_contains(config.show_on_blocked_trigger_characters, char)
-      then
+      elseif trigger.is_trigger_character(char) then
         trigger.context = nil
         trigger.show({ trigger_character = char })
 
@@ -79,23 +71,17 @@ function trigger.activate()
       end
     end,
     on_cursor_moved = function(event, is_ignored)
-      if vim.snippet.active() and not config.show_in_snippet and not trigger.context then return end
-
       -- we were told to ignore the cursor moved event, so we update the context
       -- but don't send an on_show event upstream
-      if trigger.ignore_next_cursor_moved and ev.event == 'CursorMovedI' then
+      if is_ignored and event == 'CursorMovedI' then
         if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
-        trigger.ignore_next_cursor_moved = false
         return
       end
 
       local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
-      local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
-      local is_on_trigger_for_show = is_on_trigger
-        and not vim.tbl_contains(config.show_on_blocked_trigger_characters, char_under_cursor)
-      local is_on_trigger_for_show_on_insert = is_on_trigger
-        and not vim.tbl_contains(config.show_on_x_blocked_trigger_characters, char_under_cursor)
+      local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
+      local is_on_trigger_for_show_on_insert = trigger.is_trigger_character(char_under_cursor, true)
       local is_on_context_char = char_under_cursor:match(keyword_config.regex) ~= nil
 
       local insert_enter_on_trigger_character = config.show_on_insert_on_trigger_character
@@ -107,7 +93,7 @@ function trigger.activate()
         trigger.show()
 
       -- check if we've entered insert mode on a trigger character
-      -- or if we've moved onto a trigger character
+      -- or if we've moved onto a trigger character (by accepting for example)
       elseif insert_enter_on_trigger_character or (is_on_trigger_for_show and trigger.context ~= nil) then
         trigger.context = nil
         trigger.show({ trigger_character = char_under_cursor })
@@ -126,34 +112,32 @@ function trigger.activate()
   })
 end
 
+function trigger.is_trigger_character(char, is_show_on_x)
+  local sources = require('blink.cmp.sources.lib')
+  local is_trigger = vim.tbl_contains(sources.get_trigger_characters(), char)
+
+  local is_blocked = vim.tbl_contains(config.show_on_blocked_trigger_characters, char)
+    or (is_show_on_x and vim.tbl_contains(config.show_on_x_blocked_trigger_characters, char))
+
+  return is_trigger and not is_blocked
+end
+
 --- Suppresses on_hide and on_show events for the duration of the callback
 --- TODO: extract into an autocmd module
 --- HACK: there's likely edge cases with this since we can't know for sure
 --- if the autocmds will fire for cursor_moved afaik
 function trigger.suppress_events_for_callback(cb)
-  local cursor_before = vim.api.nvim_win_get_cursor(0)
-  local changed_tick_before = vim.api.nvim_buf_get_changedtick(0)
-
-  cb()
-
-  local cursor_after = vim.api.nvim_win_get_cursor(0)
-  local changed_tick_after = vim.api.nvim_buf_get_changedtick(0)
-
-  local is_insert_mode = vim.api.nvim_get_mode().mode == 'i'
-  trigger.ignore_next_text_changed = changed_tick_after ~= changed_tick_before and is_insert_mode
-  -- TODO: does this guarantee that the CursorMovedI event will fire?
-  trigger.ignore_next_cursor_moved = (cursor_after[1] ~= cursor_before[1] or cursor_after[2] ~= cursor_before[2])
-    and is_insert_mode
+  if not trigger.buffer_events then return cb() end
+  trigger.buffer_events:suppress_events_for_callback(cb)
 end
 
 --- @param opts { is_accept?: boolean } | nil
 function trigger.show_if_on_trigger_character(opts)
-  if opts and opts.is_accept and not config.show_on_accept_on_trigger_character then return end
+  if opts and opts.is_accept and not config.show_on_accept_on_trigger_character then return false end
 
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
-  local is_on_trigger = vim.tbl_contains(sources.get_trigger_characters(), char_under_cursor)
-    and not vim.tbl_contains(config.show_on_x_blocked_trigger_characters, char_under_cursor)
+  local is_on_trigger = trigger.is_trigger_character(char_under_cursor, true)
 
   if is_on_trigger then trigger.show({ trigger_character = char_under_cursor }) end
   return is_on_trigger

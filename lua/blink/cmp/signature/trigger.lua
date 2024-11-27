@@ -17,6 +17,7 @@
 --- @field context? blink.cmp.SignatureHelpContext
 --- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.SignatureHelpContext }>
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
+--- @field buffer_events? blink.cmp.BufferEvents
 ---
 --- @field activate fun()
 --- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
@@ -38,7 +39,11 @@ local trigger = {
 }
 
 function trigger.activate()
-  require('blink.cmp.lib.buffer_events'):listen_buffer_changed({
+  trigger.buffer_events = require('blink.cmp.lib.buffer_events').new({
+    show_in_snippet = true,
+    has_context = function() return trigger.context ~= nil end,
+  })
+  trigger.buffer_events:listen({
     on_char_added = function(char)
       local is_on_trigger = trigger.is_trigger_character(char)
       local is_on_retrigger = trigger.is_trigger_character(char, true)
@@ -67,8 +72,6 @@ function trigger.activate()
     end,
     on_insert_leave = function() trigger.hide() end,
   })
-
-  return trigger
 end
 
 function trigger.is_trigger_character(char, is_retrigger)

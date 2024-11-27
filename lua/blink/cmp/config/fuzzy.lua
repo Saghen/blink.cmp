@@ -1,14 +1,14 @@
 --- @class (exact) blink.cmp.FuzzyConfig
---- @field use_typo_resistance boolean
---- @field use_frecency boolean
---- @field use_proximity boolean
---- @field sorts ("label" | "kind" | "score")[]
+--- @field use_typo_resistance boolean When enabled, allows for a number of typos relative to the length of the query. Disabling this matches the behavior of fzf
+--- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item
+--- @field use_proximity boolean Boosts the score of items matching nearby words
+--- @field sorts ("label" | "kind" | "score")[] Controls which sorts to use and in which order, these three are currently the only allowed options
 --- @field prebuilt_binaries blink.cmp.PrebuiltBinariesConfig
 
 --- @class (exact) blink.cmp.PrebuiltBinariesConfig
---- @field download boolean
---- @field force_version? string
---- @field force_system_triple? string
+--- @field download boolean Whenther or not to automatically download a prebuilt binary from github. If this is set to `false` you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
+--- @field force_version? string When downloading a prebuilt binary, force the downloader to resolve this version. If this is unset then the downloader will attempt to infer the version from the checked out git tag (if any). WARN: Beware that `main` may be incompatible with the version you select
+--- @field force_system_triple? string When downloading a prebuilt binary, force the downloader to use this system triple. If this is unset then the downloader will attempt to infer the system triple from `jit.os` and `jit.arch`. Check the latest release for all available system triples. WARN: Beware that `main` may be incompatible with the version you select
 
 local validate = require('blink.cmp.config.utils').validate
 local fuzzy = {

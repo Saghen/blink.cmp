@@ -1,8 +1,7 @@
-local config = require('blink.cmp.config')
+local config = require('blink.cmp.config').completion.ghost_text
+local highlight_ns = require('blink.cmp.config').appearance.highlight_ns
 local text_edits_lib = require('blink.cmp.lib.text_edits')
 local snippets_utils = require('blink.cmp.sources.snippets.utils')
-
-local ghost_text_config = config.completion.ghost_text
 
 --- @class blink.cmp.windows.GhostText
 --- @field win integer?
@@ -30,9 +29,7 @@ end
 -- immediately re-draw the preview when the cursor moves/text changes
 vim.api.nvim_create_autocmd({ 'CursorMovedI', 'TextChangedI' }, {
   callback = function()
-    if ghost_text_config.enabled and ghost_text.win then
-      ghost_text.draw_preview(vim.api.nvim_win_get_buf(ghost_text.win))
-    end
+    if config.enabled and ghost_text.win then ghost_text.draw_preview(vim.api.nvim_win_get_buf(ghost_text.win)) end
   end,
 })
 
@@ -55,7 +52,7 @@ function ghost_text.clear_preview()
   ghost_text.selected_item = nil
   ghost_text.win = nil
   if ghost_text.extmark_id ~= nil then
-    vim.api.nvim_buf_del_extmark(0, config.appearance.highlight_ns, ghost_text.extmark_id)
+    vim.api.nvim_buf_del_extmark(0, highlight_ns, ghost_text.extmark_id)
     ghost_text.extmark_id = nil
   end
 end
@@ -84,14 +81,13 @@ function ghost_text.draw_preview(bufnr)
     text_edit.range['end'].character,
   }
 
-  ghost_text.extmark_id =
-    vim.api.nvim_buf_set_extmark(bufnr, config.appearance.highlight_ns, cursor_pos[1], cursor_pos[2], {
-      id = ghost_text.extmark_id,
-      virt_text_pos = 'inline',
-      virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
-      virt_lines = virt_lines,
-      hl_mode = 'combine',
-    })
+  ghost_text.extmark_id = vim.api.nvim_buf_set_extmark(bufnr, highlight_ns, cursor_pos[1], cursor_pos[2], {
+    id = ghost_text.extmark_id,
+    virt_text_pos = 'inline',
+    virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
+    virt_lines = virt_lines,
+    hl_mode = 'combine',
+  })
 end
 
 return ghost_text

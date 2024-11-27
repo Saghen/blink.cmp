@@ -1,23 +1,23 @@
---- @class (exact) blink.cmp.CompletionWindowConfig
+--- @class (exact) blink.cmp.CompletionMenuConfig
 --- @field enabled boolean
 --- @field min_width number
 --- @field max_height number
 --- @field border blink.cmp.WindowBorder
---- @field scrollbar boolean
---- @field order blink.cmp.CompletionWindowOrderConfig
---- @field direction_priority ("n" | "s")[]
+--- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
+--- @field order blink.cmp.CompletionMenuOrderConfig TODO: implement
+--- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space
 --- @field winblend number
 --- @field winhighlight string
---- @field scrolloff number
---- @field draw blink.cmp.Draw
+--- @field scrolloff number Keep the cursor X lines away from the top/bottom of the window
+--- @field draw blink.cmp.Draw Controls how the completion items are rendered on the popup window
 
---- @class (exact) blink.cmp.CompletionWindowOrderConfig
+--- @class (exact) blink.cmp.CompletionMenuOrderConfig
 --- @field n 'top_down' | 'bottom_up'
 --- @field s 'top_down' | 'bottom_up'
 
 local validate = require('blink.cmp.config.utils').validate
 local window = {
-  --- @type blink.cmp.CompletionWindowConfig
+  --- @type blink.cmp.CompletionMenuConfig
   default = {
     enabled = true,
     min_width = 15,
@@ -56,7 +56,7 @@ local window = {
           ellipsis = false,
           text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
           highlight = function(ctx)
-            return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind)
+            return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or ('BlinkCmpKind' .. ctx.kind)
           end,
         },
 
@@ -65,7 +65,7 @@ local window = {
           width = { fill = true },
           text = function(ctx) return ctx.kind end,
           highlight = function(ctx)
-            return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or ('BlinkCmpKind' .. ctx.kind)
+            return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or ('BlinkCmpKind' .. ctx.kind)
           end,
         },
 
