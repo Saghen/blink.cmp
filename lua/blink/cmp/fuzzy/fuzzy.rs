@@ -121,8 +121,14 @@ pub fn fuzzy(
             }
             "label" => {
                 matches.sort_by(|a, b| {
-                    let label_a = &haystack[a.index_in_haystack].label;
-                    let label_b = &haystack[b.index_in_haystack].label;
+                    let label_a = haystack[a.index_in_haystack]
+                        .sort_text
+                        .as_ref()
+                        .unwrap_or(&haystack[a.index_in_haystack].label);
+                    let label_b = haystack[b.index_in_haystack]
+                        .sort_text
+                        .as_ref()
+                        .unwrap_or(&haystack[b.index_in_haystack].label);
 
                     // Put anything with an underscore at the end
                     match (label_a.starts_with('_'), label_b.starts_with('_')) {

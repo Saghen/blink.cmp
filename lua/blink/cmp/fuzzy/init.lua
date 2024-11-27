@@ -65,8 +65,11 @@ end
 function fuzzy.get_query()
   local line = vim.api.nvim_get_current_line()
   local keyword = config.completion.keyword
-  local range =
-    require('blink.cmp.lib.utils').get_regex_around_cursor(keyword.range, keyword.regex, keyword.exclude_from_prefix_regex)
+  local range = require('blink.cmp.lib.utils').get_regex_around_cursor(
+    keyword.range,
+    keyword.regex,
+    keyword.exclude_from_prefix_regex
+  )
   return string.sub(line, range.start_col, range.start_col + range.length - 1)
 end
 
