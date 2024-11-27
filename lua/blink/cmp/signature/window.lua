@@ -75,7 +75,7 @@ function signature.open_with_signature_help(context, signature_help)
 
     vim.api.nvim_buf_add_highlight(
       signature.win:get_buf(),
-      require('blink.cmp.config').highlight.ns,
+      require('blink.cmp.config').appearance.highlight_ns,
       'BlinkCmpSignatureHelpActiveParameter',
       0,
       start_region,
