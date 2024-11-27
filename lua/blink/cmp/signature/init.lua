@@ -1,12 +1,14 @@
 local signature = {}
 
 function signature.setup()
-  local trigger = require('blink.cmp.signature.trigger').activate()
-  local window = require('blink.cmp.signature.window').setup()
+  local trigger = require('blink.cmp.signature.trigger')
+  trigger.activate()
+  local window = require('blink.cmp.signature.window')
 
   local sources = require('blink.cmp.sources.lib')
 
-  trigger.listen_on_show(function(context)
+  trigger.show_emitter:on(function(event)
+    local context = event.context
     sources.cancel_signature_help()
     sources.get_signature_help(context, function(signature_help)
       if signature_help ~= nil and trigger.context ~= nil and trigger.context.id == context.id then
@@ -17,7 +19,7 @@ function signature.setup()
       end
     end)
   end)
-  trigger.listen_on_hide(function() window.close() end)
+  trigger.hide_emitter:on(function() window.close() end)
 end
 
 return signature

@@ -27,10 +27,10 @@ local signature = {
 }
 
 -- todo: deduplicate this
-menu.position_update_emitter:on(function() signature.update_position(signature.context) end)
+menu.position_update_emitter:on(function() signature.update_position() end)
 vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
   callback = function()
-    if signature.context then signature.update_position(signature.context) end
+    if signature.context then signature.update_position() end
   end,
 })
 
