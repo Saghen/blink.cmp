@@ -6,10 +6,7 @@ function cmp.setup(opts)
   config.merge_with(opts)
 
   require('blink.cmp.fuzzy.download').ensure_downloaded(function(err)
-    if err then
-      vim.notify('Error while downloading blink.cmp pre-built binary: ' .. err, vim.log.levels.ERROR)
-      return
-    end
+    if err then error('Error while downloading blink.cmp pre-built binary: ' .. err) end
 
     -- setup highlights, keymap, completion and signature help
     require('blink.cmp.highlights').setup()
