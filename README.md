@@ -425,7 +425,7 @@ MiniDeps.add({
 
           source_name = {
             width = { max = 30 },
-            text = function(ctx) return '[' .. ctx.source_name .. ']' end,
+            text = function(ctx) return ctx.source_name end,
             highlight = 'BlinkCmpSource',
           },
         },
