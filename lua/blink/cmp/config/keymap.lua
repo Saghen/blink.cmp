@@ -43,7 +43,7 @@
 ---
 ---   ['<Tab>'] = {
 ---     function(cmp)
----       if cmp.is_in_snippet() then return cmp.accept()
+---       if cmp.snippet_active() then return cmp.accept()
 ---       else return cmp.select_and_accept() end
 ---     end,
 ---     'snippet_forward',

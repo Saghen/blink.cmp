@@ -217,7 +217,7 @@ MiniDeps.add({
   --
   --   ['<Tab>'] = {
   --     function(cmp)
-  --       if cmp.is_in_snippet() then return cmp.accept()
+  --       if cmp.snippet_active() then return cmp.accept()
   --       else return cmp.select_and_accept() end
   --     end,
   --     'snippet_forward',
@@ -383,7 +383,7 @@ MiniDeps.add({
             ellipsis = false,
             text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
             highlight = function(ctx)
-              return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+              return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
             end,
           },
 
@@ -392,7 +392,7 @@ MiniDeps.add({
             width = { fill = true },
             text = function(ctx) return ctx.kind end,
             highlight = function(ctx)
-              return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+              return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
             end,
           },
 
@@ -757,7 +757,7 @@ completion.menu.draw = {
       ellipsis = false,
       text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
       highlight = function(ctx)
-        return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+        return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
       end,
     },
 
@@ -766,7 +766,7 @@ completion.menu.draw = {
       width = { fill = true },
       text = function(ctx) return ctx.kind end,
       highlight = function(ctx)
-        return require('blink.cmp.lib.utils').get_tailwind_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
+        return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
       end,
     },
 

@@ -71,13 +71,13 @@ function sources.validate(config)
     providers = { config.providers, 'table' },
   })
   validate('sources.completion', {
-    enabled_providers = { config.completion.enabled_providers, 'table' },
+    enabled_providers = { config.completion.enabled_providers, { 'table', 'function' } },
   })
   for key, provider in pairs(config.providers) do
     validate('sources.providers.' .. key, {
       name = { provider.name, 'string' },
       module = { provider.module, 'string' },
-      enabled = { provider.enabled, 'boolean', true },
+      enabled = { provider.enabled, { 'boolean', 'function' }, true },
       opts = { provider.opts, 'table', true },
       transform_items = { provider.transform_items, 'function', true },
       should_show_items = { provider.should_show_items, { 'boolean', 'function' }, true },
