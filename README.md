@@ -661,9 +661,10 @@ MiniDeps.add({
 | `BlinkCmpLabel` | Pmenu | Label of the completion item |
 | `BlinkCmpLabelDeprecated` | Comment | Deprecated label of the completion item |
 | `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
-| `BlinkCmpGhostText` | Comment | Preview item with ghost text  |
 | `BlinkCmpKind` | Special | Kind icon/text of the completion item |
 | `BlinkCmpKind<kind>` | Special | Kind icon/text of the completion item |
+| `BlinkCmpSourceName` | NonText | Source name of the completion item |
+| `BlinkCmpGhostText` | Comment | Preview item with ghost text  |
 | `BlinkCmpDoc` | NormalFloat | The documentation window |
 | `BlinkCmpDocBorder` | NormalFloat | The documentation window border |
 | `BlinkCmpDocCursorLine` | Visual | The documentation window cursor line |
@@ -801,6 +802,13 @@ completion.menu.draw = {
       width = { max = 30 },
       text = function(ctx) return ctx.label_description end,
       highlight = 'BlinkCmpLabelDescription',
+    },
+
+    source_name = {
+      width = { max = 30 },
+      -- source_name or source_id are supported
+      text = function(ctx) return ctx.source_name end,
+      highlight = 'BlinkCmpSource',
     },
   },
 }
