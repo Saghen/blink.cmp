@@ -59,7 +59,7 @@ function documentation.validate(config)
     min_width = { config.window.min_width, 'number' },
     max_width = { config.window.max_width, 'number' },
     max_height = { config.window.max_height, 'number' },
-    border = { config.window.border, 'string' },
+    border = { config.window.border, { 'string', 'table' } },
     winblend = { config.window.winblend, 'number' },
     winhighlight = { config.window.winhighlight, 'string' },
     scrollbar = { config.window.scrollbar, 'boolean' },

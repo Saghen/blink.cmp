@@ -106,7 +106,7 @@ function window.validate(config)
     enabled = { config.enabled, 'boolean' },
     min_width = { config.min_width, 'number' },
     max_height = { config.max_height, 'number' },
-    border = { config.border, 'string' },
+    border = { config.border, { 'string', 'table' } },
     scrollbar = { config.scrollbar, 'boolean' },
     order = { config.order, 'table' },
     direction_priority = { config.direction_priority, 'table' },
