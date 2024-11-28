@@ -83,4 +83,12 @@ function utils.get_regex_around_cursor(range, regex, exclude_from_prefix_regex)
   return { start_col = start_col, length = length }
 end
 
+function utils.schedule_if_needed(fn)
+  if vim.in_fast_event() then
+    vim.schedule(fn)
+  else
+    fn()
+  end
+end
+
 return utils
