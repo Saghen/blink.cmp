@@ -29,7 +29,7 @@ function event_emitter:emit(data)
   end
   if self.autocmd then
     require('blink.cmp.lib.utils').schedule_if_needed(
-      vim.api.nvim_exec_autocmds('User', { pattern = self.autocmd, modeline = false, data = data })
+      function() vim.api.nvim_exec_autocmds('User', { pattern = self.autocmd, modeline = false, data = data }) end
     )
   end
 end
