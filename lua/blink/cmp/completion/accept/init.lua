@@ -15,10 +15,16 @@ local function accept(ctx, item, callback)
   sources
     .resolve(item)
     :map(function(resolved_item)
+      -- Get additional text edits, converted to utf-8
       local all_text_edits =
         vim.deepcopy(resolved_item and resolved_item.additionalTextEdits or item.additionalTextEdits or {})
+      all_text_edits = vim.tbl_map(
+        function(text_edit) return text_edits_lib.to_utf_8(text_edit, text_edits_lib.offset_encoding_from_item(item)) end,
+        all_text_edits
+      )
 
       item = vim.deepcopy(item)
+      -- TODO: it's not obvious that this is converting to utf-8
       item.textEdit = text_edits_lib.get_from_item(item)
 
       -- Create an undo point, if it's not a snippet, since the snippet engine should handle undo

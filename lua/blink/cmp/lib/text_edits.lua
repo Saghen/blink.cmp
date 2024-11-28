@@ -102,9 +102,6 @@ function text_edits.get_from_item(item)
   text_edit.replace = nil
   --- @cast text_edit lsp.TextEdit
 
-  local client = vim.lsp.get_client_by_id(item.client_id)
-  local offset_encoding = client ~= nil and client.offset_encoding or 'utf-8'
-
   -- Adjust the position of the text edit to be the current cursor position
   -- since the data might be outdated. We compare the cursor column position
   -- from when the items were fetched versus the current.
@@ -113,14 +110,25 @@ function text_edits.get_from_item(item)
   local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
   text_edit.range['end'].character = text_edit.range['end'].character + offset
 
-  -- convert the offset encoding to utf-8 if necessary
+  -- convert the offset encoding to utf-8
   -- TODO: we have to do this last because it applies a max on the position based on the length of the line
   -- so it would break the offset code when removing characters at the end of the line
-  if offset_encoding ~= 'utf-8' then
-    text_edit.range.start.character = get_line_byte_from_position(text_edit.range.start, offset_encoding)
-    text_edit.range['end'].character = get_line_byte_from_position(text_edit.range['end'], offset_encoding)
-  end
+  local offset_encoding = text_edits.offset_encoding_from_item(item)
+  text_edit = text_edits.to_utf_8(text_edit, offset_encoding)
 
+  return text_edit
+end
+
+function text_edits.offset_encoding_from_item(item)
+  local client = vim.lsp.get_client_by_id(item.client_id)
+  return client ~= nil and client.offset_encoding or 'utf-8'
+end
+
+function text_edits.to_utf_8(text_edit, offset_encoding)
+  if offset_encoding == 'utf-8' then return text_edit end
+  text_edit = vim.deepcopy(text_edit)
+  text_edit.range.start.character = get_line_byte_from_position(text_edit.range.start, offset_encoding)
+  text_edit.range['end'].character = get_line_byte_from_position(text_edit.range['end'], offset_encoding)
   return text_edit
 end
 
@@ -131,8 +139,11 @@ function text_edits.guess(item)
   local word = item.insertText or item.label
 
   local keyword = config.completion.keyword
-  local range =
-    require('blink.cmp.lib.utils').get_regex_around_cursor(keyword.range, keyword.regex, keyword.exclude_from_prefix_regex)
+  local range = require('blink.cmp.lib.utils').get_regex_around_cursor(
+    keyword.range,
+    keyword.regex,
+    keyword.exclude_from_prefix_regex
+  )
   local current_line = vim.api.nvim_win_get_cursor(0)[1]
 
   -- convert to 0-index
