@@ -24,6 +24,7 @@
 --- @field show_if_on_trigger_character fun()
 --- @field show fun(opts?: { trigger_character: string })
 --- @field hide fun()
+--- @field set_active_signature_help fun(signature_help: lsp.SignatureHelp)
 
 local config = require('blink.cmp.config').signature.trigger
 local utils = require('blink.cmp.lib.utils')

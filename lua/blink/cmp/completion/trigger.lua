@@ -21,7 +21,7 @@
 --- @field buffer_events blink.cmp.BufferEvents
 --- @field current_context_id number
 --- @field context? blink.cmp.Context
---- @field show_emitter blink.cmp.EventEmitter<blink.cmp.Context>
+--- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.Context }>
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
 ---
 --- @field activate fun()

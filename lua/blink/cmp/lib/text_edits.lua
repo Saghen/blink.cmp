@@ -60,7 +60,7 @@ end
 --- Grabbed from vim.lsp.utils. Converts an offset_encoding to byte offset
 --- @param position lsp.Position
 --- @param offset_encoding? 'utf-8'|'utf-16'|'utf-32'
---- @return integer
+--- @return number
 local function get_line_byte_from_position(position, offset_encoding)
   local bufnr = vim.api.nvim_get_current_buf()
   local col = position.character
@@ -70,7 +70,7 @@ local function get_line_byte_from_position(position, offset_encoding)
 
   local line = vim.api.nvim_buf_get_lines(bufnr, position.line, position.line + 1, false)[1] or ''
   if vim.fn.has('nvim-0.11.0') == 1 then
-    col = vim.str_byteindex(line, offset_encoding or 'utf-16', col, false)
+    col = vim.str_byteindex(line, offset_encoding or 'utf-16', col, false) or 0
   else
     col = vim.lsp.util._str_byteindex_enc(line, col, offset_encoding or 'utf-16')
   end
