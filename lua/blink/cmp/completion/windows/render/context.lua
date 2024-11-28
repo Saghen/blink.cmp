@@ -9,6 +9,8 @@
 --- @field kind_icon string
 --- @field icon_gap string
 --- @field deprecated boolean
+--- @field source_id string
+--- @field source_name string
 
 local context = {}
 
@@ -46,6 +48,8 @@ function context.new(draw, item, matched_indices)
 
   local label_detail = (item.labelDetails and item.labelDetails.detail or ''):gsub('\n', newline_char)
   local label_description = (item.labelDetails and item.labelDetails.description or ''):gsub('\n', newline_char)
+  local source_id = item.source_id
+  local source_name = item.source_name
 
   return {
     self = draw,
@@ -58,6 +62,8 @@ function context.new(draw, item, matched_indices)
     kind_icon = kind_icon,
     icon_gap = config.nerd_font_variant == 'mono' and '' or ' ',
     deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) or false,
+    source_id = source_id,
+    source_name = source_name,
   }
 end
 
