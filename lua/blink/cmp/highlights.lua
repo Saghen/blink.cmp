@@ -17,6 +17,7 @@ function highlights.setup()
   set_hl('BlinkCmpLabelDetail', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
   set_hl('BlinkCmpLabelDescription', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
   set_hl('BlinkCmpKind', { link = use_nvim_cmp and 'CmpItemKind' or 'Special' })
+  set_hl('BlinkCmpSource', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
   for _, kind in ipairs(require('blink.cmp.types').CompletionItemKind) do
     set_hl('BlinkCmpKind' .. kind, { link = use_nvim_cmp and 'CmpItemKind' .. kind or 'BlinkCmpKind' })
   end

@@ -96,6 +96,13 @@ local window = {
           text = function(ctx) return ctx.label_description end,
           highlight = 'BlinkCmpLabelDescription',
         },
+
+        source_name = {
+          width = { max = 30 },
+          -- source_name or source_id are supported
+          text = function(ctx) return ctx.source_name end,
+          highlight = 'BlinkCmpSource',
+        },
       },
     },
   },
