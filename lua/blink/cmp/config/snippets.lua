@@ -10,7 +10,7 @@ local snippets = {
     -- NOTE: we wrap these in functions to reduce startup by 1-2ms
     -- when using lazy.nvim
     expand = function(snippet) vim.snippet.expand(snippet) end,
-    active = function(filter) vim.snippet.active(filter) end,
+    active = function(filter) return vim.snippet.active(filter) end,
     jump = function(direction) vim.snippet.jump(direction) end,
   },
 }
