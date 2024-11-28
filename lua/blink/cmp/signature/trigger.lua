@@ -21,7 +21,7 @@
 ---
 --- @field activate fun()
 --- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
---- @field show_if_on_trigger_character fun(): boolean
+--- @field show_if_on_trigger_character fun()
 --- @field show fun(opts?: { trigger_character: string })
 --- @field hide fun()
 
@@ -89,9 +89,7 @@ end
 function trigger.show_if_on_trigger_character()
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
-  local is_on_trigger = trigger.is_trigger_character(char_under_cursor)
-  if is_on_trigger then trigger.show({ trigger_character = char_under_cursor }) end
-  return is_on_trigger
+  if trigger.is_trigger_character(char_under_cursor) then trigger.show({ trigger_character = char_under_cursor }) end
 end
 
 function trigger.show(opts)

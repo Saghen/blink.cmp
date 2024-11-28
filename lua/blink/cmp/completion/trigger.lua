@@ -27,8 +27,8 @@
 --- @field activate fun()
 --- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
---- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean }): boolean
---- @field show fun(opts?: { trigger_character?: string })
+--- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
+--- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean })
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
 --- @field get_context_bounds fun(regex: string): blink.cmp.ContextBounds
@@ -131,19 +131,17 @@ function trigger.suppress_events_for_callback(cb)
   trigger.buffer_events:suppress_events_for_callback(cb)
 end
 
---- @param opts { is_accept?: boolean } | nil
 function trigger.show_if_on_trigger_character(opts)
-  if opts and opts.is_accept and not config.show_on_accept_on_trigger_character then return false end
+  if opts and opts.is_accept and not config.show_on_accept_on_trigger_character then return end
 
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
-  local is_on_trigger = trigger.is_trigger_character(char_under_cursor, true)
 
-  if is_on_trigger then trigger.show({ trigger_character = char_under_cursor }) end
-  return is_on_trigger
+  if trigger.is_trigger_character(char_under_cursor, true) then
+    trigger.show({ trigger_character = char_under_cursor })
+  end
 end
 
---- @param opts { trigger_character?: string, send_upstream?: boolean, force?: boolean } | nil
 function trigger.show(opts)
   opts = opts or {}
 

@@ -76,10 +76,15 @@ function buffer_events:listen(opts)
   })
 
   -- definitely leaving the context
-  vim.api.nvim_create_autocmd({ 'InsertLeave', 'BufLeave' }, {
+  vim.api.nvim_create_autocmd({ 'ModeChanged', 'BufLeave' }, {
     callback = function()
       last_char = ''
-      opts.on_insert_leave()
+      -- HACK: when using vim.snippet.expand, the mode switches from insert -> normal -> visual -> select
+      -- so we schedule to ignore the intermediary modes
+      -- TODO: deduplicate requests
+      vim.schedule(function()
+        if not vim.tbl_contains({ 'i', 's' }, vim.api.nvim_get_mode().mode) then opts.on_insert_leave() end
+      end)
     end,
   })
 
