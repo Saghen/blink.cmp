@@ -16,7 +16,7 @@ local presets = {
     ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
   },
 
-  super_tab = {
+  ['super-tab'] = {
     ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
     ['<C-e>'] = { 'hide', 'fallback' },
 
