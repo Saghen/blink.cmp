@@ -648,7 +648,6 @@ MiniDeps.add({
   version = '0.*',
   dependencies = { 
     'L3MON4D3/LuaSnip',
-    'leiserfg/blink_luasnip',
     "leiserfg/blink_luasnip" },
   opts = {
     accept = {
