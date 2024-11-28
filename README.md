@@ -279,15 +279,19 @@ MiniDeps.add({
     trigger = {
       -- When false, will not show the completion window automatically when in a snippet
       show_in_snippet = true,
+      -- When true, will show the completion window after typing a character that matches the `keyword.regex`
+      show_on_keyword = true,
+      -- When true, will show the completion window after typing a trigger character
+      show_on_trigger_character = true,
       -- LSPs can indicate when to show the completion window via trigger characters
       -- however, some LSPs (i.e. tsserver) return characters that would essentially
       -- always show the window. We block these by default.
       show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
-      -- When true, will show the completion window when the cursor comes after a trigger character
-      -- after accepting an item
+      -- When both this and show_on_trigger_character are true, will show the completion window
+      -- when the cursor comes after a trigger character after accepting an item
       show_on_accept_on_trigger_character = true,
-      -- When true, will show the completion window when the cursor comes after a trigger character
-      -- when entering insert mode
+      -- When both this and show_on_trigger_character are true, will show the completion window
+      -- when the cursor comes after a trigger character when entering insert mode
       show_on_insert_on_trigger_character = true,
       -- List of trigger characters (on top of `show_on_blocked_trigger_characters`) that won't trigger
       -- the completion window when the cursor comes after a trigger character when

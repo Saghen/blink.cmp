@@ -57,12 +57,12 @@ function trigger.activate()
         if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
 
       -- character forces a trigger according to the sources, create a fresh context
-      elseif trigger.is_trigger_character(char) then
+      elseif trigger.is_trigger_character(char) and config.show_on_trigger_character then
         trigger.context = nil
         trigger.show({ trigger_character = char })
 
       -- character is part of the current context OR in an existing context
-      elseif char:match(keyword_config.regex) ~= nil then
+      elseif char:match(keyword_config.regex) ~= nil and config.show_on_keyword then
         trigger.show()
 
       -- nothing matches so hide
@@ -84,7 +84,8 @@ function trigger.activate()
       local is_on_trigger_for_show_on_insert = trigger.is_trigger_character(char_under_cursor, true)
       local is_on_context_char = char_under_cursor:match(keyword_config.regex) ~= nil
 
-      local insert_enter_on_trigger_character = config.show_on_insert_on_trigger_character
+      local insert_enter_on_trigger_character = config.show_on_trigger_character
+        and config.show_on_insert_on_trigger_character
         and is_on_trigger_for_show_on_insert
         and event == 'InsertEnter'
 
@@ -132,7 +133,12 @@ function trigger.suppress_events_for_callback(cb)
 end
 
 function trigger.show_if_on_trigger_character(opts)
-  if opts and opts.is_accept and not config.show_on_accept_on_trigger_character then return end
+  if
+    (opts and opts.is_accept)
+    and (not config.show_on_trigger_character or not config.show_on_accept_on_trigger_character)
+  then
+    return
+  end
 
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
