@@ -82,6 +82,9 @@ local window = {
               table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
             end
 
+            -- add treesitter highlights
+            vim.list_extend(highlights, require('blink.cmp.completion.windows.render.treesitter').highlight(ctx))
+
             -- characters matched on the label by the fuzzy matcher
             for _, idx in ipairs(ctx.label_matched_indices) do
               table.insert(highlights, { idx, idx + 1, group = 'BlinkCmpLabelMatch' })
