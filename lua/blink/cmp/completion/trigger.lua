@@ -57,12 +57,12 @@ function trigger.activate()
         if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
 
       -- character forces a trigger according to the sources, create a fresh context
-      elseif trigger.is_trigger_character(char) and config.show_on_trigger_character then
+      elseif trigger.is_trigger_character(char) and (config.show_on_trigger_character or trigger.context ~= nil) then
         trigger.context = nil
         trigger.show({ trigger_character = char })
 
-      -- character is part of the current context OR in an existing context
-      elseif char:match(keyword_config.regex) ~= nil and config.show_on_keyword then
+      -- character is part of a keyword
+      elseif char:match(keyword_config.regex) ~= nil and (config.show_on_keyword or trigger.context ~= nil) then
         trigger.show()
 
       -- nothing matches so hide
@@ -82,7 +82,7 @@ function trigger.activate()
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
       local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
       local is_on_trigger_for_show_on_insert = trigger.is_trigger_character(char_under_cursor, true)
-      local is_on_context_char = char_under_cursor:match(keyword_config.regex) ~= nil
+      local is_on_keyword_char = char_under_cursor:match(keyword_config.regex) ~= nil
 
       local insert_enter_on_trigger_character = config.show_on_trigger_character
         and config.show_on_insert_on_trigger_character
@@ -100,7 +100,7 @@ function trigger.activate()
         trigger.show({ trigger_character = char_under_cursor })
 
       -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
-      elseif is_on_context_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
+      elseif is_on_keyword_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
         trigger.context = nil
         trigger.show()
 
