@@ -110,7 +110,10 @@ function win:open()
   if self.scrollbar then self.scrollbar:mount(self.id) end
 end
 
-function win:set_option_value(option, value) vim.api.nvim_set_option_value(option, value, { win = self.id }) end
+function win:set_option_value(option, value)
+  if self.id == nil or not vim.api.nvim_win_is_valid(self.id) then return end
+  vim.api.nvim_set_option_value(option, value, { win = self.id })
+end
 
 function win:close()
   if self.id ~= nil then
