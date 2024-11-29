@@ -12,7 +12,7 @@ mod fuzzy;
 mod lsp_item;
 
 lazy_static! {
-    static ref REGEX: Regex = Regex::new(r"[A-Za-z][A-Za-z0-9_\\-]{2,32}").unwrap();
+    static ref REGEX: Regex = Regex::new(r"\w[\w0-9_\\-]{2,32}").unwrap();
     static ref FRECENCY: RwLock<Option<FrecencyTracker>> = RwLock::new(None);
 }
 
