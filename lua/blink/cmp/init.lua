@@ -41,14 +41,15 @@ function cmp.cancel()
   return true
 end
 
-function cmp.accept()
+--- @param opts? blink.cmp.CompletionListAcceptOpts
+function cmp.accept(opts)
   if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
 
   local completion_list = require('blink.cmp.completion.list')
   local item = completion_list.get_selected_item()
   if item == nil then return end
 
-  vim.schedule(function() completion_list.accept() end)
+  vim.schedule(function() completion_list.accept(opts) end)
   return true
 end
 

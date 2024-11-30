@@ -1,6 +1,7 @@
 --- @class blink.cmp.DrawItemContext
 --- @field self blink.cmp.Draw
 --- @field item blink.cmp.CompletionItem
+--- @field idx number
 --- @field label string
 --- @field label_detail string
 --- @field label_description string
@@ -24,16 +25,17 @@ function context.get_from_items(draw, items)
 
   local ctxs = {}
   for idx, item in ipairs(items) do
-    ctxs[idx] = context.new(draw, item, matched_indices[idx])
+    ctxs[idx] = context.new(draw, idx, item, matched_indices[idx])
   end
   return ctxs
 end
 
 --- @param draw blink.cmp.Draw
+--- @param item_idx number
 --- @param item blink.cmp.CompletionItem
 --- @param matched_indices number[]
 --- @return blink.cmp.DrawItemContext
-function context.new(draw, item, matched_indices)
+function context.new(draw, item_idx, item, matched_indices)
   local config = require('blink.cmp.config').appearance
   local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
   local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
@@ -54,6 +56,7 @@ function context.new(draw, item, matched_indices)
   return {
     self = draw,
     item = item,
+    idx = item_idx,
     label = label,
     label_detail = label_detail,
     label_description = label_description,
