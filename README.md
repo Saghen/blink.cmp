@@ -840,7 +840,7 @@ For a setup similar to nvim-cmp, use the following config:
 }
 ```
 
-### Select Nth Item from the list
+### Select Nth item from the list
 
 Here's an example configuration that allows you to select the nth item from the list, based on [#382](https://github.com/Saghen/blink.cmp/issues/382):
 
