@@ -68,6 +68,7 @@
 
     -- default list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, via `opts_extend`
+    -- and defining this outside of your primary `blink.cmp` config
     sources = {
       completion = {
         enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
