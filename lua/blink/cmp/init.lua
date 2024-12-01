@@ -2,6 +2,7 @@ local cmp = {}
 
 --- @param opts blink.cmp.Config
 function cmp.setup(opts)
+  opts = opts or {}
   local config = require('blink.cmp.config')
   config.merge_with(opts)
 
