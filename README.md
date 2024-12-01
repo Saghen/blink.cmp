@@ -598,6 +598,13 @@ MiniDeps.add({
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
         fallback_for = { 'lsp' },
+        -- opts = {
+        --   -- Specifies the buffer numbers to complete
+        --   -- Example usage for getting all visible buffers
+        --   get_bufnrs = function()
+        --     return vim.tbl_map(function(win) return vim.api.nvim_win_get_buf(win) end, vim.api.nvim_list_wins())
+        --   end,
+        -- }
       },
     },
   },
