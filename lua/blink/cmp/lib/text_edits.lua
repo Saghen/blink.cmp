@@ -116,6 +116,8 @@ function text_edits.get_from_item(item)
   local offset_encoding = text_edits.offset_encoding_from_item(item)
   text_edit = text_edits.to_utf_8(text_edit, offset_encoding)
 
+  text_edit.range = text_edits.clamp_range_to_bounds(text_edit.range)
+
   return text_edit
 end
 
@@ -154,6 +156,22 @@ function text_edits.guess(item)
     },
     newText = word,
   }
+end
+
+--- Clamps the range to the bounds of their respective lines
+--- @param range lsp.Range
+--- @return lsp.Range
+--- TODO: clamp start and end lines
+function text_edits.clamp_range_to_bounds(range)
+  range = vim.deepcopy(range)
+
+  local start_line = vim.api.nvim_buf_get_lines(0, range.start.line, range.start.line + 1, false)[1]
+  range.start.character = math.min(math.max(range.start.character, 0), #start_line)
+
+  local end_line = vim.api.nvim_buf_get_lines(0, range['end'].line, range['end'].line + 1, false)[1]
+  range['end'].character = math.min(math.max(range['end'].character, 0), #end_line)
+
+  return range
 end
 
 return text_edits
