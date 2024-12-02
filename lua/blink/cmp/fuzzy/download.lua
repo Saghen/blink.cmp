@@ -128,9 +128,6 @@ function download.from_github(tag, cb)
 
     vim.system({
       'curl',
-      '--retry',
-      '2',
-      '--retry-connrefused',
       '--fail', -- Fail on 4xx/5xx
       '--location', -- Follow redirects
       '--silent', -- Don't show progress
