@@ -62,7 +62,7 @@ function utils.get_regex_around_cursor(range, regex, exclude_from_prefix_regex)
 
   -- Search forward for the end of the word if configured
   if range == 'full' then
-    while start_col + length < #line do
+    while start_col + length <= #line do
       local col = start_col + length
       local char = line:sub(col, col)
       if char:match(regex) == nil then break end
