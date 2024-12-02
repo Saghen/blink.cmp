@@ -205,7 +205,7 @@ function trigger.get_context_bounds(regex)
 
   local line = vim.api.nvim_buf_get_lines(0, cursor_line - 1, cursor_line, false)[1]
   local start_col = cursor_col
-  while start_col > 1 do
+  while start_col >= 1 do
     local char = line:sub(start_col, start_col)
     if char:match(regex) == nil then
       start_col = start_col + 1
@@ -213,6 +213,7 @@ function trigger.get_context_bounds(regex)
     end
     start_col = start_col - 1
   end
+  start_col = math.max(start_col, 1)
 
   local end_col = cursor_col
   while end_col < #line do
