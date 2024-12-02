@@ -1,3 +1,10 @@
+## [0.7.1](https://github.com/Saghen/blink.cmp/compare/v0.7.0...v0.7.1) (2024-12-02)
+
+### Bug Fixes
+
+* arguments on curl ([f992b72](https://github.com/Saghen/blink.cmp/commit/f992b72017cac77d4f4e22dc05016e5d79adff68))
+* drop retry from curl ([6e9fb62](https://github.com/Saghen/blink.cmp/commit/6e9fb6254bb49eaf014a48049ff511bbfd6a66a3)), closes [#425](https://github.com/Saghen/blink.cmp/issues/425)
+
 ## [0.7.0](https://github.com/Saghen/blink.cmp/compare/v0.6.2...v0.7.0) (2024-12-02)
 
 > [!IMPORTANT]
