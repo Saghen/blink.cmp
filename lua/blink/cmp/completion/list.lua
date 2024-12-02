@@ -15,7 +15,7 @@
 --- @field hide fun()
 ---
 --- @field get_selected_item fun(): blink.cmp.CompletionItem?
---- @field select fun(idx?: number)
+--- @field select fun(idx?: number, opts?: { undo_preview?: boolean })
 --- @field select_next fun()
 --- @field select_prev fun()
 ---
@@ -74,7 +74,7 @@ function list.show(context, items)
   end
 
   -- todo: some logic to maintain the selection if the user moved the cursor?
-  list.select(list.config.selection == 'preselect' and 1 or nil)
+  list.select(list.config.selection == 'preselect' and 1 or nil, { undo_preview = false })
 end
 
 function list.fuzzy(context, items)
@@ -91,11 +91,15 @@ function list.hide() list.hide_emitter:emit({ context = list.context }) end
 
 function list.get_selected_item() return list.items[list.selected_item_idx] end
 
-function list.select(idx)
+function list.select(idx, opts)
+  opts = opts or {}
   local item = list.items[idx]
 
-  list.undo_preview()
-  if list.config.selection == 'auto_insert' and item then list.apply_preview(item) end
+  require('blink.cmp.completion.trigger').suppress_events_for_callback(function()
+    -- default to undoing the preview
+    if opts.undo_preview ~= false then list.undo_preview() end
+    if list.config.selection == 'auto_insert' and item then list.apply_preview(item) end
+  end)
 
   list.selected_item_idx = idx
   list.select_emitter:emit({ idx = idx, item = item, items = list.items, context = list.context })
@@ -155,14 +159,12 @@ function list.undo_preview()
 end
 
 function list.apply_preview(item)
-  require('blink.cmp.completion.trigger').suppress_events_for_callback(function()
-    -- undo the previous preview if it exists
-    if list.preview_undo_text_edit ~= nil then
-      require('blink.cmp.lib.text_edits').apply({ list.preview_undo_text_edit })
-    end
-    -- apply the new preview
-    list.preview_undo_text_edit = require('blink.cmp.completion.accept.preview')(item)
-  end)
+  -- undo the previous preview if it exists
+  if list.preview_undo_text_edit ~= nil then
+    require('blink.cmp.lib.text_edits').apply({ list.preview_undo_text_edit })
+  end
+  -- apply the new preview
+  list.preview_undo_text_edit = require('blink.cmp.completion.accept.preview')(item)
 end
 
 ---------- Accept ----------

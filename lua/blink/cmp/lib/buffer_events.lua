@@ -52,11 +52,13 @@ function buffer_events:listen(opts)
       if utils.is_blocked_buffer() then return end
       if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
 
+      local is_ignored = self.ignore_next_text_changed
+      self.ignore_next_text_changed = false
+
       -- no characters added so let cursormoved handle it
       if last_char == '' then return end
 
-      opts.on_char_added(last_char, self.ignore_next_text_changed)
-      self.ignore_next_text_changed = false
+      opts.on_char_added(last_char, is_ignored)
 
       last_char = ''
     end,
@@ -64,14 +66,16 @@ function buffer_events:listen(opts)
 
   vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
+      local is_ignored = ev.event == 'CursorMovedI' and self.ignore_next_cursor_moved
+      if ev.event == 'CursorMovedI' then self.ignore_next_cursor_moved = false end
+
       -- characters added so let textchanged handle it
       if last_char ~= '' then return end
 
       if utils.is_blocked_buffer() then return end
       if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
 
-      opts.on_cursor_moved(ev.event, ev.event == 'CursorMovedI' and self.ignore_next_cursor_moved)
-      if ev.event == 'CursorMovedI' then self.ignore_next_cursor_moved = false end
+      opts.on_cursor_moved(ev.event, is_ignored)
     end,
   })
 
