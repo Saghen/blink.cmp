@@ -1,3 +1,72 @@
+## [0.7.0](https://github.com/Saghen/blink.cmp/compare/v0.6.2...v0.7.0) (2024-12-02)
+
+> [!IMPORTANT]
+> Most of the configuration has been reworked, please see the README for the new schema
+
+* Includes an enormous refactor in preparation for sources v2, commandline completions, and the v1 release [#389](https://github.com/Saghen/blink.cmp/issues/389)
+* Enable Treesitter highlighting on the labels via `completion.menu.draw.treesitter_highlighting = true`
+
+### BREAKING CHANGES
+
+* nuke the debt ([#389](https://github.com/Saghen/blink.cmp/issues/389)) ([1187172](https://github.com/Saghen/blink.cmp/commit/11871727278381febd05d1ee1a17f98fb2e32b26)), closes [#323](https://github.com/Saghen/blink.cmp/issues/323)
+
+### Features
+
+* add show_on_keyword and show_on_trigger_character trigger options ([69a69dd](https://github.com/Saghen/blink.cmp/commit/69a69dd7c66f2290dea849846402266b2303782c)), closes [#402](https://github.com/Saghen/blink.cmp/issues/402)
+* allow completing buffer words with unicode ([#392](https://github.com/Saghen/blink.cmp/issues/392)) ([e1d3e9d](https://github.com/Saghen/blink.cmp/commit/e1d3e9d4a64466b521940b3ccb67c6fd534b0032))
+* call execute after accepting, but before applying semantic brackets ([073449a](https://github.com/Saghen/blink.cmp/commit/073449a872d49d0c61cb1cf020232d609b2b3d8c))
+* default to empty table for setup ([#412](https://github.com/Saghen/blink.cmp/issues/412)) ([4559ec5](https://github.com/Saghen/blink.cmp/commit/4559ec5cfb91ed8080e2f8df7d4784e12aa27f18))
+* error on download failure ([6054da2](https://github.com/Saghen/blink.cmp/commit/6054da23af87117afd1de59bb77df90037e84675))
+* nuke the debt ([#389](https://github.com/Saghen/blink.cmp/issues/389)) ([1187172](https://github.com/Saghen/blink.cmp/commit/11871727278381febd05d1ee1a17f98fb2e32b26)), closes [#323](https://github.com/Saghen/blink.cmp/issues/323)
+* prebuilt binary retry, disable progress, and docs ([bc67391](https://github.com/Saghen/blink.cmp/commit/bc67391de57ce3e42302b13cccf9dd41207c0860)), closes [#68](https://github.com/Saghen/blink.cmp/issues/68)
+* **render:** support `source_id` and `source_name` in menu render ([#400](https://github.com/Saghen/blink.cmp/issues/400)) ([d5f62f9](https://github.com/Saghen/blink.cmp/commit/d5f62f981cde0660944626aaeaab8541c9516346))
+* support accepting and drawing by index ([4b1a793](https://github.com/Saghen/blink.cmp/commit/4b1a79305d9acb22171062053a6c942383fefa72)), closes [#382](https://github.com/Saghen/blink.cmp/issues/382)
+* support get_bufnrs for the buffer source ([#411](https://github.com/Saghen/blink.cmp/issues/411)) ([4c65dbd](https://github.com/Saghen/blink.cmp/commit/4c65dbde1709bed2cb87483b0ce4eb522098bebc))
+* treesitter highlighter ([#404](https://github.com/Saghen/blink.cmp/issues/404)) ([08a0777](https://github.com/Saghen/blink.cmp/commit/08a07776838e205c697a3d05bcf43104a2adacf5))
+* use sort_text over label for sorting ([0386120](https://github.com/Saghen/blink.cmp/commit/0386120c3bbe32a6746b73a8e38ec954c58575c9)), closes [#365](https://github.com/Saghen/blink.cmp/issues/365)
+
+### Bug Fixes
+
+* accept grabbing wrong config ([3dcf98d](https://github.com/Saghen/blink.cmp/commit/3dcf98d8a5c1c720d5a3d789ac14a9741dbe70eb))
+* allow border to be a table ([52f6387](https://github.com/Saghen/blink.cmp/commit/52f63878c0affef88023cd2a00a103644cb7ccfa)), closes [#398](https://github.com/Saghen/blink.cmp/issues/398)
+* auto_insert scheduling and module reference ([1b3cd31](https://github.com/Saghen/blink.cmp/commit/1b3cd31e26066308f97075fee7744cd8694cd75e))
+* autocmd called in fast event ([9428983](https://github.com/Saghen/blink.cmp/commit/94289832dc7c148862fdf9326e173df265abe8ad)), closes [#396](https://github.com/Saghen/blink.cmp/issues/396)
+* buffer events suppression, auto_insert selection ([96ceb56](https://github.com/Saghen/blink.cmp/commit/96ceb56f7b6e0abeacb01aa2b04abef33121d38b)), closes [#415](https://github.com/Saghen/blink.cmp/issues/415)
+* convert additional text edits to utf-8 ([49981f2](https://github.com/Saghen/blink.cmp/commit/49981f2bc8c04967cf868574913f092392a267fe)), closes [#397](https://github.com/Saghen/blink.cmp/issues/397)
+* cycling list skipping one item ([07b2ee1](https://github.com/Saghen/blink.cmp/commit/07b2ee14eaae6908f0da44bfa918177d167b12de))
+* deduplicate mode changes, dont hide on select mode ([04ff262](https://github.com/Saghen/blink.cmp/commit/04ff262f3590cd9b63dab03e2cecc759d4abdf69)), closes [#393](https://github.com/Saghen/blink.cmp/issues/393)
+* default snippet active function not returning ([59add2d](https://github.com/Saghen/blink.cmp/commit/59add2d602d9a13003ed3430232b3689872ea9ac)), closes [#399](https://github.com/Saghen/blink.cmp/issues/399)
+* don't set window properties when nil ([cb815af](https://github.com/Saghen/blink.cmp/commit/cb815afca7c32af7feeb3a90d5b450620d4bef2b)), closes [#407](https://github.com/Saghen/blink.cmp/issues/407)
+* ensure failed curl doesn't update the version ([933052b](https://github.com/Saghen/blink.cmp/commit/933052b8e9b585c24c493fdc34a66519d4889c1b)), closes [#68](https://github.com/Saghen/blink.cmp/issues/68)
+* ensure menu selection index is within bounds ([bb5407d](https://github.com/Saghen/blink.cmp/commit/bb5407d27e93dc71f8572571ab04b3fc02fc8259)), closes [#416](https://github.com/Saghen/blink.cmp/issues/416)
+* filter text always being nil ([33f7d8d](https://github.com/Saghen/blink.cmp/commit/33f7d8df8119673b7eca3d7a04ed28b805cae296)), closes [#365](https://github.com/Saghen/blink.cmp/issues/365)
+* incorrect context start_col 1 char after beginning of line ([e88da6a](https://github.com/Saghen/blink.cmp/commit/e88da6a123c857ec2da92ff488c3f82cfba718ef)), closes [#405](https://github.com/Saghen/blink.cmp/issues/405)
+* invalid configuration and readme after refactor ([56f7cb6](https://github.com/Saghen/blink.cmp/commit/56f7cb679ef9e5c09351bfa67b081c68ad27349f)), closes [#394](https://github.com/Saghen/blink.cmp/issues/394)
+* keyword range "full" when covering end of line ([160b687](https://github.com/Saghen/blink.cmp/commit/160b6875095977d49e16c4e33add4b0e6b0c8668)), closes [#268](https://github.com/Saghen/blink.cmp/issues/268)
+* misc typing issues ([b94172c](https://github.com/Saghen/blink.cmp/commit/b94172c8b28f6030c0df3f846eec4a129a25c5bb))
+* only affect initial show for show_on_keyword and show_on_trigger_character ([ea61b1d](https://github.com/Saghen/blink.cmp/commit/ea61b1dc9ed2c4a092ab1365657bc4220b1b5488)), closes [#402](https://github.com/Saghen/blink.cmp/issues/402)
+* signature window highlight ns ([0b9a128](https://github.com/Saghen/blink.cmp/commit/0b9a1282eb4f9e44de66fd689d4e301bb987abf5))
+* signature window setup ([cab7576](https://github.com/Saghen/blink.cmp/commit/cab7576350c12de902dc18a85d17f4733f1f9938))
+* super-tab preset keymap name ([f569aeb](https://github.com/Saghen/blink.cmp/commit/f569aeb9e684a2b18514077501e98b0f9ef873bd))
+* user autocmd called in fast event not being wrapped ([e9baeea](https://github.com/Saghen/blink.cmp/commit/e9baeeac1d05d8cbbbee560380853baeb8b316f3))
+
+### Documentation
+
+* add note about reworked config ([180be7b](https://github.com/Saghen/blink.cmp/commit/180be7ba574033baa30fa8af0db4f59db7353584))
+
+## [0.6.2](https://github.com/Saghen/blink.cmp/compare/v0.6.1...v0.6.2) (2024-11-26)
+
+### Features
+
+* add `cancel` command for use with `auto_insert` ([c58b3a8](https://github.com/Saghen/blink.cmp/commit/c58b3a8ec2cd71b422fbd4b1607e924996dfdebb)), closes [#215](https://github.com/Saghen/blink.cmp/issues/215)
+* remove rust from blocked auto brackets filetypes ([8500a62](https://github.com/Saghen/blink.cmp/commit/8500a62e6f07a823b373df91b00c997734b3c664)), closes [#359](https://github.com/Saghen/blink.cmp/issues/359)
+
+### Bug Fixes
+
+* mark all config properties as optional ([e328bde](https://github.com/Saghen/blink.cmp/commit/e328bdedc4d12d01ff5c68bee8ea6ae6f33f42f7)), closes [#370](https://github.com/Saghen/blink.cmp/issues/370)
+* path source not handling hidden files correctly ([22c5c0d](https://github.com/Saghen/blink.cmp/commit/22c5c0d2c96d5ab86cd23f8df76f005505138a5d)), closes [#369](https://github.com/Saghen/blink.cmp/issues/369)
+* use offset encoding of first client ([0a2abab](https://github.com/Saghen/blink.cmp/commit/0a2ababaa450f50afeb4653c3d40b34344aa80d6)), closes [#380](https://github.com/Saghen/blink.cmp/issues/380)
+
 ## [0.6.1](https://github.com/Saghen/blink.cmp/compare/v0.6.0...v0.6.1) (2024-11-24)
 
 ### Features
