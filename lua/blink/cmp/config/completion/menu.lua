@@ -44,6 +44,7 @@ local window = {
       padding = 1,
       -- Gap between columns
       gap = 1,
+      treesitter = false, -- Use treesitter to highlight the label text
       -- Components to render, grouped by column
       columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
       -- Definitions for possible components to render. Each component defines:
@@ -80,6 +81,11 @@ local window = {
             }
             if ctx.label_detail then
               table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
+            end
+
+            if ctx.self.treesitter then
+              -- add treesitter highlights
+              vim.list_extend(highlights, require('blink.cmp.completion.windows.render.treesitter').highlight(ctx))
             end
 
             -- characters matched on the label by the fuzzy matcher
