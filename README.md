@@ -5,7 +5,7 @@
 > The configuration was recently reworked, please read the [configuration section](#configuration) for the new schema
 
 > [!NOTE]
-> If you're on a release tag, ensure you're viewing the README for [the latest release](https://github.com/Saghen/blink.cmp/tree/v0.7.0)
+> If you're on a release tag, ensure you're viewing the README for [the latest release](https://github.com/Saghen/blink.cmp/tree/v0.7.1)
 
 # Blink Completion (blink.cmp)
 
