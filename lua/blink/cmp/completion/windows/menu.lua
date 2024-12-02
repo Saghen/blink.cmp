@@ -48,6 +48,7 @@ vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
 function menu.open_with_items(context, items)
   menu.context = context
   menu.items = items
+  menu.selected_item_idx = menu.selected_item_idx ~= nil and math.min(menu.selected_item_idx, #items) or nil
 
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
   menu.renderer:draw(menu.win:get_buf(), items)
