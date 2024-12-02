@@ -4,7 +4,7 @@
 > Most of the configuration has been reworked, please see the README for the new schema
 
 * Includes an enormous refactor in preparation for sources v2, commandline completions, and the v1 release [#389](https://github.com/Saghen/blink.cmp/issues/389)
-* Enable Treesitter highlighting on the labels via `completion.menu.draw.treesitter_highlighting = true`
+* Enable experimental Treesitter highlighting on the labels via `completion.menu.draw.treesitter = true`
 
 ### BREAKING CHANGES
 
