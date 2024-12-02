@@ -28,6 +28,18 @@ function utils.union_keys(t1, t2)
   return vim.tbl_keys(t3)
 end
 
+--- Returns a list of unique values from the input array
+--- @generic T
+--- @param arr T[]
+--- @return T[]
+function utils.deduplicate(arr)
+  local hash = {}
+  for _, v in ipairs(arr) do
+    hash[v] = true
+  end
+  return vim.tbl_keys(hash)
+end
+
 --- Determines whether the current buffer is a "special" buffer or if the filetype is in the list of ignored filetypes
 --- @return boolean
 function utils.is_blocked_buffer()

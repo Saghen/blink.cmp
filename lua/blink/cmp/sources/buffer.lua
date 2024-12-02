@@ -72,7 +72,14 @@ local buffer = {}
 function buffer.new(opts)
   opts = opts or {} ---@type blink.cmp.BufferOpts
   local self = setmetatable({}, { __index = buffer })
-  self.get_bufnrs = opts.get_bufnrs or function() return { vim.api.nvim_get_current_buf() } end
+  self.get_bufnrs = opts.get_bufnrs
+    or function()
+      return vim
+        .iter(vim.api.nvim_list_wins())
+        :map(function(win) return vim.api.nvim_win_get_buf(win) end)
+        :filter(function(buf) return vim.bo[buf].buftype ~= 'nofile' end)
+        :totable()
+    end
   return self
 end
 
@@ -81,8 +88,9 @@ function buffer:get_completions(_, callback)
     callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
   end
 
+  local bufnrs = require('blink.cmp.lib.utils').deduplicate(self.get_bufnrs())
   local buf_texts = {}
-  for _, buf in ipairs(self.get_bufnrs()) do
+  for _, buf in ipairs(bufnrs) do
     table.insert(buf_texts, get_buf_text(buf))
   end
   local buf_text = table.concat(buf_texts, '\n')
