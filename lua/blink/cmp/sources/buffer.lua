@@ -13,22 +13,24 @@ local function get_buf_text(bufnr)
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   local column = vim.api.nvim_win_get_cursor(0)[2]
   local line = lines[line_number]
-  local start_col = column
-  while start_col > 1 do
-    local char = line:sub(start_col, start_col)
-    if char:match('[%w_\\-]') == nil then
-      start_col = start_col + 1
-      break
+  if line ~= nil then
+    local start_col = column
+    while start_col > 1 do
+      local char = line:sub(start_col, start_col)
+      if char:match('[%w_\\-]') == nil then
+        start_col = start_col + 1
+        break
+      end
+      start_col = start_col - 1
     end
-    start_col = start_col - 1
+    local end_col = column
+    while end_col < #line do
+      local char = line:sub(end_col + 1, end_col + 1)
+      if char:match('[%w_\\-]') == nil then break end
+      end_col = end_col + 1
+    end
+    lines[line_number] = line:sub(1, start_col) .. ' ' .. line:sub(end_col + 1)
   end
-  local end_col = column
-  while end_col < #line do
-    local char = line:sub(end_col + 1, end_col + 1)
-    if char:match('[%w_\\-]') == nil then break end
-    end_col = end_col + 1
-  end
-  lines[line_number] = line:sub(1, start_col) .. ' ' .. line:sub(end_col + 1)
 
   return table.concat(lines, '\n')
 end
