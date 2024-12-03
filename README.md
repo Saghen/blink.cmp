@@ -699,17 +699,11 @@ MiniDeps.add({
 
 ### Luasnip
 
-There's currently no `blink.cmp` native source for [luasnip](https://github.com/L3MON4D3/LuaSnip). You may use [blink.compat](https://github.com/saghen/blink.compat) plugin with the [cmp_luasnip](https://github.com/saadparwaiz1/cmp_luasnip) nvim-cmp source in the meantime.
-
 ```lua
 {
   'saghen/blink.cmp',
-  version = '0.*',
-  dependencies = { 
-    'L3MON4D3/LuaSnip',
-    'saadparwaiz1/cmp_luasnip',
-    -- lock compat to tagged versions, if you've also locked blink.cmp to tagged versions
-    { 'saghen/blink.compat', version = '*', opts = { impersonate_nvim_cmp = true } } },
+  version = 'v0.*',
+  dependencies = 'L3MON4D3/LuaSnip',
   opts = {
     snippets = {
       expand = function(snippet) require('luasnip').lsp_expand(snippet) end,
@@ -723,23 +717,7 @@ There's currently no `blink.cmp` native source for [luasnip](https://github.com/
     },
     sources = {
       completion = {
-        -- WARN: add the rest of your providers here, unless you're using `opts_extend` 
-        -- and defining this outside of your primary `blink.cmp` config
-        -- see the default configuration for the default providers
-        enabled_providers = { 'luasnip' },
-      },
-      providers = {
-        luasnip = {
-          name = 'luasnip',
-          module = 'blink.compat.source',
-
-          score_offset = -3,
-
-          opts = {
-            use_show_condition = false,
-            show_autosnippets = true,
-          },
-        },
+        enabled_providers = { 'lsp', 'path', 'luasnip', 'buffer' },
       },
     },
   }
