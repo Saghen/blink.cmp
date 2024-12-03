@@ -764,6 +764,8 @@ completion.menu.draw = {
   padding = 1,
   -- Gap between columns
   gap = 1,
+  -- Use treesitter to highlight the label text
+  treesitter = false,
 
   -- Components to render, grouped by column
   columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
