@@ -1,3 +1,21 @@
+## [0.7.2](https://github.com/Saghen/blink.cmp/compare/v0.7.1...v0.7.2) (2024-12-03)
+
+> [!IMPORTANT]
+> A native `luasnip` source has been added, please see the [README](https://github.com/Saghen/blink.cmp#luasnip) for the configuration
+
+### Features
+
+* add `auto_show` property for menu ([29fe017](https://github.com/Saghen/blink.cmp/commit/29fe017624030fa53ee053626762fa385a9adb19)), closes [#402](https://github.com/Saghen/blink.cmp/issues/402)
+* clamp text edit range to bounds ([7ceff61](https://github.com/Saghen/blink.cmp/commit/7ceff61595aae682b421a68e208719b1523c7b44)), closes [#257](https://github.com/Saghen/blink.cmp/issues/257)
+* expose reload function ([f4e53f2](https://github.com/Saghen/blink.cmp/commit/f4e53f2ac7a3d8c3ef47be0dffa97dca637bf696)), closes [#428](https://github.com/Saghen/blink.cmp/issues/428)
+* native luasnip source ([08b59ed](https://github.com/Saghen/blink.cmp/commit/08b59edc59950be279f8c72a20bd7897e9f0d021)), closes [#378](https://github.com/Saghen/blink.cmp/issues/378) [#401](https://github.com/Saghen/blink.cmp/issues/401) [#432](https://github.com/Saghen/blink.cmp/issues/432)
+
+### Bug Fixes
+
+* avoid removing words for current line on out of focus buffers ([2cbb02d](https://github.com/Saghen/blink.cmp/commit/2cbb02da58ab40f2bfd3dd85f80cba76d6279987)), closes [#433](https://github.com/Saghen/blink.cmp/issues/433)
+* documentation not updating after manually opened ([8c1fdc9](https://github.com/Saghen/blink.cmp/commit/8c1fdc901cfead1cd88ed3e652d45ca7d75a3d3f)), closes [#430](https://github.com/Saghen/blink.cmp/issues/430)
+* handle nil line ([#429](https://github.com/Saghen/blink.cmp/issues/429)) ([38b3ad6](https://github.com/Saghen/blink.cmp/commit/38b3ad6d4af9d392d3e5e0dabcb14e7d8e348314))
+
 ## [0.7.1](https://github.com/Saghen/blink.cmp/compare/v0.7.0...v0.7.1) (2024-12-02)
 
 ### Bug Fixes
