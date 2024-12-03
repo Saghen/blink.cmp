@@ -52,7 +52,10 @@ function menu.open_with_items(context, items)
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
   menu.renderer:draw(menu.win:get_buf(), items)
 
-  if menu.auto_show then menu.open() end
+  if menu.auto_show then
+    menu.open()
+    menu.update_position()
+  end
 end
 
 function menu.open()
@@ -62,7 +65,6 @@ function menu.open()
   if menu.selected_item_idx ~= nil then
     vim.api.nvim_win_set_cursor(menu.win:get_win(), { menu.selected_item_idx, 0 })
   end
-  menu.update_position()
 
   menu.open_emitter:emit()
 end
