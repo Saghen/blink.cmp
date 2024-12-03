@@ -1,3 +1,9 @@
+## [0.7.3](https://github.com/Saghen/blink.cmp/compare/v0.7.2...v0.7.3) (2024-12-03)
+
+### Bug Fixes
+
+* revert to original logic for updating menu position ([99129b6](https://github.com/Saghen/blink.cmp/commit/99129b67759c1b78198e527eae9cc91121cded29)), closes [#436](https://github.com/Saghen/blink.cmp/issues/436)
+
 ## [0.7.2](https://github.com/Saghen/blink.cmp/compare/v0.7.1...v0.7.2) (2024-12-03)
 
 > [!IMPORTANT]
