@@ -23,7 +23,7 @@ local config = require('blink.cmp.config')
 --- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil))
 --- @field cancel_signature_help fun()
 ---
---- @field reload fun()
+--- @field reload fun(source?: string)
 --- @field get_lsp_capabilities fun(override?: lsp.ClientCapabilities, include_nvim_defaults?: boolean): lsp.ClientCapabilities
 
 --- @class blink.cmp.SourceCompletionsEvent
@@ -220,7 +220,19 @@ end
 --- Misc ---
 
 --- For external integrations to force reloading the source
-function sources.reload()
+function sources.reload(provider)
+  -- Reload specific provider
+  if provider ~= nil then
+    assert(type(provider) == 'string', 'Expected string for provider')
+    assert(
+      sources.providers[provider] ~= nil or config.sources.providers[provider] ~= nil,
+      'Source ' .. provider .. ' does not exist'
+    )
+    if sources.providers[provider] ~= nil then sources.providers[provider]:reload() end
+    return
+  end
+
+  -- Reload all providers
   for _, source in pairs(sources.providers) do
     source:reload()
   end

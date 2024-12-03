@@ -133,6 +133,10 @@ function cmp.snippet_backward()
   return true
 end
 
+--- Tells the sources to reload a specific provider or all providers (when nil)
+--- @param provider? string
+function cmp.reload(provider) require('blink.cmp.sources.lib').reload(provider) end
+
 --- @param override? lsp.ClientCapabilities
 --- @param include_nvim_defaults? boolean
 function cmp.get_lsp_capabilities(override, include_nvim_defaults)
