@@ -67,7 +67,11 @@ function source:get_completions(ctx, callback)
         insertText = snip.trigger,
         insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
         sortText = sort_text,
-        data = { snip_id = snip.id, show_condition = snip.show_condition },
+        data = {
+          snip_id = snip.id,
+          documentation = { (snip.dscr or ''), { '```' .. ft, snip:get_docstring(), '```' } },
+          show_condition = snip.show_condition,
+        },
       }
       table.insert(items, item)
     end
@@ -95,7 +99,7 @@ function source:resolve(item, callback)
   local snip = require('luasnip').get_id_snippet(item.data.snip_id)
 
   local resolved_item = vim.deepcopy(item)
-  resolved_item.detail = snip:get_docstring()
+  resolved_item.detail = table.concat(snip:get_docstring(), '\n')
   resolved_item.documentation = {
     kind = 'markdown',
     value = table.concat(vim.lsp.util.convert_input_to_markdown_lines(item.data.documentation or ''), '\n'),
