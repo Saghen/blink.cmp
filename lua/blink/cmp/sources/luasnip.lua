@@ -95,11 +95,17 @@ function source:resolve(item, callback)
   local snip = require('luasnip').get_id_snippet(item.data.snip_id)
 
   local resolved_item = vim.deepcopy(item)
-  resolved_item.detail = snip:get_docstring()
-  resolved_item.documentation = {
-    kind = 'markdown',
-    value = table.concat(vim.lsp.util.convert_input_to_markdown_lines(item.data.documentation or ''), '\n'),
-  }
+
+  local detail = snip:get_docstring()
+  if type(detail) == 'table' then detail = table.concat(detail, '\n') end
+  resolved_item.detail = detail
+
+  if snip.dscr then
+    resolved_item.documentation = {
+      kind = 'markdown',
+      value = table.concat(vim.lsp.util.convert_input_to_markdown_lines(snip.dscr), '\n'),
+    }
+  end
 
   callback(resolved_item)
 end
