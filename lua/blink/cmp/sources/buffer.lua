@@ -9,28 +9,28 @@ local uv = vim.uv
 local function get_buf_text(bufnr)
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
 
-  -- exclude word under the cursor
+  if bufnr ~= vim.api.nvim_get_current_buf() then return table.concat(lines, '\n') end
+
+  -- exclude word under the cursor for the current buffer
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
   local column = vim.api.nvim_win_get_cursor(0)[2]
   local line = lines[line_number]
-  if line ~= nil then
-    local start_col = column
-    while start_col > 1 do
-      local char = line:sub(start_col, start_col)
-      if char:match('[%w_\\-]') == nil then
-        start_col = start_col + 1
-        break
-      end
-      start_col = start_col - 1
+  local start_col = column
+  while start_col > 1 do
+    local char = line:sub(start_col, start_col)
+    if char:match('[%w_\\-]') == nil then
+      start_col = start_col + 1
+      break
     end
-    local end_col = column
-    while end_col < #line do
-      local char = line:sub(end_col + 1, end_col + 1)
-      if char:match('[%w_\\-]') == nil then break end
-      end_col = end_col + 1
-    end
-    lines[line_number] = line:sub(1, start_col) .. ' ' .. line:sub(end_col + 1)
+    start_col = start_col - 1
   end
+  local end_col = column
+  while end_col < #line do
+    local char = line:sub(end_col + 1, end_col + 1)
+    if char:match('[%w_\\-]') == nil then break end
+    end_col = end_col + 1
+  end
+  lines[line_number] = line:sub(1, start_col) .. ' ' .. line:sub(end_col + 1)
 
   return table.concat(lines, '\n')
 end
