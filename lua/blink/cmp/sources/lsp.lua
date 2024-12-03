@@ -1,4 +1,5 @@
---- @class blink.cmp.Source
+--- @type blink.cmp.Source
+--- @diagnostic disable-next-line: missing-fields
 local lsp = {}
 
 function lsp.new() return setmetatable({}, { __index = lsp }) end

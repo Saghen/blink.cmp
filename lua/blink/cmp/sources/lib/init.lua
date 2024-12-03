@@ -23,7 +23,7 @@ local config = require('blink.cmp.config')
 --- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil))
 --- @field cancel_signature_help fun()
 ---
---- @field reload fun(source?: string)
+--- @field reload fun(provider?: string)
 --- @field get_lsp_capabilities fun(override?: lsp.ClientCapabilities, include_nvim_defaults?: boolean): lsp.ClientCapabilities
 
 --- @class blink.cmp.SourceCompletionsEvent
