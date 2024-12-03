@@ -31,6 +31,7 @@ local menu = {
   }),
   items = {},
   context = nil,
+  auto_show = config.auto_show,
   open_emitter = require('blink.cmp.lib.event_emitter').new('completion_menu_open', 'BlinkCmpCompletionMenuOpen'),
   close_emitter = require('blink.cmp.lib.event_emitter').new('completion_menu_close', 'BlinkCmpCompletionMenuClose'),
   position_update_emitter = require('blink.cmp.lib.event_emitter').new(
@@ -43,8 +44,6 @@ vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
   callback = function() menu.update_position() end,
 })
 
---- @param context blink.cmp.Context
---- @param items blink.cmp.CompletionItem[]
 function menu.open_with_items(context, items)
   menu.context = context
   menu.items = items
@@ -53,12 +52,7 @@ function menu.open_with_items(context, items)
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
   menu.renderer:draw(menu.win:get_buf(), items)
 
-  menu.open()
-  menu.update_position()
-
-  -- it's possible for the window to close after updating the position
-  -- if there was nowhere to place the window
-  if not menu.win:is_open() then return end
+  if menu.auto_show then menu.open() end
 end
 
 function menu.open()
@@ -68,11 +62,13 @@ function menu.open()
   if menu.selected_item_idx ~= nil then
     vim.api.nvim_win_set_cursor(menu.win:get_win(), { menu.selected_item_idx, 0 })
   end
+  menu.update_position()
 
   menu.open_emitter:emit()
 end
 
 function menu.close()
+  menu.auto_show = config.auto_show
   if not menu.win:is_open() then return end
 
   menu.win:close()

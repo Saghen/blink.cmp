@@ -363,6 +363,10 @@ MiniDeps.add({
       -- Which directions to show the window,
       -- falling back to the next direction when there's not enough space
       direction_priority = { 's', 'n' },
+
+      -- Whether to automatically show the window when new completion items are available
+      auto_show = true,
+
       -- Controls how the completion items are rendered on the popup window
       draw = {
         -- Aligns the keyword you've typed to a component in the menu

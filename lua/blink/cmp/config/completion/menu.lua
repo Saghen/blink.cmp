@@ -9,6 +9,7 @@
 --- @field winblend number
 --- @field winhighlight string
 --- @field scrolloff number Keep the cursor X lines away from the top/bottom of the window
+--- @field auto_show boolean Whether to automatically show the window when new completion items are available
 --- @field draw blink.cmp.Draw Controls how the completion items are rendered on the popup window
 
 --- @class (exact) blink.cmp.CompletionMenuOrderConfig
@@ -35,6 +36,9 @@ local window = {
     -- which direction previous/next items show up
     -- TODO: implement
     order = { n = 'bottom_up', s = 'top_down' },
+
+    -- Whether to automatically show the window when new completion items are available
+    auto_show = true,
 
     -- Controls how the completion items are rendered on the popup window
     draw = {

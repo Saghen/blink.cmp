@@ -22,7 +22,10 @@ end
 function cmp.show()
   if require('blink.cmp.completion.windows.menu').win:is_open() then return end
 
-  vim.schedule(function() require('blink.cmp.completion.trigger').show({ force = true }) end)
+  vim.schedule(function()
+    require('blink.cmp.completion.windows.menu').auto_show = true
+    require('blink.cmp.completion.trigger').show({ force = true })
+  end)
   return true
 end
 
