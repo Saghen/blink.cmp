@@ -42,9 +42,7 @@ function completion.setup()
     list.hide_emitter:on(function() require('blink.cmp.completion.windows.menu').close() end)
     list.select_emitter:on(function(event)
       require('blink.cmp.completion.windows.menu').set_selected_item_idx(event.idx)
-      if config.completion.documentation.auto_show then
-        require('blink.cmp.completion.windows.documentation').auto_show_item(event.context, event.item)
-      end
+      require('blink.cmp.completion.windows.documentation').auto_show_item(event.context, event.item)
     end)
   end
 
