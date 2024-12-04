@@ -118,6 +118,7 @@ function source:execute(ctx, item)
   if snip.regTrig then snip = snip:get_pattern_expand_helper() end
 
   -- get (0, 0) indexed cursor position
+  -- the completion has been accepted by this point, so ctx.cursor is out of date
   local cursor = vim.api.nvim_win_get_cursor(0)
   cursor[1] = cursor[1] - 1
 
