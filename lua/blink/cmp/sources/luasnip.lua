@@ -110,7 +110,7 @@ function source:resolve(item, callback)
   callback(resolved_item)
 end
 
-function source:execute(_, item)
+function source:execute(ctx, item)
   local luasnip = require('luasnip')
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
@@ -118,8 +118,7 @@ function source:execute(_, item)
   if snip.regTrig then snip = snip:get_pattern_expand_helper() end
 
   -- get (0, 0) indexed cursor position
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  cursor[1] = cursor[1] - 1
+  local cursor = { ctx.cursor[1] - 1, ctx.cursor[2] }
 
   local expand_params = snip:matches(require('luasnip.util.util').get_current_line_to_cursor())
 
