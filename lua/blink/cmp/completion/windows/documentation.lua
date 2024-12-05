@@ -4,7 +4,7 @@
 --- @field auto_show_timer uv_timer_t
 --- @field shown_item? blink.cmp.CompletionItem
 ---
---- @field auto_show_item fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem)
+--- @field auto_show_item fun(item: blink.cmp.CompletionItem)
 --- @field show_item fun(item: blink.cmp.CompletionItem)
 --- @field update_position fun()
 --- @field scroll_up fun(amount: number)
@@ -35,18 +35,19 @@ local docs = {
 }
 
 menu.position_update_emitter:on(docs.update_position)
-menu.close_emitter:on(function() docs.win:close() end)
-
-function docs.auto_show_item(context, item)
+menu.close_emitter:on(function()
+  docs.win:close()
   docs.auto_show_timer:stop()
-  if docs.win:is_open() or context.id == docs.last_context_id then
-    docs.last_context_id = context.id
+end)
+
+function docs.auto_show_item(item)
+  docs.auto_show_timer:stop()
+  if docs.win:is_open() then
     docs.auto_show_timer:start(config.update_delay_ms, 0, function()
       vim.schedule(function() docs.show_item(item) end)
     end)
   elseif config.auto_show then
     docs.auto_show_timer:start(config.auto_show_delay_ms, 0, function()
-      docs.last_context_id = context.id
       vim.schedule(function() docs.show_item(item) end)
     end)
   end
