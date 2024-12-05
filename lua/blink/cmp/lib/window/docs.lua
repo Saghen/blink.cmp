@@ -24,9 +24,12 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
   detail_lines, doc_lines = docs.extract_detail_from_doc(detail_lines, doc_lines)
 
   local combined_lines = vim.list_extend({}, detail_lines)
+
   -- add a blank line for the --- separator
-  if #detail_lines > 0 and #doc_lines > 0 then table.insert(combined_lines, '') end
-  vim.list_extend(combined_lines, doc_lines)
+  local doc_already_has_separator = #doc_lines > 1 and (doc_lines[1] == '---' or doc_lines[1] == '***')
+  if #detail_lines > 0 and #doc_lines > 0  then table.insert(combined_lines, '') end
+  -- skip original separator in doc_lines, so we can highlight it later
+  vim.list_extend(combined_lines, doc_lines, doc_already_has_separator and 2 or 1)
 
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, combined_lines)
   vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
