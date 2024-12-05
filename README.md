@@ -271,7 +271,7 @@ MiniDeps.add({
       -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
       range = 'prefix',
       -- Regex used to get the text when fuzzy matching
-      regex = '[%w_\\-]',
+      regex = '[-_]\\|\\k',
       -- After matching with regex, any characters matching this regex at the prefix will be excluded
       exclude_from_prefix_regex = '[\\-]',
     },
