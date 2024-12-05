@@ -97,7 +97,13 @@ function text_edits.get_from_item(item)
   if text_edit == nil then return text_edits.guess(item) end
 
   -- FIXME: temporarily convert insertReplaceEdit to regular textEdit
-  text_edit.range = text_edit.range or text_edit.insert or text_edit.replace
+  if text_edit.range == nil then
+    if config.completion.keyword.range == 'full' and text_edit.replace ~= nil then
+      text_edit.range = text_edit.replace
+    else
+      text_edit.range = text_edit.insert or text_edit.replace
+    end
+  end
   text_edit.insert = nil
   text_edit.replace = nil
   --- @cast text_edit lsp.TextEdit

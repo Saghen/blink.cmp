@@ -15,8 +15,8 @@ local keyword = {
   --- @type blink.cmp.CompletionKeywordConfig
   default = {
     range = 'prefix',
-    regex = '[%w_\\-]',
-    exclude_from_prefix_regex = '[\\-]',
+    regex = '[-_]\\|\\k',
+    exclude_from_prefix_regex = '-',
   },
 }
 

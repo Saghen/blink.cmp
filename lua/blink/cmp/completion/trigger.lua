@@ -36,6 +36,8 @@
 local keyword_config = require('blink.cmp.config').completion.keyword
 local config = require('blink.cmp.config').completion.trigger
 
+local keyword_regex = vim.regex(keyword_config.regex)
+
 --- @type blink.cmp.CompletionTrigger
 --- @diagnostic disable-next-line: missing-fields
 local trigger = {
@@ -62,7 +64,7 @@ function trigger.activate()
         trigger.show({ trigger_character = char })
 
       -- character is part of a keyword
-      elseif char:match(keyword_config.regex) ~= nil and (config.show_on_keyword or trigger.context ~= nil) then
+      elseif keyword_regex:match_str(char) ~= nil and (config.show_on_keyword or trigger.context ~= nil) then
         trigger.show()
 
       -- nothing matches so hide
@@ -82,7 +84,7 @@ function trigger.activate()
       local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
       local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
       local is_on_trigger_for_show_on_insert = trigger.is_trigger_character(char_under_cursor, true)
-      local is_on_keyword_char = char_under_cursor:match(keyword_config.regex) ~= nil
+      local is_on_keyword_char = keyword_regex:match_str(char_under_cursor) ~= nil
 
       local insert_enter_on_trigger_character = config.show_on_trigger_character
         and config.show_on_insert_on_trigger_character
@@ -197,9 +199,8 @@ function trigger.within_query_bounds(cursor)
 end
 
 --- Moves forward and backwards around the cursor looking for word boundaries
---- @param regex string
 --- @return blink.cmp.ContextBounds
-function trigger.get_context_bounds(regex)
+function trigger.get_context_bounds()
   local cursor_line = vim.api.nvim_win_get_cursor(0)[1]
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
 
@@ -207,7 +208,7 @@ function trigger.get_context_bounds(regex)
   local start_col = cursor_col
   while start_col >= 1 do
     local char = line:sub(start_col, start_col)
-    if char:match(regex) == nil then
+    if keyword_regex:match_str(char) == nil then
       start_col = start_col + 1
       break
     end
@@ -218,7 +219,7 @@ function trigger.get_context_bounds(regex)
   local end_col = cursor_col
   while end_col < #line do
     local char = line:sub(end_col + 1, end_col + 1)
-    if char:match(regex) == nil then break end
+    if keyword_regex:match_str(char) == nil then break end
     end_col = end_col + 1
   end
 
@@ -228,7 +229,7 @@ function trigger.get_context_bounds(regex)
   local length = end_col - start_col + 1
   -- Since sub(1, 1) returns a single char string, we need to check if that single char matches
   -- and otherwise mark the length as 0
-  if start_col == end_col and line:sub(start_col, end_col):match(regex) == nil then length = 0 end
+  if start_col == end_col and keyword_regex:match_str(line:sub(start_col, end_col)) == nil then length = 0 end
 
   return { line_number = cursor_line, start_col = start_col, end_col = end_col, length = length }
 end
