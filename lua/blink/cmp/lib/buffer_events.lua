@@ -28,7 +28,7 @@ local buffer_events = {}
 function buffer_events.new(opts)
   return setmetatable({
     has_context = opts.has_context,
-    show_in_snippet = opts.show_in_snippet or true,
+    show_in_snippet = opts.show_in_snippet,
     ignore_next_text_changed = false,
     ignore_next_cursor_moved = false,
   }, { __index = buffer_events })
