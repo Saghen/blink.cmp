@@ -679,12 +679,14 @@ MiniDeps.add({
 | `BlinkCmpScrollBarThumb` | PmenuThumb | The scrollbar thumb |
 | `BlinkCmpScrollBarGutter` | PmenuSbar | The scrollbar gutter |
 | `BlinkCmpLabel` | Pmenu | Label of the completion item |
-| `BlinkCmpLabelDeprecated` | Comment | Deprecated label of the completion item |
+| `BlinkCmpLabelDeprecated` | NonText | Deprecated label of the completion item |
 | `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
+| `BlinkCmpLabelDetail` | NonText | Label description of the completion item |
+| `BlinkCmpLabelDescription` | NonText | Label description of the completion item |
 | `BlinkCmpKind` | Special | Kind icon/text of the completion item |
 | `BlinkCmpKind<kind>` | Special | Kind icon/text of the completion item |
 | `BlinkCmpSource` | NonText | Source of the completion item |
-| `BlinkCmpGhostText` | Comment | Preview item with ghost text  |
+| `BlinkCmpGhostText` | NonText | Preview item with ghost text  |
 | `BlinkCmpDoc` | NormalFloat | The documentation window |
 | `BlinkCmpDocBorder` | NormalFloat | The documentation window border |
 | `BlinkCmpDocSeparator` | NormalFloat | The documentation separator between doc and detail |
