@@ -33,6 +33,7 @@ function highlights.setup()
 
   set_hl('BlinkCmpDoc', { link = 'NormalFloat' })
   set_hl('BlinkCmpDocBorder', { link = 'NormalFloat' })
+  set_hl('BlinkCmpDocSeparator', { link = 'NormalFloat' })
   set_hl('BlinkCmpDocCursorLine', { link = 'Visual' })
 
   set_hl('BlinkCmpSignatureHelp', { link = 'NormalFloat' })

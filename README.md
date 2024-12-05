@@ -687,6 +687,7 @@ MiniDeps.add({
 | `BlinkCmpGhostText` | Comment | Preview item with ghost text  |
 | `BlinkCmpDoc` | NormalFloat | The documentation window |
 | `BlinkCmpDocBorder` | NormalFloat | The documentation window border |
+| `BlinkCmpDocSeparator` | NormalFloat | The documentation separator between doc and detail |
 | `BlinkCmpDocCursorLine` | Visual | The documentation window cursor line |
 | `BlinkCmpSignatureHelp` | NormalFloat | The signature help window |
 | `BlinkCmpSignatureHelpBorder` | NormalFloat | The signature help window border |
