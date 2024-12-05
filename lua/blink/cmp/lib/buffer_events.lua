@@ -13,8 +13,8 @@
 --- @field suppress_events_for_callback fun(self: blink.cmp.BufferEvents, cb: fun())
 
 --- @class blink.cmp.BufferEventsOptions
---- @field has_context? fun(): boolean
---- @field show_in_snippet? boolean
+--- @field has_context fun(): boolean
+--- @field show_in_snippet boolean
 
 --- @class blink.cmp.BufferEventsListener
 --- @field on_char_added fun(char: string, is_ignored: boolean)
