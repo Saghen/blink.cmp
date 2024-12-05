@@ -39,10 +39,8 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
   -- Only add the separator if there are documentation lines (otherwise only display the detail)
   if #detail_lines > 0 and #doc_lines > 0 then
     vim.api.nvim_buf_set_extmark(bufnr, highlight_ns, #detail_lines, 0, {
-      virt_text = { { string.rep('─', max_width) } },
+      virt_text = { { string.rep('─', max_width), 'BlinkCmpDocSeparator' } },
       virt_text_pos = 'overlay',
-      hl_eol = true,
-      hl_group = 'BlinkCmpDocDetail',
     })
   end
 
