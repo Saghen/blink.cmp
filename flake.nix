@@ -22,43 +22,41 @@
 
         # define the packages provided by this flake
         packages = let
-          inherit (inputs.fenix.packages.${system}.minimal) toolchain;
-          inherit (pkgs.stdenv) hostPlatform;
-
-          rustPlatform = pkgs.makeRustPlatform {
-            cargo = toolchain;
-            rustc = toolchain;
-          };
-
           src = ./.;
-          version = "2024-11-11";
-
-          blink-fuzzy-lib = rustPlatform.buildRustPackage {
+          version = "0.7.3";
+        in rec {
+          blink-fuzzy-lib = let
+            inherit (inputs.fenix.packages.${system}.minimal) toolchain;
+            rustPlatform = pkgs.makeRustPlatform {
+              cargo = toolchain;
+              rustc = toolchain;
+            };
+          in rustPlatform.buildRustPackage {
             pname = "blink-fuzzy-lib";
             inherit src version;
-            cargoLock = {
-              lockFile = ./Cargo.lock;
-              outputHashes = {
-                "frizbee-0.1.0" =
-                  "sha256-pt6sMsRyjXrbrTK7t/YvWeen/n3nU8UUaiNYTY1LczE=";
-              };
-            };
+            useFetchCargoVendor = true;
+            cargoHash = "";
+
+            passthru.updateScript = pkgs.nix-update-script;
           };
 
-          libExt = if hostPlatform.isDarwin then
-            "dylib"
-          else if hostPlatform.isWindows then
-            "dll"
-          else
-            "so";
-        in {
-          blink-cmp = pkgs.vimUtils.buildVimPlugin {
+          blink-cmp = let
+            inherit (pkgs.stdenv) hostPlatform;
+            libExt = if hostPlatform.isDarwin then
+              "dylib"
+            else if hostPlatform.isWindows then
+              "dll"
+            else
+              "so";
+          in pkgs.vimUtils.buildVimPlugin {
             pname = "blink-cmp";
             inherit src version;
             preInstall = ''
               mkdir -p target/release
               ln -s ${blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.${libExt} target/release/libblink_cmp_fuzzy.${libExt}
             '';
+
+            passthru.updateScript = pkgs.nix-update-script;
 
             meta = {
               description =
@@ -78,10 +76,7 @@
           program = let
             buildScript = pkgs.writeShellApplication {
               name = "build-plugin";
-              runtimeInputs = with pkgs; [
-                fenix.complete.toolchain
-                rust-analyzer-nightly
-              ];
+              runtimeInputs = with pkgs; [ fenix.minimal.toolchain ];
               text = ''
                 cargo build --release
               '';
@@ -92,7 +87,11 @@
         # define the default dev environment
         devShells.default = pkgs.mkShell {
           name = "blink";
-          packages = with pkgs; [ fenix.minimal.toolchain ];
+          packages = with pkgs; [
+            fenix.complete.toolchain
+            rust-analyzer-nightly
+            nix-update
+          ];
         };
       };
     };
