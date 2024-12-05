@@ -35,7 +35,7 @@
             pname = "blink-fuzzy-lib";
             inherit src version;
             useFetchCargoVendor = true;
-            cargoHash = "";
+            cargoHash = "sha256-XXI2jEoD6XbFNk3O8B6+aLzl1ZcJq1VinQXb+AOw8Rw=";
 
             passthru.updateScript = pkgs.nix-update-script;
           };
