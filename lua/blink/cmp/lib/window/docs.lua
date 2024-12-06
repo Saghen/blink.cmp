@@ -49,9 +49,36 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
     })
   end
 
-  if #doc_lines > 0 and use_treesitter_highlighting then
-    local start = #detail_lines + (#detail_lines > 0 and 1 or 0)
-    docs.highlight_with_treesitter(bufnr, 'markdown', start, start + #doc_lines)
+  if #doc_lines > 0 then
+    do
+      -- Fallback to regex highlighting when a treesitter parser is not
+      -- available for the language. If we highlight with treesitter, any
+      -- codeblocks in the docs will not be highlighted correctly. This is
+      -- because the markdown treesitter parser needs other parsers to properly
+      -- highlight codeblocks.
+      local codeblock_language = nil
+      for _, line in ipairs(doc_lines) do
+        local abc = line:match('^```%s*(%w+)')
+        if abc then
+          codeblock_language = abc
+          break
+        end
+      end
+
+      local parser = codeblock_language and vim.treesitter.language.get_lang(codeblock_language)
+      local parser_installed = parser
+        and pcall(function() return vim.treesitter.get_parser(bufnr, codeblock_language, {}) end)
+      if not parser_installed then
+        vim.api.nvim_set_option_value('filetype', codeblock_language, { buf = bufnr })
+        vim.cmd('syntax on')
+        return
+      end
+    end
+
+    if use_treesitter_highlighting then
+      local start = #detail_lines + (#detail_lines > 0 and 1 or 0)
+      docs.highlight_with_treesitter(bufnr, 'markdown', start, start + #doc_lines)
+    end
   end
 end
 
