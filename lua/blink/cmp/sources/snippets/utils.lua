@@ -1,4 +1,6 @@
-local utils = {}
+local utils = {
+  parse_cache = {},
+}
 
 --- Parses the json file and notifies the user if there's an error
 ---@param path string
@@ -26,8 +28,12 @@ end
 
 ---@type fun(input: string): vim.snippet.Node<vim.snippet.SnippetData>|nil
 function utils.safe_parse(input)
+  if utils.parse_cache[input] then return utils.parse_cache[input] end
+
   local safe, parsed = pcall(vim.lsp._snippet_grammar.parse, input)
   if not safe then return nil end
+
+  utils.parse_cache[input] = parsed
   return parsed
 end
 
