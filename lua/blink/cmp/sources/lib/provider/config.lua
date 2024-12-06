@@ -3,12 +3,13 @@
 --- @field name string
 --- @field module string
 --- @field enabled fun(ctx: blink.cmp.Context): boolean
+--- @field async fun(ctx: blink.cmp.Context): boolean
 --- @field transform_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
 --- @field should_show_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
---- @field max_items? fun(ctx: blink.cmp.Context, enabled_sources: string[], items: blink.cmp.CompletionItem[]): number
---- @field min_keyword_length fun(ctx: blink.cmp.Context, enabled_sources: string[]): number
---- @field fallback_for fun(ctx: blink.cmp.Context, enabled_sources: string[]): string[]
---- @field score_offset fun(ctx: blink.cmp.Context, enabled_sources: string[]): number
+--- @field max_items? fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): number
+--- @field min_keyword_length fun(ctx: blink.cmp.Context): number
+--- @field fallbacks fun(ctx: blink.cmp.Context): string[]
+--- @field score_offset fun(ctx: blink.cmp.Context): number
 
 --- @class blink.cmp.SourceProviderConfig
 --- @diagnostic disable-next-line: missing-fields
@@ -31,7 +32,7 @@ function wrapper.new(config)
   self.should_show_items = call_or_get(config.should_show_items, true)
   self.max_items = call_or_get(config.max_items, nil)
   self.min_keyword_length = call_or_get(config.min_keyword_length, 0)
-  self.fallback_for = call_or_get(config.fallback_for, {})
+  self.fallbacks = call_or_get(config.fallbacks, {})
   self.score_offset = call_or_get(config.score_offset, 0)
   return self
 end

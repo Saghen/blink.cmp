@@ -2,6 +2,7 @@
 --- @field blocked_filetypes string[]
 --- @field keymap blink.cmp.KeymapConfig
 --- @field completion blink.cmp.CompletionConfig
+--- @field fuzzy blink.cmp.FuzzyConfig
 --- @field sources blink.cmp.SourceConfig
 --- @field signature blink.cmp.SignatureConfig
 --- @field snippets blink.cmp.SnippetsConfig

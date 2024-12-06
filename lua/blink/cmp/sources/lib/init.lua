@@ -8,14 +8,16 @@ local config = require('blink.cmp.config')
 --- @field providers table<string, blink.cmp.SourceProvider>
 --- @field completions_emitter blink.cmp.EventEmitter<blink.cmp.SourceCompletionsEvent>
 ---
+--- @field get_all_providers fun(): blink.cmp.SourceProvider[]
+--- @field get_enabled_provider_ids fun(context?: blink.cmp.Context): string[]
 --- @field get_enabled_providers fun(context?: blink.cmp.Context): table<string, blink.cmp.SourceProvider>
 --- @field get_trigger_characters fun(): string[]
 ---
---- @field emit_completions fun(context: blink.cmp.Context, enabled_sources: table<string, blink.cmp.SourceProvider>, responses: table<string, blink.cmp.CompletionResponse>)
+--- @field emit_completions fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)
 --- @field request_completions fun(context: blink.cmp.Context)
 --- @field cancel_completions fun()
---- @field listen_on_completions fun(callback: fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]))
 --- @field apply_max_items_for_completions fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
+--- @field listen_on_completions fun(callback: fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]))
 --- @field resolve fun(item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field execute fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
 ---
@@ -28,7 +30,7 @@ local config = require('blink.cmp.config')
 
 --- @class blink.cmp.SourceCompletionsEvent
 --- @field context blink.cmp.Context
---- @field items blink.cmp.CompletionItem[]
+--- @field items table<string, blink.cmp.CompletionItem[]>
 
 --- @type blink.cmp.Sources
 --- @diagnostic disable-next-line: missing-fields
@@ -38,33 +40,49 @@ local sources = {
   completions_emitter = require('blink.cmp.lib.event_emitter').new('source_completions', 'BlinkCmpSourceCompletions'),
 }
 
-function sources.get_enabled_providers(context)
-  local mode_providers = type(config.sources.completion.enabled_providers) == 'function'
-      and config.sources.completion.enabled_providers(context)
-    or config.sources.completion.enabled_providers
-  --- @cast mode_providers string[]
-
-  for _, provider in ipairs(mode_providers) do
-    assert(
-      sources.providers[provider] ~= nil or config.sources.providers[provider] ~= nil,
-      'Requested provider "'
-        .. provider
-        .. '" has not been configured. Available providers: '
-        .. vim.fn.join(vim.tbl_keys(sources.providers), ', ')
-    )
-    -- initialize the provider if it hasn't been initialized yet
-    if not sources.providers[provider] then
-      sources.providers[provider] =
-        require('blink.cmp.sources.lib.provider').new(provider, config.sources.providers[provider])
-    end
+function sources.get_all_providers()
+  local providers = {}
+  for provider_id, _ in pairs(config.sources.providers) do
+    providers[provider_id] = sources.get_provider_by_id(provider_id)
   end
+  return providers
+end
+
+function sources.get_enabled_provider_ids(context)
+  local enabled_providers = config.sources.completion.enabled_providers
+  if type(enabled_providers) == 'function' then return enabled_providers(context) end
+  --- @cast enabled_providers string[]
+  return enabled_providers
+end
+
+function sources.get_enabled_providers(context)
+  local mode_providers = sources.get_enabled_provider_ids(context)
 
   --- @type table<string, blink.cmp.SourceProvider>
   local providers = {}
-  for key, provider in pairs(sources.providers) do
-    if vim.tbl_contains(mode_providers, key) and provider:enabled(context) then providers[key] = provider end
+  for _, provider_id in ipairs(mode_providers) do
+    local provider = sources.get_provider_by_id(provider_id)
+    if provider:enabled(context) then providers[provider_id] = sources.get_provider_by_id(provider_id) end
   end
   return providers
+end
+
+function sources.get_provider_by_id(provider_id)
+  assert(
+    sources.providers[provider_id] ~= nil or config.sources.providers[provider_id] ~= nil,
+    'Requested provider "'
+      .. provider_id
+      .. '" has not been configured. Available providers: '
+      .. vim.fn.join(vim.tbl_keys(sources.providers), ', ')
+  )
+
+  -- initialize the provider if it hasn't been initialized yet
+  if not sources.providers[provider_id] then
+    local provider_config = config.sources.providers[provider_id]
+    sources.providers[provider_id] = require('blink.cmp.sources.lib.provider').new(provider_id, provider_config)
+  end
+
+  return sources.providers[provider_id]
 end
 
 --- Completion ---
@@ -72,18 +90,16 @@ end
 function sources.get_trigger_characters()
   local providers = sources.get_enabled_providers()
   local trigger_characters = {}
-  for _, source in pairs(providers) do
-    vim.list_extend(trigger_characters, source:get_trigger_characters())
+  for _, provider in pairs(providers) do
+    vim.list_extend(trigger_characters, provider:get_trigger_characters())
   end
   return trigger_characters
 end
 
-function sources.emit_completions(context, enabled_sources, responses)
+function sources.emit_completions(context, responses)
   local items = {}
   for id, response in pairs(responses) do
-    if sources.providers[id]:should_show_items(context, enabled_sources, response.items) then
-      vim.list_extend(items, response.items)
-    end
+    if sources.providers[id]:should_show_items(context, response.items) then items[id] = response.items end
   end
   sources.completions_emitter:emit({ context = context, items = items })
 end
@@ -93,16 +109,12 @@ function sources.request_completions(context)
   local is_new_context = sources.current_context == nil or context.id ~= sources.current_context.id
   if is_new_context then
     if sources.current_context ~= nil then sources.current_context:destroy() end
-    sources.current_context = require('blink.cmp.sources.lib.context').new(
-      context,
-      sources.get_enabled_providers(context),
-      sources.emit_completions
-    )
+    sources.current_context =
+      require('blink.cmp.sources.lib.context').new(context, sources.get_all_providers(), sources.emit_completions)
   -- send cached completions if they exist to immediately trigger updates
   elseif sources.current_context:get_cached_completions() ~= nil then
     sources.emit_completions(
       context,
-      sources.current_context:get_sources(),
       --- @diagnostic disable-next-line: param-type-mismatch
       sources.current_context:get_cached_completions()
     )
@@ -199,13 +211,8 @@ function sources.get_signature_help(context, callback)
     table.insert(tasks, source:get_signature_help(context))
   end
 
-  sources.current_signature_help = async.task.await_all(tasks):map(function(tasks_results)
-    local signature_helps = {}
-    for _, task_result in ipairs(tasks_results) do
-      if task_result.status == async.STATUS.COMPLETED and task_result.result ~= nil then
-        table.insert(signature_helps, task_result.result)
-      end
-    end
+  sources.current_signature_help = async.task.await_all(tasks):map(function(signature_helps)
+    signature_helps = vim.tbl_filter(function(signature_help) return signature_help ~= nil end, signature_helps)
     callback(signature_helps[1])
   end)
 end

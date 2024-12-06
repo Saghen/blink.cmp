@@ -10,8 +10,8 @@
 --- @field select_emitter blink.cmp.EventEmitter<blink.cmp.CompletionListSelectEvent>
 --- @field accept_emitter blink.cmp.EventEmitter<blink.cmp.CompletionListAcceptEvent>
 ---
---- @field show fun(context: blink.cmp.Context, items?: blink.cmp.CompletionItem[])
---- @field fuzzy fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
+--- @field show fun(context: blink.cmp.Context, items: table<string, blink.cmp.CompletionItem[]>)
+--- @field fuzzy fun(context: blink.cmp.Context, items: table<string, blink.cmp.CompletionItem[]>): blink.cmp.CompletionItem[]
 --- @field hide fun()
 ---
 --- @field get_selected_item fun(): blink.cmp.CompletionItem?
@@ -59,13 +59,13 @@ local list = {
 
 ---------- State ----------
 
-function list.show(context, items)
+function list.show(context, items_by_source)
   -- reset state for new context
   local is_new_context = not list.context or list.context.id ~= context.id
   if is_new_context then list.preview_undo_text_edit = nil end
 
   list.context = context
-  list.items = list.fuzzy(context, items or list.items)
+  list.items = list.fuzzy(context, items_by_source)
 
   if #list.items == 0 then
     list.hide_emitter:emit({ context = context })
@@ -77,12 +77,15 @@ function list.show(context, items)
   list.select(list.config.selection == 'preselect' and 1 or nil, { undo_preview = false })
 end
 
-function list.fuzzy(context, items)
+function list.fuzzy(context, items_by_source)
   local fuzzy = require('blink.cmp.fuzzy')
-  local sources = require('blink.cmp.sources.lib')
+  local filtered_items = fuzzy.fuzzy(fuzzy.get_query(), items_by_source)
 
-  local filtered_items = fuzzy.fuzzy(fuzzy.get_query(), items)
-  return sources.apply_max_items_for_completions(context, filtered_items)
+  -- apply the per source max_items
+  filtered_items = require('blink.cmp.sources.lib').apply_max_items_for_completions(context, filtered_items)
+
+  -- apply the global max_items
+  return require('blink.cmp.lib.utils').slice(filtered_items, 1, list.config.max_items)
 end
 
 function list.hide() list.hide_emitter:emit({ context = list.context }) end

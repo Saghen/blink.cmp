@@ -4,11 +4,11 @@ local utils = {}
 --- and the new context
 ---
 --- @param new_context blink.cmp.Context
+--- @param old_context blink.cmp.Context
 --- @param response blink.cmp.CompletionResponse
 ---
 --- @return false | 'forward' | 'backward' | 'unknown'
-function utils.should_run_request(new_context, response)
-  local old_context = response.context
+function utils.should_run_request(new_context, old_context, response)
   -- get the text for the current and queued context
   local old_context_query = old_context.line:sub(old_context.bounds.start_col, old_context.cursor[2])
   local new_context_query = new_context.line:sub(new_context.bounds.start_col, new_context.cursor[2])

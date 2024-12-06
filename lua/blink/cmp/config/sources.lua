@@ -25,11 +25,12 @@
 --- @field module? string
 --- @field enabled? boolean | fun(ctx?: blink.cmp.Context): boolean Whether or not to enable the provider
 --- @field opts? table
+--- @field async? boolean Whether blink should wait for the source to return before showing the completions
 --- @field transform_items? fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
 --- @field should_show_items? boolean | number | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether or not to show the items
 --- @field max_items? number | fun(ctx: blink.cmp.Context, enabled_sources: string[], items: blink.cmp.CompletionItem[]): number Maximum number of items to display in the menu
---- @field min_keyword_length? number | fun(ctx: blink.cmp.Context, enabled_sources: string[]): number Minimum number of characters in the keyword to trigger the provider
---- @field fallback_for? string[] | fun(ctx: blink.cmp.Context, enabled_sources: string[]): string[] If any of these providers return 0 items, it will fallback to this provider
+--- @field min_keyword_length? number | fun(ctx: blink.cmp.Context): number Minimum number of characters in the keyword to trigger the provider
+--- @field fallbacks? string[] | fun(ctx: blink.cmp.Context, enabled_sources: string[]): string[] If this provider returns 0 items, it will fallback to these providers
 --- @field score_offset? number | fun(ctx: blink.cmp.Context, enabled_sources: string[]): number Boost/penalize the score of the items
 --- @field deduplicate? blink.cmp.DeduplicateConfig TODO: implement
 --- @field override? blink.cmp.SourceOverride Override the source's functions
@@ -45,6 +46,7 @@ local sources = {
       lsp = {
         name = 'LSP',
         module = 'blink.cmp.sources.lsp',
+        fallbacks = { 'buffer' },
       },
       path = {
         name = 'Path',
@@ -64,7 +66,6 @@ local sources = {
       buffer = {
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
-        fallback_for = { 'lsp' },
       },
     },
   },
@@ -88,7 +89,7 @@ function sources.validate(config)
       should_show_items = { provider.should_show_items, { 'boolean', 'function' }, true },
       max_items = { provider.max_items, { 'number', 'function' }, true },
       min_keyword_length = { provider.min_keyword_length, { 'number', 'function' }, true },
-      fallback_for = { provider.fallback_for, { 'table', 'function' }, true },
+      fallbacks = { provider.fallback_for, { 'table', 'function' }, true },
       score_offset = { provider.score_offset, { 'number', 'function' }, true },
       deduplicate = { provider.deduplicate, 'table', true },
       override = { provider.override, 'table', true },

@@ -151,7 +151,8 @@ end
 --- utils
 
 function task.await_all(tasks)
-  return task.new(function(resolve)
+  local all_task
+  all_task = task.new(function(resolve, reject)
     local results = {}
 
     local function resolve_if_completed()
@@ -165,19 +166,24 @@ function task.await_all(tasks)
 
     for idx, task in ipairs(tasks) do
       task:on_completion(function(result)
-        results[idx] = { status = STATUS.COMPLETED, result = result }
+        results[idx] = result
         resolve_if_completed()
       end)
       task:on_failure(function(err)
-        results[idx] = { status = STATUS.FAILED, err = err }
-        resolve_if_completed()
+        for _, task in ipairs(tasks) do
+          task:cancel()
+        end
+        reject(err)
       end)
       task:on_cancel(function()
-        results[idx] = { status = STATUS.CANCELLED }
-        resolve_if_completed()
+        for _, sub_task in ipairs(tasks) do
+          sub_task:cancel()
+        end
+        all_task:cancel()
       end)
     end
   end)
+  return all_task
 end
 
 return { task = task, STATUS = STATUS }
