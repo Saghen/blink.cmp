@@ -1,3 +1,12 @@
+local known_defaults = {
+  'commitCharacters',
+  'editRange',
+  'insertTextFormat',
+  'insertTextMode',
+  'data',
+}
+local CompletionTriggerKind = vim.lsp.protocol.CompletionTriggerKind
+
 --- @type blink.cmp.Source
 --- @diagnostic disable-next-line: missing-fields
 local lsp = {}
@@ -40,6 +49,9 @@ function lsp:get_trigger_characters()
   return trigger_characters
 end
 
+--- @param capability string
+--- @param filter? table
+--- @return vim.lsp.Client[]
 function lsp:get_clients_with_capability(capability, filter)
   local clients = {}
   for _, client in pairs(vim.lsp.get_clients(filter)) do
@@ -50,121 +62,59 @@ function lsp:get_clients_with_capability(capability, filter)
 end
 
 function lsp:get_completions(context, callback)
-  -- TODO: should make separate LSP requests to return results earlier, in the case of slow LSPs
+  local clients =
+    self:get_clients_with_capability('completionProvider', { bufnr = 0, method = 'textDocument/completion' })
 
-  -- no providers with completion support
-  if not self:has_capability('completionProvider') or not self:has_method('textDocument/completion') then
+  -- no clients with completion support
+  if #clients == 0 then
     callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
     return function() end
   end
 
-  -- TODO: offset encoding is global but should be per-client
-  local first_client = vim.lsp.get_clients({ bufnr = 0 })[1]
-  local offset_encoding = first_client and first_client.offset_encoding or 'utf-16'
-
-  -- completion context with additional info about how it was triggered
-  local params = vim.lsp.util.make_position_params(nil, offset_encoding)
-  params.context = {
-    triggerKind = context.trigger.kind,
-  }
-  if context.trigger.kind == vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter then
-    params.context.triggerCharacter = context.trigger.character
-  end
-
-  -- special case, the first character of the context is a trigger character, so we adjust the position
-  -- sent to the LSP server to be the start of the trigger character
-  --
-  -- some LSP do their own filtering before returning results, which we want to avoid
-  -- since we perform fuzzy matching ourselves.
-  --
-  -- this also avoids having to make multiple calls to the LSP server in case characters are deleted
-  -- for these special cases
-  -- i.e. hello.wor| would be sent as hello.|wor
-  -- TODO: should we still make two calls to the LSP server and merge?
-  -- TODO: breaks the textEdit resolver since it assumes the request was made from the cursor
-  -- local trigger_characters = self:get_trigger_characters()
-  -- local trigger_character_block_list = { ' ', '\n', '\t' }
-  -- local bounds = context.bounds
-  -- local trigger_character_before_context = context.line:sub(bounds.start_col - 1, bounds.start_col - 1)
-  -- if
-  --   vim.tbl_contains(trigger_characters, trigger_character_before_context)
-  --   and not vim.tbl_contains(trigger_character_block_list, trigger_character_before_context)
-  -- then
-  --   local offset_encoding = vim.lsp.get_clients({ bufnr = 0 })[1].offset_encoding
-  --   params.position.character =
-  --     vim.lsp.util.character_offset(0, params.position.line, bounds.start_col - 1, offset_encoding)
-  -- end
-
-  -- request from each of the clients
-  -- todo: refactor
-  return vim.lsp.buf_request_all(0, 'textDocument/completion', params, function(result)
-    local responses = {}
-    for client_id, response in pairs(result) do
-      -- todo: pass error upstream
-      if response.error or response.result == nil then
-        responses[client_id] = { is_incomplete_forward = true, is_incomplete_backward = true, items = {} }
-
-      -- as per the spec, we assume it's complete if we get CompletionItem[]
-      elseif response.result.items == nil then
-        responses[client_id] = {
-          is_incomplete_forward = false,
-          is_incomplete_backward = true,
-          items = response.result,
-        }
-
-      -- convert full response to our internal format
-      else
-        -- add defaults to the items
-        local defaults = response.result and response.result.itemDefaults or {}
-        local known_defaults = {
-          'commitCharacters',
-          'editRange',
-          'insertTextFormat',
-          'insertTextMode',
-          'data',
-        }
-        for _, item in ipairs(response.result.items) do
-          for key, value in pairs(defaults) do
-            if vim.tbl_contains(known_defaults, key) then item[key] = item[key] or value end
-          end
-        end
-
-        responses[client_id] = {
-          is_incomplete_forward = response.result.isIncomplete,
-          is_incomplete_backward = true,
-          items = response.result.items,
-        }
-      end
+  -- request from each client individually so slow LSPs don't delay the response
+  local cancel_fns = {}
+  for _, client in pairs(clients) do
+    local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+    params.context = { triggerKind = context.trigger.kind }
+    if context.trigger.kind == CompletionTriggerKind.TriggerCharacter then
+      params.context.triggerCharacter = context.trigger.character
     end
 
-    -- add client_id and defaults to the items
-    for client_id, response in pairs(responses) do
-      for _, item in ipairs(response.items) do
+    local _, request_id = client.request('textDocument/completion', params, function(err, result)
+      if err or result == nil then return end
+
+      local items = result.items or result
+
+      -- add defaults, client id and score offset to the items
+      for _, item in ipairs(items) do
         -- todo: terraform lsp doesn't return a .kind in situations like `toset`, is there a default value we need to grab?
-        -- it doesn't seem to return itemDefaults either
+        -- it doesn't seem to return itemDefaults
         item.kind = item.kind or require('blink.cmp.types').CompletionItemKind.Text
-        item.client_id = client_id
+
+        item.client_id = client.id
 
         -- todo: make configurable
         if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then item.score_offset = -2 end
+
+        for key, value in pairs(result.itemDefaults or {}) do
+          if vim.tbl_contains(known_defaults, key) then item[key] = item[key] or value end
+        end
       end
-    end
 
-    -- combine responses
-    -- todo: ideally pass multiple responses to the sources
-    -- so that we can do fine-grained isIncomplete
-    -- or do caching here
-    local combined_response = { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
-    for _, response in pairs(responses) do
-      combined_response.is_incomplete_forward = combined_response.is_incomplete_forward
-        or response.is_incomplete_forward
-      combined_response.is_incomplete_backward = combined_response.is_incomplete_backward
-        or response.is_incomplete_backward
-      vim.list_extend(combined_response.items, response.items)
-    end
+      callback({
+        is_incomplete_forward = result.isIncomplete or false,
+        is_incomplete_backward = true,
+        items = items,
+      })
+    end)
+    if request_id ~= nil then cancel_fns[#cancel_fns + 1] = function() client.cancel_request(request_id) end end
+  end
 
-    callback(combined_response)
-  end)
+  return function()
+    for _, cancel_fn in ipairs(cancel_fns) do
+      cancel_fn()
+    end
+  end
 end
 
 --- Resolve ---

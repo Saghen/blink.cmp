@@ -4,7 +4,7 @@ use crate::lsp_item::LspItem;
 use lazy_static::lazy_static;
 use mlua::prelude::*;
 use regex::Regex;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::sync::RwLock;
 
 mod frecency;
@@ -14,6 +14,8 @@ mod lsp_item;
 lazy_static! {
     static ref REGEX: Regex = Regex::new(r"\p{L}[\p{L}0-9_\\-]{2,32}").unwrap();
     static ref FRECENCY: RwLock<Option<FrecencyTracker>> = RwLock::new(None);
+    static ref HAYSTACKS_BY_PROVIDER: RwLock<HashMap<String, Vec<LspItem>>> =
+        RwLock::new(HashMap::new());
 }
 
 pub fn init_db(_: &Lua, db_path: String) -> LuaResult<bool> {
@@ -52,10 +54,21 @@ pub fn access(_: &Lua, item: LspItem) -> LuaResult<bool> {
     Ok(true)
 }
 
+pub fn set_provider_items(
+    _: &Lua,
+    (provider_id, items): (String, Vec<LspItem>),
+) -> LuaResult<bool> {
+    let mut items_by_provider = HAYSTACKS_BY_PROVIDER.write().map_err(|_| {
+        mlua::Error::RuntimeError("Failed to acquire lock for items by provider".to_string())
+    })?;
+    items_by_provider.insert(provider_id, items);
+    Ok(true)
+}
+
 pub fn fuzzy(
     _lua: &Lua,
-    (needle, haystack, opts): (String, Vec<LspItem>, FuzzyOptions),
-) -> LuaResult<Vec<u32>> {
+    (needle, provider_id, opts): (String, String, FuzzyOptions),
+) -> LuaResult<(Vec<i32>, Vec<u32>)> {
     let mut frecency_handle = FRECENCY.write().map_err(|_| {
         mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
     })?;
@@ -63,10 +76,17 @@ pub fn fuzzy(
         mlua::Error::RuntimeError("Attempted to use frencecy before initialization".to_string())
     })?;
 
-    Ok(fuzzy::fuzzy(needle, haystack, frecency, opts)
-        .into_iter()
-        .map(|i| i as u32)
-        .collect())
+    let haystacks_by_provider = HAYSTACKS_BY_PROVIDER.read().map_err(|_| {
+        mlua::Error::RuntimeError("Failed to acquire lock for items by provider".to_string())
+    })?;
+    let haystack = haystacks_by_provider.get(&provider_id).ok_or_else(|| {
+        mlua::Error::RuntimeError(format!(
+            "Attempted to fuzzy match for provider {} before setting the provider's items",
+            provider_id
+        ))
+    })?;
+
+    Ok(fuzzy::fuzzy(needle, haystack, frecency, opts))
 }
 
 pub fn fuzzy_matched_indices(
@@ -93,6 +113,10 @@ pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
 #[mlua::lua_module(skip_memory_check)]
 fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
+    exports.set(
+        "set_provider_items",
+        lua.create_function(set_provider_items)?,
+    )?;
     exports.set("fuzzy", lua.create_function(fuzzy)?)?;
     exports.set(
         "fuzzy_matched_indices",
