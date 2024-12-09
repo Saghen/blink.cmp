@@ -27,7 +27,7 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
 
   -- add a blank line for the --- separator
   local doc_already_has_separator = #doc_lines > 1 and (doc_lines[1] == '---' or doc_lines[1] == '***')
-  if #detail_lines > 0 and #doc_lines > 0  then table.insert(combined_lines, '') end
+  if #detail_lines > 0 and #doc_lines > 0 then table.insert(combined_lines, '') end
   -- skip original separator in doc_lines, so we can highlight it later
   vim.list_extend(combined_lines, doc_lines, doc_already_has_separator and 2 or 1)
 
@@ -37,7 +37,9 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
   -- Highlight with treesitter
   vim.api.nvim_buf_clear_namespace(bufnr, highlight_ns, 0, -1)
 
-  if #detail_lines > 0 and use_treesitter_highlighting then docs.highlight_with_treesitter(bufnr, vim.bo.filetype, 0, #detail_lines) end
+  if #detail_lines > 0 and use_treesitter_highlighting then
+    docs.highlight_with_treesitter(bufnr, vim.bo.filetype, 0, #detail_lines)
+  end
 
   -- Only add the separator if there are documentation lines (otherwise only display the detail)
   if #detail_lines > 0 and #doc_lines > 0 then
@@ -47,9 +49,36 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
     })
   end
 
-  if #doc_lines > 0 and use_treesitter_highlighting then
-    local start = #detail_lines + (#detail_lines > 0 and 1 or 0)
-    docs.highlight_with_treesitter(bufnr, 'markdown', start, start + #doc_lines)
+  if #doc_lines > 0 then
+    do
+      -- Fallback to regex highlighting when a treesitter parser is not
+      -- available for the language. If we highlight with treesitter, any
+      -- codeblocks in the docs will not be highlighted correctly. This is
+      -- because the markdown treesitter parser needs other parsers to properly
+      -- highlight codeblocks.
+      local codeblock_language = nil
+      for _, line in ipairs(doc_lines) do
+        local abc = line:match('^```%s*(%w+)')
+        if abc then
+          codeblock_language = abc
+          break
+        end
+      end
+
+      local parser = codeblock_language and vim.treesitter.language.get_lang(codeblock_language)
+      local parser_installed = parser
+        and pcall(function() return vim.treesitter.get_parser(bufnr, codeblock_language, {}) end)
+      if not parser_installed then
+        vim.api.nvim_set_option_value('filetype', codeblock_language, { buf = bufnr })
+        vim.cmd('syntax on')
+        return
+      end
+    end
+
+    if use_treesitter_highlighting then
+      local start = #detail_lines + (#detail_lines > 0 and 1 or 0)
+      docs.highlight_with_treesitter(bufnr, 'markdown', start, start + #doc_lines)
+    end
   end
 end
 
@@ -202,12 +231,10 @@ function docs.extract_detail_from_doc(detail_lines, doc_lines)
   local doc_str_detail_row = doc_str:find(detail_str, 1, true)
 
   -- didn't find the detail in the doc, so return as is
-  if doc_str_detail_row == nil or #detail_str == 0 or #doc_str == 0 then
-    return detail_lines, doc_lines
-  end
+  if doc_str_detail_row == nil or #detail_str == 0 or #doc_str == 0 then return detail_lines, doc_lines end
 
   -- get the line of the match
-  -- hack: surely there's a better way to do this but it's late 
+  -- hack: surely there's a better way to do this but it's late
   -- and I can't be bothered
   local offset = 1
   local detail_line = 1
