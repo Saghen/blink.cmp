@@ -15,9 +15,10 @@
 --- @field hide fun()
 ---
 --- @field get_selected_item fun(): blink.cmp.CompletionItem?
---- @field select fun(idx?: number, opts?: { undo_preview?: boolean })
+--- @field select fun(idx?: number, opts?: { undo_preview?: boolean, is_explicit_selection?: boolean })
 --- @field select_next fun()
 --- @field select_prev fun()
+--- @field get_item_idx_in_list fun(item?: blink.cmp.CompletionItem): number
 ---
 --- @field undo_preview fun()
 --- @field apply_preview fun(item: blink.cmp.CompletionItem)
@@ -54,6 +55,7 @@ local list = {
   context = nil,
   items = {},
   selected_item_idx = nil,
+  is_explicitly_selected = false,
   preview_undo_text_edit = nil,
 }
 
@@ -62,8 +64,20 @@ local list = {
 function list.show(context, items_by_source)
   -- reset state for new context
   local is_new_context = not list.context or list.context.id ~= context.id
-  if is_new_context then list.preview_undo_text_edit = nil end
+  if is_new_context then
+    list.preview_undo_text_edit = nil
+    list.is_explicitly_selected = false
+  end
 
+  -- if the keyword changed, the list is no longer explicitly selected
+  local bounds_equal = list.context ~= nil
+    and list.context.bounds.start_col == context.bounds.start_col
+    and list.context.bounds.length == context.bounds.length
+  if not bounds_equal then list.is_explicitly_selected = false end
+
+  local previous_selected_item = list.get_selected_item()
+
+  -- update the context/list and emit
   list.context = context
   list.items = list.fuzzy(context, items_by_source)
 
@@ -73,8 +87,18 @@ function list.show(context, items_by_source)
     list.show_emitter:emit({ items = list.items, context = context })
   end
 
-  -- todo: some logic to maintain the selection if the user moved the cursor?
-  list.select(list.config.selection == 'preselect' and 1 or nil, { undo_preview = false })
+  -- maintain the selection if the user selected an item
+  local previous_item_idx = list.get_item_idx_in_list(previous_selected_item)
+  if list.is_explicitly_selected and previous_item_idx ~= nil and previous_item_idx <= 10 then
+    list.select(previous_item_idx, { undo_preview = false })
+
+  -- otherwise, use the default selection
+  else
+    list.select(
+      list.config.selection == 'preselect' and 1 or nil,
+      { undo_preview = false, is_explicit_selection = false }
+    )
+  end
 end
 
 function list.fuzzy(context, items_by_source)
@@ -104,6 +128,8 @@ function list.select(idx, opts)
     if list.config.selection == 'auto_insert' and item then list.apply_preview(item) end
   end)
 
+  --- @diagnostic disable-next-line: assign-type-mismatch
+  list.is_explicitly_selected = opts.is_explicit_selection == nil and true or opts.is_explicit_selection
   list.selected_item_idx = idx
   list.select_emitter:emit({ idx = idx, item = item, items = list.items, context = list.context })
 end
@@ -150,6 +176,11 @@ function list.select_prev()
 
   -- typical case, select the previous item
   list.select(list.selected_item_idx - 1)
+end
+
+function list.get_item_idx_in_list(item)
+  if item == nil then return end
+  return require('blink.cmp.lib.utils').find_idx(list.items, function(i) return i.label == item.label end)
 end
 
 ---------- Preview ----------
