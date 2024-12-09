@@ -19,12 +19,15 @@ end
 
 ------- Public API -------
 
-function cmp.show()
-  if require('blink.cmp.completion.windows.menu').win:is_open() then return end
+--- @params opts? { enabled_providers?: string[] }
+function cmp.show(opts)
+  if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.enabled_providers) then
+    return
+  end
 
   vim.schedule(function()
     require('blink.cmp.completion.windows.menu').auto_show = true
-    require('blink.cmp.completion.trigger').show({ force = true })
+    require('blink.cmp.completion.trigger').show({ force = true, enabled_providers = opts and opts.enabled_providers })
   end)
   return true
 end

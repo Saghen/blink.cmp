@@ -18,7 +18,7 @@
 ---     end
 ---   end
 --- ```
---- @field enabled_providers string[] | fun(ctx?: blink.cmp.Context): string[]
+--- @field enabled_providers string[] | fun(): string[]
 
 --- @class blink.cmp.SourceProviderConfig
 --- @field name? string

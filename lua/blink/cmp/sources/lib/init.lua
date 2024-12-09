@@ -131,13 +131,11 @@ end
 
 --- Limits the number of items per source as configured
 function sources.apply_max_items_for_completions(context, items)
-  local enabled_sources = sources.get_enabled_providers(context)
-
   -- get the configured max items for each source
   local total_items_for_sources = {}
   local max_items_for_sources = {}
   for id, source in pairs(sources.providers) do
-    max_items_for_sources[id] = source.config.max_items(context, enabled_sources, items)
+    max_items_for_sources[id] = source.config.max_items(context, items)
     total_items_for_sources[id] = 0
   end
 
