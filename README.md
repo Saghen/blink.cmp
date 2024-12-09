@@ -701,10 +701,11 @@ MiniDeps.add({
 ### Community Sources
 
 - [lazydev](https://github.com/folke/lazydev.nvim)
-- [ctags](https://github.com/netmute/blink-cmp-ctags)
-- [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
-- [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
 - [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
+- [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
+- [blink-cmp-ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
+- [blink-cmp-ctags](https://github.com/netmute/blink-cmp-ctags)
+- [blink-cmp-copilot](https://github.com/giuxtaposition/blink-cmp-copilot)
 
 ### Luasnip
 
