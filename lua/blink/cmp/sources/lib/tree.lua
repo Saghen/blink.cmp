@@ -4,8 +4,19 @@
 --- @field dependencies blink.cmp.SourceTreeNode[]
 --- @field dependents blink.cmp.SourceTreeNode[]
 
+--- @class blink.cmp.SourceTree
+--- @field nodes blink.cmp.SourceTreeNode[]
+--- @field new fun(context: blink.cmp.Context, all_sources: blink.cmp.SourceProvider[]): blink.cmp.SourceTree
+--- @field get_completions fun(self: blink.cmp.SourceTree, context: blink.cmp.Context, on_items_by_provider: fun(items_by_provider: table<string, blink.cmp.CompletionItem[]>)): blink.cmp.Task
+--- @field destroy fun(self: blink.cmp.SourceTree)
+--- @field get_top_level_nodes fun(self: blink.cmp.SourceTree): blink.cmp.SourceTreeNode[]
+--- @field detect_cycle fun(node: blink.cmp.SourceTreeNode, visited?: table<string, boolean>, path?: table<string, boolean>): boolean
+
 local utils = require('blink.cmp.lib.utils')
 local async = require('blink.cmp.lib.async')
+
+--- @type blink.cmp.SourceTree
+--- @diagnostic disable-next-line: missing-fields
 local tree = {}
 
 --- @param context blink.cmp.Context
@@ -45,48 +56,61 @@ function tree.new(context, all_sources)
   return setmetatable({ nodes = nodes }, { __index = tree })
 end
 
-function tree:get_top_level_nodes()
-  local top_level_nodes = {}
-  for _, node in ipairs(self.nodes) do
-    if #node.dependencies == 0 then table.insert(top_level_nodes, node) end
-  end
-  return top_level_nodes
-end
-
-function tree:get_completions(context)
+function tree:get_completions(context, on_items_by_provider)
+  local should_push_upstream = false
+  local items_by_provider = {}
   local nodes_falling_back = {}
 
   --- @param node blink.cmp.SourceTreeNode
   local function get_completions_for_node(node)
     -- check that all the dependencies have been triggered, and are falling back
     for _, dependency in ipairs(node.dependencies) do
-      if not nodes_falling_back[dependency.id] then return async.task.new(function(resolve) resolve() end) end
+      if not nodes_falling_back[dependency.id] then return async.task.empty() end
     end
 
-    return node.source:get_completions(context):map(function(result)
-      if #result.response.items ~= 0 or #node.dependents == 0 then
-        return { node = node, cached = result.cached, response = result.response }
-      end
+    vim.print('getting completions for ' .. node.id)
+    return async.task.new(function(resolve, reject)
+      return node.source:get_completions(context, function(items)
+        items_by_provider[node.id] = items
+        if should_push_upstream then
+          vim.print('async upstreaming')
+          on_items_by_provider(items_by_provider)
+        end
+        if #items ~= 0 then return resolve() end
 
-      -- run dependents if the source returned 0 items
-      nodes_falling_back[node.id] = true
-      local tasks = vim.tbl_map(function(dependent) return get_completions_for_node(dependent) end, node.dependents)
-      return async.task.await_all(tasks)
+        -- run dependents if the source returned 0 items
+        nodes_falling_back[node.id] = true
+        local tasks = vim.tbl_map(function(dependent) return get_completions_for_node(dependent) end, node.dependents)
+        async.task.await_all(tasks):map(resolve):catch(reject)
+      end)
     end)
   end
 
+  vim.print('calling')
   -- run the top level nodes and let them fall back to their dependents if needed
   local tasks = vim.tbl_map(function(node) return get_completions_for_node(node) end, self:get_top_level_nodes())
+  return async.task
+    .await_all(tasks)
+    :map(function()
+      vim.print('pushing upstream')
+      should_push_upstream = true
+      on_items_by_provider(items_by_provider)
+    end)
+    :catch(function(err) vim.print('failed to get completions with error: ' .. err) end)
+end
 
-  return async.task.await_all(tasks):map(function(results)
-    local cached = true
-    local responses = {}
-    for _, result in ipairs(utils.flatten(results)) do
-      cached = cached and result.cached
-      responses[result.node.id] = result.response
-    end
-    return { cached = cached, responses = responses }
-  end)
+function tree:emit_completions(context, items_by_provider, on_items_by_provider) end
+
+function tree:destroy() end
+
+--- Internal ---
+
+function tree:get_top_level_nodes()
+  local top_level_nodes = {}
+  for _, node in ipairs(self.nodes) do
+    if #node.dependencies == 0 then table.insert(top_level_nodes, node) end
+  end
+  return top_level_nodes
 end
 
 --- Helper function to detect cycles using DFS

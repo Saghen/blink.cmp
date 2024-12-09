@@ -4,15 +4,14 @@
 --- @field name string
 --- @field config blink.cmp.SourceProviderConfigWrapper
 --- @field module blink.cmp.Source
---- @field last_response blink.cmp.CompletionResponse | nil
---- @field last_context blink.cmp.Context | nil
+--- @field list blink.cmp.SourceProviderList | nil
 --- @field resolve_tasks table<blink.cmp.CompletionItem, blink.cmp.Task>
 ---
 --- @field new fun(id: string, config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProvider
 --- @field enabled fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context): boolean
 --- @field get_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
---- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context): blink.cmp.Task
---- @field should_show_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, response: blink.cmp.CompletionResponse): boolean
+--- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, on_items: fun(items: blink.cmp.CompletionItem[]))
+--- @field should_show_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
 --- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field execute fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): blink.cmp.Task
 --- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): { trigger_characters: string[], retrigger_characters: string[] }
@@ -23,7 +22,6 @@
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
 
-local utils = require('blink.cmp.sources.lib.utils')
 local async = require('blink.cmp.lib.async')
 
 function source.new(id, config)
@@ -38,8 +36,7 @@ function source.new(id, config)
     config.override
   )
   self.config = require('blink.cmp.sources.lib.provider.config').new(config)
-  self.last_response = nil
-  self.last_context = nil
+  self.list = nil
   self.resolve_tasks = {}
 
   return self
@@ -61,20 +58,13 @@ function source:get_trigger_characters()
   return self.module:get_trigger_characters()
 end
 
-function source:get_completions(context)
-  -- Return the previous successful completions if the context is the same
+function source:get_completions(context, on_items)
+  -- return the previous successful completions if the context is the same
   -- and the data doesn't need to be updated
-  if self.last_response ~= nil and self.last_context ~= nil and self.last_context.id == context.id then
-    if utils.should_run_request(context, self.last_context, self.last_response) == false then
-      return async.task.new(
-        function(resolve)
-          resolve({
-            cached = true,
-            response = self.last_response,
-          })
-        end
-      )
-    end
+  if self.list ~= nil and self.list:is_valid_for_context(context) then
+    self.list:set_on_items(on_items)
+    self.list:emit()
+    return
   end
 
   -- the source indicates we should refetch when this character is typed
@@ -87,46 +77,19 @@ function source:get_completions(context)
       and { kind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter, character = context.trigger.character }
     or { kind = vim.lsp.protocol.CompletionTriggerKind.Invoked }
 
-  return async.task
-    .new(function(resolve)
-      if self.module.get_completions == nil then return resolve() end
-      return self.module:get_completions(source_context, resolve)
-    end)
-    :map(function(response)
-      if response == nil then response = { is_incomplete_forward = true, is_incomplete_backward = true, items = {} } end
-
-      -- add non-lsp metadata
-      local source_score_offset = self.config.score_offset(context) or 0
-      for _, item in ipairs(response.items) do
-        item.score_offset = (item.score_offset or 0) + source_score_offset
-        item.cursor_column = context.cursor[2]
-        item.source_id = self.id
-        item.source_name = self.name
-      end
-
-      -- if the user provided a transform_items function, run it
-      if self.config.transform_items ~= nil then
-        response.items = self.config.transform_items(context, response.items)
-      end
-
-      self.last_response = response
-      self.last_context = context
-      return { cached = false, response = response }
-    end)
-    :catch(function(err)
-      vim.print('failed to get completions with error: ' .. err)
-      return { cached = false, { is_incomplete_forward = false, is_incomplete_backward = false, items = {} } }
-    end)
+  -- TODO: error handling
+  if self.list ~= nil then self.list:destroy() end
+  self.list = require('blink.cmp.sources.lib.provider.list').new(self, context, on_items)
 end
 
-function source:should_show_items(context, response)
+function source:should_show_items(context, items)
   -- if keyword length is configured, check if the context is long enough
   local min_keyword_length = self.config.min_keyword_length(context)
   local current_keyword_length = context.bounds.length
   if current_keyword_length < min_keyword_length then return false end
 
   if self.config.should_show_items == nil then return true end
-  return self.config.should_show_items(context, response.items)
+  return self.config.should_show_items(context, items)
 end
 
 --- Resolve ---

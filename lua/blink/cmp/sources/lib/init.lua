@@ -2,7 +2,7 @@ local async = require('blink.cmp.lib.async')
 local config = require('blink.cmp.config')
 
 --- @class blink.cmp.Sources
---- @field current_context blink.cmp.SourcesContext | nil
+--- @field completions_queue blink.cmp.SourcesContext | nil
 --- @field current_signature_help blink.cmp.Task | nil
 --- @field sources_registered boolean
 --- @field providers table<string, blink.cmp.SourceProvider>
@@ -35,7 +35,7 @@ local config = require('blink.cmp.config')
 --- @type blink.cmp.Sources
 --- @diagnostic disable-next-line: missing-fields
 local sources = {
-  current_context = nil,
+  completions_queue = nil,
   providers = {},
   completions_emitter = require('blink.cmp.lib.event_emitter').new('source_completions', 'BlinkCmpSourceCompletions'),
 }
@@ -96,37 +96,37 @@ function sources.get_trigger_characters()
   return trigger_characters
 end
 
-function sources.emit_completions(context, responses)
-  local items = {}
-  for id, response in pairs(responses) do
-    if sources.providers[id]:should_show_items(context, response.items) then items[id] = response.items end
+function sources.emit_completions(context, _items_by_provider)
+  local items_by_provider = {}
+  for id, items in pairs(_items_by_provider) do
+    if sources.providers[id]:should_show_items(context, items) then items_by_provider[id] = items end
   end
-  sources.completions_emitter:emit({ context = context, items = items })
+  vim.print('emitting')
+  sources.completions_emitter:emit({ context = context, items = items_by_provider })
 end
 
 function sources.request_completions(context)
   -- create a new context if the id changed or if we haven't created one yet
-  local is_new_context = sources.current_context == nil or context.id ~= sources.current_context.id
-  if is_new_context then
-    if sources.current_context ~= nil then sources.current_context:destroy() end
-    sources.current_context =
-      require('blink.cmp.sources.lib.context').new(context, sources.get_all_providers(), sources.emit_completions)
+  if sources.completions_queue == nil or context.id ~= sources.completions_queue.id then
+    if sources.completions_queue ~= nil then sources.completions_queue:destroy() end
+    sources.completions_queue =
+      require('blink.cmp.sources.lib.queue').new(context, sources.get_all_providers(), sources.emit_completions)
   -- send cached completions if they exist to immediately trigger updates
-  elseif sources.current_context:get_cached_completions() ~= nil then
+  elseif sources.completions_queue:get_cached_completions() ~= nil then
     sources.emit_completions(
       context,
       --- @diagnostic disable-next-line: param-type-mismatch
-      sources.current_context:get_cached_completions()
+      sources.completions_queue:get_cached_completions()
     )
   end
 
-  sources.current_context:get_completions(context)
+  sources.completions_queue:get_completions(context)
 end
 
 function sources.cancel_completions()
-  if sources.current_context ~= nil then
-    sources.current_context:destroy()
-    sources.current_context = nil
+  if sources.completions_queue ~= nil then
+    sources.completions_queue:destroy()
+    sources.completions_queue = nil
   end
 end
 

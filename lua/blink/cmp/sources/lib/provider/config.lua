@@ -4,6 +4,7 @@
 --- @field module string
 --- @field enabled fun(ctx: blink.cmp.Context): boolean
 --- @field async fun(ctx: blink.cmp.Context): boolean
+--- @field timeout_ms fun(ctx: blink.cmp.Context): number
 --- @field transform_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
 --- @field should_show_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
 --- @field max_items? fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): number
@@ -28,6 +29,8 @@ function wrapper.new(config)
   self.name = config.name
   self.module = config.module
   self.enabled = call_or_get(config.enabled, true)
+  self.async = call_or_get(config.async, false)
+  self.timeout_ms = call_or_get(config.timeout, 400)
   self.transform_items = config.transform_items or function(_, items) return items end
   self.should_show_items = call_or_get(config.should_show_items, true)
   self.max_items = call_or_get(config.max_items, nil)
