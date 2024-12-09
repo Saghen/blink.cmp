@@ -14,11 +14,13 @@ function apply.keymap_to_current_buffer(keys_to_commands)
   for key, commands in pairs(keys_to_commands) do
     if #commands == 0 then goto continue end
 
+    local fallback = require('blink.cmp.keymap.fallback').wrap('i', key)
+
     apply.set('i', key, function()
       for _, command in ipairs(commands) do
         -- special case for fallback
         if command == 'fallback' then
-          return require('blink.cmp.keymap.fallback').run_non_blink_keymap('i', key)
+          return fallback()
 
         -- run user defined functions
         elseif type(command) == 'function' then
@@ -42,11 +44,13 @@ function apply.keymap_to_current_buffer(keys_to_commands)
     end
     if not has_snippet_command or #commands == 0 then goto continue end
 
+    local fallback = require('blink.cmp.keymap.fallback').wrap('s', key)
+
     apply.set('s', key, function()
       for _, command in ipairs(keys_to_commands[key] or {}) do
         -- special case for fallback
         if command == 'fallback' then
-          return require('blink.cmp.keymap.fallback').run_non_blink_keymap('s', key)
+          return fallback()
 
           -- run user defined functions
         elseif type(command) == 'function' then
