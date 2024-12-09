@@ -36,7 +36,6 @@ end
 
 --- Normalizes the autocmds + ctrl+c into a common api and handles ignored events
 function buffer_events:listen(opts)
-  local utils = require('blink.cmp.lib.utils')
   local snippet = require('blink.cmp.config').snippets
 
   local last_char = ''
@@ -49,7 +48,7 @@ function buffer_events:listen(opts)
 
   vim.api.nvim_create_autocmd('TextChangedI', {
     callback = function()
-      if utils.is_blocked_buffer() then return end
+      if not require('blink.cmp.config').enabled() then return end
       if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
 
       local is_ignored = self.ignore_next_text_changed
@@ -72,7 +71,7 @@ function buffer_events:listen(opts)
       -- characters added so let textchanged handle it
       if last_char ~= '' then return end
 
-      if utils.is_blocked_buffer() then return end
+      if not require('blink.cmp.config').enabled() then return end
       if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
 
       opts.on_cursor_moved(ev.event, is_ignored)

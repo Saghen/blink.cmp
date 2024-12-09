@@ -252,8 +252,12 @@ MiniDeps.add({
   --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
   keymap = 'default',
 
-  -- Disables keymaps, completions and signature help for these filetypes
-  blocked_filetypes = {},
+  -- Enables keymaps, completions and signature help when true
+  enabled = function() return vim.bo.buftype ~= "prompt" end,
+  -- Example for blocking multiple filetypes
+  -- enabled = function()
+  --  return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) and vim.bo.buftype ~= "prompt"
+  -- end,
 
   snippets = {
     -- Function to use when expanding LSP provided snippets

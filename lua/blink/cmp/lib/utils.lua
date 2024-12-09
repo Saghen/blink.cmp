@@ -40,18 +40,6 @@ function utils.deduplicate(arr)
   return vim.tbl_keys(hash)
 end
 
---- Determines whether the current buffer is a "special" buffer or if the filetype is in the list of ignored filetypes
---- @return boolean
-function utils.is_blocked_buffer()
-  local bufnr = vim.api.nvim_get_current_buf()
-  local buftype = vim.api.nvim_get_option_value('buftype', { buf = bufnr })
-  local blocked_filetypes = require('blink.cmp.config').blocked_filetypes or {}
-  local buf_filetype = vim.api.nvim_get_option_value('filetype', { buf = bufnr })
-
-  if vim.tbl_contains(blocked_filetypes, buf_filetype) then return true end
-  return buftype ~= ''
-end
-
 --- Gets characters around the cursor and returns the range, 0-indexed
 --- @param range 'prefix' | 'full'
 --- @param regex_str string
