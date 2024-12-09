@@ -27,7 +27,6 @@
 --- @field set_active_signature_help fun(signature_help: lsp.SignatureHelp)
 
 local config = require('blink.cmp.config').signature.trigger
-local utils = require('blink.cmp.lib.utils')
 
 --- @type blink.cmp.SignatureTrigger
 --- @diagnostic disable-next-line: missing-fields
