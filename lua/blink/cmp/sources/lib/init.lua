@@ -101,7 +101,6 @@ function sources.emit_completions(context, _items_by_provider)
   for id, items in pairs(_items_by_provider) do
     if sources.providers[id]:should_show_items(context, items) then items_by_provider[id] = items end
   end
-  vim.print('emitting')
   sources.completions_emitter:emit({ context = context, items = items_by_provider })
 end
 

@@ -183,7 +183,11 @@ function task.await_all(tasks)
         for _, sub_task in ipairs(tasks) do
           sub_task:cancel()
         end
-        all_task:cancel()
+        if all_task == nil then
+          vim.schedule(function() all_task:cancel() end)
+        else
+          all_task:cancel()
+        end
       end)
     end
   end)

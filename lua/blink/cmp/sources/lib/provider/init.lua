@@ -61,6 +61,7 @@ end
 function source:get_completions(context, on_items)
   -- return the previous successful completions if the context is the same
   -- and the data doesn't need to be updated
+  -- or if the list is async, since we don't want to cause a flash of no items
   if self.list ~= nil and self.list:is_valid_for_context(context) then
     self.list:set_on_items(on_items)
     self.list:emit()
@@ -77,9 +78,18 @@ function source:get_completions(context, on_items)
       and { kind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter, character = context.trigger.character }
     or { kind = vim.lsp.protocol.CompletionTriggerKind.Invoked }
 
-  -- TODO: error handling
+  local async_initial_items = self.list ~= nil and self.list.items or {}
   if self.list ~= nil then self.list:destroy() end
-  self.list = require('blink.cmp.sources.lib.provider.list').new(self, context, on_items)
+
+  self.list = require('blink.cmp.sources.lib.provider.list').new(
+    self,
+    context,
+    on_items,
+    -- HACK: if the source is async, we're not reusing the previous list and the response was marked as incomplete,
+    -- the user will see a flash of no items from the provider, since the list emits immediately. So we hack around
+    -- this for now
+    { async_initial_items = async_initial_items }
+  )
 end
 
 function source:should_show_items(context, items)

@@ -8,6 +8,7 @@
 --- @field nodes blink.cmp.SourceTreeNode[]
 --- @field new fun(context: blink.cmp.Context, all_sources: blink.cmp.SourceProvider[]): blink.cmp.SourceTree
 --- @field get_completions fun(self: blink.cmp.SourceTree, context: blink.cmp.Context, on_items_by_provider: fun(items_by_provider: table<string, blink.cmp.CompletionItem[]>)): blink.cmp.Task
+--- @field emit_completions fun(self: blink.cmp.SourceTree, items_by_provider: table<string, blink.cmp.CompletionItem[]>, on_items_by_provider: fun(items_by_provider: table<string, blink.cmp.CompletionItem[]>)): nil
 --- @field destroy fun(self: blink.cmp.SourceTree)
 --- @field get_top_level_nodes fun(self: blink.cmp.SourceTree): blink.cmp.SourceTreeNode[]
 --- @field detect_cycle fun(node: blink.cmp.SourceTreeNode, visited?: table<string, boolean>, path?: table<string, boolean>): boolean
@@ -68,14 +69,10 @@ function tree:get_completions(context, on_items_by_provider)
       if not nodes_falling_back[dependency.id] then return async.task.empty() end
     end
 
-    vim.print('getting completions for ' .. node.id)
     return async.task.new(function(resolve, reject)
       return node.source:get_completions(context, function(items)
         items_by_provider[node.id] = items
-        if should_push_upstream then
-          vim.print('async upstreaming')
-          on_items_by_provider(items_by_provider)
-        end
+        if should_push_upstream then self:emit_completions(items_by_provider, on_items_by_provider) end
         if #items ~= 0 then return resolve() end
 
         -- run dependents if the source returned 0 items
@@ -86,20 +83,43 @@ function tree:get_completions(context, on_items_by_provider)
     end)
   end
 
-  vim.print('calling')
   -- run the top level nodes and let them fall back to their dependents if needed
   local tasks = vim.tbl_map(function(node) return get_completions_for_node(node) end, self:get_top_level_nodes())
   return async.task
     .await_all(tasks)
     :map(function()
-      vim.print('pushing upstream')
       should_push_upstream = true
-      on_items_by_provider(items_by_provider)
+      self:emit_completions(items_by_provider, on_items_by_provider)
     end)
     :catch(function(err) vim.print('failed to get completions with error: ' .. err) end)
 end
 
-function tree:emit_completions(context, items_by_provider, on_items_by_provider) end
+function tree:emit_completions(items_by_provider, on_items_by_provider)
+  local nodes_falling_back = {}
+  local final_items_by_provider = {}
+
+  local add_node_items
+  add_node_items = function(node)
+    for _, dependency in ipairs(node.dependencies) do
+      if not nodes_falling_back[dependency.id] then return end
+    end
+    local items = items_by_provider[node.id]
+    if items ~= nil and #items > 0 then
+      final_items_by_provider[node.id] = items
+    else
+      nodes_falling_back[node.id] = true
+      for _, dependent in ipairs(node.dependents) do
+        add_node_items(dependent)
+      end
+    end
+  end
+
+  for _, node in ipairs(self:get_top_level_nodes()) do
+    add_node_items(node)
+  end
+
+  on_items_by_provider(final_items_by_provider)
+end
 
 function tree:destroy() end
 

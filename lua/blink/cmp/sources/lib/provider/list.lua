@@ -3,29 +3,34 @@
 --- @field context blink.cmp.Context
 --- @field items blink.cmp.CompletionItem[]
 --- @field on_items fun(items: blink.cmp.CompletionItem[])
+--- @field has_completed boolean
 --- @field is_incomplete_backward boolean
 --- @field is_incomplete_forward boolean
 --- @field cancel_completions? fun(): nil
 ---
---- @field new fun(module: blink.cmp.Source, config: blink.cmp.SourceProviderConfigWrapper, context: blink.cmp.Context, on_response: fun(response: blink.cmp.CompletionResponse)): blink.cmp.SourceProviderList
+--- @field new fun(provider: blink.cmp.SourceProvider, config: blink.cmp.SourceProviderConfigWrapper, context: blink.cmp.Context, on_items: fun(items: blink.cmp.CompletionItem[]), opts: blink.cmp.SourceProviderListOpts): blink.cmp.SourceProviderList
 --- @field append fun(self: blink.cmp.SourceProviderList, response: blink.cmp.CompletionResponse): nil
 --- @field emit fun(self: blink.cmp.SourceProviderList): nil
 --- @field destroy fun(self: blink.cmp.SourceProviderList): nil
 --- @field set_on_items fun(self: blink.cmp.SourceProviderList, on_response: fun(response: blink.cmp.CompletionResponse)): nil
 --- @field is_valid_for_context fun(self: blink.cmp.SourceProviderList, context: blink.cmp.Context): boolean
+---
+--- @class blink.cmp.SourceProviderListOpts
+--- @field async_initial_items blink.cmp.CompletionItem[]
 
 --- @type blink.cmp.SourceProviderList
 --- @diagnostic disable-next-line: missing-fields
 local list = {}
 
-function list.new(provider, context, on_items)
+function list.new(provider, context, on_items, opts)
   --- @type blink.cmp.SourceProviderList
   local self = setmetatable({
     provider = provider,
     context = context,
-    items = {},
+    items = opts.async_initial_items,
     on_items = on_items,
 
+    has_completed = false,
     is_incomplete_backward = true,
     is_incomplete_forward = true,
   }, { __index = list })
@@ -45,9 +50,9 @@ function list.new(provider, context, on_items)
     )
   end
 
-  -- if async, immediately send the default response
+  -- if async, immediately send the default response/initial items
   local is_async = self.provider.config.async(self.context)
-  if self.provider.config.async(self.context) then self:append(default_response) end
+  if self.provider.config.async(self.context) then self:emit() end
 
   -- if not async and timeout is set, send the default response after the timeout
   local timeout_ms = self.provider.config.timeout_ms(self.context)
@@ -57,8 +62,12 @@ function list.new(provider, context, on_items)
 end
 
 function list:append(response)
-  self.is_incomplete_backward = response.is_incomplete_backward
-  self.is_incomplete_forward = response.is_incomplete_forward
+  if not self.has_completed then
+    self.has_completed = true
+    self.is_incomplete_backward = response.is_incomplete_backward
+    self.is_incomplete_forward = response.is_incomplete_forward
+    self.items = {}
+  end
 
   -- add non-lsp metadata
   local source_score_offset = self.provider.config.score_offset(self.context) or 0
@@ -69,6 +78,7 @@ function list:append(response)
     item.source_name = self.provider.name
   end
 
+  -- combine with existing items
   local new_items = {}
   vim.list_extend(new_items, self.items)
   vim.list_extend(new_items, response.items)
@@ -78,9 +88,6 @@ function list:append(response)
   if self.provider.config.transform_items ~= nil then
     self.items = self.provider.config.transform_items(self.context, self.items)
   end
-  vim.print(
-    'appended ' .. #response.items .. ' items for ' .. self.provider.id .. ' for a total of ' .. #self.items .. ' items'
-  )
 
   self:emit()
 end
