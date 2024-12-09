@@ -101,7 +101,7 @@ function lsp:get_completions(context, callback)
     local responses = {}
     for client_id, response in pairs(result) do
       -- todo: pass error upstream
-      if response.error or response.result == nil then
+      if response.err or response.result == nil then
         responses[client_id] = { is_incomplete_forward = true, is_incomplete_backward = true, items = {} }
 
       -- as per the spec, we assume it's complete if we get CompletionItem[]
