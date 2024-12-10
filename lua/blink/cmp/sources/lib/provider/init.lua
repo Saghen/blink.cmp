@@ -78,7 +78,7 @@ function source:get_completions(context, on_items)
       and { kind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter, character = context.trigger.character }
     or { kind = vim.lsp.protocol.CompletionTriggerKind.Invoked }
 
-  local async_initial_items = self.list ~= nil and self.list.items or {}
+  local async_initial_items = self.list ~= nil and self.list.context.id == context.id and self.list.items or {}
   if self.list ~= nil then self.list:destroy() end
 
   self.list = require('blink.cmp.sources.lib.provider.list').new(
