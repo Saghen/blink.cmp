@@ -9,7 +9,6 @@
 --- @field new fun(context: blink.cmp.Context, all_sources: blink.cmp.SourceProvider[]): blink.cmp.SourceTree
 --- @field get_completions fun(self: blink.cmp.SourceTree, context: blink.cmp.Context, on_items_by_provider: fun(items_by_provider: table<string, blink.cmp.CompletionItem[]>)): blink.cmp.Task
 --- @field emit_completions fun(self: blink.cmp.SourceTree, items_by_provider: table<string, blink.cmp.CompletionItem[]>, on_items_by_provider: fun(items_by_provider: table<string, blink.cmp.CompletionItem[]>)): nil
---- @field destroy fun(self: blink.cmp.SourceTree)
 --- @field get_top_level_nodes fun(self: blink.cmp.SourceTree): blink.cmp.SourceTreeNode[]
 --- @field detect_cycle fun(node: blink.cmp.SourceTreeNode, visited?: table<string, boolean>, path?: table<string, boolean>): boolean
 
@@ -119,8 +118,6 @@ function tree:emit_completions(items_by_provider, on_items_by_provider)
 
   on_items_by_provider(final_items_by_provider)
 end
-
-function tree:destroy() end
 
 --- Internal ---
 
