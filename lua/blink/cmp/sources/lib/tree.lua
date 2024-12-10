@@ -58,6 +58,7 @@ end
 function tree:get_completions(context, on_items_by_provider)
   local should_push_upstream = false
   local items_by_provider = {}
+  local is_all_cached = true
   local nodes_falling_back = {}
 
   --- @param node blink.cmp.SourceTreeNode
@@ -68,8 +69,10 @@ function tree:get_completions(context, on_items_by_provider)
     end
 
     return async.task.new(function(resolve, reject)
-      return node.source:get_completions(context, function(items)
+      return node.source:get_completions(context, function(items, is_cached)
         items_by_provider[node.id] = items
+        is_all_cached = is_all_cached and is_cached
+
         if should_push_upstream then self:emit_completions(items_by_provider, on_items_by_provider) end
         if #items ~= 0 then return resolve() end
 
@@ -87,7 +90,9 @@ function tree:get_completions(context, on_items_by_provider)
     .await_all(tasks)
     :map(function()
       should_push_upstream = true
-      self:emit_completions(items_by_provider, on_items_by_provider)
+
+      -- if atleast one of the results wasn't cached, emit the results
+      if not is_all_cached then self:emit_completions(items_by_provider, on_items_by_provider) end
     end)
     :catch(function(err) vim.print('failed to get completions with error: ' .. err) end)
 end

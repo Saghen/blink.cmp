@@ -10,7 +10,7 @@
 --- @field new fun(id: string, config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProvider
 --- @field enabled fun(self: blink.cmp.SourceProvider): boolean
 --- @field get_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
---- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, on_items: fun(items: blink.cmp.CompletionItem[]))
+--- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, on_items: fun(items: blink.cmp.CompletionItem[], is_cached: boolean))
 --- @field should_show_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
 --- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field execute fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): blink.cmp.Task
@@ -64,7 +64,7 @@ function source:get_completions(context, on_items)
   -- or if the list is async, since we don't want to cause a flash of no items
   if self.list ~= nil and self.list:is_valid_for_context(context) then
     self.list:set_on_items(on_items)
-    self.list:emit()
+    self.list:emit(true)
     return
   end
 
