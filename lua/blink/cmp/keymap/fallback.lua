@@ -8,12 +8,29 @@ local fallback = {}
 ---@field lhsraw? string
 ---@field buffer? number
 
---- Gets the first non blink.cmp keymap for the given mode and key
+--- Gets the non blink.cmp global keymap for the given mode and key
+--- @param mode string
+--- @param key string
+--- @return vim.api.keyset.keymap | nil
+function fallback.get_non_blink_global_mapping_for_key(mode, key)
+  local normalized_key = vim.api.nvim_replace_termcodes(key, true, true, true)
+
+  -- get global mappings
+  local mappings = vim.api.nvim_get_keymap(mode)
+
+  for _, mapping in ipairs(mappings) do
+    local mapping_key = vim.api.nvim_replace_termcodes(mapping.lhs, true, true, true)
+    if mapping_key == normalized_key and mapping.desc ~= 'blink.cmp' then return mapping end
+  end
+end
+
+--- Gets the non blink.cmp buffer keymap for the given mode and key
 --- @param mode string
 --- @param key string
 --- @return vim.api.keyset.keymap?
-function fallback.get_non_blink_mapping_for_key(mode, key)
+function fallback.get_non_blink_buffer_mapping_for_key(mode, key)
   local ret = vim.fn.maparg(key, mode, false, true) --[[@as vim.api.keyset.keymap]]
+  if ret and ret.buffer == 0 then return end
   if ret and ret.desc and ret.desc == 'blink.cmp' then return end
   return ret ~= vim.empty_dict() and ret or nil
 end
@@ -23,8 +40,11 @@ end
 --- @param key string
 --- @return fun(): string?
 function fallback.wrap(mode, key)
-  local mapping = fallback.get_non_blink_mapping_for_key(mode, key)
-  return function() return mapping and fallback.run_non_blink_keymap(mapping, key) or nil end
+  local buffer_mapping = fallback.get_non_blink_buffer_mapping_for_key(mode, key)
+  return function()
+    local mapping = buffer_mapping or fallback.get_non_blink_global_mapping_for_key(mode, key)
+    return mapping and fallback.run_non_blink_keymap(mapping, key) or nil
+  end
 end
 
 --- Runs the first non blink.cmp keymap for the given mode and key
