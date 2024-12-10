@@ -151,33 +151,51 @@ end
 --- utils
 
 function task.await_all(tasks)
-  return task.new(function(resolve)
+  if #tasks == 0 then return task.empty() end
+
+  local all_task
+  all_task = task.new(function(resolve, reject)
     local results = {}
+    local has_resolved = {}
 
     local function resolve_if_completed()
       -- we can't check #results directly because a table like
       -- { [2] = { ... } } has a length of 2
       for i = 1, #tasks do
-        if results[i] == nil then return end
+        if has_resolved[i] == nil then return end
       end
       resolve(results)
     end
 
     for idx, task in ipairs(tasks) do
       task:on_completion(function(result)
-        results[idx] = { status = STATUS.COMPLETED, result = result }
+        results[idx] = result
+        has_resolved[idx] = true
         resolve_if_completed()
       end)
       task:on_failure(function(err)
-        results[idx] = { status = STATUS.FAILED, err = err }
-        resolve_if_completed()
+        for _, task in ipairs(tasks) do
+          task:cancel()
+        end
+        reject(err)
       end)
       task:on_cancel(function()
-        results[idx] = { status = STATUS.CANCELLED }
-        resolve_if_completed()
+        for _, sub_task in ipairs(tasks) do
+          sub_task:cancel()
+        end
+        if all_task == nil then
+          vim.schedule(function() all_task:cancel() end)
+        else
+          all_task:cancel()
+        end
       end)
     end
   end)
+  return all_task
+end
+
+function task.empty()
+  return task.new(function(resolve) resolve() end)
 end
 
 return { task = task, STATUS = STATUS }

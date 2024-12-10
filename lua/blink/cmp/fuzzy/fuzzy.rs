@@ -5,7 +5,6 @@ use crate::lsp_item::LspItem;
 use mlua::prelude::*;
 use mlua::FromLua;
 use mlua::Lua;
-use std::cmp::Reverse;
 use std::collections::HashSet;
 
 #[derive(Clone, Hash)]
@@ -15,8 +14,6 @@ pub struct FuzzyOptions {
     use_proximity: bool,
     nearby_words: Option<Vec<String>>,
     min_score: u16,
-    max_items: u32,
-    sorts: Vec<String>,
 }
 
 impl FromLua for FuzzyOptions {
@@ -27,8 +24,6 @@ impl FromLua for FuzzyOptions {
             let use_proximity: bool = tab.get("use_proximity").unwrap_or_default();
             let nearby_words: Option<Vec<String>> = tab.get("nearby_words").ok();
             let min_score: u16 = tab.get("min_score").unwrap_or_default();
-            let max_items: u32 = tab.get("max_items").unwrap_or_default();
-            let sorts: Vec<String> = tab.get("sorts").unwrap_or_default();
 
             Ok(FuzzyOptions {
                 use_typo_resistance,
@@ -36,8 +31,6 @@ impl FromLua for FuzzyOptions {
                 use_proximity,
                 nearby_words,
                 min_score,
-                max_items,
-                sorts,
             })
         } else {
             Err(mlua::Error::FromLuaConversionError {
@@ -51,10 +44,10 @@ impl FromLua for FuzzyOptions {
 
 pub fn fuzzy(
     needle: String,
-    haystack: Vec<LspItem>,
+    haystack: &Vec<LspItem>,
     frecency: &FrecencyTracker,
     opts: FuzzyOptions,
-) -> Vec<usize> {
+) -> (Vec<i32>, Vec<u32>) {
     let nearby_words: HashSet<String> = HashSet::from_iter(opts.nearby_words.unwrap_or_default());
     let haystack_labels = haystack
         .iter()
@@ -110,42 +103,15 @@ pub fn fuzzy(
             .collect::<Vec<_>>();
     }
 
-    // Sort matches by sort criteria
-    for sort in opts.sorts.iter() {
-        match sort.as_str() {
-            "kind" => {
-                matches.sort_by_key(|mtch| haystack[mtch.index_in_haystack].kind);
-            }
-            "score" => {
-                matches.sort_by_cached_key(|mtch| Reverse(match_scores[mtch.index]));
-            }
-            "label" => {
-                matches.sort_by(|a, b| {
-                    let label_a = haystack[a.index_in_haystack]
-                        .sort_text
-                        .as_ref()
-                        .unwrap_or(&haystack[a.index_in_haystack].label);
-                    let label_b = haystack[b.index_in_haystack]
-                        .sort_text
-                        .as_ref()
-                        .unwrap_or(&haystack[b.index_in_haystack].label);
-
-                    // Put anything with an underscore at the end
-                    match (label_a.starts_with('_'), label_b.starts_with('_')) {
-                        (true, false) => std::cmp::Ordering::Greater,
-                        (false, true) => std::cmp::Ordering::Less,
-                        _ => label_a.cmp(label_b),
-                    }
-                });
-            }
-            _ => {}
-        }
-    }
-
-    // Grab the top N matches and return the indices
-    matches
-        .iter()
-        .map(|mtch| mtch.index_in_haystack)
-        .take(opts.max_items as usize)
-        .collect::<Vec<_>>()
+    // Return scores and indices
+    (
+        matches
+            .iter()
+            .map(|mtch| match_scores[mtch.index] as i32)
+            .collect::<Vec<_>>(),
+        matches
+            .iter()
+            .map(|mtch| mtch.index_in_haystack as u32)
+            .collect::<Vec<_>>(),
+    )
 }

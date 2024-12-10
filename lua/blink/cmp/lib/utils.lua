@@ -93,4 +93,70 @@ function utils.schedule_if_needed(fn)
   end
 end
 
+--- Flattens an arbitrarily deep table into a  single level table
+--- @param t table
+--- @return table
+function utils.flatten(t)
+  if t[1] == nil then return t end
+
+  local flattened = {}
+  for _, v in ipairs(t) do
+    if v[1] == nil then
+      table.insert(flattened, v)
+    else
+      vim.list_extend(flattened, utils.flatten(v))
+    end
+  end
+  return flattened
+end
+
+--- Returns the index of the first occurrence of the value in the array
+--- @generic T
+--- @param arr T[]
+--- @param val T
+--- @return number | nil
+function utils.index_of(arr, val)
+  for idx, v in ipairs(arr) do
+    if v == val then return idx end
+  end
+  return nil
+end
+
+--- Finds an item in an array using a predicate function
+--- @generic T
+--- @param arr T[]
+--- @param predicate fun(item: T): boolean
+--- @return T | nil
+function utils.find_idx(arr, predicate)
+  for idx, v in ipairs(arr) do
+    if predicate(v) then return idx end
+  end
+  return nil
+end
+
+--- Slices an array
+--- @generic T
+--- @param arr T[]
+--- @param start number
+--- @param finish number
+--- @return T[]
+function utils.slice(arr, start, finish)
+  start = start or 1
+  finish = finish or #arr
+  local sliced = {}
+  for i = start, finish do
+    sliced[#sliced + 1] = arr[i]
+  end
+  return sliced
+end
+
+function utils.fast_gsub(str, old_char, new_char)
+  local result = ''
+  for i = 1, #str do
+    local c = str:sub(i, i)
+    result = result .. (c == old_char and new_char or c)
+  end
+  return result
+end
+
 return utils

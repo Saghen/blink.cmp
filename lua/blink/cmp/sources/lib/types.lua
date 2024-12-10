@@ -5,12 +5,11 @@
 --- @class blink.cmp.CompletionResponse
 --- @field is_incomplete_forward boolean
 --- @field is_incomplete_backward boolean
---- @field context blink.cmp.Context
 --- @field items blink.cmp.CompletionItem[]
 
 --- @class blink.cmp.Source
 --- @field new fun(opts: table, config: blink.cmp.SourceProviderConfig): blink.cmp.Source
---- @field enabled? fun(self: blink.cmp.Source, context: blink.cmp.Context): boolean
+--- @field enabled? fun(self: blink.cmp.Source): boolean
 --- @field get_trigger_characters? fun(self: blink.cmp.Source): string[]
 --- @field get_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, callback: fun(response?: blink.cmp.CompletionResponse)): (fun(): nil) | nil
 --- @field should_show_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, response: blink.cmp.CompletionResponse): boolean

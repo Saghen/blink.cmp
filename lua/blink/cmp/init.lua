@@ -19,12 +19,13 @@ end
 
 ------- Public API -------
 
-function cmp.show()
-  if require('blink.cmp.completion.windows.menu').win:is_open() then return end
+--- @params opts? { providers?: string[] }
+function cmp.show(opts)
+  if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then return end
 
   vim.schedule(function()
     require('blink.cmp.completion.windows.menu').auto_show = true
-    require('blink.cmp.completion.trigger').show({ force = true })
+    require('blink.cmp.completion.trigger').show({ force = true, providers = opts and opts.providers })
   end)
   return true
 end
@@ -144,6 +145,15 @@ function cmp.reload(provider) require('blink.cmp.sources.lib').reload(provider) 
 --- @param include_nvim_defaults? boolean
 function cmp.get_lsp_capabilities(override, include_nvim_defaults)
   return require('blink.cmp.sources.lib').get_lsp_capabilities(override, include_nvim_defaults)
+end
+
+--- @param id string
+--- @param provider_config blink.cmp.SourceProviderConfig
+function cmp.add_provider(id, provider_config)
+  local config = require('blink.cmp.config')
+  assert(config.sources.providers[id] == nil, 'Provider with id ' .. id .. ' already exists')
+  require('blink.cmp.config.sources').validate_provider(id, provider_config)
+  config.sources.providers[id] = provider_config
 end
 
 return cmp

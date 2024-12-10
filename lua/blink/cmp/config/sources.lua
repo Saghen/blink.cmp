@@ -1,8 +1,4 @@
 --- @class blink.cmp.SourceConfig
---- @field completion blink.cmp.SourceModeConfig
---- @field providers table<string, blink.cmp.SourceProviderConfig>
-
---- @class blink.cmp.SourceModeConfig
 --- Static list of providers to enable, or a function to dynamically enable/disable providers based on the context
 ---
 --- Example dynamically picking providers based on the filetype and treesitter node:
@@ -18,18 +14,21 @@
 ---     end
 ---   end
 --- ```
---- @field enabled_providers string[] | fun(ctx?: blink.cmp.Context): string[]
+--- @field default string[] | fun(): string[]
+--- @field per_filetype table<string, string[] | fun(): string[]>
+--- @field providers table<string, blink.cmp.SourceProviderConfig>
 
 --- @class blink.cmp.SourceProviderConfig
 --- @field name? string
 --- @field module? string
 --- @field enabled? boolean | fun(ctx?: blink.cmp.Context): boolean Whether or not to enable the provider
 --- @field opts? table
+--- @field async? boolean Whether blink should wait for the source to return before showing the completions
 --- @field transform_items? fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
---- @field should_show_items? boolean | number | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether or not to show the items
---- @field max_items? number | fun(ctx: blink.cmp.Context, enabled_sources: string[], items: blink.cmp.CompletionItem[]): number Maximum number of items to display in the menu
---- @field min_keyword_length? number | fun(ctx: blink.cmp.Context, enabled_sources: string[]): number Minimum number of characters in the keyword to trigger the provider
---- @field fallback_for? string[] | fun(ctx: blink.cmp.Context, enabled_sources: string[]): string[] If any of these providers return 0 items, it will fallback to this provider
+--- @field should_show_items? boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether or not to show the items
+--- @field max_items? number | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): number Maximum number of items to display in the menu
+--- @field min_keyword_length? number | fun(ctx: blink.cmp.Context): number Minimum number of characters in the keyword to trigger the provider
+--- @field fallbacks? string[] | fun(ctx: blink.cmp.Context, enabled_sources: string[]): string[] If this provider returns 0 items, it will fallback to these providers
 --- @field score_offset? number | fun(ctx: blink.cmp.Context, enabled_sources: string[]): number Boost/penalize the score of the items
 --- @field deduplicate? blink.cmp.DeduplicateConfig TODO: implement
 --- @field override? blink.cmp.SourceOverride Override the source's functions
@@ -38,13 +37,13 @@ local validate = require('blink.cmp.config.utils').validate
 local sources = {
   --- @type blink.cmp.SourceConfig
   default = {
-    completion = {
-      enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
-    },
+    default = { 'lsp', 'path', 'snippets', 'buffer' },
+    per_filetype = {},
     providers = {
       lsp = {
         name = 'LSP',
         module = 'blink.cmp.sources.lsp',
+        fallbacks = { 'buffer' },
       },
       path = {
         name = 'Path',
@@ -64,7 +63,6 @@ local sources = {
       buffer = {
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
-        fallback_for = { 'lsp' },
       },
     },
   },
@@ -72,28 +70,39 @@ local sources = {
 
 function sources.validate(config)
   validate('sources', {
-    completion = { config.completion, 'table' },
+    default = { config.default, { 'function', 'table' } },
+    per_filetype = { config.per_filetype, 'table' },
     providers = { config.providers, 'table' },
   })
-  validate('sources.completion', {
-    enabled_providers = { config.completion.enabled_providers, { 'table', 'function' } },
-  })
-  for key, provider in pairs(config.providers) do
-    validate('sources.providers.' .. key, {
-      name = { provider.name, 'string' },
-      module = { provider.module, 'string' },
-      enabled = { provider.enabled, { 'boolean', 'function' }, true },
-      opts = { provider.opts, 'table', true },
-      transform_items = { provider.transform_items, 'function', true },
-      should_show_items = { provider.should_show_items, { 'boolean', 'function' }, true },
-      max_items = { provider.max_items, { 'number', 'function' }, true },
-      min_keyword_length = { provider.min_keyword_length, { 'number', 'function' }, true },
-      fallback_for = { provider.fallback_for, { 'table', 'function' }, true },
-      score_offset = { provider.score_offset, { 'number', 'function' }, true },
-      deduplicate = { provider.deduplicate, 'table', true },
-      override = { provider.override, 'table', true },
-    })
+  assert(
+    config.completion == nil,
+    '`sources.completion.enabled_providers` has been replaced with `sources.default`. !!Note!! Be sure to update `opts_extend` as well if you have it set'
+  )
+  for id, provider in pairs(config.providers) do
+    sources.validate_provider(id, provider)
   end
+end
+
+function sources.validate_provider(id, provider)
+  assert(
+    provider.fallback_for == nil,
+    '`fallback_for` has been replaced with `fallbacks` which work in the opposite direction. For example, fallback_for = { "lsp" } on "buffer" would now be "fallbacks" = { "buffer" } on "lsp"'
+  )
+
+  validate('sources.providers.' .. id, {
+    name = { provider.name, 'string' },
+    module = { provider.module, 'string' },
+    enabled = { provider.enabled, { 'boolean', 'function' }, true },
+    opts = { provider.opts, 'table', true },
+    transform_items = { provider.transform_items, 'function', true },
+    should_show_items = { provider.should_show_items, { 'boolean', 'function' }, true },
+    max_items = { provider.max_items, { 'number', 'function' }, true },
+    min_keyword_length = { provider.min_keyword_length, { 'number', 'function' }, true },
+    fallbacks = { provider.fallback_for, { 'table', 'function' }, true },
+    score_offset = { provider.score_offset, { 'number', 'function' }, true },
+    deduplicate = { provider.deduplicate, 'table', true },
+    override = { provider.override, 'table', true },
+  })
 end
 
 return sources
