@@ -16,7 +16,7 @@
 --- @field line string
 --- @field bounds blink.cmp.ContextBounds
 --- @field trigger { kind: number, character: string | nil }
---- @field enabled_providers string[]
+--- @field providers string[]
 
 --- @class blink.cmp.CompletionTrigger
 --- @field buffer_events blink.cmp.BufferEvents
@@ -29,7 +29,7 @@
 --- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
---- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean, enabled_providers?: string[] })
+--- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[] })
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
 --- @field get_context_bounds fun(regex: string): blink.cmp.ContextBounds
@@ -175,12 +175,12 @@ function trigger.show(opts)
   end
 
   -- update context
-  if trigger.context == nil or opts.enabled_providers ~= nil then
+  if trigger.context == nil or opts.providers ~= nil then
     trigger.current_context_id = trigger.current_context_id + 1
   end
 
-  local enabled_providers = opts.enabled_providers
-    or (trigger.context and trigger.context.enabled_providers)
+  local providers = opts.providers
+    or (trigger.context and trigger.context.providers)
     or require('blink.cmp.sources.lib').get_enabled_provider_ids()
 
   trigger.context = {
@@ -194,7 +194,7 @@ function trigger.show(opts)
         or vim.lsp.protocol.CompletionTriggerKind.Invoked,
       character = opts.trigger_character,
     },
-    enabled_providers = enabled_providers,
+    providers = providers,
   }
 
   if opts.send_upstream ~= false then trigger.show_emitter:emit({ context = trigger.context }) end

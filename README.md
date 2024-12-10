@@ -72,9 +72,7 @@
     -- default list of enabled providers defined so that you can extend it
     -- elsewhere in your config, without redefining it, via `opts_extend`
     sources = {
-      completion = {
-        enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
-      },
+      default = { 'lsp', 'path', 'snippets', 'buffer' },
     },
 
     -- experimental auto-brackets support
@@ -83,9 +81,9 @@
     -- experimental signature help support
     -- signature = { enabled = true }
   },
-  -- allows extending the enabled_providers array elsewhere in your config
+  -- allows extending the providers array elsewhere in your config
   -- without having to redefine it
-  opts_extend = { "sources.completion.enabled_providers" }
+  opts_extend = { "sources.default" }
 },
 ```
 
@@ -287,6 +285,14 @@ MiniDeps.add({
       -- however, some LSPs (i.e. tsserver) return characters that would essentially
       -- always show the window. We block these by default.
       show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
+      -- or a function like
+      -- show_on_blocked_trigger_characters = function()
+      --   local blocked = { ' ', '\n', '\t' }
+      --   if vim.bo.filetype == 'markdown' then
+      --     vim.list_extend(blocked, { '.', '/', '(', '[' })
+      --   end
+      --   return blocked
+      -- end
       -- When both this and show_on_trigger_character are true, will show the completion window
       -- when the cursor comes after a trigger character after accepting an item
       show_on_accept_on_trigger_character = true,
@@ -297,6 +303,7 @@ MiniDeps.add({
       -- the completion window when the cursor comes after a trigger character when
       -- entering insert mode/accepting an item
       show_on_x_blocked_trigger_characters = { "'", '"', '(' },
+      -- or a function, similar to show_on_blocked_trigger_character
     },
 
     list = {
@@ -535,20 +542,23 @@ MiniDeps.add({
   },
 
   sources = {
-    completion = {
-      -- Static list of providers to enable, or a function to dynamically enable/disable providers based on the context
-      enabled_providers = { 'lsp', 'path', 'snippets', 'buffer' },
-      -- Example dynamically picking providers based on the filetype and treesitter node:
-      -- enabled_providers = function(ctx)
-      --   local node = vim.treesitter.get_node()
-      --   if vim.bo.filetype == 'lua' then
-      --     return { 'lsp', 'path' }
-      --   elseif node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }), node:type())
-      --     return { 'buffer' }
-      --   else
-      --     return { 'lsp', 'path', 'snippets', 'buffer' }
-      --   end
-      -- end
+    -- Static list of providers to enable, or a function to dynamically enable/disable providers based on the context
+    default = { 'lsp', 'path', 'snippets', 'buffer' },
+    -- Example dynamically picking providers based on the filetype and treesitter node:
+    -- providers = function(ctx)
+    --   local node = vim.treesitter.get_node()
+    --   if vim.bo.filetype == 'lua' then
+    --     return { 'lsp', 'path' }
+    --   elseif node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }), node:type())
+    --     return { 'buffer' }
+    --   else
+    --     return { 'lsp', 'path', 'snippets', 'buffer' }
+    --   end
+    -- end
+    
+    -- You may also define providers per filetype
+    per_filetype = {
+      -- lua = { 'lsp', 'path' },
     },
 
     -- Please see https://github.com/Saghen/blink.compat for using `nvim-cmp` sources
@@ -557,16 +567,19 @@ MiniDeps.add({
         name = 'LSP',
         module = 'blink.cmp.sources.lsp',
 
-        --- *All* of the providers have the following options available
+        --- *All* providers have the following options available
         --- NOTE: All of these options may be functions to get dynamic behavior
         --- See the type definitions for more information.
-        --- Check the enabled_providers config for an example
         enabled = true, -- Whether or not to enable the provider
+        async = false, -- Whether we should wait for the provider to return before showing the completions
+        timeout_ms = 400, -- How long to wait for the provider to return before showing completions and treating it as asynchronous
         transform_items = nil, -- Function to transform the items before they're returned
         should_show_items = true, -- Whether or not to show the items
         max_items = nil, -- Maximum number of items to display in the menu
         min_keyword_length = 0, -- Minimum number of characters in the keyword to trigger the provider
-        fallback_for = {}, -- If any of these providers return 0 items, it will fallback to this provider
+        -- If this provider returns 0 items, it will fallback to these providers.
+        -- If multiple providers falback to the same provider, all of the providers must return 0 items for it to fallback
+        fallbacks = { 'buffer' },
         score_offset = 0, -- Boost/penalize the score of the items
         override = nil, -- Override the source's functions
       },
@@ -604,7 +617,6 @@ MiniDeps.add({
       buffer = {
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
-        fallback_for = { 'lsp' },
         opts = {
           -- default to all visible buffers
           get_bufnrs = function()
@@ -726,9 +738,7 @@ MiniDeps.add({
       jump = function(direction) require('luasnip').jump(direction) end,
     },
     sources = {
-      completion = {
-        enabled_providers = { 'lsp', 'path', 'luasnip', 'buffer' },
-      },
+      default = { 'lsp', 'path', 'luasnip', 'buffer' },
     },
   }
 }

@@ -24,7 +24,7 @@ local tree = {}
 function tree.new(context, all_sources)
   -- only include enabled sources for the given context
   local sources = vim.tbl_filter(
-    function(source) return vim.tbl_contains(context.enabled_providers, source.id) and source:enabled(context) end,
+    function(source) return vim.tbl_contains(context.providers, source.id) and source:enabled(context) end,
     all_sources
   )
   local source_ids = vim.tbl_map(function(source) return source.id end, sources)

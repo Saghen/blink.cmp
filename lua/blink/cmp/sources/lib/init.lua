@@ -9,8 +9,8 @@ local config = require('blink.cmp.config')
 --- @field completions_emitter blink.cmp.EventEmitter<blink.cmp.SourceCompletionsEvent>
 ---
 --- @field get_all_providers fun(): blink.cmp.SourceProvider[]
---- @field get_enabled_provider_ids fun(context?: blink.cmp.Context): string[]
---- @field get_enabled_providers fun(context?: blink.cmp.Context): table<string, blink.cmp.SourceProvider>
+--- @field get_enabled_provider_ids fun(): string[]
+--- @field get_enabled_providers fun(): table<string, blink.cmp.SourceProvider>
 --- @field get_trigger_characters fun(): string[]
 ---
 --- @field emit_completions fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)
@@ -48,21 +48,21 @@ function sources.get_all_providers()
   return providers
 end
 
-function sources.get_enabled_provider_ids(context)
-  local enabled_providers = config.sources.completion.enabled_providers
-  if type(enabled_providers) == 'function' then return enabled_providers(context) end
+function sources.get_enabled_provider_ids()
+  local enabled_providers = config.sources.per_filetype[vim.bo.filetype] or config.sources.default
+  if type(enabled_providers) == 'function' then return enabled_providers() end
   --- @cast enabled_providers string[]
   return enabled_providers
 end
 
-function sources.get_enabled_providers(context)
-  local mode_providers = sources.get_enabled_provider_ids(context)
+function sources.get_enabled_providers()
+  local mode_providers = sources.get_enabled_provider_ids()
 
   --- @type table<string, blink.cmp.SourceProvider>
   local providers = {}
   for _, provider_id in ipairs(mode_providers) do
     local provider = sources.get_provider_by_id(provider_id)
-    if provider:enabled(context) then providers[provider_id] = sources.get_provider_by_id(provider_id) end
+    if provider:enabled() then providers[provider_id] = sources.get_provider_by_id(provider_id) end
   end
   return providers
 end
