@@ -79,22 +79,26 @@ function sources.validate(config)
   validate('sources.completion', {
     enabled_providers = { config.completion.enabled_providers, { 'table', 'function' } },
   })
-  for key, provider in pairs(config.providers) do
-    validate('sources.providers.' .. key, {
-      name = { provider.name, 'string' },
-      module = { provider.module, 'string' },
-      enabled = { provider.enabled, { 'boolean', 'function' }, true },
-      opts = { provider.opts, 'table', true },
-      transform_items = { provider.transform_items, 'function', true },
-      should_show_items = { provider.should_show_items, { 'boolean', 'function' }, true },
-      max_items = { provider.max_items, { 'number', 'function' }, true },
-      min_keyword_length = { provider.min_keyword_length, { 'number', 'function' }, true },
-      fallbacks = { provider.fallback_for, { 'table', 'function' }, true },
-      score_offset = { provider.score_offset, { 'number', 'function' }, true },
-      deduplicate = { provider.deduplicate, 'table', true },
-      override = { provider.override, 'table', true },
-    })
+  for id, provider in pairs(config.providers) do
+    sources.validate_provider(id, provider)
   end
+end
+
+function sources.validate_provider(id, provider)
+  validate('sources.providers.' .. id, {
+    name = { provider.name, 'string' },
+    module = { provider.module, 'string' },
+    enabled = { provider.enabled, { 'boolean', 'function' }, true },
+    opts = { provider.opts, 'table', true },
+    transform_items = { provider.transform_items, 'function', true },
+    should_show_items = { provider.should_show_items, { 'boolean', 'function' }, true },
+    max_items = { provider.max_items, { 'number', 'function' }, true },
+    min_keyword_length = { provider.min_keyword_length, { 'number', 'function' }, true },
+    fallbacks = { provider.fallback_for, { 'table', 'function' }, true },
+    score_offset = { provider.score_offset, { 'number', 'function' }, true },
+    deduplicate = { provider.deduplicate, 'table', true },
+    override = { provider.override, 'table', true },
+  })
 end
 
 return sources

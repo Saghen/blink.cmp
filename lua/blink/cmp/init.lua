@@ -154,6 +154,7 @@ end
 function cmp.add_provider(id, provider_config)
   local config = require('blink.cmp.config')
   assert(config.sources.providers[id] == nil, 'Provider with id ' .. id .. ' already exists')
+  require('blink.cmp.config.sources').validate_provider(id, provider_config)
   config.sources.providers[id] = provider_config
 end
 
