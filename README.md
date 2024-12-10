@@ -5,7 +5,7 @@
 > The configuration was recently reworked, please read the [configuration section](#configuration) for the new schema
 
 > [!NOTE]
-> If you're on a release tag, ensure you're viewing the README for [the latest release](https://github.com/Saghen/blink.cmp/tree/v0.7.3)
+> If you're on a release tag, ensure you're viewing the README for [the latest release](https://github.com/Saghen/blink.cmp/tree/v0.7.5)
 
 # Blink Completion (blink.cmp)
 
@@ -110,7 +110,7 @@ Setting capabilities for `nvim-lspconfig`:
   config = function(_, opts)
     local lspconfig = require('lspconfig')
     for server, config in pairs(opts.servers) do
-      -- passing config.capabilities to blink.cmp merges with the capabilities in your 
+      -- passing config.capabilities to blink.cmp merges with the capabilities in your
       -- `opts[server].capabilities, if you've defined it
       config.capabilities = require('blink.cmp').get_lsp_capabilities(config.capabilities)
       lspconfig[server].setup(config)
@@ -121,7 +121,7 @@ Setting capabilities for `nvim-lspconfig`:
   config = function()
     local capabilities = require('blink.cmp').get_lsp_capabilities()
     local lspconfig = require('lspconfig')
-  
+
     lspconfig['lua-ls'].setup({ capabilities = capabilities })
   end
 }
@@ -181,7 +181,7 @@ MiniDeps.add({
   --   preset = 'default',
   --   ['<Up>'] = { 'select_prev', 'fallback' },
   --   ['<Down>'] = { 'select_next', 'fallback' },
-  -- 
+  --
   --   -- disable a keymap from the preset
   --   ['<C-e>'] = {},
   -- },
@@ -250,8 +250,12 @@ MiniDeps.add({
   --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
   keymap = 'default',
 
-  -- Disables keymaps, completions and signature help for these filetypes
-  blocked_filetypes = {},
+  -- Enables keymaps, completions and signature help when true
+  enabled = function() return vim.bo.buftype ~= "prompt" end,
+  -- Example for blocking multiple filetypes
+  -- enabled = function()
+  --  return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) and vim.bo.buftype ~= "prompt"
+  -- end,
 
   snippets = {
     -- Function to use when expanding LSP provided snippets
@@ -317,7 +321,7 @@ MiniDeps.add({
       -- 'manual' will not select any item by default
       -- 'auto_insert' will not select any item by default, and insert the completion items automatically
       -- when selecting them
-      -- 
+      --
       -- You may want to bind a key to the `cancel` command, which will undo the selection
       -- when using 'auto_insert'
       cycle = {
@@ -482,7 +486,7 @@ MiniDeps.add({
       enabled = false,
     },
   },
-  
+
   -- Experimental signature help support
   signature = {
     enabled = false,
@@ -514,7 +518,7 @@ MiniDeps.add({
     -- when enabled, allows for a number of typos relative to the length of the query
     -- disabling this matches the behavior of fzf
     use_typo_resistance = true,
-    -- frencency tracks the most recently/frequently used items and boosts the score of the item
+    -- frecency tracks the most recently/frequently used items and boosts the score of the item
     use_frecency = true,
     -- proximity bonus boosts the score of items matching nearby words
     use_proximity = true,
@@ -549,7 +553,7 @@ MiniDeps.add({
     --   local node = vim.treesitter.get_node()
     --   if vim.bo.filetype == 'lua' then
     --     return { 'lsp', 'path' }
-    --   elseif node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }), node:type())
+    --   elseif node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
     --     return { 'buffer' }
     --   else
     --     return { 'lsp', 'path', 'snippets', 'buffer' }
@@ -714,10 +718,11 @@ MiniDeps.add({
 ### Community Sources
 
 - [lazydev](https://github.com/folke/lazydev.nvim)
-- [ctags](https://github.com/netmute/blink-cmp-ctags)
-- [ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
-- [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
 - [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
+- [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
+- [blink-cmp-ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
+- [blink-cmp-ctags](https://github.com/netmute/blink-cmp-ctags)
+- [blink-cmp-copilot](https://github.com/giuxtaposition/blink-cmp-copilot)
 
 ### Luasnip
 

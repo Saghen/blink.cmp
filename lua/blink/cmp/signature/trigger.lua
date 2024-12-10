@@ -27,7 +27,6 @@
 --- @field set_active_signature_help fun(signature_help: lsp.SignatureHelp)
 
 local config = require('blink.cmp.config').signature.trigger
-local utils = require('blink.cmp.lib.utils')
 
 --- @type blink.cmp.SignatureTrigger
 --- @diagnostic disable-next-line: missing-fields
@@ -49,13 +48,13 @@ function trigger.activate()
       local is_on_trigger = trigger.is_trigger_character(char)
       local is_on_retrigger = trigger.is_trigger_character(char, true)
 
-      -- ignore if in a special buffer
-      if utils.is_blocked_buffer() then
+      -- ignore if disabled
+      if not require('blink.cmp.config').enabled() then
         return trigger.hide()
-        -- character forces a trigger according to the sources, refresh the existing context if it exists
+      -- character forces a trigger according to the sources, refresh the existing context if it exists
       elseif is_on_trigger then
         return trigger.show({ trigger_character = char })
-        -- character forces a re-trigger according to the sources, show if we have a context
+      -- character forces a re-trigger according to the sources, show if we have a context
       elseif is_on_retrigger and trigger.context ~= nil then
         return trigger.show()
       end

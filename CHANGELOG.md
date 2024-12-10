@@ -1,3 +1,31 @@
+## [0.7.5](https://github.com/Saghen/blink.cmp/compare/v0.7.4...v0.7.5) (2024-12-10)
+
+### Features
+
+* use `enabled` function instead of blocked_filetypes ([a6636c1](https://github.com/Saghen/blink.cmp/commit/a6636c1c38704c1581750b29abb0addabd198b89)), closes [#440](https://github.com/Saghen/blink.cmp/issues/440)
+
+### Bug Fixes
+
+* **fallback:** make fallback work with buffer-local mappings ([#483](https://github.com/Saghen/blink.cmp/issues/483)) ([8b553f6](https://github.com/Saghen/blink.cmp/commit/8b553f65419d051fe84eeeda3e2071e104c4f272))
+
+## [0.7.4](https://github.com/Saghen/blink.cmp/compare/v0.7.3...v0.7.4) (2024-12-09)
+
+### Features
+
+* support non-latin characters for keyword and buffer source ([51d5f59](https://github.com/Saghen/blink.cmp/commit/51d5f598adf7f1cd1bb188011bb761c1856083a9)), closes [#130](https://github.com/Saghen/blink.cmp/issues/130) [#388](https://github.com/Saghen/blink.cmp/issues/388)
+
+### Bug Fixes
+
+* check response.err instead of response.error ([#473](https://github.com/Saghen/blink.cmp/issues/473)) ([e720477](https://github.com/Saghen/blink.cmp/commit/e7204774a6e99c5e222c930565353c757d2d0ec1))
+* completion.trigger.show_in_snippet ([#452](https://github.com/Saghen/blink.cmp/issues/452)) ([a42afb6](https://github.com/Saghen/blink.cmp/commit/a42afb61ad455816aef6baa1992f8de45e9a5eb1)), closes [#443](https://github.com/Saghen/blink.cmp/issues/443)
+* documentation window auto show once and for all ([624676e](https://github.com/Saghen/blink.cmp/commit/624676efda13aa78a042aba29ee13e109821fa76)), closes [#430](https://github.com/Saghen/blink.cmp/issues/430)
+* fill in cargoHash ([aa70277](https://github.com/Saghen/blink.cmp/commit/aa70277f537c942f7e477fd135531fffc37d81f3))
+* **highlight:** fix invalid highlight for doc separator ([#449](https://github.com/Saghen/blink.cmp/issues/449)) ([283a6af](https://github.com/Saghen/blink.cmp/commit/283a6afee44e0aea9b17074d49779558354d3520))
+* luasnip resolve documentation ([85f318b](https://github.com/Saghen/blink.cmp/commit/85f318b6db5b48d825d4ef575b405a8d41233753)), closes [#437](https://github.com/Saghen/blink.cmp/issues/437)
+* make buffer events options required ([d0b0e16](https://github.com/Saghen/blink.cmp/commit/d0b0e16671733432986953bf4ddff268eb5b2d7c))
+* **render:** not render two separator for doc window ([#451](https://github.com/Saghen/blink.cmp/issues/451)) ([fc12fa9](https://github.com/Saghen/blink.cmp/commit/fc12fa99d4e1274d331c2004e777981193f7d6f8))
+* revert luasnip source to use current cursor position ([5cfff34](https://github.com/Saghen/blink.cmp/commit/5cfff3433a2afc3f4e29eb4e3caa8f80953f0cfb))
+
 ## [0.7.3](https://github.com/Saghen/blink.cmp/compare/v0.7.2...v0.7.3) (2024-12-03)
 
 ### Bug Fixes
