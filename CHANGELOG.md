@@ -1,3 +1,13 @@
+## [0.7.5](https://github.com/Saghen/blink.cmp/compare/v0.7.4...v0.7.5) (2024-12-10)
+
+### Features
+
+* use `enabled` function instead of blocked_filetypes ([a6636c1](https://github.com/Saghen/blink.cmp/commit/a6636c1c38704c1581750b29abb0addabd198b89)), closes [#440](https://github.com/Saghen/blink.cmp/issues/440)
+
+### Bug Fixes
+
+* **fallback:** make fallback work with buffer-local mappings ([#483](https://github.com/Saghen/blink.cmp/issues/483)) ([8b553f6](https://github.com/Saghen/blink.cmp/commit/8b553f65419d051fe84eeeda3e2071e104c4f272))
+
 ## [0.7.4](https://github.com/Saghen/blink.cmp/compare/v0.7.3...v0.7.4) (2024-12-09)
 
 ### Features
