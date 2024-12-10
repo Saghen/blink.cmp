@@ -149,4 +149,12 @@ function cmp.get_lsp_capabilities(override, include_nvim_defaults)
   return require('blink.cmp.sources.lib').get_lsp_capabilities(override, include_nvim_defaults)
 end
 
+--- @param id string
+--- @param provider_config blink.cmp.SourceProviderConfig
+function cmp.add_provider(id, provider_config)
+  local config = require('blink.cmp.config')
+  assert(config.sources.providers[id] == nil, 'Provider with id ' .. id .. ' already exists')
+  config.sources.providers[id] = provider_config
+end
+
 return cmp
