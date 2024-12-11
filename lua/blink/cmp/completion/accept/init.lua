@@ -29,18 +29,21 @@ local function accept(ctx, item, callback)
 
       -- Create an undo point, if it's not a snippet, since the snippet engine should handle undo
       if
-        item.insertTextFormat ~= vim.lsp.protocol.InsertTextFormat.Snippet
+        ctx.mode == 'default'
+        and item.insertTextFormat ~= vim.lsp.protocol.InsertTextFormat.Snippet
         and require('blink.cmp.config').completion.accept.create_undo_point
       then
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
       end
 
       -- Add brackets to the text edit if needed
-      local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(vim.bo.filetype, item)
+      local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(ctx, vim.bo.filetype, item)
       item.textEdit = text_edit_with_brackets
 
       -- Snippet
       if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+        assert(ctx.mode == 'default', 'Snippets are only supported in default mode')
+
         -- We want to handle offset_encoding and the text edit api can do this for us
         -- so we empty the newText and apply
         local temp_text_edit = vim.deepcopy(item.textEdit)
@@ -56,10 +59,7 @@ local function accept(ctx, item, callback)
         table.insert(all_text_edits, item.textEdit)
         text_edits_lib.apply(all_text_edits)
         -- TODO: should move the cursor only by the offset since text edit handles everything else?
-        vim.api.nvim_win_set_cursor(0, {
-          vim.api.nvim_win_get_cursor(0)[1],
-          item.textEdit.range.start.character + #item.textEdit.newText + offset,
-        })
+        ctx.set_cursor({ ctx.get_cursor()[1], item.textEdit.range.start.character + #item.textEdit.newText + offset })
       end
 
       -- Let the source execute the item itself

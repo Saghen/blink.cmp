@@ -16,6 +16,7 @@
 --- ```
 --- @field default string[] | fun(): string[]
 --- @field per_filetype table<string, string[] | fun(): string[]>
+--- @field command string[] | fun(): string[]
 --- @field providers table<string, blink.cmp.SourceProviderConfig>
 
 --- @class blink.cmp.SourceProviderConfig
@@ -39,6 +40,11 @@ local sources = {
   default = {
     default = { 'lsp', 'path', 'snippets', 'buffer' },
     per_filetype = {},
+    command = function()
+      local type = vim.fn.getcmdtype()
+      if type == '/' or type == '?' then return { 'buffer' } end
+      return { 'command' }
+    end,
     providers = {
       lsp = {
         name = 'LSP',
@@ -63,6 +69,10 @@ local sources = {
       buffer = {
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
+      },
+      command = {
+        name = 'Command',
+        module = 'blink.cmp.sources.command',
       },
     },
   },

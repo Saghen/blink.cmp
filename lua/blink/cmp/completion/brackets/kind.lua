@@ -1,12 +1,16 @@
 local utils = require('blink.cmp.completion.brackets.utils')
 
+--- @param ctx blink.cmp.Context
 --- @param filetype string
 --- @param item blink.cmp.CompletionItem
 --- @return 'added' | 'check_semantic_token' | 'skipped', lsp.TextEdit | lsp.InsertReplaceEdit, number
-local function add_brackets(filetype, item)
+local function add_brackets(ctx, filetype, item)
   local text_edit = item.textEdit
   assert(text_edit ~= nil, 'Got nil text edit while adding brackets via kind')
   local brackets_for_filetype = utils.get_for_filetype(filetype, item)
+
+  -- skip if we're not in default mode
+  if ctx.mode ~= 'default' then return 'skipped', text_edit, 0 end
 
   -- if there's already the correct brackets in front, skip but indicate the cursor should move in front of the bracket
   -- TODO: what if the brackets_for_filetype[1] == '' or ' ' (haskell/ocaml)?

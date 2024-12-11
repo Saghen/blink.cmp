@@ -2,16 +2,17 @@ local async = require('blink.cmp.lib.async')
 local config = require('blink.cmp.config')
 
 --- @class blink.cmp.Sources
---- @field completions_queue blink.cmp.SourcesContext | nil
+--- @field completions_queue blink.cmp.SourcesQueue | nil
 --- @field current_signature_help blink.cmp.Task | nil
 --- @field sources_registered boolean
 --- @field providers table<string, blink.cmp.SourceProvider>
 --- @field completions_emitter blink.cmp.EventEmitter<blink.cmp.SourceCompletionsEvent>
 ---
 --- @field get_all_providers fun(): blink.cmp.SourceProvider[]
---- @field get_enabled_provider_ids fun(): string[]
---- @field get_enabled_providers fun(): table<string, blink.cmp.SourceProvider>
---- @field get_trigger_characters fun(): string[]
+--- @field get_enabled_provider_ids fun(mode: blink.cmp.Mode): string[]
+--- @field get_enabled_providers fun(mode: blink.cmp.Mode): table<string, blink.cmp.SourceProvider>
+--- @field get_provider_by_id fun(id: string): blink.cmp.SourceProvider
+--- @field get_trigger_characters fun(mode: blink.cmp.Mode): string[]
 ---
 --- @field emit_completions fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)
 --- @field request_completions fun(context: blink.cmp.Context)
@@ -21,7 +22,7 @@ local config = require('blink.cmp.config')
 --- @field resolve fun(item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field execute fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
 ---
---- @field get_signature_help_trigger_characters fun(): { trigger_characters: string[], retrigger_characters: string[] }
+--- @field get_signature_help_trigger_characters fun(mode: blink.cmp.Mode): { trigger_characters: string[], retrigger_characters: string[] }
 --- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil))
 --- @field cancel_signature_help fun()
 ---
@@ -48,15 +49,17 @@ function sources.get_all_providers()
   return providers
 end
 
-function sources.get_enabled_provider_ids()
-  local enabled_providers = config.sources.per_filetype[vim.bo.filetype] or config.sources.default
+function sources.get_enabled_provider_ids(mode)
+  local enabled_providers = mode ~= 'default' and config.sources[mode]
+    or config.sources.per_filetype[vim.bo.filetype]
+    or config.sources.default
   if type(enabled_providers) == 'function' then return enabled_providers() end
   --- @cast enabled_providers string[]
   return enabled_providers
 end
 
-function sources.get_enabled_providers()
-  local mode_providers = sources.get_enabled_provider_ids()
+function sources.get_enabled_providers(mode)
+  local mode_providers = sources.get_enabled_provider_ids(mode)
 
   --- @type table<string, blink.cmp.SourceProvider>
   local providers = {}
@@ -87,8 +90,8 @@ end
 
 --- Completion ---
 
-function sources.get_trigger_characters()
-  local providers = sources.get_enabled_providers()
+function sources.get_trigger_characters(mode)
+  local providers = sources.get_enabled_providers(mode)
   local trigger_characters = {}
   for _, provider in pairs(providers) do
     vim.list_extend(trigger_characters, provider:get_trigger_characters())
@@ -189,12 +192,12 @@ end
 
 --- Signature help ---
 
-function sources.get_signature_help_trigger_characters()
+function sources.get_signature_help_trigger_characters(mode)
   local trigger_characters = {}
   local retrigger_characters = {}
 
   -- todo: should this be all sources? or should it follow fallbacks?
-  for _, source in pairs(sources.get_enabled_providers()) do
+  for _, source in pairs(sources.get_enabled_providers(mode)) do
     local res = source:get_signature_help_trigger_characters()
     vim.list_extend(trigger_characters, res.trigger_characters)
     vim.list_extend(retrigger_characters, res.retrigger_characters)

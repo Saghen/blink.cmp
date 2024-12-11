@@ -30,6 +30,9 @@ function keymap.setup()
   if vim.api.nvim_get_mode().mode == 'i' and require('blink.cmp.config').enabled() then
     require('blink.cmp.keymap.apply').keymap_to_current_buffer(mappings)
   end
+
+  -- Always apply command mode keymaps since they're global
+  require('blink.cmp.keymap.apply').command_mode_keymaps(mappings)
 end
 
 return keymap

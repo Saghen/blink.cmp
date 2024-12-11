@@ -1,3 +1,5 @@
+--- @alias blink.cmp.Mode 'command' | 'default'
+
 --- @class blink.cmp.CompletionItem : lsp.CompletionItem
 --- @field score_offset? number
 --- @field source_id string
