@@ -9,7 +9,7 @@
 --- @field winhighlight? string
 --- @field scrolloff? number
 --- @field scrollbar? boolean
---- @field filetype? string
+--- @field filetype string
 
 --- @class blink.cmp.Window
 --- @field id? number
@@ -55,7 +55,7 @@ function win.new(config)
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
     scrollbar = config.scrollbar,
-    filetype = config.filetype or 'blink-cmp',
+    filetype = config.filetype,
   }
 
   if self.config.scrollbar then
