@@ -29,6 +29,7 @@ local docs = {
     winhighlight = win_config.winhighlight,
     scrollbar = win_config.scrollbar,
     wrap = true,
+    filetype = 'blink-cmp-documentation',
   }),
   last_context_id = nil,
   auto_show_timer = vim.uv.new_timer(),

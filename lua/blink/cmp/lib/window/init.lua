@@ -9,6 +9,7 @@
 --- @field winhighlight? string
 --- @field scrolloff? number
 --- @field scrollbar? boolean
+--- @field filetype string
 
 --- @class blink.cmp.Window
 --- @field id? number
@@ -54,6 +55,7 @@ function win.new(config)
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
     scrollbar = config.scrollbar,
+    filetype = config.filetype,
   }
 
   if self.config.scrollbar then
@@ -106,6 +108,7 @@ function win:open()
   vim.api.nvim_set_option_value('cursorlineopt', 'line', { win = self.id })
   vim.api.nvim_set_option_value('cursorline', self.config.cursorline, { win = self.id })
   vim.api.nvim_set_option_value('scrolloff', self.config.scrolloff, { win = self.id })
+  vim.api.nvim_set_option_value('filetype', self.config.filetype, { buf = self.buf })
 
   if self.scrollbar then self.scrollbar:mount(self.id) end
 end
