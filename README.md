@@ -184,6 +184,9 @@ MiniDeps.add({
   --
   --   -- disable a keymap from the preset
   --   ['<C-e>'] = {},
+  --   
+  --   -- show with a list of providers
+  --   ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },
   -- },
   --
   -- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
