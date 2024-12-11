@@ -229,16 +229,20 @@ function win.get_cursor_screen_position()
 
   -- command line
   if vim.api.nvim_get_mode().mode == 'c' then
-    local cursor_col = vim.fn.getcmdpos()
+    local config = require('blink.cmp.config').completion.menu
+    local cmdline_position = type(config.cmdline_position) == 'function' and config.cmdline_position()
+      or config.cmdline_position
+    --- @cast cmdline_position number[]
+
     return {
-      distance_from_top = screen_height - 1,
-      distance_from_bottom = 0,
-      distance_from_left = cursor_col,
-      distance_from_right = screen_width - cursor_col,
+      distance_from_top = cmdline_position[1] - 1,
+      distance_from_bottom = screen_height - cmdline_position[1],
+      distance_from_left = cmdline_position[2],
+      distance_from_right = screen_width - cmdline_position[2],
     }
   end
 
-  -- buffer
+  -- default
   local cursor_line, cursor_column = unpack(vim.api.nvim_win_get_cursor(0))
   -- todo: convert cursor_column to byte index
   local pos = vim.fn.screenpos(vim.api.nvim_win_get_number(0), cursor_line, cursor_column)

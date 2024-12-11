@@ -3,13 +3,14 @@
 --- @field min_width number
 --- @field max_height number
 --- @field border blink.cmp.WindowBorder
---- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
---- @field order blink.cmp.CompletionMenuOrderConfig TODO: implement
---- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space
 --- @field winblend number
 --- @field winhighlight string
 --- @field scrolloff number Keep the cursor X lines away from the top/bottom of the window
+--- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
+--- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space
+--- @field order blink.cmp.CompletionMenuOrderConfig TODO: implement
 --- @field auto_show boolean Whether to automatically show the window when new completion items are available
+--- @field cmdline_position number[] | fun(): number[] Screen coordinates (0-indexed) of the command line
 --- @field draw blink.cmp.Draw Controls how the completion items are rendered on the popup window
 
 --- @class (exact) blink.cmp.CompletionMenuOrderConfig
@@ -39,6 +40,9 @@ local window = {
 
     -- Whether to automatically show the window when new completion items are available
     auto_show = true,
+
+    -- Screen coordinates of the command line
+    cmdline_position = { vim.o.lines - 1, 0 },
 
     -- Controls how the completion items are rendered on the popup window
     draw = {
@@ -124,12 +128,13 @@ function window.validate(config)
     min_width = { config.min_width, 'number' },
     max_height = { config.max_height, 'number' },
     border = { config.border, { 'string', 'table' } },
-    scrollbar = { config.scrollbar, 'boolean' },
-    order = { config.order, 'table' },
-    direction_priority = { config.direction_priority, 'table' },
     winblend = { config.winblend, 'number' },
     winhighlight = { config.winhighlight, 'string' },
     scrolloff = { config.scrolloff, 'number' },
+    scrollbar = { config.scrollbar, 'boolean' },
+    direction_priority = { config.direction_priority, 'table' },
+    order = { config.order, 'table' },
+    cmdline_position = { config.cmdline_position, { 'function', 'table' } },
     draw = { config.draw, 'table' },
   })
   validate('completion.window.order', {

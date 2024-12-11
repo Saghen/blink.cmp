@@ -156,4 +156,14 @@ function cmp.add_provider(id, provider_config)
   config.sources.providers[id] = provider_config
 end
 
+--- Sets the screen coordinates (0-indexed) of the command line
+function cmp.set_cmdline_position(cmdline_position)
+  local config = require('blink.cmp.config').completion.menu
+  config.cmdline_position = cmdline_position
+
+  if require('blink.cmp.completion.windows.menu').win:is_open() then
+    require('blink.cmp.completion.windows.menu').update_position()
+  end
+end
+
 return cmp

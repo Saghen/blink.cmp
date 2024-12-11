@@ -113,18 +113,24 @@ function menu.update_position()
 
   -- place the window at the start col of the current text we're fuzzy matching against
   -- so the window doesnt move around as we type
-  local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
-  local col = context.bounds.start_col - cursor_col - (context.bounds.length == 0 and 0 or 1) - border_size.left
   local row = pos.direction == 's' and 1 or -pos.height - border_size.vertical
+
   if vim.api.nvim_get_mode().mode == 'c' then
+    local cmdline_position = type(config.cmdline_position) == 'function' and config.cmdline_position()
+      or config.cmdline_position
+    --- @cast cmdline_position number[]
+
     vim.api.nvim_win_set_config(winnr, {
       relative = 'editor',
-      row = vim.o.lines + row - 1,
-      col = math.max(col - start_col, 0),
+      row = cmdline_position[1] + row,
+      col = math.max(cmdline_position[2] + context.bounds.start_col - start_col, 0),
     })
   else
+    local cursor_col = context.get_cursor()[2]
+    local col = context.bounds.start_col - cursor_col - (context.bounds.length == 0 and 0 or 1) - border_size.left
     vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = row, col = col - start_col })
   end
+
   vim.api.nvim_win_set_height(winnr, pos.height)
 
   menu.position_update_emitter:emit()
