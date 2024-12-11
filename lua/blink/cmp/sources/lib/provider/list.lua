@@ -52,7 +52,7 @@ function list.new(provider, context, on_items, opts)
 
   -- if async, immediately send the default response/initial items
   local is_async = self.provider.config.async(self.context)
-  if self.provider.config.async(self.context) and not self.has_completed then self:emit() end
+  if is_async and not self.has_completed then self:emit() end
 
   -- if not async and timeout is set, send the default response after the timeout
   local timeout_ms = self.provider.config.timeout_ms(self.context)
