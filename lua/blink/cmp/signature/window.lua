@@ -22,6 +22,7 @@ local signature = {
     winhighlight = config.winhighlight,
     scrollbar = config.scrollbar,
     wrap = true,
+    filetype = 'blink-cmp-signature',
   }),
   context = nil,
 }
