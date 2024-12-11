@@ -126,8 +126,9 @@ function download.from_github(tag, cb)
       .. system_triple
       .. download.get_lib_extension()
 
-    vim.system({
-      'curl',
+    local args = { 'curl' }
+    vim.list_extend(args, download_config.extra_curl_args)
+    vim.list_extend(args, {
       '--fail', -- Fail on 4xx/5xx
       '--location', -- Follow redirects
       '--silent', -- Don't show progress
@@ -136,7 +137,9 @@ function download.from_github(tag, cb)
       '--output',
       download.lib_path,
       url,
-    }, {}, function(out)
+    })
+
+    vim.system(args, {}, function(out)
       if out.code ~= 0 then return cb('Failed to download pre-build binaries: ' .. out.stderr) end
       cb()
     end)

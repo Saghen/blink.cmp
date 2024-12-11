@@ -542,6 +542,8 @@ MiniDeps.add({
       --
       -- Beware that if the FFI ABI changes while tracking main then this may result in blink breaking.
       force_system_triple = nil,
+      -- Extra arguments that will be passed to curl like { 'curl', ..extra_curl_args, ..built_in_args }
+      extra_curl_args = {}
     },
   },
 
