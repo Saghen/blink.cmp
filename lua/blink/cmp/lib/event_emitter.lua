@@ -27,11 +27,11 @@ function event_emitter:emit(data)
   for _, callback in ipairs(self.listeners) do
     callback(data)
   end
-  -- if self.autocmd then
-  --   require('blink.cmp.lib.utils').schedule_if_needed(
-  --     function() vim.api.nvim_exec_autocmds('User', { pattern = self.autocmd, modeline = false, data = data }) end
-  --   )
-  -- end
+  if self.autocmd then
+    require('blink.cmp.lib.utils').schedule_if_needed(
+      function() vim.api.nvim_exec_autocmds('User', { pattern = self.autocmd, modeline = false, data = data }) end
+    )
+  end
 end
 
 return event_emitter
