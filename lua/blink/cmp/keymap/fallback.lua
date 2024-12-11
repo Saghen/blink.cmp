@@ -29,10 +29,14 @@ end
 --- @param key string
 --- @return vim.api.keyset.keymap?
 function fallback.get_non_blink_buffer_mapping_for_key(mode, key)
-  local ret = vim.fn.maparg(key, mode, false, true) --[[@as vim.api.keyset.keymap]]
-  if ret and ret.buffer == 0 then return end
-  if ret and ret.desc and ret.desc == 'blink.cmp' then return end
-  return ret.lhs ~= nil and ret or nil
+  local normalized_key = vim.api.nvim_replace_termcodes(key, true, true, true)
+
+  local buffer_mappings = vim.api.nvim_buf_get_keymap(0, mode)
+
+  for _, mapping in ipairs(buffer_mappings) do
+    local mapping_key = vim.api.nvim_replace_termcodes(mapping.lhs, true, true, true)
+    if mapping_key == normalized_key and mapping.desc ~= 'blink.cmp' then return mapping end
+  end
 end
 
 --- Returns a function that will run the first non blink.cmp keymap for the given mode and key
@@ -44,6 +48,7 @@ function fallback.wrap(mode, key)
   return function()
     local mapping = buffer_mapping or fallback.get_non_blink_global_mapping_for_key(mode, key)
     if mapping then return fallback.run_non_blink_keymap(mapping, key) end
+    return vim.api.nvim_replace_termcodes(key, true, true, true)
   end
 end
 
