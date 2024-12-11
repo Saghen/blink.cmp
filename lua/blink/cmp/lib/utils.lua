@@ -150,13 +150,4 @@ function utils.slice(arr, start, finish)
   return sliced
 end
 
-function utils.fast_gsub(str, old_char, new_char)
-  local result = ''
-  for i = 1, #str do
-    local c = str:sub(i, i)
-    result = result .. (c == old_char and new_char or c)
-  end
-  return result
-end
-
 return utils
