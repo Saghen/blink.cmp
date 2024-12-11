@@ -87,10 +87,6 @@ function lsp:get_completions(context, callback)
 
       -- add defaults, client id and score offset to the items
       for _, item in ipairs(items) do
-        -- todo: terraform lsp doesn't return a .kind in situations like `toset`, is there a default value we need to grab?
-        -- it doesn't seem to return itemDefaults
-        item.kind = item.kind or require('blink.cmp.types').CompletionItemKind.Text
-
         item.client_id = client.id
 
         -- todo: make configurable

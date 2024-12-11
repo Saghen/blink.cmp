@@ -93,6 +93,11 @@ function list:append(response)
     self.items = self.provider.config.transform_items(self.context, self.items)
   end
 
+  -- default item.kind to CompletionKind.Property
+  for _, item in ipairs(self.items) do
+    item.kind = item.kind or require('blink.cmp.types').CompletionItemKind.Property
+  end
+
   self:emit()
 end
 
