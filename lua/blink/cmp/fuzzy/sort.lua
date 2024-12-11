@@ -39,6 +39,7 @@ function sort.label(a, b)
   elseif entry1_under < entry2_under then
     return true
   end
+  return a.label:lower() < b.label:lower()
 end
 
 return sort
