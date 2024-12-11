@@ -4,7 +4,7 @@
 
 --- @class blink.cmp.CompletionTrigger
 --- @field buffer_events blink.cmp.BufferEvents
---- @field command_events blink.cmp.CommandEvents
+--- @field cmdline_events blink.cmp.CmdlineEvents
 --- @field current_context_id number
 --- @field context? blink.cmp.Context
 --- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.Context }>
@@ -38,7 +38,7 @@ function trigger.activate()
     has_context = function() return trigger.context ~= nil end,
     show_in_snippet = config.show_in_snippet,
   })
-  trigger.command_events = require('blink.cmp.lib.command_events').new()
+  trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
 
   local function on_char_added(char, is_ignored)
     -- we were told to ignore the text changed event, so we update the context
@@ -107,7 +107,7 @@ function trigger.activate()
     on_cursor_moved = on_cursor_moved,
     on_insert_leave = function() trigger.hide() end,
   })
-  trigger.command_events:listen({
+  trigger.cmdline_events:listen({
     on_char_added = on_char_added,
     on_cursor_moved = on_cursor_moved,
     on_leave = function() trigger.hide() end,
@@ -135,9 +135,9 @@ end
 
 --- Suppresses on_hide and on_show events for the duration of the callback
 function trigger.suppress_events_for_callback(cb)
-  local mode = vim.api.nvim_get_mode().mode == 'c' and 'command' or 'default'
+  local mode = vim.api.nvim_get_mode().mode == 'c' and 'cmdline' or 'default'
 
-  local events = mode == 'default' and trigger.buffer_events or trigger.command_events
+  local events = mode == 'default' and trigger.buffer_events or trigger.cmdline_events
   if not events then return cb() end
 
   events:suppress_events_for_callback(cb)

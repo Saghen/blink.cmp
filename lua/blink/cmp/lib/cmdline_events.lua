@@ -1,29 +1,29 @@
---- @class blink.cmp.CommandEvents
+--- @class blink.cmp.CmdlineEvents
 --- @field has_context fun(): boolean
 --- @field ignore_next_text_changed boolean
 --- @field ignore_next_cursor_moved boolean
 ---
---- @field new fun(): blink.cmp.CommandEvents
---- @field listen fun(self: blink.cmp.CommandEvents, opts: blink.cmp.CommandEventsListener)
---- @field suppress_events_for_callback fun(self: blink.cmp.CommandEvents, cb: fun())
+--- @field new fun(): blink.cmp.CmdlineEvents
+--- @field listen fun(self: blink.cmp.CmdlineEvents, opts: blink.cmp.CmdlineEventsListener)
+--- @field suppress_events_for_callback fun(self: blink.cmp.CmdlineEvents, cb: fun())
 
---- @class blink.cmp.CommandEventsListener
+--- @class blink.cmp.CmdlineEventsListener
 --- @field on_char_added fun(char: string, is_ignored: boolean)
 --- @field on_cursor_moved fun(event: 'CursorMovedI' | 'InsertEnter', is_ignored: boolean)
 --- @field on_leave fun()
 
---- @type blink.cmp.CommandEvents
+--- @type blink.cmp.CmdlineEvents
 --- @diagnostic disable-next-line: missing-fields
-local command_events = {}
+local cmdline_events = {}
 
-function command_events.new()
+function cmdline_events.new()
   return setmetatable({
     ignore_next_text_changed = false,
     ignore_next_cursor_moved = false,
-  }, { __index = command_events })
+  }, { __index = cmdline_events })
 end
 
-function command_events:listen(opts)
+function cmdline_events:listen(opts)
   local previous_cmdline = ''
 
   vim.api.nvim_create_autocmd('CmdlineEnter', {
@@ -85,7 +85,7 @@ end
 
 --- Suppresses autocmd events for the duration of the callback
 --- HACK: there's likely edge cases with this
-function command_events:suppress_events_for_callback(cb)
+function cmdline_events:suppress_events_for_callback(cb)
   local cursor_before = vim.fn.getcmdpos()
   local text_before = vim.fn.getcmdline()
 
@@ -101,4 +101,4 @@ function command_events:suppress_events_for_callback(cb)
   self.ignore_next_cursor_moved = cursor_after ~= cursor_before
 end
 
-return command_events
+return cmdline_events

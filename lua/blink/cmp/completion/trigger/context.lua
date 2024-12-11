@@ -72,23 +72,23 @@ function context:within_query_bounds(cursor)
   return row == bounds.line_number and col >= bounds.start_col and col <= bounds.end_col
 end
 
-function context.get_mode() return vim.api.nvim_get_mode().mode == 'c' and 'command' or 'default' end
+function context.get_mode() return vim.api.nvim_get_mode().mode == 'c' and 'cmdline' or 'default' end
 
 function context.get_cursor()
-  return context.get_mode() == 'command' and { 1, vim.fn.getcmdpos() - 1 } or vim.api.nvim_win_get_cursor(0)
+  return context.get_mode() == 'cmdline' and { 1, vim.fn.getcmdpos() - 1 } or vim.api.nvim_win_get_cursor(0)
 end
 
 function context.set_cursor(cursor)
   local mode = context.get_mode()
   if mode == 'default' then return vim.api.nvim_win_set_cursor(0, cursor) end
 
-  assert(mode == 'command', 'Unsupported mode for setting cursor: ' .. mode)
-  assert(cursor[1] == 1, 'Cursor must be on the first line in command mode')
+  assert(mode == 'cmdline', 'Unsupported mode for setting cursor: ' .. mode)
+  assert(cursor[1] == 1, 'Cursor must be on the first line in cmdline mode')
   vim.fn.setcmdpos(cursor[2])
 end
 
 function context.get_line()
-  return context.get_mode() == 'command' and vim.fn.getcmdline()
+  return context.get_mode() == 'cmdline' and vim.fn.getcmdline()
     or vim.api.nvim_buf_get_lines(0, context.get_cursor()[1] - 1, context.get_cursor()[1], false)[1]
 end
 

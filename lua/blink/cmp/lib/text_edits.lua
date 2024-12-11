@@ -9,8 +9,8 @@ function text_edits.apply(edits)
   local mode = context.get_mode()
   if mode == 'default' then return vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8') end
 
-  assert(mode == 'command', 'Unsupported mode for text edits: ' .. mode)
-  assert(#edits == 1, 'Command mode only supports one text edit. Contributions welcome!')
+  assert(mode == 'cmdline', 'Unsupported mode for text edits: ' .. mode)
+  assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
 
   local edit = edits[1]
   local line = context.get_line()

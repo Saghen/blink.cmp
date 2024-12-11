@@ -67,8 +67,8 @@ function apply.keymap_to_current_buffer(keys_to_commands)
   end
 end
 
-function apply.command_mode_keymaps(keys_to_commands)
-  -- command mode: uses only insert commands
+function apply.cmdline_keymaps(keys_to_commands)
+  -- cmdline mode: uses only insert commands
   for key, commands in pairs(keys_to_commands) do
     local has_insert_command = false
     for _, command in ipairs(commands) do

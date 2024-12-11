@@ -1,4 +1,4 @@
-local regex = require('blink.cmp.sources.command.regex')
+local regex = require('blink.cmp.sources.cmdline.regex')
 
 --- @class blink.cmp.Source
 local cmdline = {}

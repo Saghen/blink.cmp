@@ -138,7 +138,7 @@ function menu.update_position()
 end
 
 local redraw_queued = false
---- In command mode, the window won't be redrawn automatically so we redraw ourselves on schedule
+--- In cmdline mode, the window won't be redrawn automatically so we redraw ourselves on schedule
 function menu.redraw_if_needed()
   if vim.api.nvim_get_mode().mode ~= 'c' or menu.win:get_win() == nil then return end
   if redraw_queued then return end

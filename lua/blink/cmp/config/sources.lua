@@ -16,7 +16,7 @@
 --- ```
 --- @field default string[] | fun(): string[]
 --- @field per_filetype table<string, string[] | fun(): string[]>
---- @field command string[] | fun(): string[]
+--- @field cmdline string[] | fun(): string[]
 --- @field providers table<string, blink.cmp.SourceProviderConfig>
 
 --- @class blink.cmp.SourceProviderConfig
@@ -40,10 +40,11 @@ local sources = {
   default = {
     default = { 'lsp', 'path', 'snippets', 'buffer' },
     per_filetype = {},
-    command = function()
+    cmdline = function()
       local type = vim.fn.getcmdtype()
       if type == '/' or type == '?' then return { 'buffer' } end
-      return { 'command' }
+      if type == ':' then return { 'cmdline' } end
+      return {}
     end,
     providers = {
       lsp = {
@@ -70,9 +71,9 @@ local sources = {
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
       },
-      command = {
-        name = 'Command',
-        module = 'blink.cmp.sources.command',
+      cmdline = {
+        name = 'cmdline',
+        module = 'blink.cmp.sources.cmdline',
       },
     },
   },
@@ -82,6 +83,7 @@ function sources.validate(config)
   validate('sources', {
     default = { config.default, { 'function', 'table' } },
     per_filetype = { config.per_filetype, 'table' },
+    cmdline = { config.cmdline, { 'function', 'table' } },
     providers = { config.providers, 'table' },
   })
   assert(

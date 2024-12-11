@@ -1,4 +1,4 @@
---- @alias blink.cmp.Mode 'command' | 'default'
+--- @alias blink.cmp.Mode 'cmdline' | 'default'
 
 --- @class blink.cmp.CompletionItem : lsp.CompletionItem
 --- @field score_offset? number
