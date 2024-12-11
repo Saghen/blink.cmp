@@ -23,7 +23,7 @@ function sort.score(a, b)
 end
 
 function sort.kind(a, b)
-  if a.kind == b.kind then return end
+  if not (a.kind and b.kind) or a.kind == b.kind then return end
   return a.kind < b.kind
 end
 
