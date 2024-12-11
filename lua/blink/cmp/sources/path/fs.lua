@@ -46,13 +46,7 @@ function fs.fs_stat_all(cwd, entries)
       end)
     )
   end
-  return async.task.await_all(tasks):map(function(tasks_results)
-    local resolved_entries = {}
-    for _, entry in ipairs(tasks_results) do
-      if entry.status == async.STATUS.COMPLETED then table.insert(resolved_entries, entry.result) end
-    end
-    return resolved_entries
-  end)
+  return async.task.await_all(tasks)
 end
 
 --- @param path string
