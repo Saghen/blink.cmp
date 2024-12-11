@@ -28,6 +28,7 @@ local menu = {
     cursorline = false,
     scrolloff = config.scrolloff,
     scrollbar = config.scrollbar,
+    filetype = 'blink-cmp-menu',
   }),
   items = {},
   context = nil,
