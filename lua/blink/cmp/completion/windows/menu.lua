@@ -28,7 +28,7 @@ local menu = {
     winhighlight = config.winhighlight,
     cursorline = false,
     scrolloff = config.scrolloff,
-    scrollbar = false,
+    scrollbar = config.scrollbar,
     filetype = 'blink-cmp-menu',
   }),
   items = {},
