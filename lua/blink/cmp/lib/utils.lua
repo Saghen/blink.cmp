@@ -105,4 +105,53 @@ function utils.slice(arr, start, finish)
   return sliced
 end
 
+--- Generates a random string of length n
+--- @param n number
+--- @return string
+function utils.random_string(n)
+  n = n or 10
+  local str = ''
+  for _ = 1, n do
+    str = str .. string.char(math.random(97, 122))
+  end
+  return str
+end
+
+--- Runs a function on an interval until it returns false or the timeout is reached
+--- @param fn fun(): false?
+--- @param opts { interval_ms: number, timeout_ms: number }
+--- @return fun() Cancels the timer
+function utils.run_on_interval(fn, opts)
+  local start_time = vim.uv.now()
+  local timer = vim.uv.new_timer()
+
+  local function check()
+    -- Check if we've exceeded the timeout
+    if (vim.uv.now() - start_time) >= opts.timeout_ms then
+      timer:stop()
+      timer:close()
+      return
+    end
+
+    -- Run the function and check its result
+    local result = fn()
+    if result == false then
+      timer:stop()
+      timer:close()
+      return
+    end
+  end
+
+  -- Run immediately first
+  check()
+
+  -- Then set up the interval
+  timer:start(0, opts.interval_ms, vim.schedule_wrap(check))
+
+  return function()
+    timer:stop()
+    timer:close()
+  end
+end
+
 return utils
