@@ -1,13 +1,20 @@
 local config = require('blink.cmp.config')
 local context = require('blink.cmp.completion.trigger.context')
+local utils = require('blink.cmp.lib.utils')
 
 local text_edits = {}
 
 --- Applies one or more text edits to the current buffer, assuming utf-8 encoding
 --- @param edits lsp.TextEdit[]
-function text_edits.apply(edits)
+--- @param offset number
+function text_edits.apply(edits, offset)
   local mode = context.get_mode()
-  if mode == 'default' then return vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8') end
+  local cursor = text_edits.get_post_apply_cursor(edits, offset)
+  if mode == 'default' then
+    vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8')
+    vim.api.nvim_win_set_cursor(0, cursor)
+    return
+  end
 
   assert(mode == 'cmdline', 'Unsupported mode for text edits: ' .. mode)
   assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
@@ -17,9 +24,41 @@ function text_edits.apply(edits)
   local edited_line = line:sub(1, edit.range.start.character)
     .. edit.newText
     .. line:sub(edit.range['end'].character + 1)
-  -- FIXME: for some reason, we have to set the cursor here, instead of later,
-  -- because this will override the cursor position set later
-  vim.fn.setcmdline(edited_line, edit.range.start.character + #edit.newText + 1)
+  vim.fn.setcmdline(edited_line, cursor[2])
+end
+
+--- Gets the cursor position after applying the text edits
+--- @param edits lsp.TextEdit[]
+--- @param offset number
+--- @return number[]
+function text_edits.get_post_apply_cursor(edits, offset)
+  local mode = context.get_mode()
+  local cursor = context.get_cursor()
+  local cursor_row = cursor[1] - 1 -- convert to 0-indexed
+  local cursor_col = cursor[2] -- already 0-indexed
+  if mode == 'default' then
+    -- Get the first edit that intersects with the cursor
+    local edit = utils.find(edits, function(edit)
+      if edit.range.start.line == cursor_row then
+        if edit.range.start.line ~= edit.range['end'].line then return true end
+        return edit.range.start.character >= cursor_col and edit.range['end'].character <= cursor_col
+      end
+      if edit.range['end'].line + 1 == cursor_row then return edit.range['end'].character >= cursor_col end
+      return edit.range.start.line + 1 >= cursor_row and edit.range['end'].line + 1 <= cursor_row
+    end)
+    if not edit then return cursor end
+
+    -- Move the cursor to the end of the edit
+    local lines = vim.split(edit.newText, '\n')
+    return { edit.range.start.line + #lines, edit.range.start.character + #lines[#lines] + offset }
+  end
+
+  assert(mode == 'cmdline', 'Unsupported mode for text edits: ' .. mode)
+  assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
+
+  -- TODO: support multiple edits in cmdline mode
+  local edit = edits[1]
+  return { 1, edit.range.start.character + #edit.newText + 1 + offset }
 end
 
 ------- Undo -------

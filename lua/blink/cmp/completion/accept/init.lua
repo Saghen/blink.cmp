@@ -50,17 +50,15 @@ local function accept(ctx, item, callback)
         local temp_text_edit = vim.deepcopy(item.textEdit)
         temp_text_edit.newText = ''
         table.insert(all_text_edits, temp_text_edit)
-        text_edits_lib.apply(all_text_edits)
+        text_edits_lib.apply(all_text_edits, 0)
 
         -- Expand the snippet
         require('blink.cmp.config').snippets.expand(item.textEdit.newText)
 
-      -- OR Normal: Apply the text edit and move the cursor
+      -- Normal (non-snippet)
       else
         table.insert(all_text_edits, item.textEdit)
-        text_edits_lib.apply(all_text_edits)
-        -- TODO: should move the cursor only by the offset since text edit handles everything else?
-        ctx.set_cursor({ ctx.get_cursor()[1], item.textEdit.range.start.character + #item.textEdit.newText + offset })
+        text_edits_lib.apply(all_text_edits, offset)
       end
 
       -- Let the source execute the item itself
