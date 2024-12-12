@@ -941,7 +941,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 ## Special Thanks
 
-- [@hrsh7th](https://github.com/hrsh7th/) nvim-cmp used as inspiration and nvim-path implementation modified for path source
+- [@hrsh7th](https://github.com/hrsh7th/) nvim-cmp used as inspiration and cmp-path/cmp-cmdline implementations modified for path/cmdline sources
 - [@garymjr](https://github.com/garymjr) nvim-snippets implementation modified for snippets source
 - [@redxtech](https://github.com/redxtech) Help with design and testing
 - [@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing
