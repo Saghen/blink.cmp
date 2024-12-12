@@ -21,9 +21,9 @@ end
 function text_lib.set_width(text, width, component)
   local length = vim.api.nvim_strwidth(text)
   if length > width then
-    return renderer.truncate_text(text, width, component.ellipsis)
+    return text_lib.truncate(text, width, component.ellipsis)
   elseif length < width then
-    return renderer.pad_text(text, width)
+    return text_lib.pad(text, width)
   else
     return text
   end

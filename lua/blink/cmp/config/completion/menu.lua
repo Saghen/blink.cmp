@@ -86,7 +86,10 @@ local window = {
 
         label = {
           width = { fill = true, max = 60 },
-          text = function(ctx) return ctx.label .. ctx.label_detail end,
+          text = function(ctx)
+            local label = (ctx.label .. ctx.label_detail):gsub('…', '…' .. ctx.icon_gap)
+            return label
+          end,
           highlight = function(ctx)
             -- label and label details
             local label = ctx.label
