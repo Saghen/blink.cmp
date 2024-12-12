@@ -7,7 +7,8 @@
 --- @field cmdline_events blink.cmp.CmdlineEvents
 --- @field current_context_id number
 --- @field context? blink.cmp.Context
---- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.Context, prefetch: boolean }>
+--- @field prefetch? boolean
+--- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.Context }>
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
 ---
 --- @field activate fun()
@@ -190,10 +191,9 @@ function trigger.show(opts)
 
   trigger.context =
     context.new({ id = trigger.current_context_id, providers = providers, trigger_character = opts.trigger_character })
+  trigger.prefetch = opts.prefetch == true
 
-  if opts.send_upstream ~= false then
-    trigger.show_emitter:emit({ context = trigger.context, prefetch = opts.prefetch == true })
-  end
+  if opts.send_upstream ~= false then trigger.show_emitter:emit({ context = trigger.context }) end
 end
 
 function trigger.hide()
