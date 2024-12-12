@@ -73,6 +73,8 @@
     -- elsewhere in your config, without redefining it, via `opts_extend`
     sources = {
       default = { 'lsp', 'path', 'snippets', 'buffer' },
+      -- optionally disable cmdline completions
+      -- cmdline = {},
     },
 
     -- experimental signature help support
