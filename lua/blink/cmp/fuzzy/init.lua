@@ -7,11 +7,15 @@ local fuzzy = {
 }
 
 function fuzzy.init_db()
+  if fuzzy.has_init_db then return end
+
   fuzzy.rust.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
 
   vim.api.nvim_create_autocmd('VimLeavePre', {
     callback = fuzzy.rust.destroy_db,
   })
+
+  fuzzy.has_init_db = true
 end
 
 ---@param item blink.cmp.CompletionItem
