@@ -31,8 +31,10 @@ function keymap.setup()
     require('blink.cmp.keymap.apply').keymap_to_current_buffer(mappings)
   end
 
-  -- Always apply cmdline keymaps since they're global
-  require('blink.cmp.keymap.apply').cmdline_keymaps(mappings)
+  -- Conditionally apply cmdline keymaps based on user config
+  if type(require('blink.cmp.config').sources.cmdline) ~= 'table' then
+    require('blink.cmp.keymap.apply').cmdline_keymaps(mappings)
+  end
 end
 
 return keymap
