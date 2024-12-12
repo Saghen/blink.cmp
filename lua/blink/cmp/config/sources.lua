@@ -127,6 +127,8 @@ function sources.validate_provider(id, provider)
     module = { provider.module, 'string' },
     enabled = { provider.enabled, { 'boolean', 'function' }, true },
     opts = { provider.opts, 'table', true },
+    async = { provider.async, { 'boolean', 'function' }, true },
+    timeout_ms = { provider.timeout_ms, { 'number', 'function' }, true },
     transform_items = { provider.transform_items, 'function', true },
     should_show_items = { provider.should_show_items, { 'boolean', 'function' }, true },
     max_items = { provider.max_items, { 'number', 'function' }, true },
