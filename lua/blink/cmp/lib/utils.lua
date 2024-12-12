@@ -89,18 +89,6 @@ function utils.find_idx(arr, predicate)
   return nil
 end
 
---- Finds an item in an array using a predicate function
---- @generic T
---- @param arr T[]
---- @param predicate fun(item: T): boolean
---- @return T | nil
-function utils.find(arr, predicate)
-  for _, v in ipairs(arr) do
-    if predicate(v) then return v end
-  end
-  return nil
-end
-
 --- Slices an array
 --- @generic T
 --- @param arr T[]
