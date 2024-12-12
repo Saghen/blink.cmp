@@ -73,13 +73,14 @@ function list:append(response)
     self.items = {}
   end
 
-  -- add non-lsp metadata
+  -- add metadata and default kind
   local source_score_offset = self.provider.config.score_offset(self.context) or 0
   for _, item in ipairs(response.items) do
     item.score_offset = (item.score_offset or 0) + source_score_offset
     item.cursor_column = self.context.cursor[2]
     item.source_id = self.provider.id
     item.source_name = self.provider.name
+    item.kind = item.kind or require('blink.cmp.types').CompletionItemKind.Property
   end
 
   -- combine with existing items
