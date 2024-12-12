@@ -63,8 +63,7 @@ end
 function docs.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
   local Range = require('vim.treesitter._range')
 
-  local root_lang = vim.treesitter.language.get_lang(filetype)
-  if root_lang == nil then return end
+  local root_lang = vim.treesitter.language.get_lang(filetype) or "markdown"
 
   local success, trees = pcall(vim.treesitter.get_parser, bufnr, root_lang)
   if not success or not trees then return end
