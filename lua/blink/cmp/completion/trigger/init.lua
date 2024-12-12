@@ -98,7 +98,7 @@ function trigger.activate()
       trigger.show()
 
     -- prefetch completions without opening window on InsertEnter
-    elseif event == 'InsertEnter' then
+    elseif event == 'InsertEnter' and config.prefetch_on_insert then
       trigger.show({ prefetch = true })
 
     -- otherwise hide

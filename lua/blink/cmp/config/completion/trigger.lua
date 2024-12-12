@@ -1,4 +1,5 @@
 --- @class (exact) blink.cmp.CompletionTriggerConfig
+--- @field prefetch_on_insert boolean When true, will prefetch the completion items when entering insert mode
 --- @field show_in_snippet boolean When false, will not show the completion window when in a snippet
 --- @field show_on_keyword boolean When true, will show the completion window after typing a character that matches the `keyword.regex`
 --- @field show_on_trigger_character boolean When true, will show the completion window after typing a trigger character
@@ -11,6 +12,7 @@ local validate = require('blink.cmp.config.utils').validate
 local trigger = {
   --- @type blink.cmp.CompletionTriggerConfig
   default = {
+    prefetch_on_insert = false,
     show_in_snippet = true,
     show_on_keyword = true,
     show_on_trigger_character = true,
@@ -23,6 +25,7 @@ local trigger = {
 
 function trigger.validate(config)
   validate('completion.trigger', {
+    prefetch_on_insert = { config.prefetch_on_insert, 'boolean' },
     show_in_snippet = { config.show_in_snippet, 'boolean' },
     show_on_keyword = { config.show_on_keyword, 'boolean' },
     show_on_trigger_character = { config.show_on_trigger_character, 'boolean' },
