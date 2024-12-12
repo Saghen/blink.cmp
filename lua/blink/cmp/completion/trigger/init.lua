@@ -7,14 +7,14 @@
 --- @field cmdline_events blink.cmp.CmdlineEvents
 --- @field current_context_id number
 --- @field context? blink.cmp.Context
---- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.Context }>
+--- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.Context, prefetch: boolean }>
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
 ---
 --- @field activate fun()
 --- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
---- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[] })
+--- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[], prefetch?: boolean })
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
 --- @field get_context_bounds fun(regex: vim.regex, line: string, cursor: number[]): blink.cmp.ContextBounds
@@ -95,6 +95,10 @@ function trigger.activate()
     elseif is_on_keyword_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
       trigger.context = nil
       trigger.show()
+
+    -- prefetch completions without opening window on InsertEnter
+    elseif event == 'InsertEnter' then
+      trigger.show({ prefetch = true })
 
     -- otherwise hide
     else
@@ -187,7 +191,9 @@ function trigger.show(opts)
   trigger.context =
     context.new({ id = trigger.current_context_id, providers = providers, trigger_character = opts.trigger_character })
 
-  if opts.send_upstream ~= false then trigger.show_emitter:emit({ context = trigger.context }) end
+  if opts.send_upstream ~= false then
+    trigger.show_emitter:emit({ context = trigger.context, prefetch = opts.prefetch == true })
+  end
 end
 
 function trigger.hide()

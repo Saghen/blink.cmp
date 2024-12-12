@@ -29,6 +29,8 @@ function completion.setup()
     vim.schedule(function()
       -- since this was performed asynchronously, we check if the context has changed
       if trigger.context == nil or event.context.id ~= trigger.context.id then return end
+      -- don't show the list if prefetching results
+      if event.prefetch then return end
       list.show(event.context, event.items)
     end)
   end)
