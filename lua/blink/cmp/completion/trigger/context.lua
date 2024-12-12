@@ -8,6 +8,7 @@
 --- @field length number
 
 --- @class blink.cmp.Context
+--- @field mode blink.cmp.Mode
 --- @field id number
 --- @field bufnr number
 --- @field cursor number[]
