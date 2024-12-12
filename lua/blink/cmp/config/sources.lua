@@ -17,14 +17,19 @@
 --- @field default string[] | fun(): string[]
 --- @field per_filetype table<string, string[] | fun(): string[]>
 --- @field cmdline string[] | fun(): string[]
+---
+--- @field transform_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
+--- @field min_keyword_length number | fun(ctx: blink.cmp.Context): number Minimum number of characters in the keyword to trigger
+---
 --- @field providers table<string, blink.cmp.SourceProviderConfig>
 
 --- @class blink.cmp.SourceProviderConfig
---- @field name? string
---- @field module? string
+--- @field name string
+--- @field module string
 --- @field enabled? boolean | fun(ctx?: blink.cmp.Context): boolean Whether or not to enable the provider
 --- @field opts? table
---- @field async? boolean Whether blink should wait for the source to return before showing the completions
+--- @field async? boolean | fun(ctx: blink.cmp.Context): boolean Whether blink should wait for the source to return before showing the completions
+--- @field timeout_ms? number | fun(ctx: blink.cmp.Context): number How long to wait for the provider to return before showing completions and treating it as asynchronous
 --- @field transform_items? fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
 --- @field should_show_items? boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether or not to show the items
 --- @field max_items? number | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): number Maximum number of items to display in the menu
@@ -48,6 +53,17 @@ local sources = {
       if type == ':' then return { 'cmdline' } end
       return {}
     end,
+
+    transform_items = function(_, items)
+      for _, item in ipairs(items) do
+        if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
+          item.score_offset = item.score_offset - 3
+        end
+      end
+      return items
+    end,
+    min_keyword_length = 0,
+
     providers = {
       lsp = {
         name = 'LSP',
@@ -62,12 +78,10 @@ local sources = {
       snippets = {
         name = 'Snippets',
         module = 'blink.cmp.sources.snippets',
-        score_offset = -3,
       },
       luasnip = {
         name = 'Luasnip',
         module = 'blink.cmp.sources.luasnip',
-        score_offset = -3,
       },
       buffer = {
         name = 'Buffer',

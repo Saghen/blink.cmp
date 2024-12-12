@@ -1,5 +1,6 @@
 --- @class blink.cmp.SourceProviderConfigWrapper
 --- @field new fun(config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProviderConfigWrapper
+---
 --- @field name string
 --- @field module string
 --- @field enabled fun(): boolean
@@ -12,13 +13,15 @@
 --- @field fallbacks fun(ctx: blink.cmp.Context): string[]
 --- @field score_offset fun(ctx: blink.cmp.Context): number
 
---- @class blink.cmp.SourceProviderConfig
+--- @class blink.cmp.SourceProviderConfigWrapper
 --- @diagnostic disable-next-line: missing-fields
 local wrapper = {}
 
 function wrapper.new(config)
   local function call_or_get(fn_or_val, default)
-    if fn_or_val == nil then return function() return default end end
+    if fn_or_val == nil then
+      return function() return default end
+    end
     return function(...)
       if type(fn_or_val) == 'function' then return fn_or_val(...) end
       return fn_or_val
@@ -30,7 +33,7 @@ function wrapper.new(config)
   self.module = config.module
   self.enabled = call_or_get(config.enabled, true)
   self.async = call_or_get(config.async, false)
-  self.timeout_ms = call_or_get(config.timeout, 2000)
+  self.timeout_ms = call_or_get(config.timeout_ms, 2000)
   self.transform_items = config.transform_items or function(_, items) return items end
   self.should_show_items = call_or_get(config.should_show_items, true)
   self.max_items = call_or_get(config.max_items, nil)

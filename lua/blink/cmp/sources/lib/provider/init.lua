@@ -94,7 +94,14 @@ end
 
 function source:should_show_items(context, items)
   -- if keyword length is configured, check if the context is long enough
-  local min_keyword_length = self.config.min_keyword_length(context)
+  local global_min_keyword_length_func_or_num = require('blink.cmp.config').sources.min_keyword_length
+  local global_min_keyword_length = type(global_min_keyword_length_func_or_num) == 'function'
+      and global_min_keyword_length_func_or_num(context)
+    or global_min_keyword_length_func_or_num
+  --- @cast global_min_keyword_length number
+  local provider_min_keyword_length = self.config.min_keyword_length(context)
+
+  local min_keyword_length = math.max(provider_min_keyword_length, global_min_keyword_length)
   local current_keyword_length = context.bounds.length
   if current_keyword_length < min_keyword_length then return false end
 
@@ -129,7 +136,9 @@ end
 --- Execute ---
 
 function source:execute(context, item)
-  if self.module.execute == nil then return async.task.new(function(resolve) resolve() end) end
+  if self.module.execute == nil then
+    return async.task.new(function(resolve) resolve() end)
+  end
   return async.task.new(function(resolve) self.module:execute(context, item, resolve) end)
 end
 

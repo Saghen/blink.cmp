@@ -279,6 +279,8 @@ MiniDeps.add({
     },
 
     trigger = {
+      -- When true, will prefetch the completion items when entering insert mode
+      prefetch_on_insert = false,
       -- When false, will not show the completion window automatically when in a snippet
       show_in_snippet = true,
       -- When true, will show the completion window after typing a character that matches the `keyword.regex`
@@ -587,6 +589,24 @@ MiniDeps.add({
       return {}
     end,
 
+    -- Function to use when transforming the items before they're returned for all providers
+    -- The default will lower the score for snippets to sort them lower in the list
+    transform_items = function(_, items)
+      for _, item in ipairs(items) do
+        if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
+          item.score_offset = item.score_offset - 3
+        end
+      end
+      return items
+    end,
+    -- Minimum number of characters in the keyword to trigger all providers
+    -- May also be `function(ctx: blink.cmp.Context): number`
+    min_keyword_length = 0,
+    -- Example for setting a minimum keyword length for markdown files
+    -- min_keyword_length = function()
+    --   return vim.bo.filetype == 'markdown' and 2 or 0
+    -- end,
+
     -- Please see https://github.com/Saghen/blink.compat for using `nvim-cmp` sources
     providers = {
       lsp = {
@@ -623,7 +643,6 @@ MiniDeps.add({
       snippets = {
         name = 'Snippets',
         module = 'blink.cmp.sources.snippets',
-        score_offset = -3,
         opts = {
           friendly_snippets = true,
           search_paths = { vim.fn.stdpath('config') .. '/snippets' },
@@ -639,6 +658,10 @@ MiniDeps.add({
         -- enabled = function(ctx)
         --   return ctx ~= nil and ctx.trigger.kind == vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter
         -- end,
+      },
+      luasnip = {
+        name = 'Luasnip',
+        module = 'blink.cmp.sources.luasnip',
       },
       buffer = {
         name = 'Buffer',

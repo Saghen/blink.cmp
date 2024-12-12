@@ -89,9 +89,10 @@ function list:append(response)
   vim.list_extend(new_items, response.items)
   self.items = new_items
 
-  -- if the user provided a transform_items function, run it
+  -- run provider-local and global transform_items functions
   if self.provider.config.transform_items ~= nil then
     self.items = self.provider.config.transform_items(self.context, self.items)
+    self.items = require('blink.cmp.config').sources.transform_items(self.context, self.items)
   end
 
   self:emit()
