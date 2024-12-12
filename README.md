@@ -75,9 +75,6 @@
       default = { 'lsp', 'path', 'snippets', 'buffer' },
     },
 
-    -- experimental auto-brackets support
-    -- completion = { accept = { auto_brackets = { enabled = true } } }
-
     -- experimental signature help support
     -- signature = { enabled = true }
   },
@@ -343,7 +340,7 @@ MiniDeps.add({
       -- Experimental auto-brackets support
       auto_brackets = {
         -- Whether to auto-insert brackets for functions
-        enabled = false,
+        enabled = true,
         -- Default brackets to use for unknown languages
         default_brackets = { '(', ')' },
         -- Overrides the default blocked filetypes
