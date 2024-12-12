@@ -45,7 +45,7 @@ local window = {
     cmdline_position = function()
       if vim.g.ui_cmdline_pos ~= nil then
         local pos = vim.g.ui_cmdline_pos -- (1, 0)-indexed
-        return { pos.row - 1, pos.col }
+        return { pos[1] - 1, pos[2] }
       end
       return { vim.o.lines - 1, 0 }
     end,
