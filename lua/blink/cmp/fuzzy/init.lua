@@ -21,7 +21,11 @@ end
 ---@param item blink.cmp.CompletionItem
 function fuzzy.access(item)
   fuzzy.init_db()
-  fuzzy.rust.access(item)
+
+  -- writing to the db takes ~10ms, so schedule writes in another thread
+  vim.uv
+    .new_work(function(itm) require('blink.cmp.fuzzy.rust').access(vim.mpack.decode(itm)) end, function() end)
+    :queue(vim.mpack.encode(item))
 end
 
 ---@param lines string
