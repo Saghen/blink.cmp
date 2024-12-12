@@ -579,6 +579,17 @@ MiniDeps.add({
       -- lua = { 'lsp', 'path' },
     },
 
+    -- By default, we choose providers for the cmdline based on the current cmdtype
+    -- You may disable cmdline completions by replacing this with an empty table
+    cmdline = function()
+      local type = vim.fn.getcmdtype()
+      -- Search forward and backward
+      if type == '/' or type == '?' then return { 'buffer' } end
+      -- Commands
+      if type == ':' then return { 'cmdline' } end
+      return {}
+    end,
+
     -- Please see https://github.com/Saghen/blink.compat for using `nvim-cmp` sources
     providers = {
       lsp = {
