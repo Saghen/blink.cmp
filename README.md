@@ -381,6 +381,15 @@ MiniDeps.add({
       -- Whether to automatically show the window when new completion items are available
       auto_show = true,
 
+      -- Screen coordinates of the command line
+      cmdline_position = function()
+        if vim.g.ui_cmdline_pos ~= nil then
+          local pos = vim.g.ui_cmdline_pos -- (1, 0)-indexed
+          return { pos.row - 1, pos.col }
+        end
+        return { vim.o.lines - 1, 0 }
+      end,
+
       -- Controls how the completion items are rendered on the popup window
       draw = {
         -- Aligns the keyword you've typed to a component in the menu

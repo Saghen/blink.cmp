@@ -10,7 +10,7 @@
 --- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space
 --- @field order blink.cmp.CompletionMenuOrderConfig TODO: implement
 --- @field auto_show boolean Whether to automatically show the window when new completion items are available
---- @field cmdline_position number[] | fun(): number[] Screen coordinates (0-indexed) of the command line
+--- @field cmdline_position fun(): number[] Screen coordinates (0-indexed) of the command line
 --- @field draw blink.cmp.Draw Controls how the completion items are rendered on the popup window
 
 --- @class (exact) blink.cmp.CompletionMenuOrderConfig
@@ -42,7 +42,13 @@ local window = {
     auto_show = true,
 
     -- Screen coordinates of the command line
-    cmdline_position = { vim.o.lines - 1, 0 },
+    cmdline_position = function()
+      if vim.g.ui_cmdline_pos ~= nil then
+        local pos = vim.g.ui_cmdline_pos -- (1, 0)-indexed
+        return { pos.row - 1, pos.col }
+      end
+      return { vim.o.lines - 1, 0 }
+    end,
 
     -- Controls how the completion items are rendered on the popup window
     draw = {
@@ -134,7 +140,7 @@ function window.validate(config)
     scrollbar = { config.scrollbar, 'boolean' },
     direction_priority = { config.direction_priority, 'table' },
     order = { config.order, 'table' },
-    cmdline_position = { config.cmdline_position, { 'function', 'table' } },
+    cmdline_position = { config.cmdline_position, 'function' },
     draw = { config.draw, 'table' },
   })
   validate('completion.window.order', {

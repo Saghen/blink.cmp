@@ -230,9 +230,7 @@ function win.get_cursor_screen_position()
   -- command line
   if vim.api.nvim_get_mode().mode == 'c' then
     local config = require('blink.cmp.config').completion.menu
-    local cmdline_position = type(config.cmdline_position) == 'function' and config.cmdline_position()
-      or config.cmdline_position
-    --- @cast cmdline_position number[]
+    local cmdline_position = config.cmdline_position()
 
     return {
       distance_from_top = cmdline_position[1] - 1,

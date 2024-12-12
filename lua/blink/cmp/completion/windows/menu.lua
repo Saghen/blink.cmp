@@ -116,10 +116,7 @@ function menu.update_position()
   local row = pos.direction == 's' and 1 or -pos.height - border_size.vertical
 
   if vim.api.nvim_get_mode().mode == 'c' then
-    local cmdline_position = type(config.cmdline_position) == 'function' and config.cmdline_position()
-      or config.cmdline_position
-    --- @cast cmdline_position number[]
-
+    local cmdline_position = config.cmdline_position()
     vim.api.nvim_win_set_config(winnr, {
       relative = 'editor',
       row = cmdline_position[1] + row,
