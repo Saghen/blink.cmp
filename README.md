@@ -381,6 +381,15 @@ MiniDeps.add({
       -- Whether to automatically show the window when new completion items are available
       auto_show = true,
 
+      -- Screen coordinates of the command line
+      cmdline_position = function()
+        if vim.g.ui_cmdline_pos ~= nil then
+          local pos = vim.g.ui_cmdline_pos -- (1, 0)-indexed
+          return { pos.row - 1, pos.col }
+        end
+        return { vim.o.lines - 1, 0 }
+      end,
+
       -- Controls how the completion items are rendered on the popup window
       draw = {
         -- Aligns the keyword you've typed to a component in the menu
@@ -569,6 +578,17 @@ MiniDeps.add({
     per_filetype = {
       -- lua = { 'lsp', 'path' },
     },
+
+    -- By default, we choose providers for the cmdline based on the current cmdtype
+    -- You may disable cmdline completions by replacing this with an empty table
+    cmdline = function()
+      local type = vim.fn.getcmdtype()
+      -- Search forward and backward
+      if type == '/' or type == '?' then return { 'buffer' } end
+      -- Commands
+      if type == ':' then return { 'cmdline' } end
+      return {}
+    end,
 
     -- Please see https://github.com/Saghen/blink.compat for using `nvim-cmp` sources
     providers = {
@@ -921,7 +941,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 
 ## Special Thanks
 
-- [@hrsh7th](https://github.com/hrsh7th/) nvim-cmp used as inspiration and nvim-path implementation modified for path source
+- [@hrsh7th](https://github.com/hrsh7th/) nvim-cmp used as inspiration and cmp-path/cmp-cmdline implementations modified for path/cmdline sources
 - [@garymjr](https://github.com/garymjr) nvim-snippets implementation modified for snippets source
 - [@redxtech](https://github.com/redxtech) Help with design and testing
 - [@aaditya-sahay](https://github.com/aaditya-sahay) Help with rust, design and testing

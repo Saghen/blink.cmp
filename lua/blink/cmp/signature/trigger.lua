@@ -75,7 +75,10 @@ function trigger.activate()
 end
 
 function trigger.is_trigger_character(char, is_retrigger)
-  local res = require('blink.cmp.sources.lib').get_signature_help_trigger_characters()
+  -- TODO: should the get_mode() be moved to sources or somewhere else?
+  local mode = require('blink.cmp.completion.trigger.context').get_mode()
+
+  local res = require('blink.cmp.sources.lib').get_signature_help_trigger_characters(mode)
   local trigger_characters = is_retrigger and res.retrigger_characters or res.trigger_characters
   local is_trigger = vim.tbl_contains(trigger_characters, char)
 
@@ -87,8 +90,11 @@ function trigger.is_trigger_character(char, is_retrigger)
 end
 
 function trigger.show_if_on_trigger_character()
+  if require('blink.cmp.completion.trigger.context').get_mode() ~= 'default' then return end
+
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
+  -- TODO: accept a mode parameter here if we end up supporting more modes for signature help
   if trigger.is_trigger_character(char_under_cursor) then trigger.show({ trigger_character = char_under_cursor }) end
 end
 

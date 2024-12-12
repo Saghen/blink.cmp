@@ -15,7 +15,6 @@ function apply.keymap_to_current_buffer(keys_to_commands)
     if #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('i', key)
-
     apply.set('i', key, function()
       for _, command in ipairs(commands) do
         -- special case for fallback
@@ -36,7 +35,7 @@ function apply.keymap_to_current_buffer(keys_to_commands)
     ::continue::
   end
 
-  -- snippet mode
+  -- snippet mode: uses only snippet commands
   for key, commands in pairs(keys_to_commands) do
     local has_snippet_command = false
     for _, command in ipairs(commands) do
@@ -68,18 +67,61 @@ function apply.keymap_to_current_buffer(keys_to_commands)
   end
 end
 
+function apply.cmdline_keymaps(keys_to_commands)
+  -- cmdline mode: uses only insert commands
+  for key, commands in pairs(keys_to_commands) do
+    local has_insert_command = false
+    for _, command in ipairs(commands) do
+      has_insert_command = has_insert_command or not vim.tbl_contains(snippet_commands, command)
+    end
+    if not has_insert_command or #commands == 0 then goto continue end
+
+    local fallback = require('blink.cmp.keymap.fallback').wrap('c', key)
+    apply.set('c', key, function()
+      for _, command in ipairs(commands) do
+        -- special case for fallback
+        if command == 'fallback' then
+          return fallback()
+
+        -- run user defined functions
+        elseif type(command) == 'function' then
+          if command(require('blink.cmp')) then return end
+
+        -- otherwise, run the built-in command
+        elseif not vim.tbl_contains(snippet_commands, command) then
+          local did_run = require('blink.cmp')[command]()
+          if did_run then return end
+        end
+      end
+    end)
+
+    ::continue::
+  end
+end
+
 --- @param mode string
 --- @param key string
 --- @param callback fun(): string | nil
 function apply.set(mode, key, callback)
-  vim.api.nvim_buf_set_keymap(0, mode, key, '', {
-    callback = callback,
-    expr = true,
-    silent = true,
-    noremap = true,
-    replace_keycodes = false,
-    desc = 'blink.cmp',
-  })
+  if mode == 'c' then
+    vim.api.nvim_set_keymap(mode, key, '', {
+      callback = callback,
+      expr = true,
+      silent = true,
+      noremap = true,
+      replace_keycodes = false,
+      desc = 'blink.cmp',
+    })
+  else
+    vim.api.nvim_buf_set_keymap(0, mode, key, '', {
+      callback = callback,
+      expr = true,
+      silent = true,
+      noremap = true,
+      replace_keycodes = false,
+      desc = 'blink.cmp',
+    })
+  end
 end
 
 return apply

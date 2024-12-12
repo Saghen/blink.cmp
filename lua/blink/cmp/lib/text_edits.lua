@@ -1,9 +1,26 @@
 local config = require('blink.cmp.config')
+local context = require('blink.cmp.completion.trigger.context')
+
 local text_edits = {}
 
 --- Applies one or more text edits to the current buffer, assuming utf-8 encoding
 --- @param edits lsp.TextEdit[]
-function text_edits.apply(edits) vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8') end
+function text_edits.apply(edits)
+  local mode = context.get_mode()
+  if mode == 'default' then return vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8') end
+
+  assert(mode == 'cmdline', 'Unsupported mode for text edits: ' .. mode)
+  assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
+
+  local edit = edits[1]
+  local line = context.get_line()
+  local edited_line = line:sub(1, edit.range.start.character)
+    .. edit.newText
+    .. line:sub(edit.range['end'].character + 1)
+  -- FIXME: for some reason, we have to set the cursor here, instead of later,
+  -- because this will override the cursor position set later
+  vim.fn.setcmdline(edited_line, edit.range.start.character + #edit.newText + 1)
+end
 
 ------- Undo -------
 
@@ -145,14 +162,11 @@ end
 --- TODO: doesnt work when the item contains characters not included in the context regex
 function text_edits.guess(item)
   local word = item.insertText or item.label
+  local context = require('blink.cmp.completion.trigger.context')
 
   local keyword = config.completion.keyword
-  local range = require('blink.cmp.lib.utils').get_regex_around_cursor(
-    keyword.range,
-    keyword.regex,
-    keyword.exclude_from_prefix_regex
-  )
-  local current_line = vim.api.nvim_win_get_cursor(0)[1]
+  local range = context.get_regex_around_cursor(keyword.range, keyword.regex, keyword.exclude_from_prefix_regex)
+  local current_line = context.get_cursor()[1]
 
   -- convert to 0-index
   return {

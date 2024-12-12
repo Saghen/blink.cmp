@@ -8,7 +8,7 @@ local async = require('blink.cmp.lib.async')
 --- @field cached_items_by_provider table<string, blink.cmp.CompletionResponse> | nil
 --- @field on_completions_callback fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)
 ---
---- @field new fun(context: blink.cmp.Context, providers: table<string, blink.cmp.SourceProvider>, on_completions_callback: fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)): blink.cmp.SourcesContext
+--- @field new fun(context: blink.cmp.Context, providers: table<string, blink.cmp.SourceProvider>, on_completions_callback: fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)): blink.cmp.SourcesQueue
 --- @field get_cached_completions fun(self: blink.cmp.SourcesQueue): table<string, blink.cmp.CompletionResponse> | nil
 --- @field get_completions fun(self: blink.cmp.SourcesQueue, context: blink.cmp.Context)
 --- @field destroy fun(self: blink.cmp.SourcesQueue)

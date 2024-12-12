@@ -13,19 +13,21 @@
 --- @field source_id string
 --- @field source_name string
 
-local context = {}
+local draw_context = {}
 
+--- @param context blink.cmp.Context
 --- @param draw blink.cmp.Draw
 --- @param items blink.cmp.CompletionItem[]
 --- @return blink.cmp.DrawItemContext[]
-function context.get_from_items(draw, items)
-  local fuzzy = require('blink.cmp.fuzzy')
-  local matched_indices =
-    fuzzy.fuzzy_matched_indices(fuzzy.get_query(), vim.tbl_map(function(item) return item.label end, items))
+function draw_context.get_from_items(context, draw, items)
+  local matched_indices = require('blink.cmp.fuzzy').fuzzy_matched_indices(
+    context:get_keyword(),
+    vim.tbl_map(function(item) return item.label end, items)
+  )
 
   local ctxs = {}
   for idx, item in ipairs(items) do
-    ctxs[idx] = context.new(draw, idx, item, matched_indices[idx])
+    ctxs[idx] = draw_context.new(draw, idx, item, matched_indices[idx])
   end
   return ctxs
 end
@@ -35,7 +37,7 @@ end
 --- @param item blink.cmp.CompletionItem
 --- @param matched_indices number[]
 --- @return blink.cmp.DrawItemContext
-function context.new(draw, item_idx, item, matched_indices)
+function draw_context.new(draw, item_idx, item, matched_indices)
   local config = require('blink.cmp.config').appearance
   local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
   local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
@@ -70,4 +72,4 @@ function context.new(draw, item_idx, item, matched_indices)
   }
 end
 
-return context
+return draw_context
