@@ -54,17 +54,21 @@ function documentation.validate(config)
     update_delay_ms = { config.update_delay_ms, 'number' },
     treesitter_highlighting = { config.treesitter_highlighting, 'boolean' },
     window = { config.window, 'table' },
-  })
+  }, config)
+
   validate('completion.documentation.window', {
     min_width = { config.window.min_width, 'number' },
     max_width = { config.window.max_width, 'number' },
     max_height = { config.window.max_height, 'number' },
+    desired_min_width = { config.window.desired_min_width, 'number' },
+    desired_min_height = { config.window.desired_min_height, 'number' },
     border = { config.window.border, { 'string', 'table' } },
     winblend = { config.window.winblend, 'number' },
     winhighlight = { config.window.winhighlight, 'string' },
     scrollbar = { config.window.scrollbar, 'boolean' },
     direction_priority = { config.window.direction_priority, 'table' },
-  })
+  }, config.window)
+
   validate('completion.documentation.window.direction_priority', {
     menu_north = {
       config.window.direction_priority.menu_north,
@@ -88,7 +92,7 @@ function documentation.validate(config)
       end,
       'one of: "n", "s", "e", "w"',
     },
-  })
+  }, config.window.direction_priority)
 end
 
 return documentation

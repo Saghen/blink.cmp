@@ -48,7 +48,7 @@ function accept.validate(config)
   validate('completion.accept', {
     create_undo_point = { config.create_undo_point, 'boolean' },
     auto_brackets = { config.auto_brackets, 'table' },
-  })
+  }, config)
   validate('completion.accept.auto_brackets', {
     enabled = { config.auto_brackets.enabled, 'boolean' },
     default_brackets = { config.auto_brackets.default_brackets, 'table' },
@@ -57,16 +57,16 @@ function accept.validate(config)
     blocked_filetypes = { config.auto_brackets.blocked_filetypes, 'table' },
     kind_resolution = { config.auto_brackets.kind_resolution, 'table' },
     semantic_token_resolution = { config.auto_brackets.semantic_token_resolution, 'table' },
-  })
+  }, config.auto_brackets)
   validate('completion.accept.auto_brackets.kind_resolution', {
     enabled = { config.auto_brackets.kind_resolution.enabled, 'boolean' },
     blocked_filetypes = { config.auto_brackets.kind_resolution.blocked_filetypes, 'table' },
-  })
+  }, config.auto_brackets.kind_resolution)
   validate('completion.accept.auto_brackets.semantic_token_resolution', {
     enabled = { config.auto_brackets.semantic_token_resolution.enabled, 'boolean' },
     blocked_filetypes = { config.auto_brackets.semantic_token_resolution.blocked_filetypes, 'table' },
     timeout_ms = { config.auto_brackets.semantic_token_resolution.timeout_ms, 'number' },
-  })
+  }, config.auto_brackets.semantic_token_resolution)
 end
 
 return accept

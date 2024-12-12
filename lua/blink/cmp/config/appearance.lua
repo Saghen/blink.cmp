@@ -52,7 +52,7 @@ function appearance.validate(config)
     use_nvim_cmp_as_default = { config.use_nvim_cmp_as_default, 'boolean' },
     nerd_font_variant = { config.nerd_font_variant, 'string' },
     kind_icons = { config.kind_icons, 'table' },
-  })
+  }, config)
 end
 
 return appearance

@@ -129,20 +129,24 @@ function keymap.validate(config)
   }
   local presets = { 'default', 'super-tab', 'enter' }
 
-  vim.validate({ preset = {} })
   local validation_schema = {}
   for key, command_or_preset in pairs(config) do
     if key == 'preset' then
       validation_schema[key] = {
         command_or_preset,
         function(preset) return vim.tbl_contains(presets, preset) end,
-        '"preset" must be one of: ' .. table.concat(presets, ', '),
+        'one of: ' .. table.concat(presets, ', '),
       }
     else
       validation_schema[key] = {
         command_or_preset,
-        function(command) return vim.tbl_contains(commands, command) end,
-        '"' .. key .. '" must be one of: ' .. table.concat(commands, ', '),
+        function(key_commands)
+          for _, command in ipairs(key_commands) do
+            if type(command) ~= 'function' and not vim.tbl_contains(commands, command) then return false end
+          end
+          return true
+        end,
+        'commands must be one of: ' .. table.concat(commands, ', '),
       }
     end
   end

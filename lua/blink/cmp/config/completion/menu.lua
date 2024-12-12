@@ -132,7 +132,7 @@ local window = {
 }
 
 function window.validate(config)
-  validate('completion.window', {
+  validate('completion.menu', {
     enabled = { config.enabled, 'boolean' },
     min_width = { config.min_width, 'number' },
     max_height = { config.max_height, 'number' },
@@ -141,21 +141,27 @@ function window.validate(config)
     winhighlight = { config.winhighlight, 'string' },
     scrolloff = { config.scrolloff, 'number' },
     scrollbar = { config.scrollbar, 'boolean' },
-    direction_priority = { config.direction_priority, 'table' },
+    direction_priority = {
+      config.direction_priority,
+      function(direction_priority)
+        for _, direction in ipairs(direction_priority) do
+          if not vim.tbl_contains({ 'n', 's' }, direction) then return false end
+        end
+        return true
+      end,
+      'one of: "n", "s"',
+    },
     order = { config.order, 'table' },
+    auto_show = { config.auto_show, 'boolean' },
     cmdline_position = { config.cmdline_position, 'function' },
     draw = { config.draw, 'table' },
-  })
-  validate('completion.window.order', {
+  }, config)
+  validate('completion.menu.order', {
     n = { config.order.n, { 'string', 'nil' } },
     s = { config.order.s, { 'string', 'nil' } },
-  })
-  validate('completion.window.direction_priority', {
-    n = { config.direction_priority.n, { 'string', 'nil' } },
-    s = { config.direction_priority.s, { 'string', 'nil' } },
-  })
+  }, config.order)
 
-  validate('completion.window.draw', {
+  validate('completion.menu.draw', {
     align_to_component = {
       config.draw.align_to_component,
       function(align)
@@ -169,6 +175,7 @@ function window.validate(config)
       end,
       '"none" or one of the components defined in the "columns"',
     },
+
     padding = {
       config.draw.padding,
       function(padding)
@@ -180,6 +187,9 @@ function window.validate(config)
       'a number or a tuple of 2 numbers (i.e. [1, 2])',
     },
     gap = { config.draw.gap, 'number' },
+
+    treesitter = { config.draw.treesitter, 'boolean' },
+
     columns = {
       config.draw.columns,
       function(columns)
@@ -199,15 +209,15 @@ function window.validate(config)
         .. table.concat(vim.tbl_keys(config.draw.components), ', '),
     },
     components = { config.draw.components, 'table' },
-  })
+  }, config.draw)
 
   for component, definition in pairs(config.draw.components) do
-    validate('completion.window.draw.components.' .. component, {
+    validate('completion.menu.draw.components.' .. component, {
       ellipsis = { definition.ellipsis, 'boolean', true },
       width = { definition.width, 'table', true },
       text = { definition.text, 'function' },
       highlight = { definition.highlight, { 'string', 'function' }, true },
-    })
+    }, config.draw.components[component])
   end
 end
 

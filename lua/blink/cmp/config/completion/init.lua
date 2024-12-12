@@ -29,7 +29,7 @@ function completion.validate(config)
     menu = { config.menu, 'table' },
     documentation = { config.documentation, 'table' },
     ghost_text = { config.ghost_text, 'table' },
-  })
+  }, config)
   require('blink.cmp.config.completion.keyword').validate(config.keyword)
   require('blink.cmp.config.completion.trigger').validate(config.trigger)
   require('blink.cmp.config.completion.list').validate(config.list)

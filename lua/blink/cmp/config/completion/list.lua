@@ -34,11 +34,12 @@ function list.validate(config)
       'one of: preselect, manual, auto_insert',
     },
     cycle = { config.cycle, 'table' },
-  })
+  }, config)
+
   validate('completion.list.cycle', {
     from_bottom = { config.cycle.from_bottom, 'boolean' },
     from_top = { config.cycle.from_top, 'boolean' },
-  })
+  }, config.cycle)
 end
 
 return list

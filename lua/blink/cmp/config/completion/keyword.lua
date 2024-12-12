@@ -29,7 +29,7 @@ function keyword.validate(config)
     },
     regex = { config.regex, 'string' },
     exclude_from_prefix_regex = { config.exclude_from_prefix_regex, 'string' },
-  })
+  }, config)
 end
 
 return keyword

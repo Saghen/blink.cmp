@@ -20,7 +20,7 @@ function snippets.validate(config)
     expand = { config.expand, 'function' },
     active = { config.active, 'function' },
     jump = { config.jump, 'function' },
-  })
+  }, config)
 end
 
 return snippets

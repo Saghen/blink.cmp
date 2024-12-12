@@ -96,16 +96,21 @@ local sources = {
 }
 
 function sources.validate(config)
-  validate('sources', {
-    default = { config.default, { 'function', 'table' } },
-    per_filetype = { config.per_filetype, 'table' },
-    cmdline = { config.cmdline, { 'function', 'table' } },
-    providers = { config.providers, 'table' },
-  })
   assert(
     config.completion == nil,
     '`sources.completion.enabled_providers` has been replaced with `sources.default`. !!Note!! Be sure to update `opts_extend` as well if you have it set'
   )
+
+  validate('sources', {
+    default = { config.default, { 'function', 'table' } },
+    per_filetype = { config.per_filetype, 'table' },
+    cmdline = { config.cmdline, { 'function', 'table' } },
+
+    transform_items = { config.transform_items, 'function' },
+    min_keyword_length = { config.min_keyword_length, { 'number', 'function' } },
+
+    providers = { config.providers, 'table' },
+  }, config)
   for id, provider in pairs(config.providers) do
     sources.validate_provider(id, provider)
   end
@@ -130,7 +135,7 @@ function sources.validate_provider(id, provider)
     score_offset = { provider.score_offset, { 'number', 'function' }, true },
     deduplicate = { provider.deduplicate, 'table', true },
     override = { provider.override, 'table', true },
-  })
+  }, provider)
 end
 
 return sources

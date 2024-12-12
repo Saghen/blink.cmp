@@ -35,15 +35,24 @@ function fuzzy.validate(config)
     use_typo_resistance = { config.use_typo_resistance, 'boolean' },
     use_frecency = { config.use_frecency, 'boolean' },
     use_proximity = { config.use_proximity, 'boolean' },
-    sorts = { config.sorts, { 'string' } },
+    sorts = {
+      config.sorts,
+      function(sorts)
+        for _, sort in ipairs(sorts) do
+          if not vim.tbl_contains({ 'label', 'kind', 'score' }, sort) and type(sort) ~= 'function' then return false end
+        end
+        return true
+      end,
+      'one of: "label", "kind", "score" or a function',
+    },
     prebuilt_binaries = { config.prebuilt_binaries, 'table' },
-  })
+  }, config)
   validate('fuzzy.prebuilt_binaries', {
     download = { config.prebuilt_binaries.download, 'boolean' },
     force_version = { config.prebuilt_binaries.force_version, { 'string', 'nil' } },
     force_system_triple = { config.prebuilt_binaries.force_system_triple, { 'string', 'nil' } },
     extra_curl_args = { config.prebuilt_binaries.extra_curl_args, { 'table' } },
-  })
+  }, config.prebuilt_binaries)
 end
 
 return fuzzy

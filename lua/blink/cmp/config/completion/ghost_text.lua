@@ -13,7 +13,7 @@ local ghost_text = {
 function ghost_text.validate(config)
   validate('completion.ghost_text', {
     enabled = { config.enabled, 'boolean' },
-  })
+  }, config)
 end
 
 return ghost_text

@@ -49,13 +49,13 @@ function signature.validate(config)
     enabled = { config.enabled, 'boolean' },
     trigger = { config.trigger, 'table' },
     window = { config.window, 'table' },
-  })
+  }, config)
   validate('signature.trigger', {
     enabled = { config.trigger.enabled, 'boolean' },
     blocked_trigger_characters = { config.trigger.blocked_trigger_characters, 'table' },
     blocked_retrigger_characters = { config.trigger.blocked_retrigger_characters, 'table' },
     show_on_insert_on_trigger_character = { config.trigger.show_on_insert_on_trigger_character, 'boolean' },
-  })
+  }, config.trigger)
   validate('signature.window', {
     min_width = { config.window.min_width, 'number' },
     max_width = { config.window.max_width, 'number' },
@@ -66,7 +66,7 @@ function signature.validate(config)
     scrollbar = { config.window.scrollbar, 'boolean' },
     direction_priority = { config.window.direction_priority, 'table' },
     treesitter_highlighting = { config.window.treesitter_highlighting, 'boolean' },
-  })
+  }, config.window)
 end
 
 return signature

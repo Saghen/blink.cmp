@@ -33,7 +33,7 @@ function trigger.validate(config)
     show_on_accept_on_trigger_character = { config.show_on_accept_on_trigger_character, 'boolean' },
     show_on_insert_on_trigger_character = { config.show_on_insert_on_trigger_character, 'boolean' },
     show_on_x_blocked_trigger_characters = { config.show_on_x_blocked_trigger_characters, { 'function', 'table' } },
-  })
+  }, config)
 end
 
 return trigger
