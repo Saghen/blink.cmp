@@ -90,22 +90,25 @@ function buffer:get_completions(_, callback)
     callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
   end
 
-  local bufnrs = require('blink.cmp.lib.utils').deduplicate(self.get_bufnrs())
-  local buf_texts = {}
-  for _, buf in ipairs(bufnrs) do
-    table.insert(buf_texts, get_buf_text(buf))
-  end
-  local buf_text = table.concat(buf_texts, '\n')
-  -- should take less than 2ms
-  if #buf_text < 20000 then
-    run_sync(buf_text, transformed_callback)
-  -- should take less than 10ms
-  elseif #buf_text < 500000 then
-    run_async(buf_text, transformed_callback)
-  -- too big so ignore
-  else
-    transformed_callback({})
-  end
+  vim.schedule(function()
+    local bufnrs = require('blink.cmp.lib.utils').deduplicate(self.get_bufnrs())
+    local buf_texts = {}
+    for _, buf in ipairs(bufnrs) do
+      table.insert(buf_texts, get_buf_text(buf))
+    end
+    local buf_text = table.concat(buf_texts, '\n')
+
+    -- should take less than 2ms
+    if #buf_text < 20000 then
+      run_sync(buf_text, transformed_callback)
+    -- should take less than 10ms
+    elseif #buf_text < 500000 then
+      run_async(buf_text, transformed_callback)
+    -- too big so ignore
+    else
+      transformed_callback({})
+    end
+  end)
 
   -- TODO: cancel run_async
   return function() end
