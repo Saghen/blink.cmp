@@ -32,16 +32,18 @@ function draw_context.get_from_items(context, draw, items)
   return ctxs
 end
 
+local config = require('blink.cmp.config').appearance
+local kinds = require('blink.cmp.types').CompletionItemKind
+local tailwind_get_hex_color = require('blink.cmp.completion.windows.render.tailwind').get_hex_color
+
 --- @param draw blink.cmp.Draw
 --- @param item_idx number
 --- @param item blink.cmp.CompletionItem
 --- @param matched_indices number[]
 --- @return blink.cmp.DrawItemContext
 function draw_context.new(draw, item_idx, item, matched_indices)
-  local config = require('blink.cmp.config').appearance
-  local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
+  local kind = kinds[item.kind] or 'Unknown'
   local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
-
   local icon_spacing = config.nerd_font_variant == 'mono' and '' or ' '
 
   -- Some LSPs can return labels with newlines
@@ -55,7 +57,7 @@ function draw_context.new(draw, item_idx, item, matched_indices)
   local source_id = item.source_id
   local source_name = item.source_name
 
-  return {
+  local ctx = {
     self = draw,
     item = item,
     idx = item_idx,
@@ -70,6 +72,10 @@ function draw_context.new(draw, item_idx, item, matched_indices)
     source_id = source_id,
     source_name = source_name,
   }
+
+  if tailwind_get_hex_color(ctx) then ctx.kind_icon = config.kind_icons.ColorSwatch end
+
+  return ctx
 end
 
 return draw_context

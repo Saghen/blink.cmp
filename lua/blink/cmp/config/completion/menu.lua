@@ -1,3 +1,7 @@
+local validate = require('blink.cmp.config.utils').validate
+local tailwind_get_hl = require('blink.cmp.completion.windows.render.tailwind').get_hl
+local treesitter_highlight = require('blink.cmp.completion.windows.render.treesitter').highlight
+
 --- @class (exact) blink.cmp.CompletionMenuConfig
 --- @field enabled boolean
 --- @field min_width number
@@ -17,7 +21,6 @@
 --- @field n 'top_down' | 'bottom_up'
 --- @field s 'top_down' | 'bottom_up'
 
-local validate = require('blink.cmp.config.utils').validate
 local window = {
   --- @type blink.cmp.CompletionMenuConfig
   default = {
@@ -71,18 +74,14 @@ local window = {
         kind_icon = {
           ellipsis = false,
           text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
-          highlight = function(ctx)
-            return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or ('BlinkCmpKind' .. ctx.kind)
-          end,
+          highlight = function(ctx) return tailwind_get_hl(ctx) or ('BlinkCmpKind' .. ctx.kind) end,
         },
 
         kind = {
           ellipsis = false,
           width = { fill = true },
           text = function(ctx) return ctx.kind end,
-          highlight = function(ctx)
-            return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or ('BlinkCmpKind' .. ctx.kind)
-          end,
+          highlight = function(ctx) return tailwind_get_hl(ctx) or ('BlinkCmpKind' .. ctx.kind) end,
         },
 
         label = {
@@ -103,7 +102,7 @@ local window = {
 
             if vim.list_contains(ctx.self.treesitter, ctx.source_id) then
               -- add treesitter highlights
-              vim.list_extend(highlights, require('blink.cmp.completion.windows.render.treesitter').highlight(ctx))
+              vim.list_extend(highlights, treesitter_highlight(ctx))
             end
 
             -- characters matched on the label by the fuzzy matcher
