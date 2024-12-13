@@ -41,6 +41,10 @@ function ghost_text.show_preview(selected_item)
     return
   end
 
+  -- doesn't work in command mode
+  -- TODO: integrate with noice.nvim?
+  if vim.api.nvim_get_mode().mode ~= 'c' then return end
+
   -- update state and redraw
   local changed = ghost_text.selected_item ~= selected_item
   ghost_text.selected_item = selected_item
