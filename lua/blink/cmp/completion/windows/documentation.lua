@@ -200,7 +200,7 @@ function docs.update_position()
     end
   end
 
-  docs.win.scrollbar:update(winnr)
+  if docs.win.scrollbar then docs.win.scrollbar:update(winnr) end
 end
 
 return docs

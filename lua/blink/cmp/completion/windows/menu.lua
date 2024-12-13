@@ -129,7 +129,7 @@ function menu.update_position()
   end
 
   vim.api.nvim_win_set_height(winnr, pos.height)
-  win.scrollbar:update(winnr)
+  if win.scrollbar then win.scrollbar:update(winnr) end
 
   menu.position_update_emitter:emit()
   menu.redraw_if_needed()
