@@ -89,8 +89,8 @@
 Setting capabilities for `nvim-lspconfig`:
 
 ```lua
--- LSP servers and clients communicate what features they support through "capabilities".
---  By default, Neovim support a subset of the LSP specification.
+-- LSP servers and clients communicate which features they support through "capabilities".
+--  By default, Neovim supports a subset of the LSP specification.
 --  With blink.cmp, Neovim has *more* capabilities which are communicated to the LSP servers.
 --  Explanation from TJ: https://youtu.be/m8C0Cq9Uv9o?t=1275
 --
@@ -527,7 +527,6 @@ MiniDeps.add({
       treesitter_highlighting = true,
     },
   },
-
 
   fuzzy = {
     -- when enabled, allows for a number of typos relative to the length of the query
