@@ -1,2 +1,2 @@
-return require("blink.cmp")
+return require('blink.cmp')
 
