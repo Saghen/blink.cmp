@@ -21,8 +21,6 @@ local presets = {
     ['<C-e>'] = { 'hide', 'fallback' },
     ['<C-y>'] = { 'select_and_accept' },
 
-    ['<Up>'] = { 'select_prev', 'fallback' },
-    ['<Down>'] = { 'select_next', 'fallback' },
     ['<C-p>'] = { 'select_prev', 'fallback' },
     ['<C-n>'] = { 'select_next', 'fallback' },
 
