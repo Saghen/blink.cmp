@@ -23,6 +23,7 @@
 - External sources support ([compatibility layer for `nvim-cmp` sources](https://github.com/Saghen/blink.compat))
 - Auto-bracket support based on semantic tokens (experimental, opt-in)
 - Signature help (experimental, opt-in)
+- Command line completion
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
 ## Requirements
@@ -971,7 +972,6 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 ### Planned missing features
 
 - Significantly more testing and documentation
-- Cmdline completions
 
 ## Special Thanks
 
