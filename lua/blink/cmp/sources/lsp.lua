@@ -81,7 +81,10 @@ function lsp:get_completions(context, callback)
     end
 
     local _, request_id = client.request('textDocument/completion', params, function(err, result)
-      if err or result == nil then return end
+      if err or result == nil then
+        callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
+        return
+      end
 
       local items = result.items or result
 
@@ -130,7 +133,9 @@ function lsp:resolve(item, callback)
     callback(resolved_item)
   end)
   if not success then callback(item) end
-  if request_id ~= nil then return function() client.cancel_request(request_id) end end
+  if request_id ~= nil then
+    return function() client.cancel_request(request_id) end
+  end
 end
 
 --- Signature help ---
