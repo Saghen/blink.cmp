@@ -59,7 +59,6 @@ function cmp.accept(opts)
 end
 
 function cmp.select_and_accept()
-  dd('foo')
   if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
 
   local completion_list = require('blink.cmp.completion.list')
