@@ -67,11 +67,7 @@ function cmp.select_and_accept()
   if not cmp.is_visible() then return end
 
   local completion_list = require('blink.cmp.completion.list')
-  vim.schedule(function()
-    -- select an item if none is selected
-    if not completion_list.get_selected_item() then completion_list.select_next({ skip_auto_insert = true }) end
-    completion_list.accept()
-  end)
+  vim.schedule(function() completion_list.accept({ index = completion_list.selected_item_idx or 1 }) end)
   return true
 end
 
