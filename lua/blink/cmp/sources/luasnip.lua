@@ -40,9 +40,17 @@ function source:get_completions(ctx, callback)
     local items = {}
 
     -- Gather filetype snippets and, optionally, autosnippets
-    local snippets = require('luasnip').get_snippets(ft, { type = 'snippets' })
+    local snippets = vim.tbl_extend(
+      'force',
+      require('luasnip').get_snippets('all', { type = 'snippets' }),
+      require('luasnip').get_snippets(ft, { type = 'snippets' })
+    )
     if self.config.show_autosnippets then
-      local autosnippets = require('luasnip').get_snippets(ft, { type = 'autosnippets' })
+      local autosnippets = vim.tbl_extend(
+        'force',
+        require('luasnip').get_snippets('all', { type = 'autosnippets' }),
+        require('luasnip').get_snippets(ft, { type = 'autosnippets' })
+      )
       snippets = require('blink.cmp.lib.utils').shallow_copy(snippets)
       vim.list_extend(snippets, autosnippets)
     end
