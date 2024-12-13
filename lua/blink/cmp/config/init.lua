@@ -18,7 +18,6 @@ local validate = require('blink.cmp.config.utils').validate
 local config = {
   enabled = function() return vim.bo.buftype ~= 'prompt' end,
   keymap = require('blink.cmp.config.keymap').default,
-  cmdline_keymap = require('blink.cmp.config.keymap').cmdline,
   completion = require('blink.cmp.config.completion').default,
   fuzzy = require('blink.cmp.config.fuzzy').default,
   sources = require('blink.cmp.config.sources').default,
