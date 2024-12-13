@@ -47,7 +47,8 @@ local window = {
         local pos = vim.g.ui_cmdline_pos -- (1, 0)-indexed
         return { pos[1] - 1, pos[2] }
       end
-      return { vim.o.lines - 1, 0 }
+      local height = (vim.o.cmdheight == 0) and 1 or vim.o.cmdheight
+      return { vim.o.lines - height, 0 }
     end,
 
     -- Controls how the completion items are rendered on the popup window
