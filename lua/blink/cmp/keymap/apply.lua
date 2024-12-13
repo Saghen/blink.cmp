@@ -44,7 +44,6 @@ function apply.keymap_to_current_buffer(keys_to_commands)
     if not has_snippet_command or #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('s', key)
-
     apply.set('s', key, function()
       for _, command in ipairs(keys_to_commands[key] or {}) do
         -- special case for fallback
@@ -107,7 +106,9 @@ function apply.set(mode, key, callback)
     vim.api.nvim_set_keymap(mode, key, '', {
       callback = callback,
       expr = true,
-      silent = true,
+      -- silent must be false for fallback to work
+      -- otherwise, you get very weird behavior
+      silent = false,
       noremap = true,
       replace_keycodes = false,
       desc = 'blink.cmp',
