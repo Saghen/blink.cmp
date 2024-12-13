@@ -16,11 +16,12 @@
 --- | (fun(cmp: table): boolean?) Custom function where returning true will prevent the next command from running
 
 --- @alias blink.cmp.KeymapPreset
+--- | 'none' No keymaps
 --- Mappings similar to the built-in completion:
 --- ```lua
 --- {
 ---   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
----   ['<C-e>'] = { 'hide' },
+---   ['<C-e>'] = { 'cancel', 'fallback' },
 ---   ['<C-y>'] = { 'select_and_accept' },
 ---
 ---   ['<C-p>'] = { 'select_prev', 'fallback' },
@@ -39,7 +40,7 @@
 --- ```lua
 --- {
 ---   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
----   ['<C-e>'] = { 'hide', 'fallback' },
+---   ['<C-e>'] = { 'cancel', 'fallback' },
 ---
 ---   ['<Tab>'] = {
 ---     function(cmp)
@@ -66,7 +67,7 @@
 --- ```lua
 --- {
 ---   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
----   ['<C-e>'] = { 'hide', 'fallback' },
+---   ['<C-e>'] = { 'cancel', 'fallback' },
 ---   ['<CR>'] = { 'accept', 'fallback' },
 ---
 ---   ['<Tab>'] = { 'snippet_forward', 'fallback' },
@@ -88,6 +89,7 @@
 ---
 --- Example:
 ---
+--- ```lua
 --- keymap = {
 ---   preset = 'default',
 ---   ['<Up>'] = { 'select_prev', 'fallback' },
@@ -95,21 +97,26 @@
 ---
 ---   -- disable a keymap from the preset
 ---   ['<C-e>'] = {},
---- },
+---
+---   -- optionally, define different keymaps for cmdline
+---   cmdline = {
+---     preset = 'cmdline',
+---   }
+--- }
+--- ```
 ---
 --- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
---- @class (exact) blink.cmp.KeymapConfig
+--- @class (exact) blink.cmp.BaseKeymapConfig
 --- @field preset? blink.cmp.KeymapPreset
 --- @field [string] blink.cmp.KeymapCommand[]> Table of keys => commands[]
+
+--- @class (exact) blink.cmp.KeymapConfig : blink.cmp.BaseKeymapConfig
+--- @field cmdline? blink.cmp.BaseKeymapConfig Optionally, define a separate keymap for cmdline
 
 local keymap = {
   --- @type blink.cmp.KeymapConfig
   default = {
     preset = 'default',
-  },
-  --- @type blink.cmp.KeymapConfig
-  cmdline = {
-    preset = 'cmdline',
   },
 }
 
@@ -131,19 +138,26 @@ function keymap.validate(config)
     'snippet_forward',
     'snippet_backward',
   }
-  local presets = { 'default', 'super-tab', 'enter', 'cmdline' }
+  local presets = { 'default', 'super-tab', 'enter' }
 
   local validation_schema = {}
-  for key, command_or_preset in pairs(config) do
-    if key == 'preset' then
+  for key, value in pairs(config) do
+    -- nested cmdline keymap
+    if key == 'cmdline' then
+      keymap.validate(value)
+
+    -- preset
+    elseif key == 'preset' then
       validation_schema[key] = {
-        command_or_preset,
+        value,
         function(preset) return vim.tbl_contains(presets, preset) end,
         'one of: ' .. table.concat(presets, ', '),
       }
+
+    -- key
     else
       validation_schema[key] = {
-        command_or_preset,
+        value,
         function(key_commands)
           for _, command in ipairs(key_commands) do
             if type(command) ~= 'function' and not vim.tbl_contains(commands, command) then return false end
