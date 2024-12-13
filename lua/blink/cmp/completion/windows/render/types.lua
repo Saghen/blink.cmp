@@ -4,7 +4,7 @@
 --- @field gap? number Gap between columns
 --- @field columns? { [number]: string, gap?: number }[] Components to render, grouped by column
 --- @field components? table<string, blink.cmp.DrawComponent> Component definitions
---- @field treesitter? boolean Use treesitter to highlight the label text
+--- @field treesitter? string[] Use treesitter to highlight the label text of completions from these sources
 ---
 --- @class blink.cmp.DrawHighlight
 --- @field [number] number Start and end index of the highlight

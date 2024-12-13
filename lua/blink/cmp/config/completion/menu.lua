@@ -59,7 +59,7 @@ local window = {
       padding = 1,
       -- Gap between columns
       gap = 1,
-      treesitter = false, -- Use treesitter to highlight the label text
+      treesitter = {}, -- Use treesitter to highlight the label text of completions from these sources
       -- Components to render, grouped by column
       columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
       -- Definitions for possible components to render. Each component defines:
@@ -101,7 +101,7 @@ local window = {
               table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
             end
 
-            if ctx.self.treesitter then
+            if vim.list_contains(ctx.self.treesitter, ctx.source_id) then
               -- add treesitter highlights
               vim.list_extend(highlights, require('blink.cmp.completion.windows.render.treesitter').highlight(ctx))
             end
@@ -189,7 +189,7 @@ function window.validate(config)
     },
     gap = { config.draw.gap, 'number' },
 
-    treesitter = { config.draw.treesitter, 'boolean' },
+    treesitter = { config.draw.treesitter, 'table' },
 
     columns = {
       config.draw.columns,
