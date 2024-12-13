@@ -39,7 +39,7 @@ function apply.keymap_to_current_buffer(keys_to_commands)
   for key, commands in pairs(keys_to_commands) do
     local has_snippet_command = false
     for _, command in ipairs(commands) do
-      if vim.tbl_contains(snippet_commands, command) then has_snippet_command = true end
+      if vim.tbl_contains(snippet_commands, command) or type(command) == 'function' then has_snippet_command = true end
     end
     if not has_snippet_command or #commands == 0 then goto continue end
 
@@ -51,11 +51,11 @@ function apply.keymap_to_current_buffer(keys_to_commands)
         if command == 'fallback' then
           return fallback()
 
-          -- run user defined functions
+        -- run user defined functions
         elseif type(command) == 'function' then
           if command(require('blink.cmp')) then return end
 
-          -- only run snippet commands
+        -- only run snippet commands
         elseif vim.tbl_contains(snippet_commands, command) then
           local did_run = require('blink.cmp')[command]()
           if did_run then return end
