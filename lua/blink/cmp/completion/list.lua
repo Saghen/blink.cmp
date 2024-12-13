@@ -24,7 +24,10 @@
 --- @field apply_preview fun(item: blink.cmp.CompletionItem)
 --- @field accept fun(opts?: blink.cmp.CompletionListAcceptOpts): boolean Applies the currently selected item, returning true if it succeeded
 
---- @class blink.cmp.CompletionListAcceptOpts
+--- @class blink.cmp.CompletionListSelectAndAcceptOpts
+--- @field callback? fun() Called after the item is accepted
+
+--- @class blink.cmp.CompletionListAcceptOpts : blink.cmp.CompletionListSelectAndAcceptOpts
 --- @field index? number The index of the item to accept, if not provided, the currently selected item will be accepted
 
 --- @class blink.cmp.CompletionListShowEvent
@@ -210,7 +213,10 @@ function list.accept(opts)
 
   list.undo_preview()
   local accept = require('blink.cmp.completion.accept')
-  accept(list.context, item, function() list.accept_emitter:emit({ item = item, context = list.context }) end)
+  accept(list.context, item, function()
+    list.accept_emitter:emit({ item = item, context = list.context })
+    if opts.callback then opts.callback() end
+  end)
   return true
 end
 

@@ -63,11 +63,19 @@ function cmp.accept(opts)
   return true
 end
 
-function cmp.select_and_accept()
+--- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
+function cmp.select_and_accept(opts)
   if not cmp.is_visible() then return end
 
   local completion_list = require('blink.cmp.completion.list')
-  vim.schedule(function() completion_list.accept({ index = completion_list.selected_item_idx or 1 }) end)
+  vim.schedule(
+    function()
+      completion_list.accept({
+        index = completion_list.selected_item_idx or 1,
+        callback = opts and opts.callback,
+      })
+    end
+  )
   return true
 end
 
