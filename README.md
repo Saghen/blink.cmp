@@ -399,8 +399,8 @@ MiniDeps.add({
         padding = 1,
         -- Gap between columns
         gap = 1,
-        -- Use treesitter to highlight the label text
-        treesitter = false,
+        -- Use treesitter to highlight the label text of completions from these sources
+        treesitter = {},
 
         -- Components to render, grouped by column
         columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
@@ -814,8 +814,8 @@ completion.menu.draw = {
   padding = 1,
   -- Gap between columns
   gap = 1,
-  -- Use treesitter to highlight the label text
-  treesitter = false,
+  -- Use treesitter to highlight the label text of completions from these sources
+  treesitter = {},
 
   -- Components to render, grouped by column
   columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
