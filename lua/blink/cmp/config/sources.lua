@@ -74,6 +74,7 @@ local sources = {
         name = 'Path',
         module = 'blink.cmp.sources.path',
         score_offset = 3,
+        fallbacks = { 'buffer' },
       },
       snippets = {
         name = 'Snippets',

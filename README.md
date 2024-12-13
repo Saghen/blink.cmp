@@ -637,6 +637,7 @@ MiniDeps.add({
         name = 'Path',
         module = 'blink.cmp.sources.path',
         score_offset = 3,
+        fallbacks = { 'buffer' },
         opts = {
           trailing_slash = false,
           label_trailing_slash = true,
