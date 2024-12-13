@@ -401,6 +401,8 @@ MiniDeps.add({
         gap = 1,
         -- Use treesitter to highlight the label text of completions from these sources
         treesitter = {},
+        -- Recommended to enable it just for the LSP source
+        -- treesitter = { 'lsp' }
 
         -- Components to render, grouped by column
         columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
