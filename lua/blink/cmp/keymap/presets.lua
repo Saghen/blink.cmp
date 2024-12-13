@@ -1,11 +1,11 @@
 local presets = {
+  none = {},
+
   default = {
     ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-    ['<C-e>'] = { 'hide', 'fallback' },
+    ['<C-e>'] = { 'cancel', 'fallback' },
     ['<C-y>'] = { 'select_and_accept' },
 
-    ['<Up>'] = { 'select_prev', 'fallback' },
-    ['<Down>'] = { 'select_next', 'fallback' },
     ['<C-p>'] = { 'select_prev', 'fallback' },
     ['<C-n>'] = { 'select_next', 'fallback' },
 
@@ -18,7 +18,7 @@ local presets = {
 
   ['super-tab'] = {
     ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-    ['<C-e>'] = { 'hide', 'fallback' },
+    ['<C-e>'] = { 'cancel', 'fallback' },
 
     ['<Tab>'] = {
       function(cmp)
@@ -44,7 +44,7 @@ local presets = {
 
   enter = {
     ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-    ['<C-e>'] = { 'hide', 'fallback' },
+    ['<C-e>'] = { 'cancel', 'fallback' },
     ['<CR>'] = { 'accept', 'fallback' },
 
     ['<Tab>'] = { 'snippet_forward', 'fallback' },

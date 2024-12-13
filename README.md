@@ -186,7 +186,12 @@ MiniDeps.add({
   --   
   --   -- show with a list of providers
   --   ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },
-  -- },
+  --
+  --   -- optionally, define different keymaps for cmdline
+  --   cmdline = {
+  --     preset = 'super-tab'
+  --   }
+  -- }
   --
   -- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
   --
@@ -250,7 +255,7 @@ MiniDeps.add({
   --
   --   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
   --   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
-  keymap = 'default',
+  keymap = { preset = 'default' },
 
   -- Enables keymaps, completions and signature help when true
   enabled = function() return vim.bo.buftype ~= "prompt" end,
