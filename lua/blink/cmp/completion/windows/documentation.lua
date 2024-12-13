@@ -199,6 +199,8 @@ function docs.update_position()
       set_config({ row = -menu_border_size.top, col = -width - menu_border_size.left })
     end
   end
+
+  docs.win.scrollbar:update(winnr)
 end
 
 return docs

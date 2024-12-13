@@ -153,6 +153,8 @@ function signature.update_position()
   else
     vim.api.nvim_win_set_config(winnr, { relative = 'cursor', row = pos.direction == 's' and 1 or -height, col = 0 })
   end
+
+  win.scrollbar:update(winnr)
 end
 
 return signature

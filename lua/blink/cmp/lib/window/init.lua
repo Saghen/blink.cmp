@@ -110,7 +110,7 @@ function win:open()
   vim.api.nvim_set_option_value('scrolloff', self.config.scrolloff, { win = self.id })
   vim.api.nvim_set_option_value('filetype', self.config.filetype, { buf = self.buf })
 
-  if self.scrollbar then self.scrollbar:mount(self.id) end
+  if self.scrollbar then self.scrollbar:update(self.id) end
 end
 
 function win:set_option_value(option, value)
@@ -123,7 +123,7 @@ function win:close()
     vim.api.nvim_win_close(self.id, true)
     self.id = nil
   end
-  if self.scrollbar then self.scrollbar:unmount() end
+  if self.scrollbar then self.scrollbar:update() end
 end
 
 --- Updates the size of the window to match the max width and height of the content/config
@@ -233,8 +233,8 @@ function win.get_cursor_screen_position()
     local cmdline_position = config.cmdline_position()
 
     return {
-      distance_from_top = cmdline_position[1] - 1,
-      distance_from_bottom = screen_height - cmdline_position[1],
+      distance_from_top = cmdline_position[1],
+      distance_from_bottom = screen_height - cmdline_position[1] - 1,
       distance_from_left = cmdline_position[2],
       distance_from_right = screen_width - cmdline_position[2],
     }

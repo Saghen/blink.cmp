@@ -18,7 +18,9 @@ local function preview(item)
 
   text_edits_lib.apply({ text_edit })
 
-  vim.api.nvim_win_set_cursor(0, cursor_pos)
+  -- TODO: remove when text_edits_lib.apply begins setting cursor position
+  if vim.api.nvim_get_mode().mode ~= 'c' then vim.api.nvim_win_set_cursor(0, cursor_pos) end
+
   return undo_text_edit
 end
 
