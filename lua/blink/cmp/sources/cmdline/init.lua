@@ -117,7 +117,7 @@ function cmdline.new()
   return self
 end
 
-function cmdline:get_trigger_characters() return { ' ', '.', '#', '-' } end
+function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=' } end
 
 function cmdline:get_completions(context, callback)
   local cursor_before_line = context.line:sub(0, context.cursor[2])
