@@ -19,9 +19,14 @@ end
 
 ------- Public API -------
 
+--- Checks if the completion menu is currently visible
+--- @return boolean
+--- TODO: should also check if ghost text is visible
+function cmp.is_visible() return require('blink.cmp.completion.windows.menu').win:is_open() end
+
 --- @params opts? { providers?: string[] }
 function cmp.show(opts)
-  if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then return end
+  if cmp.is_visible() and not (opts and opts.providers) then return end
 
   vim.schedule(function()
     require('blink.cmp.completion.windows.menu').auto_show = true
@@ -31,14 +36,14 @@ function cmp.show(opts)
 end
 
 function cmp.hide()
-  if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
+  if not cmp.is_visible() then return end
 
   vim.schedule(require('blink.cmp.completion.trigger').hide)
   return true
 end
 
 function cmp.cancel()
-  if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
+  if not cmp.is_visible() then return end
   vim.schedule(function()
     require('blink.cmp.completion.list').undo_preview()
     require('blink.cmp.completion.trigger').hide()
@@ -48,7 +53,7 @@ end
 
 --- @param opts? blink.cmp.CompletionListAcceptOpts
 function cmp.accept(opts)
-  if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
+  if not cmp.is_visible() then return end
 
   local completion_list = require('blink.cmp.completion.list')
   local item = completion_list.get_selected_item()
@@ -59,7 +64,7 @@ function cmp.accept(opts)
 end
 
 function cmp.select_and_accept()
-  if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
+  if not cmp.is_visible() then return end
 
   local completion_list = require('blink.cmp.completion.list')
   vim.schedule(function()
@@ -71,13 +76,13 @@ function cmp.select_and_accept()
 end
 
 function cmp.select_prev()
-  if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
+  if not cmp.is_visible() then return end
   vim.schedule(function() require('blink.cmp.completion.list').select_prev() end)
   return true
 end
 
 function cmp.select_next()
-  if not require('blink.cmp.completion.windows.menu').win:is_open() then return end
+  if not cmp.is_visible() then return end
   vim.schedule(function() require('blink.cmp.completion.list').select_next() end)
   return true
 end
