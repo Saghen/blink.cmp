@@ -282,6 +282,7 @@ MiniDeps.add({
 
     trigger = {
       -- When true, will prefetch the completion items when entering insert mode
+      -- WARN: buggy, not recommended unless you'd like to help develop prefetching
       prefetch_on_insert = false,
       -- When false, will not show the completion window automatically when in a snippet
       show_in_snippet = true,
