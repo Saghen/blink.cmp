@@ -298,15 +298,16 @@ MiniDeps.add({
       -- LSPs can indicate when to show the completion window via trigger characters
       -- however, some LSPs (i.e. tsserver) return characters that would essentially
       -- always show the window. We block these by default.
-      show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
-      -- or a function like
-      -- show_on_blocked_trigger_characters = function()
-      --   local blocked = { ' ', '\n', '\t' }
-      --   if vim.bo.filetype == 'markdown' then
-      --     vim.list_extend(blocked, { '.', '/', '(', '[' })
-      --   end
-      --   return blocked
-      -- end
+      show_on_blocked_trigger_characters = function()
+        if vim.api.nvim_get_mode().mode == 'c' then return {} end
+  
+        -- you can also block per filetype, for example:
+        -- if vim.bo.filetype == 'markdown' then
+        --   return { ' ', '\n', '\t', '.', '/', '(', '[' }
+        -- end
+
+        return { ' ', '\n', '\t' }
+      end,
       -- When both this and show_on_trigger_character are true, will show the completion window
       -- when the cursor comes after a trigger character after accepting an item
       show_on_accept_on_trigger_character = true,
