@@ -126,6 +126,7 @@ function cmp.snippet_active(filter) return require('blink.cmp.config').snippets.
 function cmp.snippet_forward()
   local snippets = require('blink.cmp.config').snippets
   if not snippets.active({ direction = 1 }) then return end
+  cmp.hide()
   vim.schedule(function() snippets.jump(1) end)
   return true
 end
@@ -133,6 +134,7 @@ end
 function cmp.snippet_backward()
   local snippets = require('blink.cmp.config').snippets
   if not snippets.active({ direction = -1 }) then return end
+  cmp.hide()
   vim.schedule(function() snippets.jump(-1) end)
   return true
 end
