@@ -1,6 +1,7 @@
 --- @class (exact) blink.cmp.ConfigStrict
 --- @field enabled fun(): boolean
 --- @field keymap blink.cmp.KeymapConfig
+--- @field cmdline_keymap blink.cmp.KeymapConfig
 --- @field completion blink.cmp.CompletionConfig
 --- @field fuzzy blink.cmp.FuzzyConfig
 --- @field sources blink.cmp.SourceConfig
@@ -18,6 +19,7 @@ local validate = require('blink.cmp.config.utils').validate
 local config = {
   enabled = function() return vim.bo.buftype ~= 'prompt' end,
   keymap = require('blink.cmp.config.keymap').default,
+  cmdline_keymap = require('blink.cmp.config.keymap').cmdline,
   completion = require('blink.cmp.config.completion').default,
   fuzzy = require('blink.cmp.config.fuzzy').default,
   sources = require('blink.cmp.config.sources').default,
@@ -35,6 +37,7 @@ function M.validate(cfg)
   validate('config', {
     enabled = { cfg.enabled, 'function' },
     keymap = { cfg.keymap, 'table' },
+    cmdline_keymap = { cfg.keymap, 'table' },
     completion = { cfg.completion, 'table' },
     fuzzy = { cfg.fuzzy, 'table' },
     sources = { cfg.sources, 'table' },
@@ -43,6 +46,7 @@ function M.validate(cfg)
     appearance = { cfg.appearance, 'table' },
   }, cfg)
   require('blink.cmp.config.keymap').validate(cfg.keymap)
+  require('blink.cmp.config.keymap').validate(cfg.cmdline_keymap)
   require('blink.cmp.config.completion').validate(cfg.completion)
   require('blink.cmp.config.fuzzy').validate(cfg.fuzzy)
   require('blink.cmp.config.sources').validate(cfg.sources)

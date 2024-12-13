@@ -107,6 +107,10 @@ local keymap = {
   default = {
     preset = 'default',
   },
+  --- @type blink.cmp.KeymapConfig
+  cmdline = {
+    preset = 'cmdline',
+  },
 }
 
 --- @param config blink.cmp.KeymapConfig
@@ -127,7 +131,7 @@ function keymap.validate(config)
     'snippet_forward',
     'snippet_backward',
   }
-  local presets = { 'default', 'super-tab', 'enter' }
+  local presets = { 'default', 'super-tab', 'enter', 'cmdline' }
 
   local validation_schema = {}
   for key, command_or_preset in pairs(config) do
