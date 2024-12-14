@@ -40,14 +40,12 @@ function source:get_completions(ctx, callback)
     local items = {}
 
     -- Gather filetype snippets and, optionally, autosnippets
-    local snippets = vim.tbl_extend(
-      'force',
+    local snippets = vim.list_extend(
       require('luasnip').get_snippets('all', { type = 'snippets' }),
       require('luasnip').get_snippets(ft, { type = 'snippets' })
     )
     if self.config.show_autosnippets then
-      local autosnippets = vim.tbl_extend(
-        'force',
+      local autosnippets = vim.list_extend(
         require('luasnip').get_snippets('all', { type = 'autosnippets' }),
         require('luasnip').get_snippets(ft, { type = 'autosnippets' })
       )
