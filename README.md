@@ -188,6 +188,10 @@ MiniDeps.add({
   --   -- show with a list of providers
   --   ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },
   --
+  --   -- note that your function will often be run in a "fast event" where most vim.api functions will throw an error
+  --   -- you may want to wrap your function in `vim.schedule` or use `vim.schedule_wrap`
+  --   ['<C-space>'] = { function(cmp) vim.schedule(function() your_behavior end) },
+  --
   --   -- optionally, define different keymaps for cmdline
   --   cmdline = {
   --     preset = 'super-tab'
