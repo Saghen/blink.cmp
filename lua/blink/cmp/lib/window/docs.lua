@@ -12,8 +12,8 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
   if detail and detail ~= '' then detail_lines = docs.split_lines(detail) end
 
   local doc_lines = {}
-  if documentation ~= nil then
-    local doc = type(documentation) == 'string' and documentation or documentation.value
+  local doc = type(documentation) == 'table' and documentation.value
+  if doc ~= nil then
     doc_lines = docs.split_lines(doc)
     -- if type(documentation) ~= 'string' and documentation.kind == 'markdown' then
     --   -- if the rendering seems bugged, it's likely due to this function
