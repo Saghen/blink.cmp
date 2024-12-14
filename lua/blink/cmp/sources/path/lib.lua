@@ -45,8 +45,9 @@ end
 
 --- @param dirname string
 --- @param include_hidden boolean
+--- @param context blink.cmp.Context
 --- @param opts table
-function lib.candidates(dirname, include_hidden, opts)
+function lib.candidates(dirname, include_hidden, context, opts)
   local fs = require('blink.cmp.sources.path.fs')
   return fs.scan_dir_async(dirname)
     :map(function(entries) return fs.fs_stat_all(dirname, entries) end)
@@ -54,7 +55,10 @@ function lib.candidates(dirname, include_hidden, opts)
       return vim.tbl_filter(function(entry) return include_hidden or entry.name:sub(1, 1) ~= '.' end, entries)
     end)
     :map(function(entries)
-      return vim.tbl_map(function(entry) return lib.entry_to_completion_item(entry, dirname, opts) end, entries)
+      return vim.tbl_map(
+        function(entry) return lib.entry_to_completion_item(entry, dirname, context, opts) end,
+        entries
+      )
     end)
 end
 
@@ -69,17 +73,43 @@ end
 
 --- @param entry { name: string, type: string, stat: table }
 --- @param dirname string
+--- @param context blink.cmp.Context
 --- @param opts table
 --- @return blink.cmp.CompletionItem[]
-function lib.entry_to_completion_item(entry, dirname, opts)
+function lib.entry_to_completion_item(entry, dirname, context, opts)
   local is_dir = entry.type == 'directory'
   local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
   return {
     label = (opts.label_trailing_slash and is_dir) and entry.name .. '/' or entry.name,
     kind = is_dir and CompletionItemKind.Folder or CompletionItemKind.File,
     insertText = is_dir and entry.name .. '/' or entry.name,
+    editRange = lib.get_edit_range(entry.name, context),
     word = opts.trailing_slash and entry.name or nil,
     data = { path = entry.name, full_path = dirname .. '/' .. entry.name, type = entry.type, stat = entry.stat },
+  }
+end
+
+--- @param entry_name string
+--- @param context blink.cmp.Context
+--- @return lsp.Range | nil
+function lib.get_edit_range(entry_name, context)
+  -- Default behavior is correct for non-hidden files
+  if entry_name:sub(1, 1) ~= '.' then return nil end
+
+  local line, bounds = context.line, context.bounds
+  local line_number, start_col, end_col = bounds.line_number, bounds.start_col, bounds.end_col
+  local sub_text = line:sub(start_col, end_col)
+
+  -- Occurs when:
+  -- - show_hidden_files_by_default = true
+  -- - trigger.kind is TriggerCharacter
+  -- - trigger.character is '/'
+  if sub_text == '/' then return nil end
+
+  local offset = #sub_text == 1 and 1 or 2
+  return {
+    start = { line = line_number - 1, character = start_col - offset },
+    ['end'] = { line = line_number - 1, character = end_col },
   }
 end
 
