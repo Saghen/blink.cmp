@@ -263,10 +263,14 @@ MiniDeps.add({
   keymap = { preset = 'default' },
 
   -- Enables keymaps, completions and signature help when true
-  enabled = function() return vim.bo.buftype ~= "prompt" end,
+  enabled = function() return not (vim.bo.buftype == 'prompt' or vim.b.completion == false) end,
   -- Example for blocking multiple filetypes
   -- enabled = function()
-  --  return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) and vim.bo.buftype ~= "prompt"
+  --   return not (
+  --     vim.tbl_contains({ 'lua', 'markdown' }, vim.bo.filetype)
+  --     or vim.bo.buftype == 'prompt'
+  --     or vim.b.completion == false
+  --   )
   -- end,
 
   snippets = {
