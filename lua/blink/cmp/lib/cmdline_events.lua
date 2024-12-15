@@ -33,7 +33,7 @@ function cmdline_events:listen(opts)
 
     -- ignore if it's a special key
     local key = vim.fn.keytrans(escaped_key)
-    if vim.regex([[<.*>]]):match_str(key) then return end
+    if vim.regex([[<.*>]]):match_str(key) and not '<Space>' == key then return end
 
     if not is_change_queued then
       is_change_queued = true
