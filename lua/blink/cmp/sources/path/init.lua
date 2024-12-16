@@ -44,7 +44,7 @@ function path:get_completions(context, callback)
       and context.bounds.length > 0
     )
   lib
-    .candidates(dirname, include_hidden, context, self.opts)
+    .candidates(context, dirname, include_hidden, self.opts)
     :map(
       function(candidates)
         callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = candidates })

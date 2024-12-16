@@ -43,11 +43,11 @@ function lib.dirname(path_regex, get_cwd, context)
   return nil
 end
 
+--- @param context blink.cmp.Context
 --- @param dirname string
 --- @param include_hidden boolean
---- @param context blink.cmp.Context
 --- @param opts table
-function lib.candidates(dirname, include_hidden, context, opts)
+function lib.candidates(context, dirname, include_hidden, opts)
   local fs = require('blink.cmp.sources.path.fs')
   return fs.scan_dir_async(dirname)
     :map(function(entries) return fs.fs_stat_all(dirname, entries) end)
