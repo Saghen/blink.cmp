@@ -31,6 +31,25 @@ function completion.setup()
       if trigger.context == nil or event.context.id ~= trigger.context.id then return end
       -- don't show the list if prefetching results
       if trigger.prefetch then return end
+
+      -- don't show if all the sources that defined the trigger character returned no items
+      if trigger.context.trigger.character ~= nil then
+        local triggering_source_returned_items = false
+        for _, source in pairs(event.context.providers) do
+          local trigger_characters = sources.get_provider_by_id(source):get_trigger_characters()
+          if
+            event.items[source]
+            and #event.items[source] > 0
+            and vim.tbl_contains(trigger_characters, trigger.context.trigger.character)
+          then
+            triggering_source_returned_items = true
+            break
+          end
+        end
+
+        if not triggering_source_returned_items then return end
+      end
+
       list.show(event.context, event.items)
     end)
   end)
