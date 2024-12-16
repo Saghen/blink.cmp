@@ -1,5 +1,16 @@
 local keymap = {}
 
+--- Lowercases all keys in the mappings table
+--- @param mappings table<string, blink.cmp.KeymapCommand[]>
+--- @return table<string, blink.cmp.KeymapCommand[]>
+function keymap.normalize_mappings(mappings)
+  local normalized_mappings = {}
+  for key, map in pairs(mappings) do
+    normalized_mappings[key:lower()] = map
+  end
+  return normalized_mappings
+end
+
 ---@param keymap_config blink.cmp.BaseKeymapConfig
 function keymap.get_mappings(keymap_config)
   local mappings = vim.deepcopy(keymap_config)
@@ -13,11 +24,7 @@ function keymap.get_mappings(keymap_config)
 
     -- Merge the preset keymap with the user-defined keymaps
     -- User-defined keymaps overwrite the preset keymaps
-    local normalized_mappings = {}
-    for key, map in pairs(mappings) do
-      normalized_mappings[key:lower()] = map
-    end
-    mappings = vim.tbl_extend('force', preset_keymap, normalized_mappings)
+    mappings = vim.tbl_extend('force', keymap.normalize_mappings(preset_keymap), keymap.normalize_mappings(mappings))
   end
   return mappings
 end
