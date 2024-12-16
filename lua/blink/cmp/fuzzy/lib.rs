@@ -12,7 +12,7 @@ mod fuzzy;
 mod lsp_item;
 
 lazy_static! {
-    static ref REGEX: Regex = Regex::new(r"\p{L}[\p{L}0-9_\\-]{2,32}").unwrap();
+    static ref REGEX: Regex = Regex::new(r"\p{L}[\p{L}0-9_\\-]{2,}").unwrap();
     static ref FRECENCY: RwLock<Option<FrecencyTracker>> = RwLock::new(None);
     static ref HAYSTACKS_BY_PROVIDER: RwLock<HashMap<String, Vec<LspItem>>> =
         RwLock::new(HashMap::new());
@@ -103,6 +103,7 @@ pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
     Ok(REGEX
         .find_iter(&text)
         .map(|m| m.as_str().to_string())
+        .filter(|s| s.len() < 512)
         .collect::<HashSet<String>>()
         .into_iter()
         .collect())
