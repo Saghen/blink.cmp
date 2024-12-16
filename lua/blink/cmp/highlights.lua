@@ -4,11 +4,11 @@ function highlights.setup()
   local use_nvim_cmp = require('blink.cmp.config').appearance.use_nvim_cmp_as_default
 
   --- @param hl_group string Highlight group name, e.g. 'ErrorMsg'
-  --- @param val vim.api.keyset.highlight Highlight definition map
+  --- @param opts vim.api.keyset.highlight Highlight definition map
   --- @return nil
-  local set_hl = function(hl_group, val)
-    val.default = true -- Prevents overriding existing definitions
-    vim.api.nvim_set_hl(0, hl_group, val)
+  local set_hl = function(hl_group, opts)
+    opts.default = true -- Prevents overriding existing definitions
+    vim.api.nvim_set_hl(0, hl_group, opts)
   end
 
   if use_nvim_cmp then
@@ -42,14 +42,6 @@ function highlights.setup()
   set_hl('BlinkCmpSignatureHelp', { link = 'NormalFloat' })
   set_hl('BlinkCmpSignatureHelpBorder', { link = 'NormalFloat' })
   set_hl('BlinkCmpSignatureHelpActiveParameter', { link = 'LspSignatureActiveParameter' })
-end
-
---- @param hex_color string Hex color (e.g. "#ff0000")
---- @return string
-function highlights.get_hex_color_highlight(hex_color)
-  local hl_name = 'HexColor' .. hex_color:sub(2)
-  set_hl(hl_name, { fg = hex_color })
-  return hl_name
 end
 
 return highlights
