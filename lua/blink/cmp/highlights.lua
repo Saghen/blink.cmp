@@ -3,8 +3,11 @@ local highlights = {}
 function highlights.setup()
   local use_nvim_cmp = require('blink.cmp.config').appearance.use_nvim_cmp_as_default
 
+  --- @param hl_group string Highlight group name, e.g. 'ErrorMsg'
+  --- @param opts vim.api.keyset.highlight Highlight definition map
+  --- @return nil
   local set_hl = function(hl_group, opts)
-    opts.default = true
+    opts.default = true -- Prevents overriding existing definitions
     vim.api.nvim_set_hl(0, hl_group, opts)
   end
 

@@ -32,26 +32,34 @@ function draw_context.get_from_items(context, draw, items)
   return ctxs
 end
 
+local config = require('blink.cmp.config').appearance
+local kinds = require('blink.cmp.types').CompletionItemKind
+
 --- @param draw blink.cmp.Draw
 --- @param item_idx number
 --- @param item blink.cmp.CompletionItem
 --- @param matched_indices number[]
 --- @return blink.cmp.DrawItemContext
 function draw_context.new(draw, item_idx, item, matched_indices)
-  local config = require('blink.cmp.config').appearance
-  local kind = require('blink.cmp.types').CompletionItemKind[item.kind] or 'Unknown'
-  local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
-
+  local kind = kinds[item.kind] or 'Unknown'
+  local kind_icon = require('blink.cmp.completion.windows.render.tailwind').get_kind_icon(item)
+    or config.kind_icons[kind]
+    or config.kind_icons.Field
   local icon_spacing = config.nerd_font_variant == 'mono' and '' or ' '
 
   -- Some LSPs can return labels with newlines
   -- Escape them to avoid errors in nvim_buf_set_lines when rendering the completion menu
   local newline_char = '↲' .. icon_spacing
+
   local label = item.label:gsub('\n', newline_char) .. (kind == 'Snippet' and '~' or '')
   if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
   local label_detail = (item.labelDetails and item.labelDetails.detail or ''):gsub('\n', newline_char)
+  if config.nerd_font_variant == 'normal' then label_detail = label_detail:gsub('…', '… ') end
+
   local label_description = (item.labelDetails and item.labelDetails.description or ''):gsub('\n', newline_char)
+  if config.nerd_font_variant == 'normal' then label_description = label_description:gsub('…', '… ') end
+
   local source_id = item.source_id
   local source_name = item.source_name
 

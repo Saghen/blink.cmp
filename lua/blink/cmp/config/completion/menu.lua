@@ -1,3 +1,5 @@
+local validate = require('blink.cmp.config.utils').validate
+
 --- @class (exact) blink.cmp.CompletionMenuConfig
 --- @field enabled boolean
 --- @field min_width number
@@ -17,7 +19,6 @@
 --- @field n 'top_down' | 'bottom_up'
 --- @field s 'top_down' | 'bottom_up'
 
-local validate = require('blink.cmp.config.utils').validate
 local window = {
   --- @type blink.cmp.CompletionMenuConfig
   default = {
@@ -87,10 +88,7 @@ local window = {
 
         label = {
           width = { fill = true, max = 60 },
-          text = function(ctx)
-            local label = (ctx.label .. ctx.label_detail):gsub('…', '…' .. ctx.icon_gap)
-            return label
-          end,
+          text = function(ctx) return ctx.label .. ctx.label_detail end,
           highlight = function(ctx)
             -- label and label details
             local label = ctx.label
