@@ -29,13 +29,13 @@ function cmdline_events:listen(opts)
 
   local did_backspace = false
   local is_change_queued = false
-  vim.on_key(function(_, escaped_key)
+  vim.on_key(function(raw_key, escaped_key)
     if vim.api.nvim_get_mode().mode ~= 'c' then return end
 
     -- ignore if it's a special key
     local key = vim.fn.keytrans(escaped_key)
     if key == '<BS>' and not is_change_queued then did_backspace = true end
-    if key:sub(1, 1) == '<' and key:sub(#key, #key) == '>' and key ~= '<Space>' then return end
+    if key:sub(1, 1) == '<' and key:sub(#key, #key) == '>' and raw_key ~= ' ' then return end
 
     if not is_change_queued then
       is_change_queued = true
