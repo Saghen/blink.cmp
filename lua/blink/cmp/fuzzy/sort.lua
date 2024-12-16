@@ -28,7 +28,7 @@ function sort.kind(a, b)
 end
 
 function sort.sort_text(a, b)
-  if a.sortText == b.sortText then return end
+  if a.sortText == b.sortText or a.sortText == nil or b.sortText == nil then return end
   return a.sortText < b.sortText
 end
 
