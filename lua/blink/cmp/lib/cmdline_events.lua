@@ -27,18 +27,21 @@ function cmdline_events:listen(opts)
   -- TextChanged
   local on_changed = function(key) opts.on_char_added(key, false) end
 
+  local did_backspace = false
   local is_change_queued = false
   vim.on_key(function(_, escaped_key)
     if vim.api.nvim_get_mode().mode ~= 'c' then return end
 
     -- ignore if it's a special key
     local key = vim.fn.keytrans(escaped_key)
-    if vim.regex([[<.*>]]):match_str(key) and not '<Space>' == key then return end
+    if key == '<BS>' and not is_change_queued then did_backspace = true end
+    if key:sub(1, 1) == '<' and key:sub(#key, #key) == '>' and key ~= '<Space>' then return end
 
     if not is_change_queued then
       is_change_queued = true
+      did_backspace = false
       vim.schedule(function()
-        on_changed(key)
+        on_changed(escaped_key)
         is_change_queued = false
       end)
     end
@@ -50,40 +53,31 @@ function cmdline_events:listen(opts)
     callback = function() previous_cmdline = '' end,
   })
 
-  if vim.fn.has('nvim-0.11.0') == 1 then
-    vim.api.nvim_create_autocmd('CursorMovedC', {
-      callback = function()
-        local is_ignored = self.ignore_next_cursor_moved
-        self.ignore_next_cursor_moved = false
-
-        opts.on_cursor_moved('CursorMovedI', is_ignored)
-      end,
-    })
-  else
-    -- HACK: check every 16ms (60 times/second) to see if the cursor moved
-    -- for neovim < 0.11
-    local timer = vim.uv.new_timer()
-    local previous_cursor
-    local callback
-    callback = vim.schedule_wrap(function()
-      timer:start(16, 0, callback)
-      if vim.api.nvim_get_mode().mode ~= 'c' then return end
-
-      local cmdline_equal = vim.fn.getcmdline() == previous_cmdline
-      local cursor_equal = vim.fn.getcmdpos() == previous_cursor
-
-      previous_cmdline = vim.fn.getcmdline()
-      previous_cursor = vim.fn.getcmdpos()
-
-      if cursor_equal or not cmdline_equal then return end
-
-      local is_ignored = self.ignore_next_cursor_moved
-      self.ignore_next_cursor_moved = false
-
-      opts.on_cursor_moved('CursorMovedI', is_ignored)
-    end)
+  -- TODO: switch to CursorMovedC when nvim 0.11 is released
+  -- HACK: check every 16ms (60 times/second) to see if the cursor moved
+  -- for neovim < 0.11
+  local timer = vim.uv.new_timer()
+  local previous_cursor
+  local callback
+  callback = vim.schedule_wrap(function()
     timer:start(16, 0, callback)
-  end
+    if vim.api.nvim_get_mode().mode ~= 'c' then return end
+
+    local cmdline_equal = vim.fn.getcmdline() == previous_cmdline
+    local cursor_equal = vim.fn.getcmdpos() == previous_cursor
+
+    previous_cmdline = vim.fn.getcmdline()
+    previous_cursor = vim.fn.getcmdpos()
+
+    if cursor_equal or (not cmdline_equal and not did_backspace) then return end
+    did_backspace = false
+
+    local is_ignored = self.ignore_next_cursor_moved
+    self.ignore_next_cursor_moved = false
+
+    opts.on_cursor_moved('CursorMovedI', is_ignored)
+  end)
+  timer:start(16, 0, callback)
 
   vim.api.nvim_create_autocmd('CmdlineLeave', {
     callback = function() opts.on_leave() end,

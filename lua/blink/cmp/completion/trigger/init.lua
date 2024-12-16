@@ -156,8 +156,8 @@ function trigger.show_if_on_trigger_character(opts)
     return
   end
 
-  local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
-  local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
+  local cursor_col = context.get_cursor()[2]
+  local char_under_cursor = context.get_line():sub(cursor_col, cursor_col)
 
   if trigger.is_trigger_character(char_under_cursor, true) then
     trigger.show({ trigger_character = char_under_cursor })

@@ -24,7 +24,7 @@
 --- @field get_mode fun(): blink.cmp.Mode
 --- @field get_cursor fun(): number[]
 --- @field set_cursor fun(cursor: number[])
---- @field get_line fun(): string
+--- @field get_line fun(num?: number): string
 --- @field get_context_bounds fun(line: string, cursor: number[]): blink.cmp.ContextBounds
 --- @field get_regex_around_cursor fun(range: string, regex_str: string, exclude_from_prefix_regex_str: string): { start_col: number, length: number }
 
@@ -88,9 +88,17 @@ function context.set_cursor(cursor)
   vim.fn.setcmdpos(cursor[2])
 end
 
-function context.get_line()
-  return context.get_mode() == 'cmdline' and vim.fn.getcmdline()
-    or vim.api.nvim_buf_get_lines(0, context.get_cursor()[1] - 1, context.get_cursor()[1], false)[1]
+function context.get_line(num)
+  if context.get_mode() == 'cmdline' then
+    assert(
+      num == nil or num == 0,
+      'Cannot get line number ' .. tostring(num) .. ' in cmdline mode. Only 0 is supported'
+    )
+    return vim.fn.getcmdline()
+  end
+
+  if num == nil then num = context.get_cursor()[1] - 1 end
+  return vim.api.nvim_buf_get_lines(0, num, num + 1, false)[1]
 end
 
 --- Moves forward and backwards around the cursor looking for word boundaries

@@ -121,7 +121,7 @@ function text_edits.get_from_item(item)
   -- from when the items were fetched versus the current.
   -- HACK: is there a better way?
   -- TODO: take into account the offset_encoding
-  local offset = vim.api.nvim_win_get_cursor(0)[2] - item.cursor_column
+  local offset = context.get_cursor()[2] - item.cursor_column
   text_edit.range['end'].character = text_edit.range['end'].character + offset
 
   -- convert the offset encoding to utf-8
@@ -176,10 +176,10 @@ end
 function text_edits.clamp_range_to_bounds(range)
   range = vim.deepcopy(range)
 
-  local start_line = vim.api.nvim_buf_get_lines(0, range.start.line, range.start.line + 1, false)[1]
+  local start_line = context.get_line(range.start.line)
   range.start.character = math.min(math.max(range.start.character, 0), #start_line)
 
-  local end_line = vim.api.nvim_buf_get_lines(0, range['end'].line, range['end'].line + 1, false)[1]
+  local end_line = context.get_line(range['end'].line)
   range['end'].character = math.min(math.max(range['end'].character, 0), #end_line)
 
   return range
