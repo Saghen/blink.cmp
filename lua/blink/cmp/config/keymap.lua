@@ -138,7 +138,7 @@ function keymap.validate(config)
     'snippet_forward',
     'snippet_backward',
   }
-  local presets = { 'default', 'super-tab', 'enter' }
+  local presets = { 'default', 'super-tab', 'enter', 'none' }
 
   local validation_schema = {}
   for key, value in pairs(config) do
