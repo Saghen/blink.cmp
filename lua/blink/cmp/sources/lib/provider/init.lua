@@ -126,7 +126,7 @@ function source:resolve(item)
         end
         if resolved_item ~= nil and resolved_item.detail == nil then resolved_item.detail = item.detail end
 
-        vim.schedule(function() resolve(resolved_item or item) end)
+        vim.schedule(function() resolve(vim.tbl_deep_extend('force', item, resolved_item or {})) end)
       end)
     end)
   end
