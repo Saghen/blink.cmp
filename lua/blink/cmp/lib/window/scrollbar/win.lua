@@ -70,7 +70,6 @@ end
 function scrollbar_win:hide()
   self:hide_thumb()
   self:hide_gutter()
-  if self.buf and vim.api.nvim_buf_is_valid(self.buf) then vim.api.nvim_buf_delete(self.buf, { force = true }) end
 end
 
 function scrollbar_win:_make_win(geometry, hl_group)

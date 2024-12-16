@@ -1,6 +1,5 @@
 --- @class blink.cmp.CmdlineEvents
 --- @field has_context fun(): boolean
---- @field is_suppressed boolean
 --- @field ignore_next_text_changed boolean
 --- @field ignore_next_cursor_moved boolean
 ---
@@ -19,7 +18,6 @@ local cmdline_events = {}
 
 function cmdline_events.new()
   return setmetatable({
-    is_suppressed = false,
     ignore_next_text_changed = false,
     ignore_next_cursor_moved = false,
   }, { __index = cmdline_events })
@@ -27,12 +25,7 @@ end
 
 function cmdline_events:listen(opts)
   -- TextChanged
-  local on_changed = function(key)
-    local is_ignored = self.ignore_next_text_changed
-    self.ignore_next_text_changed = false
-
-    opts.on_char_added(key, is_ignored)
-  end
+  local on_changed = function(key) opts.on_char_added(key, false) end
 
   local is_change_queued = false
   vim.on_key(function(_, escaped_key)
@@ -40,7 +33,7 @@ function cmdline_events:listen(opts)
 
     -- ignore if it's a special key
     local key = vim.fn.keytrans(escaped_key)
-    if vim.regex([[<.*>]]):match_str(key) then return end
+    if vim.regex([[<.*>]]):match_str(key) and not '<Space>' == key then return end
 
     if not is_change_queued then
       is_change_queued = true
@@ -52,6 +45,11 @@ function cmdline_events:listen(opts)
   end)
 
   -- CursorMoved
+  local previous_cmdline = ''
+  vim.api.nvim_create_autocmd('CmdlineEnter', {
+    callback = function() previous_cmdline = '' end,
+  })
+
   if vim.fn.has('nvim-0.11.0') == 1 then
     vim.api.nvim_create_autocmd('CursorMovedC', {
       callback = function()
@@ -71,9 +69,13 @@ function cmdline_events:listen(opts)
       timer:start(16, 0, callback)
       if vim.api.nvim_get_mode().mode ~= 'c' then return end
 
-      local cursor = vim.fn.getcmdpos()
-      if cursor == previous_cursor then return end
-      previous_cursor = cursor
+      local cmdline_equal = vim.fn.getcmdline() == previous_cmdline
+      local cursor_equal = vim.fn.getcmdpos() == previous_cursor
+
+      previous_cmdline = vim.fn.getcmdline()
+      previous_cursor = vim.fn.getcmdpos()
+
+      if cursor_equal or not cmdline_equal then return end
 
       local is_ignored = self.ignore_next_cursor_moved
       self.ignore_next_cursor_moved = false
@@ -91,19 +93,13 @@ end
 --- Suppresses autocmd events for the duration of the callback
 --- HACK: there's likely edge cases with this
 function cmdline_events:suppress_events_for_callback(cb)
-  self.is_suppressed = true
   local cursor_before = vim.fn.getcmdpos()
-  local text_before = vim.fn.getcmdline()
 
   cb()
 
   if not vim.api.nvim_get_mode().mode == 'c' then return end
 
-  self.is_suppressed = false
   local cursor_after = vim.fn.getcmdpos()
-  local text_after = vim.fn.getcmdline()
-
-  self.ignore_next_text_changed = self.ignore_next_text_changed or text_after ~= text_before
   -- TODO: does this guarantee that the CmdlineChanged event will fire?
   self.ignore_next_cursor_moved = self.ignore_next_cursor_moved or cursor_after ~= cursor_before
 end

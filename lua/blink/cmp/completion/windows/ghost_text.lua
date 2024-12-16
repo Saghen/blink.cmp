@@ -8,6 +8,7 @@ local snippets_utils = require('blink.cmp.sources.snippets.utils')
 --- @field selected_item blink.cmp.CompletionItem?
 --- @field extmark_id integer?
 ---
+--- @field is_open fun(): boolean
 --- @field show_preview fun(item: blink.cmp.CompletionItem)
 --- @field clear_preview fun()
 --- @field draw_preview fun(bufnr: number)
@@ -32,6 +33,8 @@ vim.api.nvim_create_autocmd({ 'CursorMovedI', 'TextChangedI' }, {
     if config.enabled and ghost_text.win then ghost_text.draw_preview(vim.api.nvim_win_get_buf(ghost_text.win)) end
   end,
 })
+
+function ghost_text.is_open() return ghost_text.extmark_id ~= nil end
 
 --- @param selected_item? blink.cmp.CompletionItem
 function ghost_text.show_preview(selected_item)

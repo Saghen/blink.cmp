@@ -23,6 +23,7 @@
 - External sources support ([compatibility layer for `nvim-cmp` sources](https://github.com/Saghen/blink.compat))
 - Auto-bracket support based on semantic tokens (experimental, opt-in)
 - Signature help (experimental, opt-in)
+- Command line completion
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
 ## Requirements
@@ -187,6 +188,10 @@ MiniDeps.add({
   --   -- show with a list of providers
   --   ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },
   --
+  --   -- note that your function will often be run in a "fast event" where most vim.api functions will throw an error
+  --   -- you may want to wrap your function in `vim.schedule` or use `vim.schedule_wrap`
+  --   ['<C-space>'] = { function(cmp) vim.schedule(function() your_behavior end) },
+  --
   --   -- optionally, define different keymaps for cmdline
   --   cmdline = {
   --     preset = 'super-tab'
@@ -258,10 +263,12 @@ MiniDeps.add({
   keymap = { preset = 'default' },
 
   -- Enables keymaps, completions and signature help when true
-  enabled = function() return vim.bo.buftype ~= "prompt" end,
+  enabled = function() return vim.bo.buftype ~= "prompt" and vim.b.completion ~= false end,
   -- Example for blocking multiple filetypes
   -- enabled = function()
-  --  return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) and vim.bo.buftype ~= "prompt"
+  --  return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype)
+  --    and vim.bo.buftype ~= "prompt"
+  --    and vim.b.completion ~= false
   -- end,
 
   snippets = {
@@ -547,7 +554,7 @@ MiniDeps.add({
     max_items = 200,
     -- controls which sorts to use and in which order, falling back to the next sort if the first one returns nil
     -- you may pass a function instead of a string to customize the sorting
-    sorts = { 'score', 'kind', 'label' },
+    sorts = { 'score', 'sort_text' },
 
     prebuilt_binaries = {
       -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
@@ -979,7 +986,6 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 ### Planned missing features
 
 - Significantly more testing and documentation
-- Cmdline completions
 
 ## Special Thanks
 

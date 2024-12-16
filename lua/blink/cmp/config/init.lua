@@ -8,15 +8,10 @@
 --- @field snippets blink.cmp.SnippetsConfig
 --- @field appearance blink.cmp.AppearanceConfig
 
---- @class (exact) blink.cmp.Config : blink.cmp.ConfigStrict
---- HACK: for some reason lua-language-server treats this as Partial<ConfigStrict>
---- but this seems to be a bug. See https://github.com/LuaLS/lua-language-server/issues/2561
---- Much easier than copying every class and marking everything as optional for now :)
-
 local validate = require('blink.cmp.config.utils').validate
 --- @type blink.cmp.ConfigStrict
 local config = {
-  enabled = function() return vim.bo.buftype ~= 'prompt' end,
+  enabled = function() return vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false end,
   keymap = require('blink.cmp.config.keymap').default,
   completion = require('blink.cmp.config.completion').default,
   fuzzy = require('blink.cmp.config.fuzzy').default,

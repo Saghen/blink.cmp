@@ -1,6 +1,6 @@
 local cmp = {}
 
---- @param opts blink.cmp.Config
+--- @param opts? blink.cmp.Config
 function cmp.setup(opts)
   opts = opts or {}
   local config = require('blink.cmp.config')
@@ -22,7 +22,10 @@ end
 --- Checks if the completion menu is currently visible
 --- @return boolean
 --- TODO: should also check if ghost text is visible
-function cmp.is_visible() return require('blink.cmp.completion.windows.menu').win:is_open() end
+function cmp.is_visible()
+  return require('blink.cmp.completion.windows.menu').win:is_open()
+    or require('blink.cmp.completion.windows.ghost_text').is_open()
+end
 
 --- @params opts? { providers?: string[] }
 function cmp.show(opts)
@@ -63,15 +66,19 @@ function cmp.accept(opts)
   return true
 end
 
-function cmp.select_and_accept()
+--- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
+function cmp.select_and_accept(opts)
   if not cmp.is_visible() then return end
 
   local completion_list = require('blink.cmp.completion.list')
-  vim.schedule(function()
-    -- select an item if none is selected
-    if not completion_list.get_selected_item() then completion_list.select_next({ skip_auto_insert = true }) end
-    completion_list.accept()
-  end)
+  vim.schedule(
+    function()
+      completion_list.accept({
+        index = completion_list.selected_item_idx or 1,
+        callback = opts and opts.callback,
+      })
+    end
+  )
   return true
 end
 

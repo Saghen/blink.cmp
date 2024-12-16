@@ -18,10 +18,7 @@ local function get_buf_text(bufnr)
   local start_col = column
   while start_col > 1 do
     local char = line:sub(start_col, start_col)
-    if char:match('[%w_\\-]') == nil then
-      start_col = start_col + 1
-      break
-    end
+    if char:match('[%w_\\-]') == nil then break end
     start_col = start_col - 1
   end
   local end_col = column
