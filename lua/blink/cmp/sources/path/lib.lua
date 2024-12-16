@@ -79,37 +79,33 @@ end
 function lib.entry_to_completion_item(entry, dirname, context, opts)
   local is_dir = entry.type == 'directory'
   local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
+  local insert_text = is_dir and entry.name .. '/' or entry.name
   return {
     label = (opts.label_trailing_slash and is_dir) and entry.name .. '/' or entry.name,
     kind = is_dir and CompletionItemKind.Folder or CompletionItemKind.File,
-    insertText = is_dir and entry.name .. '/' or entry.name,
-    editRange = lib.get_edit_range(entry.name, context),
+    insertText = insert_text,
+    textEdit = lib.get_text_edit(insert_text, context),
     word = opts.trailing_slash and entry.name or nil,
     data = { path = entry.name, full_path = dirname .. '/' .. entry.name, type = entry.type, stat = entry.stat },
   }
 end
 
---- @param entry_name string
+--- @param insert_text string
 --- @param context blink.cmp.Context
 --- @return lsp.Range | nil
-function lib.get_edit_range(entry_name, context)
-  -- Default behavior is correct for non-hidden files
-  if entry_name:sub(1, 1) ~= '.' then return nil end
+function lib.get_text_edit(insert_text, context)
+  local line_before_cursor = context.line:sub(1, context.cursor[2])
 
-  local line, bounds = context.line, context.bounds
-  local line_number, start_col, end_col = bounds.line_number, bounds.start_col, bounds.end_col
-  local sub_text = line:sub(start_col, end_col)
+  local parts = vim.split(line_before_cursor, '/')
+  local last_part = parts[#parts]
 
-  -- Occurs when:
-  -- - show_hidden_files_by_default = true
-  -- - trigger.kind is TriggerCharacter
-  -- - trigger.character is '/'
-  if sub_text == '/' then return nil end
-
-  local offset = #sub_text == 1 and 1 or 2
+  -- TODO: return the insert and replace ranges, instaed of only the insert range
   return {
-    start = { line = line_number - 1, character = start_col - offset },
-    ['end'] = { line = line_number - 1, character = end_col },
+    newText = insert_text,
+    range = {
+      start = { line = context.cursor[1] - 1, character = context.cursor[2] - #last_part },
+      ['end'] = { line = context.cursor[1] - 1, character = context.cursor[2] },
+    },
   }
 end
 
