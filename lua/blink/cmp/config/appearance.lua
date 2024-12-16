@@ -36,7 +36,6 @@ local appearance = {
 
       Snippet = '󱄽',
       Color = '󰏘',
-      ColorSwatch = '██',
       File = '󰈔',
       Reference = '󰬲',
       Folder = '󰉋',

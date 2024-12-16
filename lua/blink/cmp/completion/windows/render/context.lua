@@ -34,7 +34,6 @@ end
 
 local config = require('blink.cmp.config').appearance
 local kinds = require('blink.cmp.types').CompletionItemKind
-local tailwind_get_hex_color = require('blink.cmp.completion.windows.render.tailwind').get_hex_color
 
 --- @param draw blink.cmp.Draw
 --- @param item_idx number
@@ -43,21 +42,28 @@ local tailwind_get_hex_color = require('blink.cmp.completion.windows.render.tail
 --- @return blink.cmp.DrawItemContext
 function draw_context.new(draw, item_idx, item, matched_indices)
   local kind = kinds[item.kind] or 'Unknown'
-  local kind_icon = config.kind_icons[kind] or config.kind_icons.Field
+  local kind_icon = require('blink.cmp.completion.windows.render.tailwind').get_kind_icon(item)
+    or config.kind_icons[kind]
+    or config.kind_icons.Field
   local icon_spacing = config.nerd_font_variant == 'mono' and '' or ' '
 
   -- Some LSPs can return labels with newlines
   -- Escape them to avoid errors in nvim_buf_set_lines when rendering the completion menu
   local newline_char = '↲' .. icon_spacing
+
   local label = item.label:gsub('\n', newline_char) .. (kind == 'Snippet' and '~' or '')
   if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
   local label_detail = (item.labelDetails and item.labelDetails.detail or ''):gsub('\n', newline_char)
+  if config.nerd_font_variant == 'normal' then label_detail = label_detail:gsub('…', '… ') end
+
   local label_description = (item.labelDetails and item.labelDetails.description or ''):gsub('\n', newline_char)
+  if config.nerd_font_variant == 'normal' then label_description = label_description:gsub('…', '… ') end
+
   local source_id = item.source_id
   local source_name = item.source_name
 
-  local ctx = {
+  return {
     self = draw,
     item = item,
     idx = item_idx,
@@ -72,10 +78,6 @@ function draw_context.new(draw, item_idx, item, matched_indices)
     source_id = source_id,
     source_name = source_name,
   }
-
-  if tailwind_get_hex_color(ctx) then ctx.kind_icon = config.kind_icons.ColorSwatch end
-
-  return ctx
 end
 
 return draw_context
