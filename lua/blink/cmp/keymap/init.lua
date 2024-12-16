@@ -1,14 +1,29 @@
 local keymap = {}
 
 --- Lowercases all keys in the mappings table
---- @param mappings table<string, blink.cmp.KeymapCommand[]>
+--- @param existing_mappings table<string, blink.cmp.KeymapCommand[]>
+--- @param new_mappings table<string, blink.cmp.KeymapCommand[]>
 --- @return table<string, blink.cmp.KeymapCommand[]>
-function keymap.normalize_mappings(mappings)
-  local normalized_mappings = {}
-  for key, map in pairs(mappings) do
-    normalized_mappings[key:lower()] = map
+function keymap.merge_mappings(existing_mappings, new_mappings)
+  local merged_mappings = vim.deepcopy(existing_mappings)
+  for new_key, new_mapping in pairs(new_mappings) do
+    -- normalize the keys and replace, since naively merging would not handle <C-a> == <c-a>
+    for existing_key, _ in pairs(existing_mappings) do
+      if
+        vim.api.nvim_replace_termcodes(existing_key, true, true, true)
+        == vim.api.nvim_replace_termcodes(new_key, true, true, true)
+      then
+        merged_mappings[existing_key] = new_mapping
+        goto continue
+      end
+    end
+
+    -- key wasn't found, add it as per usual
+    merged_mappings[new_key] = new_mapping
+
+    ::continue::
   end
-  return normalized_mappings
+  return merged_mappings
 end
 
 ---@param keymap_config blink.cmp.BaseKeymapConfig
@@ -24,7 +39,7 @@ function keymap.get_mappings(keymap_config)
 
     -- Merge the preset keymap with the user-defined keymaps
     -- User-defined keymaps overwrite the preset keymaps
-    mappings = vim.tbl_extend('force', keymap.normalize_mappings(preset_keymap), keymap.normalize_mappings(mappings))
+    mappings = keymap.merge_mappings(preset_keymap, mappings)
   end
   return mappings
 end
