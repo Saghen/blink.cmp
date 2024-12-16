@@ -99,7 +99,7 @@ function lib.get_text_edit(context, insert_text)
   local parts = vim.split(line_before_cursor, '/')
   local last_part = parts[#parts]
 
-  -- TODO: return the insert and replace ranges, instaed of only the insert range
+  -- TODO: return the insert and replace ranges, instead of only the insert range
   return {
     newText = insert_text,
     range = {
