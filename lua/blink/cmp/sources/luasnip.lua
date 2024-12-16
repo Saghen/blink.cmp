@@ -53,7 +53,7 @@ function source:get_completions(ctx, callback)
       for _, extra_ft in ipairs(self.config.global_snippets) do
         vim.list_extend(snippets, ls.get_snippets(extra_ft, { type = 'autosnippets' }))
       end
-      vim.list_extend(snippets, ls.get_snippets(ft, { type = 'snippets' }))
+      vim.list_extend(snippets, ls.get_snippets(ft, { type = 'autosnippets' }))
     end
     snippets = vim.tbl_filter(function(snip) return not snip.hidden end, snippets)
 
