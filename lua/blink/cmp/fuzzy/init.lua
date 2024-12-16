@@ -65,7 +65,6 @@ function fuzzy.fuzzy(needle, haystacks_by_provider)
       use_typo_resistance = config.fuzzy.use_typo_resistance,
       use_frecency = config.fuzzy.use_frecency and #needle > 0,
       use_proximity = config.fuzzy.use_proximity and #needle > 0,
-      sorts = config.fuzzy.sorts,
       nearby_words = nearby_words,
     })
 
@@ -76,7 +75,12 @@ function fuzzy.fuzzy(needle, haystacks_by_provider)
     end
   end
 
-  return require('blink.cmp.fuzzy.sort').sort(filtered_items, config.fuzzy.sorts)
+  return require('blink.cmp.fuzzy.sort').sort(
+    filtered_items,
+    6 * needle:len(),
+    config.fuzzy.sort.strong_match,
+    config.fuzzy.sort.weak_match
+  )
 end
 
 return fuzzy
