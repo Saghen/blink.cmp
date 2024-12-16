@@ -554,7 +554,7 @@ MiniDeps.add({
     max_items = 200,
     -- controls which sorts to use and in which order, falling back to the next sort if the first one returns nil
     -- you may pass a function instead of a string to customize the sorting
-    sorts = { 'score', 'kind', 'label' },
+    sorts = { 'score', 'sort_text' },
 
     prebuilt_binaries = {
       -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
