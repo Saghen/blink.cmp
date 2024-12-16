@@ -13,7 +13,11 @@ function keymap.get_mappings(keymap_config)
 
     -- Merge the preset keymap with the user-defined keymaps
     -- User-defined keymaps overwrite the preset keymaps
-    mappings = vim.tbl_extend('force', preset_keymap, mappings)
+    local normalized_mappings = {}
+    for key, map in pairs(mappings) do
+      normalized_mappings[key:lower()] = map
+    end
+    mappings = vim.tbl_extend('force', preset_keymap, normalized_mappings)
   end
   return mappings
 end
