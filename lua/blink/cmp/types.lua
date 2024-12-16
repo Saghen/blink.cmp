@@ -6,7 +6,6 @@
 --- @field source_name string
 --- @field cursor_column number
 --- @field client_id? number
---- @field editRange? lsp.Range | { insert: lsp.Range, replace: lsp.Range }
 
 return {
   -- some plugins mutate the vim.lsp.protocol.CompletionItemKind table

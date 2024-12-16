@@ -1,6 +1,5 @@
 local known_defaults = {
   'commitCharacters',
-  'editRange',
   'insertTextFormat',
   'insertTextMode',
   'data',
@@ -87,16 +86,32 @@ function lsp:get_completions(context, callback)
       end
 
       local items = result.items or result
-
-      -- add defaults, client id and score offset to the items
+      local default_edit_range = result.itemDefaults and result.itemDefaults.editRange
       for _, item in ipairs(items) do
         item.client_id = client.id
 
+        -- score offset for deprecated items
         -- todo: make configurable
         if item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) then item.score_offset = -2 end
 
+        -- set defaults
         for key, value in pairs(result.itemDefaults or {}) do
           if vim.tbl_contains(known_defaults, key) then item[key] = item[key] or value end
+        end
+        if default_edit_range and item.textEdit == nil then
+          local new_text = item.textEditText or item.insertText or item.label
+          if default_edit_range.replace ~= nil then
+            item.textEdit = {
+              replace = default_edit_range.replace,
+              insert = default_edit_range.insert,
+              newText = new_text,
+            }
+          else
+            item.textEdit = {
+              range = result.itemDefaults.editRange,
+              newText = new_text,
+            }
+          end
         end
       end
 

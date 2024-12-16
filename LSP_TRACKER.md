@@ -2,12 +2,12 @@
 
 ## Completion Items
 
-- [x] `completionItem/resolve` <- Used to get information such as documentation which would be too expensive to include normally
+- [x] `completionItem/resolve`
 
 ### Client Capabilities
 
 - [ ] `dynamicRegistration`
-- [ ] `CompletionItem`
+- [x] `CompletionItem`
     - [x] `snippetSupport`
     - [ ] `commitCharacterSupport`
     - [x] `documentationFormat`
@@ -15,7 +15,7 @@
     - [ ] `preselectSupport`
     - [x] `tagSupport`
     - [ ] `insertReplaceSupport`
-    - [x] `resolveSupport` <- Allows LSPs to resolve additional properties lazily, potentially improving latency
+    - [x] `resolveSupport`
     - [x] `insertTextModeSupport`
     - [x] `labelDetailsSupport`
 - [x] `completionItemKind`
@@ -40,7 +40,7 @@
 - [x] `isIncomplete`
 - [x] `itemDefaults`
     - [x] `commitCharacters`
-    - [ ] `editRange`
+    - [x] `editRange`
     - [x] `insertTextFormat`
     - [x] `insertTextMode`
     - [x] `data`

@@ -101,15 +101,6 @@ end
 function text_edits.get_from_item(item)
   local text_edit = vim.deepcopy(item.textEdit)
 
-  -- Fallback to default edit range if defined, and no text edit was set
-  if text_edit == nil and item.editRange ~= nil then
-    text_edit = {
-      newText = item.textEditText or item.insertText or item.label,
-      -- FIXME: temporarily convert insertReplaceEdit to regular textEdit
-      range = vim.deepcopy(item.editRange.insert or item.editRange.replace or item.editRange),
-    }
-  end
-
   -- Guess the text edit if the item doesn't define it
   if text_edit == nil then return text_edits.guess(item) end
 
