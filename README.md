@@ -324,7 +324,7 @@ MiniDeps.add({
       -- List of trigger characters (on top of `show_on_blocked_trigger_characters`) that won't trigger
       -- the completion window when the cursor comes after a trigger character when
       -- entering insert mode/accepting an item
-      show_on_x_blocked_trigger_characters = { "'", '"', '(' },
+      show_on_x_blocked_trigger_characters = { "'", '"', '(', '{' },
       -- or a function, similar to show_on_blocked_trigger_character
     },
 
