@@ -1,10 +1,12 @@
 local tailwind = {}
 
+local kinds = require('blink.cmp.types').CompletionItemKind
+
 --- @param item blink.cmp.CompletionItem
 --- @return string|nil
 function tailwind.get_hex_color(item)
   local doc = item.documentation
-  if item.kind ~= 'Color' or not doc then return end
+  if item.kind ~= kinds.Color or not doc then return end
   local content = type(doc) == 'string' and doc or doc.value
   if content and content:match('^#%x%x%x%x%x%x$') then return content end
 end
