@@ -56,7 +56,7 @@ function lib.candidates(dirname, include_hidden, context, opts)
     end)
     :map(function(entries)
       return vim.tbl_map(
-        function(entry) return lib.entry_to_completion_item(entry, dirname, context, opts) end,
+        function(entry) return lib.entry_to_completion_item(context, entry, dirname, opts) end,
         entries
       )
     end)
@@ -71,12 +71,12 @@ function lib.is_slash_comment()
   return is_slash_comment and not no_filetype
 end
 
+--- @param context blink.cmp.Context
 --- @param entry { name: string, type: string, stat: table }
 --- @param dirname string
---- @param context blink.cmp.Context
 --- @param opts table
 --- @return blink.cmp.CompletionItem[]
-function lib.entry_to_completion_item(entry, dirname, context, opts)
+function lib.entry_to_completion_item(context, entry, dirname, opts)
   local is_dir = entry.type == 'directory'
   local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
   local insert_text = is_dir and entry.name .. '/' or entry.name
@@ -84,7 +84,7 @@ function lib.entry_to_completion_item(entry, dirname, context, opts)
     label = (opts.label_trailing_slash and is_dir) and entry.name .. '/' or entry.name,
     kind = is_dir and CompletionItemKind.Folder or CompletionItemKind.File,
     insertText = insert_text,
-    textEdit = lib.get_text_edit(insert_text, context),
+    textEdit = lib.get_text_edit(context, insert_text),
     word = opts.trailing_slash and entry.name or nil,
     data = { path = entry.name, full_path = dirname .. '/' .. entry.name, type = entry.type, stat = entry.stat },
   }
@@ -93,7 +93,7 @@ end
 --- @param insert_text string
 --- @param context blink.cmp.Context
 --- @return lsp.Range | nil
-function lib.get_text_edit(insert_text, context)
+function lib.get_text_edit(context, insert_text)
   local line_before_cursor = context.line:sub(1, context.cursor[2])
 
   local parts = vim.split(line_before_cursor, '/')
