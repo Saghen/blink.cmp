@@ -76,7 +76,7 @@
           program = let
             buildScript = pkgs.writeShellApplication {
               name = "build-plugin";
-              runtimeInputs = with pkgs; [ fenix.minimal.toolchain ];
+              runtimeInputs = with pkgs; [ fenix.minimal.toolchain gcc ];
               text = ''
                 cargo build --release
               '';
@@ -88,6 +88,7 @@
         devShells.default = pkgs.mkShell {
           name = "blink";
           packages = with pkgs; [
+            gcc
             fenix.complete.toolchain
             rust-analyzer-nightly
             nix-update
