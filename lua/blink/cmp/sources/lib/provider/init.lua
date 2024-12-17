@@ -12,7 +12,8 @@
 --- @field get_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
 --- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, on_items: fun(items: blink.cmp.CompletionItem[], is_cached: boolean))
 --- @field should_show_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
---- @field resolve fun(self: blink.cmp.SourceProvider, item: blink.cmp.CompletionItem): blink.cmp.Task
+--- @field transform_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
+--- @field resolve fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field execute fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): blink.cmp.Task
 --- @field get_signature_help_trigger_characters fun(self: blink.cmp.SourceProvider): { trigger_characters: string[], retrigger_characters: string[] }
 --- @field get_signature_help fun(self: blink.cmp.SourceProvider, context: blink.cmp.SignatureHelpContext): blink.cmp.Task
@@ -109,24 +110,25 @@ function source:should_show_items(context, items)
   return self.config.should_show_items(context, items)
 end
 
+function source:transform_items(context, items)
+  if self.config.transform_items ~= nil then items = self.config.transform_items(context, items) end
+  items = require('blink.cmp.config').sources.transform_items(context, items)
+  return items
+end
+
 --- Resolve ---
 
---- @param item blink.cmp.CompletionItem
---- @return blink.cmp.Task
-function source:resolve(item)
+function source:resolve(context, item)
   local tasks = self.resolve_tasks
   if tasks[item] == nil or tasks[item].status == async.STATUS.CANCELLED then
     tasks[item] = async.task.new(function(resolve)
       if self.module.resolve == nil then return resolve(item) end
-      return self.module:resolve(item, function(resolved_item)
-        -- use the item's existing documentation and detail if the LSP didn't return it
-        -- TODO: do we need this? this would be for java but never checked if it's needed
-        if resolved_item ~= nil and resolved_item.documentation == nil then
-          resolved_item.documentation = item.documentation
-        end
-        if resolved_item ~= nil and resolved_item.detail == nil then resolved_item.detail = item.detail end
 
-        vim.schedule(function() resolve(vim.tbl_deep_extend('force', item, resolved_item or {})) end)
+      return self.module:resolve(item, function(resolved_item)
+        -- HACK: it's out of spec to update keys not in resolveSupport.properties but some LSPs do it anyway
+        local merged_item = vim.tbl_deep_extend('force', item, resolved_item or {})
+        local transformed_item = self:transform_items(context, { merged_item })[1] or merged_item
+        vim.schedule(function() resolve(transformed_item) end)
       end)
     end)
   end

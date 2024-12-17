@@ -12,7 +12,7 @@ local function prefetch_resolve(context, item)
 
   local resolve = vim.schedule_wrap(function()
     if last_request ~= nil then last_request:cancel() end
-    last_request = require('blink.cmp.sources.lib').resolve(item)
+    last_request = require('blink.cmp.sources.lib').resolve(context, item)
   end)
 
   -- immediately resolve if the context has changed

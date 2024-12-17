@@ -19,7 +19,7 @@ local config = require('blink.cmp.config')
 --- @field cancel_completions fun()
 --- @field apply_max_items_for_completions fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
 --- @field listen_on_completions fun(callback: fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]))
---- @field resolve fun(item: blink.cmp.CompletionItem): blink.cmp.Task
+--- @field resolve fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
 --- @field execute fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
 ---
 --- @field get_signature_help_trigger_characters fun(mode: blink.cmp.Mode): { trigger_characters: string[], retrigger_characters: string[] }
@@ -159,7 +159,7 @@ end
 
 --- Resolve ---
 
-function sources.resolve(item)
+function sources.resolve(context, item)
   --- @type blink.cmp.SourceProvider?
   local item_source = nil
   for _, source in pairs(sources.providers) do
@@ -168,9 +168,13 @@ function sources.resolve(item)
       break
     end
   end
-  if item_source == nil then return async.task.new(function(resolve) resolve(item) end) end
+  if item_source == nil then
+    return async.task.new(function(resolve) resolve(item) end)
+  end
 
-  return item_source:resolve(item):catch(function(err) vim.print('failed to resolve item with error: ' .. err) end)
+  return item_source
+    :resolve(context, item)
+    :catch(function(err) vim.print('failed to resolve item with error: ' .. err) end)
 end
 
 --- Execute ---
@@ -183,7 +187,9 @@ function sources.execute(context, item)
       break
     end
   end
-  if item_source == nil then return async.task.new(function(resolve) resolve() end) end
+  if item_source == nil then
+    return async.task.new(function(resolve) resolve() end)
+  end
 
   return item_source
     :execute(context, item)

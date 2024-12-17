@@ -99,10 +99,11 @@ function cmp.show_documentation()
   local documentation = require('blink.cmp.completion.windows.documentation')
   if documentation.win:is_open() or not menu.win:is_open() then return end
 
+  local context = require('blink.cmp.completion.list').context
   local item = require('blink.cmp.completion.list').get_selected_item()
-  if not item then return end
+  if not item or not context then return end
 
-  vim.schedule(function() documentation.show_item(item) end)
+  vim.schedule(function() documentation.show_item(context, item) end)
   return true
 end
 

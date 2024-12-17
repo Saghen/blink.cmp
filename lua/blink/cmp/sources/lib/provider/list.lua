@@ -90,10 +90,7 @@ function list:append(response)
   self.items = new_items
 
   -- run provider-local and global transform_items functions
-  if self.provider.config.transform_items ~= nil then
-    self.items = self.provider.config.transform_items(self.context, self.items)
-    self.items = require('blink.cmp.config').sources.transform_items(self.context, self.items)
-  end
+  self.items = self.provider:transform_items(self.context, self.items)
 
   self:emit()
 end

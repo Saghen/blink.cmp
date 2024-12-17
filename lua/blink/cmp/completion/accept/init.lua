@@ -13,7 +13,7 @@ local function accept(ctx, item, callback)
   -- with some LSPs (i.e. rust-analyzer) causing them to return the item as-is
   -- without i.e. auto-imports
   sources
-    .resolve(item)
+    .resolve(ctx, item)
     :map(function(item)
       item = vim.deepcopy(item)
 

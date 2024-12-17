@@ -4,8 +4,8 @@
 --- @field auto_show_timer uv_timer_t
 --- @field shown_item? blink.cmp.CompletionItem
 ---
---- @field auto_show_item fun(item: blink.cmp.CompletionItem)
---- @field show_item fun(item: blink.cmp.CompletionItem)
+--- @field auto_show_item fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem)
+--- @field show_item fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem)
 --- @field update_position fun()
 --- @field scroll_up fun(amount: number)
 --- @field scroll_down fun(amount: number)
@@ -41,27 +41,27 @@ menu.close_emitter:on(function()
   docs.auto_show_timer:stop()
 end)
 
-function docs.auto_show_item(item)
+function docs.auto_show_item(context, item)
   docs.auto_show_timer:stop()
   if docs.win:is_open() then
     docs.auto_show_timer:start(config.update_delay_ms, 0, function()
-      vim.schedule(function() docs.show_item(item) end)
+      vim.schedule(function() docs.show_item(context, item) end)
     end)
   elseif config.auto_show then
     docs.auto_show_timer:start(config.auto_show_delay_ms, 0, function()
-      vim.schedule(function() docs.show_item(item) end)
+      vim.schedule(function() docs.show_item(context, item) end)
     end)
   end
 end
 
-function docs.show_item(item)
+function docs.show_item(context, item)
   docs.auto_show_timer:stop()
   if item == nil or not menu.win:is_open() then return docs.win:close() end
 
   -- TODO: cancellation
   -- TODO: only resolve if documentation does not exist
   sources
-    .resolve(item)
+    .resolve(context, item)
     :map(function(item)
       if item.documentation == nil and item.detail == nil then
         docs.win:close()
