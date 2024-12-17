@@ -29,7 +29,7 @@ function cmdline:get_completions(context, callback)
     keyword_config.regex,
     keyword_config.exclude_from_prefix_regex
   )
-  local current_arg_prefix = current_arg:sub(1, keyword.start_col - 1)
+  local current_arg_prefix = current_arg:sub(1, keyword.start_col - #text_before_cursor - 1)
 
   local query = (text_before_cursor .. current_arg_prefix):gsub([[\\]], [[\\\\]])
   local completions = vim.fn.getcompletion(query, 'cmdline')
