@@ -18,7 +18,7 @@
 --- @field providers string[]
 ---
 --- @field new fun(opts: blink.cmp.ContextOpts): blink.cmp.Context
---- @field get_keyword fun(self: blink.cmp.Context): string
+--- @field get_keyword fun(): string
 --- @field within_query_bounds fun(self: blink.cmp.Context, cursor: number[]): boolean
 ---
 --- @field get_mode fun(): blink.cmp.Mode
@@ -59,10 +59,10 @@ function context.new(opts)
   }, { __index = context })
 end
 
-function context:get_keyword()
+function context.get_keyword()
   local keyword = require('blink.cmp.config').completion.keyword
-  local range = self.get_regex_around_cursor(keyword.range, keyword.regex, keyword.exclude_from_prefix_regex)
-  return string.sub(self.line, range.start_col, range.start_col + range.length - 1)
+  local range = context.get_regex_around_cursor(keyword.range, keyword.regex, keyword.exclude_from_prefix_regex)
+  return string.sub(context.get_line(), range.start_col, range.start_col + range.length - 1)
 end
 
 --- @param cursor number[]

@@ -21,7 +21,7 @@ local draw_context = {}
 --- @return blink.cmp.DrawItemContext[]
 function draw_context.get_from_items(context, draw, items)
   local matched_indices = require('blink.cmp.fuzzy').fuzzy_matched_indices(
-    context:get_keyword(),
+    context.get_keyword(),
     vim.tbl_map(function(item) return item.label end, items)
   )
 
