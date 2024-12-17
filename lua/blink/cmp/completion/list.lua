@@ -4,7 +4,7 @@
 --- @field context? blink.cmp.Context
 --- @field items blink.cmp.CompletionItem[]
 --- @field selected_item_idx? number
---- @field preview_undo_text_edit? lsp.TextEdit
+--- @field preview_undo? { text_edit: lsp.TextEdit, cursor: integer[]?}
 --- @field show_emitter blink.cmp.EventEmitter<blink.cmp.CompletionListShowEvent>
 --- @field hide_emitter blink.cmp.EventEmitter<blink.cmp.CompletionListHideEvent>
 --- @field select_emitter blink.cmp.EventEmitter<blink.cmp.CompletionListSelectEvent>
@@ -59,7 +59,7 @@ local list = {
   items = {},
   selected_item_idx = nil,
   is_explicitly_selected = false,
-  preview_undo_text_edit = nil,
+  preview_undo = nil,
 }
 
 ---------- State ----------
@@ -68,7 +68,7 @@ function list.show(context, items_by_source)
   -- reset state for new context
   local is_new_context = not list.context or list.context.id ~= context.id
   if is_new_context then
-    list.preview_undo_text_edit = nil
+    list.preview_undo = nil
     list.is_explicitly_selected = false
   end
 
@@ -189,19 +189,19 @@ end
 ---------- Preview ----------
 
 function list.undo_preview()
-  if list.preview_undo_text_edit == nil then return end
+  if list.preview_undo == nil then return end
 
-  require('blink.cmp.lib.text_edits').apply({ list.preview_undo_text_edit })
-  list.preview_undo_text_edit = nil
+  require('blink.cmp.lib.text_edits').apply({ list.preview_undo.text_edit })
+  if list.preview_undo.cursor then vim.api.nvim_win_set_cursor(0, list.preview_undo.cursor) end
+  list.preview_undo = nil
 end
 
 function list.apply_preview(item)
   -- undo the previous preview if it exists
-  if list.preview_undo_text_edit ~= nil then
-    require('blink.cmp.lib.text_edits').apply({ list.preview_undo_text_edit })
-  end
+  list.undo_preview()
   -- apply the new preview
-  list.preview_undo_text_edit = require('blink.cmp.completion.accept.preview')(item)
+  local undo_text_edit, undo_cursor = require('blink.cmp.completion.accept.preview')(item)
+  list.preview_undo = { text_edit = undo_text_edit, cursor = undo_cursor }
 end
 
 ---------- Accept ----------
