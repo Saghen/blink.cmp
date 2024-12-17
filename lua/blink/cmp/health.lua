@@ -13,8 +13,8 @@ function health.check()
   end
 
   -- check if os is supported
-  local download = require('blink.cmp.fuzzy.download')
-  local system_triple = download.get_system_triple_sync()
+  local download = require('blink.cmp.fuzzy.download.system')
+  local system_triple = download.get_triple_sync()
   if system_triple then
     vim.health.ok('Your system is supported by pre-built binaries (' .. system_triple .. ')')
   else
