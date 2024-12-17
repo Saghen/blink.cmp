@@ -686,8 +686,6 @@ MiniDeps.add({
           use_show_condition = true,
           -- Whether to show autosnippets in the completion list
           show_autosnippets = true,
-          -- Snippet filetypes to always include in the completion list
-          global_snippets = { 'all' },
         }
       },
       buffer = {

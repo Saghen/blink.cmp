@@ -1,7 +1,6 @@
 --- @class blink.cmp.LuasnipSourceOptions
 --- @field use_show_condition? boolean Whether to use show_condition for filtering snippets
 --- @field show_autosnippets? boolean Whether to show autosnippets in the completion list
---- @field global_snippets? string[] Snippet filetypes to always include in the completion list
 
 --- @class blink.cmp.LuasnipSource : blink.cmp.Source
 --- @field config blink.cmp.LuasnipSourceOptions
@@ -14,7 +13,6 @@ local source = {}
 local defaults_config = {
   use_show_condition = true,
   show_autosnippets = true,
-  global_snippets = { 'all' },
 }
 
 function source.new(opts)
@@ -45,15 +43,12 @@ function source:get_completions(ctx, callback)
     local ls = require('luasnip')
     local snippets = {}
 
-    for _, extra_ft in ipairs(self.config.global_snippets) do
-      vim.list_extend(snippets, ls.get_snippets(extra_ft, { type = 'snippets' }))
-    end
-    vim.list_extend(snippets, ls.get_snippets(ft, { type = 'snippets' }))
-    if self.config.show_autosnippets then
-      for _, extra_ft in ipairs(self.config.global_snippets) do
-        vim.list_extend(snippets, ls.get_snippets(extra_ft, { type = 'autosnippets' }))
+    local filetypes = require('luasnip.util.util').get_snippet_filetypes()
+    for _, filetype in ipairs(filetypes) do
+      vim.list_extend(snippets, ls.get_snippets(filetype, { type = 'snippets' }))
+      if self.config.show_autosnippets then
+        vim.list_extend(snippets, ls.get_snippets(filetype, { type = 'autosnippets' }))
       end
-      vim.list_extend(snippets, ls.get_snippets(ft, { type = 'autosnippets' }))
     end
     snippets = vim.tbl_filter(function(snip) return not snip.hidden end, snippets)
 
