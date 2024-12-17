@@ -47,7 +47,7 @@ function completion.setup()
           end
         end
 
-        if not triggering_source_returned_items then return end
+        if not triggering_source_returned_items then return list.hide() end
       end
 
       list.show(event.context, event.items)

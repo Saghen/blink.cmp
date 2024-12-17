@@ -9,7 +9,7 @@
 
 --- @class blink.cmp.CmdlineEventsListener
 --- @field on_char_added fun(char: string, is_ignored: boolean)
---- @field on_cursor_moved fun(event: 'CursorMovedI' | 'InsertEnter', is_ignored: boolean)
+--- @field on_cursor_moved fun(event: 'CursorMoved' | 'InsertEnter', is_ignored: boolean)
 --- @field on_leave fun()
 
 --- @type blink.cmp.CmdlineEvents
@@ -75,7 +75,7 @@ function cmdline_events:listen(opts)
     local is_ignored = self.ignore_next_cursor_moved
     self.ignore_next_cursor_moved = false
 
-    opts.on_cursor_moved('CursorMovedI', is_ignored)
+    opts.on_cursor_moved('CursorMoved', is_ignored)
   end)
   timer:start(16, 0, callback)
 

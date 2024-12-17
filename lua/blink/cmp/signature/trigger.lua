@@ -45,17 +45,14 @@ function trigger.activate()
   })
   trigger.buffer_events:listen({
     on_char_added = function(char)
-      local is_on_trigger = trigger.is_trigger_character(char)
-      local is_on_retrigger = trigger.is_trigger_character(char, true)
-
       -- ignore if disabled
       if not require('blink.cmp.config').enabled() then
         return trigger.hide()
       -- character forces a trigger according to the sources, refresh the existing context if it exists
-      elseif is_on_trigger then
+      elseif trigger.is_trigger_character(char) then
         return trigger.show({ trigger_character = char })
       -- character forces a re-trigger according to the sources, show if we have a context
-      elseif is_on_retrigger and trigger.context ~= nil then
+      elseif trigger.is_trigger_character(char, true) and trigger.context ~= nil then
         return trigger.show()
       end
     end,
@@ -66,7 +63,7 @@ function trigger.activate()
 
       if config.show_on_insert_on_trigger_character and is_on_trigger and event == 'InsertEnter' then
         trigger.show({ trigger_character = char_under_cursor })
-      elseif event == 'CursorMovedI' and trigger.context ~= nil then
+      elseif event == 'CursorMoved' and trigger.context ~= nil then
         trigger.show()
       end
     end,

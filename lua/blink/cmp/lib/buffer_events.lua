@@ -18,7 +18,7 @@
 
 --- @class blink.cmp.BufferEventsListener
 --- @field on_char_added fun(char: string, is_ignored: boolean)
---- @field on_cursor_moved fun(event: 'CursorMovedI' | 'InsertEnter', is_ignored: boolean)
+--- @field on_cursor_moved fun(event: 'CursorMoved' | 'InsertEnter', is_ignored: boolean)
 --- @field on_insert_leave fun()
 
 --- @type blink.cmp.BufferEvents
@@ -72,9 +72,10 @@ function buffer_events:listen(opts)
       if last_char ~= '' then return end
 
       if not require('blink.cmp.config').enabled() then return end
-      if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
+      if not self.show_in_snippet and not self.has_context() and snippet.active() then return end
 
-      opts.on_cursor_moved(ev.event, is_ignored)
+      local event = ev.event == 'CursorMovedI' and 'CursorMoved' or ev.event
+      opts.on_cursor_moved(event, is_ignored)
     end,
   })
 

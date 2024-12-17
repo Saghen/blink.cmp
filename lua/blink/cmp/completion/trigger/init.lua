@@ -65,7 +65,7 @@ function trigger.activate()
   local function on_cursor_moved(event, is_ignored)
     -- we were told to ignore the cursor moved event, so we update the context
     -- but don't send an on_show event upstream
-    if is_ignored and event == 'CursorMovedI' then
+    if is_ignored and event == 'CursorMoved' then
       if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
       return
     end
@@ -73,22 +73,19 @@ function trigger.activate()
     local cursor = context.get_cursor()
     local cursor_col = cursor[2]
     local char_under_cursor = context.get_line():sub(cursor_col, cursor_col)
-    local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
-    local is_on_trigger_for_show_on_insert = trigger.is_trigger_character(char_under_cursor, true)
     local is_on_keyword_char = keyword_regex:match_str(char_under_cursor) ~= nil
 
     local insert_enter_on_trigger_character = config.show_on_trigger_character
       and config.show_on_insert_on_trigger_character
-      and is_on_trigger_for_show_on_insert
       and event == 'InsertEnter'
+      and trigger.is_trigger_character(char_under_cursor, true)
 
     -- check if we're still within the bounds of the query used for the context
     if trigger.context ~= nil and trigger.context:within_query_bounds(cursor) then
       trigger.show()
 
     -- check if we've entered insert mode on a trigger character
-    -- or if we've moved onto a trigger character (by accepting for example)
-    elseif insert_enter_on_trigger_character or (is_on_trigger_for_show and trigger.context ~= nil) then
+    elseif insert_enter_on_trigger_character then
       trigger.context = nil
       trigger.show({ trigger_character = char_under_cursor })
 
