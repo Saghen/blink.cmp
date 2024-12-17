@@ -63,10 +63,22 @@ function buffer_events:listen(opts)
     end,
   })
 
-  vim.api.nvim_create_autocmd({ 'CursorMovedI', 'InsertEnter' }, {
+  vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
-      local is_ignored = ev.event == 'CursorMovedI' and self.ignore_next_cursor_moved
-      if ev.event == 'CursorMovedI' then self.ignore_next_cursor_moved = false end
+      -- only fire a CursorMoved event (notable not CursorMovedI) when jumping between tab stops in a snippet
+      -- and we're currently showing
+      if
+        ev.event == 'CursorMoved'
+        and (vim.api.nvim_get_mode().mode ~= 'v' or not self.has_context())
+        and snippet.active()
+      then
+        return
+      end
+
+      local is_cursor_moved = ev.event == 'CursorMoved' or ev.event == 'CursorMovedI'
+
+      local is_ignored = is_cursor_moved and self.ignore_next_cursor_moved
+      if is_cursor_moved then self.ignore_next_cursor_moved = false end
 
       -- characters added so let textchanged handle it
       if last_char ~= '' then return end
@@ -74,8 +86,7 @@ function buffer_events:listen(opts)
       if not require('blink.cmp.config').enabled() then return end
       if not self.show_in_snippet and not self.has_context() and snippet.active() then return end
 
-      local event = ev.event == 'CursorMovedI' and 'CursorMoved' or ev.event
-      opts.on_cursor_moved(event, is_ignored)
+      opts.on_cursor_moved(is_cursor_moved and 'CursorMoved' or ev.event, is_ignored)
     end,
   })
 
