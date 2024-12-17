@@ -33,36 +33,38 @@ function source:enabled()
 end
 
 function source:get_completions(ctx, callback)
-  local ft = vim.bo.filetype
+  --- @type blink.cmp.CompletionItem[]
+  local items = {}
 
-  if not self.items_cache[ft] then
-    --- @type blink.cmp.CompletionItem[]
-    local items = {}
+  -- gather snippets from relevant filetypes, including extensions
+  for _, ft in ipairs(require('luasnip.util.util').get_snippet_filetypes()) do
+    if self.items_cache[ft] then
+      vim.list_extend(items, self.items_cache[ft])
+      goto continue
+    end
 
+    -- cache not yet available for this filetype
+    self.items_cache[ft] = {}
     -- Gather filetype snippets and, optionally, autosnippets
-    local ls = require('luasnip')
-    local snippets = {}
-
-    local filetypes = require('luasnip.util.util').get_snippet_filetypes()
-    for _, filetype in ipairs(filetypes) do
-      vim.list_extend(snippets, ls.get_snippets(filetype, { type = 'snippets' }))
-      if self.config.show_autosnippets then
-        vim.list_extend(snippets, ls.get_snippets(filetype, { type = 'autosnippets' }))
-      end
+    local snippets = require('luasnip').get_snippets(ft, { type = 'snippets' })
+    if self.config.show_autosnippets then
+      local autosnippets = require('luasnip').get_snippets(ft, { type = 'autosnippets' })
+      snippets = require('blink.cmp.lib.utils').shallow_copy(snippets)
+      vim.list_extend(snippets, autosnippets)
     end
     snippets = vim.tbl_filter(function(snip) return not snip.hidden end, snippets)
 
     -- Get the max priority for use with sortText
     local max_priority = 0
     for _, snip in ipairs(snippets) do
-      if not snip.hidden then max_priority = math.max(max_priority, snip.effective_priority or 0) end
+      max_priority = math.max(max_priority, snip.effective_priority or 0)
     end
 
     for _, snip in ipairs(snippets) do
       -- Convert priority of 1000 (with max of 8000) to string like "00007000|||asd" for sorting
       -- This will put high priority snippets at the top of the list, and break ties based on the trigger
       local inversed_priority = max_priority - (snip.effective_priority or 0)
-      local sort_text = ('0'):rep(8 - tostring(inversed_priority), '') .. inversed_priority .. '|||' .. snip.trigger
+      local sort_text = ('0'):rep(8 - #tostring(inversed_priority), '') .. inversed_priority .. '|||' .. snip.trigger
 
       --- @type lsp.CompletionItem
       local item = {
@@ -73,13 +75,14 @@ function source:get_completions(ctx, callback)
         sortText = sort_text,
         data = { snip_id = snip.id, show_condition = snip.show_condition },
       }
+      -- populate snippet cache for this filetype
+      table.insert(self.items_cache[ft], item)
+      -- while we're at it, also populate completion items for this request
       table.insert(items, item)
     end
 
-    self.items_cache[ft] = items
+    ::continue::
   end
-
-  local items = self.items_cache[ft] or {}
 
   -- Filter items based on show_condition, if configured
   if self.config.use_show_condition then
