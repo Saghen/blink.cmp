@@ -795,6 +795,7 @@ MiniDeps.add({
 - [blink-cmp-ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 - [blink-cmp-ctags](https://github.com/netmute/blink-cmp-ctags)
 - [blink-cmp-copilot](https://github.com/giuxtaposition/blink-cmp-copilot)
+- [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim)
 
 ### Luasnip
 
