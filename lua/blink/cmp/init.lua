@@ -55,10 +55,11 @@ end
 
 --- @param opts? blink.cmp.CompletionListAcceptOpts
 function cmp.accept(opts)
+  opts = opts or {}
   if not cmp.is_visible() then return end
 
   local completion_list = require('blink.cmp.completion.list')
-  local item = completion_list.get_selected_item()
+  local item = opts.index ~= nil and completion_list.items[opts.index] or completion_list.get_selected_item()
   if item == nil then return end
 
   vim.schedule(function() completion_list.accept(opts) end)
