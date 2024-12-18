@@ -44,7 +44,6 @@ local function accept(ctx, item, callback)
           and #parsed_snippet.data.children == 1
           and parsed_snippet.data.children[1].type == vim.lsp._snippet_grammar.NodeType.Text
         then
-          vim.notify('Snippet only contains text, ignoring', vim.log.levels.WARN)
           item.insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText
         end
       end
