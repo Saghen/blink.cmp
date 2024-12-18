@@ -21,7 +21,6 @@ end
 
 --- Checks if the completion menu is currently visible
 --- @return boolean
---- TODO: should also check if ghost text is visible
 function cmp.is_visible()
   return require('blink.cmp.completion.windows.menu').win:is_open()
     or require('blink.cmp.completion.windows.ghost_text').is_open()

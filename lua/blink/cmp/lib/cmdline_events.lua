@@ -94,7 +94,6 @@ function cmdline_events:suppress_events_for_callback(cb)
   if not vim.api.nvim_get_mode().mode == 'c' then return end
 
   local cursor_after = vim.fn.getcmdpos()
-  -- TODO: does this guarantee that the CmdlineChanged event will fire?
   self.ignore_next_cursor_moved = self.ignore_next_cursor_moved or cursor_after ~= cursor_before
 end
 

@@ -33,7 +33,7 @@ function completion.setup()
       if trigger.prefetch then return end
 
       -- don't show if all the sources that defined the trigger character returned no items
-      if trigger.context.trigger.character ~= nil then
+      if event.context.trigger.character ~= nil then
         local triggering_source_returned_items = false
         for _, source in pairs(event.context.providers) do
           local trigger_characters = sources.get_provider_by_id(source):get_trigger_characters()

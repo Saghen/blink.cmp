@@ -91,7 +91,6 @@ function trigger.show_if_on_trigger_character()
 
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
-  -- TODO: accept a mode parameter here if we end up supporting more modes for signature help
   if trigger.is_trigger_character(char_under_cursor) then trigger.show({ trigger_character = char_under_cursor }) end
 end
 
