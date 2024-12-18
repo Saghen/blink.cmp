@@ -35,7 +35,7 @@
 --- }
 --- ```
 --- | 'default'
---- Mappings simliar to VSCode.
+--- Mappings similar to VSCode.
 --- You may want to set `completion.trigger.show_in_snippet = false` or use `completion.list.selection = "manual" | "auto_insert"` when using this mapping:
 --- ```lua
 --- {
