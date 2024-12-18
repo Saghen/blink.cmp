@@ -31,10 +31,22 @@ local function accept(ctx, item, callback)
       if
         ctx.mode == 'default'
         and item.insertTextFormat ~= vim.lsp.protocol.InsertTextFormat.Snippet
-        and item.kind ~= require('blink.cmp.types').CompletionItemKind.Snippet
         and require('blink.cmp.config').completion.accept.create_undo_point
       then
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
+      end
+
+      -- Ignore snippets that only contain text
+      if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+        local parsed_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(item.textEdit.newText)
+        if
+          parsed_snippet ~= nil
+          and #parsed_snippet.data.children == 1
+          and parsed_snippet.data.children[1].type == vim.lsp._snippet_grammar.NodeType.Text
+        then
+          vim.notify('Snippet only contains text, ignoring', vim.log.levels.WARN)
+          item.insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText
+        end
       end
 
       -- Add brackets to the text edit if needed
