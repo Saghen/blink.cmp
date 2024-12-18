@@ -30,9 +30,12 @@ local function accept(ctx, item, callback)
       -- Create an undo point, if it's not a snippet, since the snippet engine should handle undo
       if
         ctx.mode == 'default'
-        and item.insertTextFormat ~= vim.lsp.protocol.InsertTextFormat.Snippet
-        and item.kind ~= require('blink.cmp.types').CompletionItemKind.Snippet
         and require('blink.cmp.config').completion.accept.create_undo_point
+        and item.insertTextFormat ~= vim.lsp.protocol.InsertTextFormat.Snippet
+        -- HACK: We check the kind here because the Luasnip source returns PlainText and handles
+        -- expansion itself. Otherwise, Luasnip will fail to enter select mode
+        -- https://github.com/Saghen/blink.cmp/commit/284dd37f9bbc632f8281d6361e877db5b45e6ff0#r150498482
+        and item.kind ~= require('blink.cmp.types').CompletionItemKind.Snippet
       then
         vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
       end
