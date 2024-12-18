@@ -630,6 +630,13 @@ MiniDeps.add({
       lsp = {
         name = 'LSP',
         module = 'blink.cmp.sources.lsp',
+        -- Filter out text items from the LSP provider, since we have the buffer provider for that
+        transform_items = function(_, items)
+          return vim.tbl_filter(
+            function(item) return item.kind ~= require('blink.cmp.types').CompletionItemKind.Text end,
+            items
+          )
+        end,
 
         --- *All* providers have the following options available
         --- NOTE: All of these options may be functions to get dynamic behavior

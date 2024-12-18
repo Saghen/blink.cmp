@@ -69,6 +69,12 @@ local sources = {
         name = 'LSP',
         module = 'blink.cmp.sources.lsp',
         fallbacks = { 'buffer' },
+        transform_items = function(_, items)
+          return vim.tbl_filter(
+            function(item) return item.kind ~= require('blink.cmp.types').CompletionItemKind.Text end,
+            items
+          )
+        end,
       },
       path = {
         name = 'Path',
