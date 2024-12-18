@@ -6,7 +6,7 @@ local docs = {}
 --- @param detail? string
 --- @param documentation? lsp.MarkupContent | string
 --- @param max_width number
---- @param use_treesitter_highlighting boolean
+--- @param use_treesitter_highlighting boolean?
 function docs.render_detail_and_documentation(bufnr, detail, documentation, max_width, use_treesitter_highlighting)
   local detail_lines = {}
   if detail and detail ~= '' then detail_lines = docs.split_lines(detail) end
@@ -19,6 +19,7 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
 
   detail_lines, doc_lines = docs.extract_detail_from_doc(detail_lines, doc_lines)
 
+  ---@type string[]
   local combined_lines = vim.list_extend({}, detail_lines)
 
   -- add a blank line for the --- separator

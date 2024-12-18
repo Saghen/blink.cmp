@@ -6,6 +6,9 @@
 --- @field source_name string
 --- @field cursor_column number
 --- @field client_id? number
+--- @field render_documentation_fn? blink.cmp.CustomRenderDocumentation
+
+---@alias blink.cmp.CustomRenderDocumentation fun(self: blink.cmp.CompletionItem, doc_win: blink.cmp.Window, default_implementation: fun()): nil
 
 return {
   -- some plugins mutate the vim.lsp.protocol.CompletionItemKind table
