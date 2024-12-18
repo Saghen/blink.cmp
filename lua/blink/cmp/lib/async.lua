@@ -151,7 +151,9 @@ end
 --- utils
 
 function task.await_all(tasks)
-  if #tasks == 0 then return task.empty() end
+  if #tasks == 0 then
+    return task.new(function(resolve) resolve({}) end)
+  end
 
   local all_task
   all_task = task.new(function(resolve, reject)
