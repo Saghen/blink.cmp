@@ -121,7 +121,7 @@ function source:execute(_, item)
   local luasnip = require('luasnip')
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
-  -- if trigger is a pattern, expand "pattern" instead of actual snippet.
+  -- if trigger is a pattern, expand "pattern" instead of actual snippet
   if snip.regTrig then snip = snip:get_pattern_expand_helper() end
 
   -- get (0, 0) indexed cursor position
