@@ -70,22 +70,26 @@ function docs.show_item(context, item)
       end
 
       if docs.shown_item ~= item then
-        local default_render_documentation = function()
-          require('blink.cmp.lib.window.docs').render_detail_and_documentation(
-            docs.win:get_buf(),
-            item.detail,
-            item.documentation,
-            docs.win.config.max_width,
-            config and config.treesitter_highlighting
-          )
-        end
+        --- @type blink.cmp.RenderDetailAndDocumentationOpts
+        local default_render_opts = {
+          bufnr = docs.win:get_buf(),
+          detail = item.detail,
+          documentation = item.documentation,
+          max_width = docs.win.config.max_width,
+          use_treesitter_highlighting = config and config.treesitter_highlighting,
+        }
+        local render = require('blink.cmp.lib.window.docs').render_detail_and_documentation
 
-        if item.render_documentation_fn ~= nil then
+        if item.documentation and item.documentation.render ~= nil then
           -- let the provider render the documentation and optionally override
           -- the default rendering
-          item:render_documentation_fn(docs.win, default_render_documentation)
+          item.documentation.render({
+            item = item,
+            window = docs.win,
+            default_implementation = function(opts) render(vim.tbl_extend('force', default_render_opts, opts)) end,
+          })
         else
-          default_render_documentation()
+          render(default_render_opts)
         end
       end
       docs.shown_item = item
