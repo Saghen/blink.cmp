@@ -1,4 +1,5 @@
 --- @alias blink.cmp.KeymapCommand
+
 --- | 'fallback' Fallback to the built-in behavior
 --- | 'show' Show the completion window
 --- | 'hide' Hide the completion window
@@ -102,6 +103,11 @@
 ---   cmdline = {
 ---     preset = 'cmdline',
 ---   }
+---
+---   -- optionally, define different keymaps for Neovim's built-in terminal
+---   term = {
+---     preset = 'term',
+---   }
 --- }
 --- ```
 ---
@@ -112,6 +118,7 @@
 
 --- @class (exact) blink.cmp.KeymapConfig : blink.cmp.BaseKeymapConfig
 --- @field cmdline? blink.cmp.BaseKeymapConfig Optionally, define a separate keymap for cmdline
+--- @field term? blink.cmp.BaseKeymapConfig Optionally, define a separate keymap for cmdline
 
 local keymap = {
   --- @type blink.cmp.KeymapConfig
@@ -142,8 +149,8 @@ function keymap.validate(config)
 
   local validation_schema = {}
   for key, value in pairs(config) do
-    -- nested cmdline keymap
-    if key == 'cmdline' then
+    -- nested cmdline/term keymap
+    if key == 'cmdline' or key == 'term' then
       keymap.validate(value)
 
     -- preset
