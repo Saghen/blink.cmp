@@ -83,7 +83,12 @@ function task:map(fn)
   local chained_task
   chained_task = task.new(function(resolve, reject)
     self:on_completion(function(result)
-      local mapped_result = fn(result)
+      local success, mapped_result = pcall(fn, result)
+      if not success then
+        reject(mapped_result)
+        return
+      end
+
       if type(mapped_result) == 'table' and mapped_result.__task then
         mapped_result:on_completion(resolve)
         mapped_result:on_failure(reject)
@@ -104,8 +109,13 @@ function task:catch(fn)
   chained_task = task.new(function(resolve, reject)
     self:on_completion(resolve)
     self:on_failure(function(err)
-      local mapped_err = fn(err)
-      if type(mapped_err) == 'table' and mapped_err.is_task then
+      local success, mapped_err = pcall(fn, err)
+      if not success then
+        reject(mapped_err)
+        return
+      end
+
+      if type(mapped_err) == 'table' and mapped_err.__task then
         mapped_err:on_completion(resolve)
         mapped_err:on_failure(reject)
         mapped_err:on_cancel(function() chained_task:cancel() end)
@@ -176,10 +186,10 @@ function task.await_all(tasks)
         resolve_if_completed()
       end)
       task:on_failure(function(err)
+        reject(err)
         for _, task in ipairs(tasks) do
           task:cancel()
         end
-        reject(err)
       end)
       task:on_cancel(function()
         for _, sub_task in ipairs(tasks) do
