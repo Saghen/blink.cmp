@@ -957,7 +957,7 @@ completion = {
       columns = { { 'item_idx' }, { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
       components = {
         item_idx = {
-          text = function(ctx) return tostring(ctx.idx) end,
+          text = function(ctx) return ctx.idx >= 10 and ' ' or tostring(ctx.idx) end,
           highlight = 'BlinkCmpItemIdx' -- optional, only if you want to change its color
         }
       }
