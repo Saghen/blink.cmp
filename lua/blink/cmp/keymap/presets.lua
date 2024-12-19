@@ -1,3 +1,5 @@
+local config = require('blink.cmp.config')
+
 local presets = {
   none = {},
 
@@ -22,7 +24,7 @@ local presets = {
 
     ['<Tab>'] = {
       function(cmp)
-        if cmp.snippet_active() then
+        if cmp.snippet_active() or config.completion.list.selection == 'manual' then
           return cmp.accept()
         else
           return cmp.select_and_accept()
