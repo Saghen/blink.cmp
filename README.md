@@ -950,6 +950,7 @@ keymap = {
   ['<A-7>'] = { function(cmp) cmp.accept({ index = 7 }) end },
   ['<A-8>'] = { function(cmp) cmp.accept({ index = 8 }) end },
   ['<A-9>'] = { function(cmp) cmp.accept({ index = 9 }) end },
+  ['<A-0>'] = { function(cmp) cmp.accept({ index = 10 }) end },
 },
 completion = {
   menu = {
@@ -957,7 +958,15 @@ completion = {
       columns = { { 'item_idx' }, { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
       components = {
         item_idx = {
-          text = function(ctx) return tostring(ctx.idx) end,
+          text = function(ctx)
+            if ctx.idx == 10 then
+              return '0'
+            elseif ctx.idx > 10 then
+              return ' '
+            else
+              return tostring(ctx.idx)
+            end
+          end,
           highlight = 'BlinkCmpItemIdx' -- optional, only if you want to change its color
         }
       }
