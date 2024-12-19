@@ -25,7 +25,7 @@
 --- @field get_cursor fun(): number[]
 --- @field set_cursor fun(cursor: number[])
 --- @field get_line fun(num?: number): string
---- @field get_context_bounds fun(line: string, cursor: number[]): blink.cmp.ContextBounds
+--- @field get_bounds fun(line: string, cursor: number[]): blink.cmp.ContextBounds
 --- @field get_regex_around_cursor fun(range: string, regex_str: string, exclude_from_prefix_regex_str: string): { start_col: number, length: number }
 
 --- @class blink.cmp.ContextOpts
@@ -49,7 +49,7 @@ function context.new(opts)
     bufnr = vim.api.nvim_get_current_buf(),
     cursor = cursor,
     line = line,
-    bounds = context.get_context_bounds(line, cursor),
+    bounds = context.get_bounds(line, cursor),
     trigger = {
       kind = opts.trigger_character and vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter
         or vim.lsp.protocol.CompletionTriggerKind.Invoked,
@@ -102,7 +102,7 @@ function context.get_line(num)
 end
 
 --- Moves forward and backwards around the cursor looking for word boundaries
-function context.get_context_bounds(line, cursor)
+function context.get_bounds(line, cursor)
   local cursor_line = cursor[1]
   local cursor_col = cursor[2]
 

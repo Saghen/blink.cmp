@@ -18,7 +18,7 @@
 --- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[], prefetch?: boolean })
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
---- @field get_context_bounds fun(regex: vim.regex, line: string, cursor: number[]): blink.cmp.ContextBounds
+--- @field get_bounds fun(regex: vim.regex, line: string, cursor: number[]): blink.cmp.ContextBounds
 
 local keyword_config = require('blink.cmp.config').completion.keyword
 local config = require('blink.cmp.config').completion.trigger
