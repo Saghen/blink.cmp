@@ -24,6 +24,24 @@ function source.new(opts)
   local self = setmetatable({}, { __index = source })
   self.config = config
   self.items_cache = {}
+  local luasnip_ag = vim.api.nvim_create_augroup('BlinkCmpLuaSnipReload', { clear = true })
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'LuasnipSnippetsAdded',
+    callback = function()
+      local ok, _ = pcall(require, 'luasnip.session')
+      if not ok then return end
+      local ft = require('luasnip.session').latest_load_ft
+      self.items_cache[ft] = nil
+    end,
+    group = luasnip_ag,
+    desc = 'Reset internal cache of luasnip source of blink.cmp when new snippets are added',
+  })
+  vim.api.nvim_create_autocmd('User', {
+    pattern = 'LuasnipCleanup',
+    callback = function() require('blink.cmp').reload('luasnip') end,
+    group = luasnip_ag,
+    desc = 'Reload luasnip source of blink.cmp when snippets are cleared',
+  })
   return self
 end
 
