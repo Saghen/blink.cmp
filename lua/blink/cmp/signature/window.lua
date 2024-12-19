@@ -53,13 +53,13 @@ function signature.open_with_signature_help(context, signature_help)
   local active_signature = signature_help.signatures[(signature_help.activeSignature or 0) + 1]
 
   if signature.shown_signature ~= active_signature then
-    require('blink.cmp.lib.window.docs').render_detail_and_documentation(
-      signature.win:get_buf(),
-      active_signature.label,
-      active_signature.documentation,
-      config.max_width,
-      config.treesitter_highlighting
-    )
+    require('blink.cmp.lib.window.docs').render_detail_and_documentation({
+      bufnr = signature.win:get_buf(),
+      detail = active_signature.label,
+      documentation = active_signature.documentation,
+      max_width = config.max_width,
+      use_treesitter_highlighting = config.treesitter_highlighting,
+    })
   end
   signature.shown_signature = active_signature
 
