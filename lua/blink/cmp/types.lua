@@ -1,11 +1,19 @@
 --- @alias blink.cmp.Mode 'cmdline' | 'default'
 
 --- @class blink.cmp.CompletionItem : lsp.CompletionItem
+--- @field documentation? string | { kind: lsp.MarkupKind, value: string, render?: blink.cmp.SourceRenderDocumentation }
 --- @field score_offset? number
 --- @field source_id string
 --- @field source_name string
 --- @field cursor_column number
 --- @field client_id? number
+
+--- @class blink.cmp.SourceRenderDocumentationOpts
+--- @field item blink.cmp.CompletionItem
+--- @field window blink.cmp.Window
+--- @field default_implementation fun(opts: blink.cmp.RenderDetailAndDocumentationOptsPartial)
+
+--- @alias blink.cmp.SourceRenderDocumentation fun(opts: blink.cmp.SourceRenderDocumentationOpts)
 
 return {
   -- some plugins mutate the vim.lsp.protocol.CompletionItemKind table

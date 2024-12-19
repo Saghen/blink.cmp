@@ -2,23 +2,34 @@ local highlight_ns = require('blink.cmp.config').appearance.highlight_ns
 
 local docs = {}
 
---- @param bufnr number
---- @param detail? string
---- @param documentation? lsp.MarkupContent | string
---- @param max_width number
---- @param use_treesitter_highlighting boolean
-function docs.render_detail_and_documentation(bufnr, detail, documentation, max_width, use_treesitter_highlighting)
+--- @class blink.cmp.RenderDetailAndDocumentationOpts
+--- @field bufnr number
+--- @field detail? string
+--- @field documentation? lsp.MarkupContent | string
+--- @field max_width number
+--- @field use_treesitter_highlighting boolean?
+
+--- @class blink.cmp.RenderDetailAndDocumentationOptsPartial
+--- @field bufnr? number
+--- @field detail? string
+--- @field documentation? lsp.MarkupContent | string
+--- @field max_width? number
+--- @field use_treesitter_highlighting boolean?
+
+--- @param opts blink.cmp.RenderDetailAndDocumentationOpts
+function docs.render_detail_and_documentation(opts)
   local detail_lines = {}
-  if detail and detail ~= '' then detail_lines = docs.split_lines(detail) end
+  if opts.detail and opts.detail ~= '' then detail_lines = docs.split_lines(opts.detail) end
 
   local doc_lines = {}
-  if documentation ~= nil then
-    local doc = type(documentation) == 'string' and documentation or documentation.value
+  if opts.documentation ~= nil then
+    local doc = type(opts.documentation) == 'string' and opts.documentation or opts.documentation.value
     doc_lines = docs.split_lines(doc)
   end
 
   detail_lines, doc_lines = docs.extract_detail_from_doc(detail_lines, doc_lines)
 
+  ---@type string[]
   local combined_lines = vim.list_extend({}, detail_lines)
 
   -- add a blank line for the --- separator
@@ -27,27 +38,27 @@ function docs.render_detail_and_documentation(bufnr, detail, documentation, max_
   -- skip original separator in doc_lines, so we can highlight it later
   vim.list_extend(combined_lines, doc_lines, doc_already_has_separator and 2 or 1)
 
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, combined_lines)
-  vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
+  vim.api.nvim_buf_set_lines(opts.bufnr, 0, -1, true, combined_lines)
+  vim.api.nvim_set_option_value('modified', false, { buf = opts.bufnr })
 
   -- Highlight with treesitter
-  vim.api.nvim_buf_clear_namespace(bufnr, highlight_ns, 0, -1)
+  vim.api.nvim_buf_clear_namespace(opts.bufnr, highlight_ns, 0, -1)
 
-  if #detail_lines > 0 and use_treesitter_highlighting then
-    docs.highlight_with_treesitter(bufnr, vim.bo.filetype, 0, #detail_lines)
+  if #detail_lines > 0 and opts.use_treesitter_highlighting then
+    docs.highlight_with_treesitter(opts.bufnr, vim.bo.filetype, 0, #detail_lines)
   end
 
   -- Only add the separator if there are documentation lines (otherwise only display the detail)
   if #detail_lines > 0 and #doc_lines > 0 then
-    vim.api.nvim_buf_set_extmark(bufnr, highlight_ns, #detail_lines, 0, {
-      virt_text = { { string.rep('─', max_width), 'BlinkCmpDocSeparator' } },
+    vim.api.nvim_buf_set_extmark(opts.bufnr, highlight_ns, #detail_lines, 0, {
+      virt_text = { { string.rep('─', opts.max_width), 'BlinkCmpDocSeparator' } },
       virt_text_pos = 'overlay',
     })
   end
 
-  if #doc_lines > 0 and use_treesitter_highlighting then
+  if #doc_lines > 0 and opts.use_treesitter_highlighting then
     local start = #detail_lines + (#detail_lines > 0 and 1 or 0)
-    docs.highlight_with_treesitter(bufnr, 'markdown', start, start + #doc_lines)
+    docs.highlight_with_treesitter(opts.bufnr, 'markdown', start, start + #doc_lines)
   end
 end
 

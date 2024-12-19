@@ -62,6 +62,7 @@ function docs.show_item(context, item)
   -- TODO: only resolve if documentation does not exist
   sources
     .resolve(context, item)
+    ---@param item blink.cmp.CompletionItem
     :map(function(item)
       if item.documentation == nil and item.detail == nil then
         docs.win:close()
@@ -69,13 +70,27 @@ function docs.show_item(context, item)
       end
 
       if docs.shown_item ~= item then
-        require('blink.cmp.lib.window.docs').render_detail_and_documentation(
-          docs.win:get_buf(),
-          item.detail,
-          item.documentation,
-          docs.win.config.max_width,
-          config.treesitter_highlighting
-        )
+        --- @type blink.cmp.RenderDetailAndDocumentationOpts
+        local default_render_opts = {
+          bufnr = docs.win:get_buf(),
+          detail = item.detail,
+          documentation = item.documentation,
+          max_width = docs.win.config.max_width,
+          use_treesitter_highlighting = config and config.treesitter_highlighting,
+        }
+        local render = require('blink.cmp.lib.window.docs').render_detail_and_documentation
+
+        if item.documentation and item.documentation.render ~= nil then
+          -- let the provider render the documentation and optionally override
+          -- the default rendering
+          item.documentation.render({
+            item = item,
+            window = docs.win,
+            default_implementation = function(opts) render(vim.tbl_extend('force', default_render_opts, opts)) end,
+          })
+        else
+          render(default_render_opts)
+        end
       end
       docs.shown_item = item
 
