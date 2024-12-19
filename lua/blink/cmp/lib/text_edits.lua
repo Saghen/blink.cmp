@@ -9,17 +9,36 @@ function text_edits.apply(edits)
   local mode = context.get_mode()
   if mode == 'default' then return vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8') end
 
-  assert(mode == 'cmdline', 'Unsupported mode for text edits: ' .. mode)
-  assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
+  assert(mode == 'cmdline' or mode == 'term', 'Unsupported mode for text edits: ' .. mode)
 
-  local edit = edits[1]
-  local line = context.get_line()
-  local edited_line = line:sub(1, edit.range.start.character)
+  if mode == 'cmdline' then
+    assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
+
+    local edit = edits[1]
+    local line = context.get_line()
+    local edited_line = line:sub(1, edit.range.start.character)
     .. edit.newText
     .. line:sub(edit.range['end'].character + 1)
-  -- FIXME: for some reason, we have to set the cursor here, instead of later,
-  -- because this will override the cursor position set later
-  vim.fn.setcmdline(edited_line, edit.range.start.character + #edit.newText + 1)
+    -- FIXME: for some reason, we have to set the cursor here, instead of later,
+    -- because this will override the cursor position set later
+    vim.fn.setcmdline(edited_line, edit.range.start.character + #edit.newText + 1)
+  end
+
+  if mode == 'term' then
+    assert(#edits == 1, 'Terminal mode only supports one text edit. Contributions welcome!')
+
+    if vim.bo.channel and vim.bo.channel ~= 0 then
+      local edit = edits[1]
+      local cur_col = vim.api.nvim_win_get_cursor(0)[2]
+      local n_replaced = cur_col - edit.range.start.character
+      local backspace_keycode = '\8'
+
+      vim.fn.chansend(
+        vim.bo.channel,
+        backspace_keycode:rep(n_replaced) .. edit.newText
+      )
+    end
+  end
 end
 
 ------- Undo -------
