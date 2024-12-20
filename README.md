@@ -21,7 +21,7 @@
 - Extensive LSP support ([tracker](./LSP_TRACKER.md))
 - Native `vim.snippet` support (including `friendly-snippets`)
 - External sources support ([compatibility layer for `nvim-cmp` sources](https://github.com/Saghen/blink.compat))
-- Auto-bracket support based on semantic tokens (experimental, opt-in)
+- Auto-bracket support based on semantic tokens
 - Signature help (experimental, opt-in)
 - Command line completion
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
@@ -977,7 +977,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 3. **Fuzzy:** Rust <-> Lua FFI which performs both filtering and sorting of the items
 	- **Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (TODO: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
 	- **Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking precedence over the LSP source. The parameters here still need to be tuned, so please let me know if you find some magical parameters!
-4. **Windows:** Responsible for placing the menu, documentation and function parameters windows. All of the rendering can be overridden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
+4. **Windows:** Responsible for placing the menu, documentation and function parameters windows. It uses a grid based layout for drawing, and uses a window decoration provider to provide ~0 overhead highlighting.
 
 ## Compared to nvim-cmp
 
@@ -986,7 +986,7 @@ The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
 - Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
 - Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
   - Setting nvim-cmp's debounce to 0ms leads to visible stuttering. If you'd like to stick with nvim-cmp, try [yioneko's fork](https://github.com/yioneko/nvim-cmp) or the more recent [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim)
-- Boosts completion item score via frecency _and_ proximity bonus. nvim-cmp only boosts score via proximity bonus and optionally by recency
+- Boosts completion item score via frecency _and_ proximity bonus. nvim-cmp boosts score via proximity bonus and optionally by recency
 - Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
 - Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
 - Built-in auto bracket and signature help support
