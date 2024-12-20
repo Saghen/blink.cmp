@@ -12,7 +12,7 @@
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
 ---
 --- @field activate fun()
---- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
+--- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
 --- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[], prefetch?: boolean })

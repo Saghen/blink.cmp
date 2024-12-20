@@ -33,7 +33,7 @@ local accept = {
       blocked_filetypes = {},
       kind_resolution = {
         enabled = true,
-        blocked_filetypes = { 'typescriptreact', 'javascriptreact', 'vue' },
+        blocked_filetypes = { 'typescriptreact', 'javascriptreact', 'vue', 'rust' },
       },
       semantic_token_resolution = {
         enabled = true,
