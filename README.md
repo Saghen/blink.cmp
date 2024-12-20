@@ -183,7 +183,7 @@ MiniDeps.add({
   --
   --   -- disable a keymap from the preset
   --   ['<C-e>'] = {},
-  --   
+  --
   --   -- show with a list of providers
   --   ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },
   --
@@ -306,7 +306,7 @@ MiniDeps.add({
       -- always show the window. We block these by default.
       show_on_blocked_trigger_characters = function()
         if vim.api.nvim_get_mode().mode == 'c' then return {} end
-  
+
         -- you can also block per filetype, for example:
         -- if vim.bo.filetype == 'markdown' then
         --   return { ' ', '\n', '\t', '.', '/', '(', '[' }
@@ -431,7 +431,19 @@ MiniDeps.add({
         components = {
           kind_icon = {
             ellipsis = false,
-            text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
+            text = function(ctx)
+              local converted_kind = types.CompletionItemKind[ctx.kind]
+
+              if
+                converted_kind ~= types.CompletionItemKind.Method
+                and converted_kind ~= types.CompletionItemKind.Function
+                and converted_kind ~= types.CompletionItemKind.Constructor
+              then
+                return ctx.label .. ' ' .. ctx.label_detail
+              else
+                return ctx.label .. ctx.label_detail
+              end
+            end,
             highlight = function(ctx)
               return require('blink.cmp.completion.windows.render.tailwind').get_hl(ctx) or 'BlinkCmpKind' .. ctx.kind
             end,
@@ -589,7 +601,7 @@ MiniDeps.add({
     --     return { 'lsp', 'path', 'snippets', 'buffer' }
     --   end
     -- end
-    
+
     -- You may also define providers per filetype
     per_filetype = {
       -- lua = { 'lsp', 'path' },

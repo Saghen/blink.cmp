@@ -1,4 +1,5 @@
 local validate = require('blink.cmp.config.utils').validate
+local types = require('blink.cmp.types')
 
 --- @class (exact) blink.cmp.CompletionMenuConfig
 --- @field enabled boolean
@@ -88,7 +89,25 @@ local window = {
 
         label = {
           width = { fill = true, max = 60 },
-          text = function(ctx) return ctx.label .. ctx.label_detail end,
+          text = function(ctx)
+            -- Make sure that we add a "space" between the `label` & `label_detail`
+            -- if the component kind is not a function/method/constructor.
+            -- This is to avoid situations like: "ModuleNamestruct".
+
+            -- We need to convert to an integer so that we can compare since
+            -- `ctx.kind` is a string like "Method", "Interface", etc.
+            local converted_kind = types.CompletionItemKind[ctx.kind]
+
+            if
+              converted_kind ~= types.CompletionItemKind.Method
+              and converted_kind ~= types.CompletionItemKind.Function
+              and converted_kind ~= types.CompletionItemKind.Constructor
+            then
+              return ctx.label .. ' ' .. ctx.label_detail
+            else
+              return ctx.label .. ctx.label_detail
+            end
+          end,
           highlight = function(ctx)
             -- label and label details
             local label = ctx.label
