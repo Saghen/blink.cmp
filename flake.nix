@@ -23,7 +23,7 @@
         # define the packages provided by this flake
         packages = let
           src = ./.;
-          version = "0.7.3";
+          version = "0.8.0";
         in rec {
           blink-fuzzy-lib = let
             inherit (inputs.fenix.packages.${system}.minimal) toolchain;
@@ -35,7 +35,7 @@
             pname = "blink-fuzzy-lib";
             inherit src version;
             useFetchCargoVendor = true;
-            cargoHash = "sha256-XXI2jEoD6XbFNk3O8B6+aLzl1ZcJq1VinQXb+AOw8Rw=";
+            cargoHash = "sha256-t84hokb2loZ6FPPt4eN8HzgNQJrQUdiG5//ZbmlasWY=";
 
             passthru.updateScript = pkgs.nix-update-script;
           };
