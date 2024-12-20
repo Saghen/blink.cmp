@@ -54,14 +54,7 @@ local sources = {
       return {}
     end,
 
-    transform_items = function(_, items)
-      for _, item in ipairs(items) do
-        if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
-          item.score_offset = item.score_offset - 3
-        end
-      end
-      return items
-    end,
+    transform_items = function(_, items) return items end,
     min_keyword_length = 0,
 
     providers = {
@@ -70,6 +63,14 @@ local sources = {
         module = 'blink.cmp.sources.lsp',
         fallbacks = { 'buffer' },
         transform_items = function(_, items)
+          -- demote snippets
+          for _, item in ipairs(items) do
+            if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
+              item.score_offset = item.score_offset - 3
+            end
+          end
+
+          -- filter out text items, since we have the buffer source
           return vim.tbl_filter(
             function(item) return item.kind ~= require('blink.cmp.types').CompletionItemKind.Text end,
             items
@@ -85,14 +86,17 @@ local sources = {
       snippets = {
         name = 'Snippets',
         module = 'blink.cmp.sources.snippets',
+        score_offset = -3,
       },
       luasnip = {
         name = 'Luasnip',
         module = 'blink.cmp.sources.luasnip',
+        score_offset = -3,
       },
       buffer = {
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
+        score_offset = -3,
       },
       cmdline = {
         name = 'cmdline',

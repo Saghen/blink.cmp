@@ -608,14 +608,7 @@ MiniDeps.add({
 
     -- Function to use when transforming the items before they're returned for all providers
     -- The default will lower the score for snippets to sort them lower in the list
-    transform_items = function(_, items)
-      for _, item in ipairs(items) do
-        if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
-          item.score_offset = item.score_offset - 3
-        end
-      end
-      return items
-    end,
+    transform_items = function(_, items) return items end,
     -- Minimum number of characters in the keyword to trigger all providers
     -- May also be `function(ctx: blink.cmp.Context): number`
     min_keyword_length = 0,
@@ -629,8 +622,15 @@ MiniDeps.add({
       lsp = {
         name = 'LSP',
         module = 'blink.cmp.sources.lsp',
-        -- Filter out text items from the LSP provider, since we have the buffer provider for that
         transform_items = function(_, items)
+          -- demote snippets
+          for _, item in ipairs(items) do
+            if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
+              item.score_offset = item.score_offset - 3
+            end
+          end
+
+          -- filter out text items, since we have the buffer source
           return vim.tbl_filter(
             function(item) return item.kind ~= require('blink.cmp.types').CompletionItemKind.Text end,
             items
@@ -668,6 +668,7 @@ MiniDeps.add({
       snippets = {
         name = 'Snippets',
         module = 'blink.cmp.sources.snippets',
+        score_offset = -3,
         opts = {
           friendly_snippets = true,
           search_paths = { vim.fn.stdpath('config') .. '/snippets' },
@@ -687,6 +688,7 @@ MiniDeps.add({
       luasnip = {
         name = 'Luasnip',
         module = 'blink.cmp.sources.luasnip',
+        score_offset = -3,
         opts = {
           -- Whether to use show_condition for filtering snippets
           use_show_condition = true,
@@ -697,6 +699,7 @@ MiniDeps.add({
       buffer = {
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
+        score_offset = -3,
         opts = {
           -- default to all visible buffers
           get_bufnrs = function()
