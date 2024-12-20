@@ -3,6 +3,13 @@ local cmp = {}
 --- @param opts? blink.cmp.Config
 function cmp.setup(opts)
   opts = opts or {}
+
+  local version = vim.version()
+  if version.major == 0 and version.minor < 10 then
+    vim.notify('blink.cmp only supports nvim 0.10 and newer', vim.log.levels.ERROR)
+    return
+  end
+
   local config = require('blink.cmp.config')
   config.merge_with(opts)
 
