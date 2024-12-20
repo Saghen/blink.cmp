@@ -27,6 +27,8 @@ function cmdline_events:listen(opts)
   -- TextChanged
   local on_changed = function(key) opts.on_char_added(key, false) end
 
+  -- We handle backspace as a special case, because the text will have changed
+  -- but we still want to fire the CursorMoved event, and not the TextChanged event
   local did_backspace = false
   local is_change_queued = false
   vim.on_key(function(raw_key, escaped_key)
