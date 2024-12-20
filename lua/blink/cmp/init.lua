@@ -1,7 +1,11 @@
+local has_setup = false
 local cmp = {}
 
 --- @param opts? blink.cmp.Config
 function cmp.setup(opts)
+  if has_setup then return end
+  has_setup = true
+
   opts = opts or {}
 
   local version = vim.version()
