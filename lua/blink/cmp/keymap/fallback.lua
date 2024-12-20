@@ -44,7 +44,10 @@ end
 --- @param key string
 --- @return fun(): string?
 function fallback.wrap(mode, key)
-  local buffer_mapping = mode ~= 'c' and fallback.get_non_blink_buffer_mapping_for_key(mode, key) or nil
+  -- In default mode, there can't be multiple mappings on a single key for buffer local mappings
+  -- In cmdline mode, there can't be multiple mappings on a single key for global mappings
+  local buffer_mapping = mode ~= 'c' and fallback.get_non_blink_buffer_mapping_for_key(mode, key)
+    or fallback.get_non_blink_global_mapping_for_key(mode, key)
   return function()
     local mapping = buffer_mapping or fallback.get_non_blink_global_mapping_for_key(mode, key)
     if mapping then return fallback.run_non_blink_keymap(mapping, key) end
