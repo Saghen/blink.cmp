@@ -13,8 +13,8 @@ function health.check()
   end
 
   -- check if os is supported
-  local download = require('blink.cmp.fuzzy.download.system')
-  local system_triple = download.get_triple_sync()
+  local download_system = require('blink.cmp.fuzzy.download.system')
+  local system_triple = download_system.get_triple_sync()
   if system_triple then
     vim.health.ok('Your system is supported by pre-built binaries (' .. system_triple .. ')')
   else
@@ -23,10 +23,9 @@ function health.check()
     )
   end
 
-  if
-    vim.uv.fs_stat(download.lib_path)
-    or vim.uv.fs_stat(string.gsub(download.lib_path, 'libblink_cmp_fuzzy', 'blink_cmp_fuzzy'))
-  then
+  local download_files = require('blink.cmp.fuzzy.download.files')
+  local lib_path_without_prefix = string.gsub(download_files.lib_path, 'libblink_cmp_fuzzy', 'blink_cmp_fuzzy')
+  if vim.uv.fs_stat(download_files.lib_path) or vim.uv.fs_stat(lib_path_without_prefix) then
     vim.health.ok('blink_cmp_fuzzy lib is downloaded/built')
   else
     vim.health.warn('blink_cmp_fuzzy lib is not downloaded/built')
