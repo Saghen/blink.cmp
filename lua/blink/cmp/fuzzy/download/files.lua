@@ -51,9 +51,9 @@ function files.get_checksum_for_file(path)
       if out.code ~= 0 then return reject('Failed to calculate checksum of pre-built binary: ' .. out.stderr) end
 
       local stdout = out.stdout or ''
-      if os == 'windows' then stdout = vim.split(stdout, '\n')[2] end
+      if os == 'windows' then stdout = vim.split(stdout, '\r\n')[2] end
       -- We get an output like 'sha256sum filename' on most systems, so we grab just the checksum
-      return resolve(vim.split(out.stdout, ' ')[1])
+      return resolve(vim.split(stdout, ' ')[1])
     end)
   end)
 end
