@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs'
+import taskLists from 'markdown-it-task-lists'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -48,6 +49,7 @@ export default defineConfig({
     },
     config(md) {
       md.use(tabsMarkdownPlugin)
+      md.use(taskLists)
     },
   },
 })

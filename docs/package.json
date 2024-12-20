@@ -6,6 +6,7 @@
   },
   "devDependencies": {
     "@catppuccin/vitepress": "^0.1.0",
+    "markdown-it-task-lists": "^2.1.1",
     "vitepress": "^1.5.0",
     "vitepress-plugin-tabs": "^0.5.0"
   }
