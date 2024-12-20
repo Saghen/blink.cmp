@@ -56,7 +56,7 @@
 - [x] `documentation` <- both string and markup content
 - [x] `deprecated`
 - [ ] `preselect`
-- [ ] `sortText`
+- [x] `sortText`
 - [x] `filterText`
 - [x] `insertText`
 - [x] `insertTextFormat` <- regular or snippet

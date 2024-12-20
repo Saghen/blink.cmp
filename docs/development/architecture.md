@@ -1,0 +1,9 @@
+# Architecture
+
+The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render
+1. **Trigger:** Controls when to request completion items from the sources and provides a context downstream with the current query (i.e. `hello.wo|`, the query would be `wo`) and the treesitter object under the cursor (i.e. for intelligently enabling/disabling sources). It respects trigger characters passed by the LSP (or any other source) and includes it in the context for sending to the LSP.
+2. **Sources:** Provides a common interface for and merges the results of completion, trigger character, resolution of additional information and cancellation. Some sources are builtin: `LSP`, `buffer`, `path`, `snippets`
+3. **Fuzzy:** Rust <-> Lua FFI which performs both filtering and sorting of the items
+	- **Filtering:** The fuzzy matching uses smith-waterman, same as FZF, but implemented in SIMD for ~6x the performance of FZF (TODO: add benchmarks). Due to the SIMD's performance, the prefiltering phase on FZF was dropped to allow for typos. Similar to fzy/fzf, additional points are given to prefix matches, characters with capitals (to promote camelCase/PascalCase first char matching) and matches after delimiters (to promote snake_case first char matching)
+	- **Sorting:** Combines fuzzy matching score with frecency and proximity bonus. Each completion item may also include a `score_offset` which will be added to this score to demote certain sources. The `snippets` source takes advantage of this to avoid taking precedence over the LSP source. The parameters here still need to be tuned, so please let me know if you find some magical parameters!
+4. **Windows:** Responsible for placing the menu, documentation and function parameters windows. All of the rendering can be overridden following a syntax similar to incline.nvim. It uses the neovim window decoration provider to provide next to no overhead from highlighting.
