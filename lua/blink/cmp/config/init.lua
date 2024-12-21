@@ -21,7 +21,7 @@ local config = {
   appearance = require('blink.cmp.config.appearance').default,
 }
 
---- @type blink.cmp.Config
+--- @type blink.cmp.ConfigStrict
 --- @diagnostic disable-next-line: missing-fields
 local M = {}
 
