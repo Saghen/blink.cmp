@@ -35,6 +35,7 @@ function cmdline_events:listen(opts)
     if vim.api.nvim_get_mode().mode ~= 'c' then return end
 
     -- ignore if it's a special key
+    -- FIXME: odd behavior when escaped_key has multiple keycodes, i.e. by pressing <C-p> and then "t"
     local key = vim.fn.keytrans(escaped_key)
     if key == '<BS>' and not is_change_queued then did_backspace = true end
     if key:sub(1, 1) == '<' and key:sub(#key, #key) == '>' and raw_key ~= ' ' then return end
@@ -43,7 +44,7 @@ function cmdline_events:listen(opts)
       is_change_queued = true
       did_backspace = false
       vim.schedule(function()
-        on_changed(escaped_key)
+        on_changed(raw_key)
         is_change_queued = false
       end)
     end
