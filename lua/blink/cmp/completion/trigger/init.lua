@@ -40,6 +40,9 @@ function trigger.activate()
     show_in_snippet = config.show_in_snippet,
   })
   trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
+  trigger.term_events = require('blink.cmp.lib.term_events').new({
+    has_context = function() return trigger.context ~= nil end,
+  })
 
   local function on_char_added(char, is_ignored)
     -- we were told to ignore the text changed event, so we update the context
@@ -77,7 +80,7 @@ function trigger.activate()
 
     local insert_enter_on_trigger_character = config.show_on_trigger_character
       and config.show_on_insert_on_trigger_character
-      and event == 'InsertEnter'
+      and (event == 'InsertEnter' or event == 'TermEnter')
       and trigger.is_trigger_character(char_under_cursor, true)
 
     -- check if we're still within the bounds of the query used for the context
@@ -95,7 +98,7 @@ function trigger.activate()
       trigger.show()
 
     -- prefetch completions without opening window on InsertEnter
-    elseif event == 'InsertEnter' and config.prefetch_on_insert then
+    elseif (event == 'InsertEnter' or event == 'TermEnter') and config.prefetch_on_insert then
       trigger.show({ prefetch = true })
 
     -- otherwise hide
@@ -113,6 +116,10 @@ function trigger.activate()
     on_char_added = on_char_added,
     on_cursor_moved = on_cursor_moved,
     on_leave = function() trigger.hide() end,
+  })
+  trigger.term_events:listen({
+    on_char_added = on_char_added,
+    on_term_leave = function() trigger.hide() end,
   })
 end
 
@@ -137,9 +144,15 @@ end
 
 --- Suppresses on_hide and on_show events for the duration of the callback
 function trigger.suppress_events_for_callback(cb)
-  local mode = vim.api.nvim_get_mode().mode == 'c' and 'cmdline' or 'default'
+  local mode = vim.api.nvim_get_mode().mode
+  mode = (vim.api.nvim_get_mode().mode == 'c' and 'cmdline')
+  or (mode == 't' and 'term')
+  or 'default'
 
-  local events = mode == 'default' and trigger.buffer_events or trigger.cmdline_events
+  local events = (mode == 'default' and trigger.buffer_events)
+  or (mode == 'term' and trigger.term_events)
+  or trigger.cmdline_events
+
   if not events then return cb() end
 
   events:suppress_events_for_callback(cb)
