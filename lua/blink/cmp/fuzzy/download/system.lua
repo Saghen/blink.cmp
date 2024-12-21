@@ -14,6 +14,7 @@ system.triples = {
     android = 'aarch64-linux-android',
     arm = function(libc) return 'aarch64-unknown-linux-' .. libc end,
     x64 = function(libc) return 'x86_64-unknown-linux-' .. libc end,
+    loongarch64 = function(libc) return 'loongarch64-unknown-linux-' .. libc end,
   },
 }
 
@@ -22,7 +23,7 @@ system.triples = {
 function system.get_info()
   local os = jit.os:lower()
   if os == 'osx' then os = 'mac' end
-  local arch = jit.arch:lower():match('arm') and 'arm' or jit.arch:lower():match('x64') and 'x64' or nil
+  local arch = jit.arch:lower():match('arm') and 'arm' or jit.arch:lower():match('x64') and 'x64' or jit.arch:lower():match('loongarch64') and 'loongarch64' or nil
   return os, arch
 end
 
