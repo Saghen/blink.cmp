@@ -65,12 +65,11 @@ function buffer_events:listen(opts)
 
   vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI', 'InsertEnter' }, {
     callback = function(ev)
-      -- only fire a CursorMoved event (notable not CursorMovedI) when jumping between tab stops in a snippet
-      -- and we're currently showing
+      -- only fire a CursorMoved event (notable not CursorMovedI)
+      -- when jumping between tab stops in a snippet while showing the menu
       if
         ev.event == 'CursorMoved'
-        and (vim.api.nvim_get_mode().mode ~= 'v' or not self.has_context())
-        and snippet.active()
+        and (vim.api.nvim_get_mode().mode ~= 'v' or not self.has_context() or not snippet.active())
       then
         return
       end
