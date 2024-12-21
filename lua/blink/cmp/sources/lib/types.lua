@@ -20,7 +20,7 @@
 --- @field reload? fun(self: blink.cmp.Source): nil
 
 --- @class blink.cmp.SourceOverride
---- @field enabled? fun(self: blink.cmp.Source, context: blink.cmp.Context): boolean
+--- @field enabled? fun(self: blink.cmp.Source): boolean
 --- @field get_trigger_characters? fun(self: blink.cmp.Source): string[]
 --- @field get_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, callback: fun(response: blink.cmp.CompletionResponse | nil)): (fun(): nil) | nil
 --- @field should_show_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, response: blink.cmp.CompletionResponse): boolean

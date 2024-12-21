@@ -26,7 +26,7 @@
 --- @class blink.cmp.SourceProviderConfig
 --- @field name string
 --- @field module string
---- @field enabled? boolean | fun(ctx?: blink.cmp.Context): boolean Whether or not to enable the provider
+--- @field enabled? boolean | fun(): boolean Whether or not to enable the provider
 --- @field opts? table
 --- @field async? boolean | fun(ctx: blink.cmp.Context): boolean Whether blink should wait for the source to return before showing the completions
 --- @field timeout_ms? number | fun(ctx: blink.cmp.Context): number How long to wait for the provider to return before showing completions and treating it as asynchronous
