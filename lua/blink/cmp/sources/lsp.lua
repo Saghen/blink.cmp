@@ -74,10 +74,11 @@ function lsp:get_completions(context, callback)
   local cancel_fns = {}
   for _, client in pairs(clients) do
     local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
-    params.context = { triggerKind = context.trigger.kind }
-    if context.trigger.kind == CompletionTriggerKind.TriggerCharacter then
-      params.context.triggerCharacter = context.trigger.character
-    end
+    params.context = {
+      triggerKind = context.trigger.kind == 'trigger_character' and CompletionTriggerKind.TriggerCharacter
+        or CompletionTriggerKind.Invoked,
+    }
+    if context.trigger.kind == 'trigger_character' then params.context.triggerCharacter = context.trigger.character end
 
     local _, request_id = client.request('textDocument/completion', params, function(err, result)
       if err or result == nil then
