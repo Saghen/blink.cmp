@@ -2,7 +2,7 @@
 
 Blink cmp has *a lot* of configuration options, the following code block highlights some changes you're most likely to care about. For more information, check out the additional pages.
 
-For more common configurations, see the [recipes](./recipes.md).
+For more common configurations, see the [recipes](../recipes.md).
 
 ```lua
 {

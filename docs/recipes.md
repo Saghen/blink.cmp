@@ -132,7 +132,7 @@ end
 
 ### Disable all snippets
 
-See the [relevant section in the snippets documentation](./snippets.md#disable-all-snippets)
+See the [relevant section in the snippets documentation](./configuration/snippets.md#disable-all-snippets)
 
 ### Set minimum keyword length by filetype
 

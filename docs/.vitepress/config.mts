@@ -12,12 +12,14 @@ export default defineConfig({
     sidebar: [
       { text: 'Introduction', link: '/' },
       { text: 'Installation', link: '/installation' },
+      { text: 'Recipes', link: '/configuration/recipes' },
       {
         text: 'Configuration',
         items: [
           { text: 'General', link: '/configuration/general' },
           { text: 'Appearance', link: '/configuration/appearance' },
           { text: 'Completion', link: '/configuration/completion' },
+          { text: 'Fuzzy', link: '/configuration/fuzzy' },
           { text: 'Keymap', link: '/configuration/keymap' },
           { text: 'Signature', link: '/configuration/signature' },
           { text: 'Sources', link: '/configuration/sources' },

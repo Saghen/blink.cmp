@@ -1,7 +1,7 @@
 # Sources <a href="./reference#sources"><Badge type="info" text="Go to default configuration" /></a>
 
 > [!NOTE]
-> Check out the [recipes](./recipes.md) for some common configurations
+> Check out the [recipes](../recipes.md) for some common configurations
 
 Blink provides a sources interface, modelled after LSPs, for getting completion items, trigger characters, documentation and signature help. The `lsp`, `path`, `snippets`, `luasnip` and `buffer` sources are built-in. You may add additional [community sources](#community-sources) as well. Check out [writing sources](../development/writing-sources.md) to learn how to write your own!
 
