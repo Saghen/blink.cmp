@@ -38,15 +38,17 @@ function fs.fs_stat_all(cwd, entries)
   for _, entry in ipairs(entries) do
     table.insert(
       tasks,
-      async.task.new(function(resolve, reject)
+      async.task.new(function(resolve)
         uv.fs_stat(cwd .. '/' .. entry.name, function(err, stat)
-          if err then return reject(err) end
+          if err then return resolve(nil) end
           resolve({ name = entry.name, type = entry.type, stat = stat })
         end)
       end)
     )
   end
-  return async.task.await_all(tasks)
+  return async.task.await_all(tasks):map(function(entries)
+    return vim.tbl_filter(function(entry) return entry ~= nil end, entries)
+  end)
 end
 
 --- @param path string
