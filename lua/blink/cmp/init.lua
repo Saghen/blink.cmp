@@ -43,7 +43,7 @@ function cmp.show(opts)
 
   vim.schedule(function()
     require('blink.cmp.completion.windows.menu').auto_show = true
-    require('blink.cmp.completion.trigger').show({ force = true, providers = opts and opts.providers })
+    require('blink.cmp.completion.trigger').show({ force = true, providers = opts and opts.providers, update_type = 'manual' })
   end)
   return true
 end

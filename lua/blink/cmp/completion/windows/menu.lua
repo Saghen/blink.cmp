@@ -54,7 +54,9 @@ function menu.open_with_items(context, items)
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
   menu.renderer:draw(context, menu.win:get_buf(), items)
 
-  if menu.auto_show then
+  local auto_show = menu.auto_show
+  if type(auto_show) == 'function' then auto_show = auto_show(context, items) end
+  if auto_show then
     menu.open()
     menu.update_position()
   end
