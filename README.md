@@ -21,7 +21,8 @@
 - Auto-bracket support based on semantic tokens
 - Signature help (experimental, opt-in)
 - Command line completion
-- [Comparison with nvim-cmp](#compared-to-nvim-cmp)
+- Support for completions in Neovim's built-in terminal (although no source for shell completions exists yet)
+- [Comparison with nvim-cmp](https://cmp.saghen.dev/#compared-to-nvim-cmp)
 
 ## Getting Started
 

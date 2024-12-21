@@ -1,5 +1,6 @@
 -- TODO: remove the end_col field from ContextBounds
 
+
 --- @class blink.cmp.ContextBounds
 --- @field line string
 --- @field line_number number
@@ -73,7 +74,11 @@ function context:within_query_bounds(cursor)
   return row == bounds.line_number and col >= bounds.start_col and col <= bounds.end_col
 end
 
-function context.get_mode() return vim.api.nvim_get_mode().mode == 'c' and 'cmdline' or 'default' end
+function context.get_mode()
+    return (vim.api.nvim_get_mode().mode == 'c' and 'cmdline')
+        or (vim.api.nvim_get_mode().mode == 't' and 'term')
+        or 'default'
+end
 
 function context.get_cursor()
   return context.get_mode() == 'cmdline' and { 1, vim.fn.getcmdpos() - 1 } or vim.api.nvim_win_get_cursor(0)
@@ -97,6 +102,7 @@ function context.get_line(num)
     return vim.fn.getcmdline()
   end
 
+  -- This method works for normal buffers and the terminal prompt
   if num == nil then num = context.get_cursor()[1] - 1 end
   return vim.api.nvim_buf_get_lines(0, num, num + 1, false)[1]
 end
