@@ -12,7 +12,7 @@ export default defineConfig({
     sidebar: [
       { text: 'Introduction', link: '/' },
       { text: 'Installation', link: '/installation' },
-      { text: 'Recipes', link: '/configuration/recipes' },
+      { text: 'Recipes', link: '/recipes' },
       {
         text: 'Configuration',
         items: [
