@@ -15,10 +15,10 @@ end,
 
 ```lua
 completion = {
-  menu = { border = 'single' }
-  documentation = { border = 'single' }
+  menu = { border = 'single' },
+  documentation = { window = { border = 'single' } },
 },
-signature = { window = { border = 'single' } }
+signature = { window = { border = 'single' } },
 ```
 
 ## Select Nth item from the list
