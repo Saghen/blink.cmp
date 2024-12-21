@@ -1,7 +1,8 @@
+--- @alias blink.cmp.CompletionTriggerType 'manual' | 'text_changed' | 'auto_show_trigger_char' | 'auto_show_keyword' | 'cursor_moved'
+---
 -- Handles hiding and showing the completion window. When a user types a trigger character
 -- (provided by the sources) or anything matching the `keyword_regex`, we create a new `context`.
 -- This can be used downstream to determine if we should make new requests to the sources or not.
-
 --- @class blink.cmp.CompletionTrigger
 --- @field buffer_events blink.cmp.BufferEvents
 --- @field cmdline_events blink.cmp.CmdlineEvents
@@ -15,7 +16,7 @@
 --- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
---- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[], prefetch?: boolean })
+--- @field show fun(opts?: { trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[], prefetch?: boolean , update_type: blink.cmp.CompletionTriggerType})
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
 --- @field get_bounds fun(regex: vim.regex, line: string, cursor: number[]): blink.cmp.ContextBounds
@@ -45,16 +46,16 @@ function trigger.activate()
     -- we were told to ignore the text changed event, so we update the context
     -- but don't send an on_show event upstream
     if is_ignored then
-      if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
+      if trigger.context ~= nil then trigger.show({ send_upstream = false, update_type = 'text_changed' }) end
 
       -- character forces a trigger according to the sources, create a fresh context
     elseif trigger.is_trigger_character(char) and (config.show_on_trigger_character or trigger.context ~= nil) then
       trigger.context = nil
-      trigger.show({ trigger_character = char })
+      trigger.show({ trigger_character = char, update_type = 'auto_show_trigger_char' })
 
       -- character is part of a keyword
     elseif keyword_regex:match_str(char) ~= nil and (config.show_on_keyword or trigger.context ~= nil) then
-      trigger.show()
+      trigger.show({ update_type = 'auto_show_keyword' })
 
       -- nothing matches so hide
     else
@@ -66,7 +67,7 @@ function trigger.activate()
     -- we were told to ignore the cursor moved event, so we update the context
     -- but don't send an on_show event upstream
     if is_ignored and event == 'CursorMoved' then
-      if trigger.context ~= nil then trigger.show({ send_upstream = false }) end
+      if trigger.context ~= nil then trigger.show({ send_upstream = false, update_type = 'cursor_moved' }) end
       return
     end
 
@@ -82,21 +83,21 @@ function trigger.activate()
 
     -- check if we're still within the bounds of the query used for the context
     if trigger.context ~= nil and trigger.context:within_query_bounds(cursor) then
-      trigger.show()
+      trigger.show({ update_type = 'cursor_moved' })
 
     -- check if we've entered insert mode on a trigger character
     elseif insert_enter_on_trigger_character then
       trigger.context = nil
-      trigger.show({ trigger_character = char_under_cursor })
+      trigger.show({ trigger_character = char_under_cursor, update_type = 'auto_show_trigger_char' })
 
     -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
     elseif is_on_keyword_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
       trigger.context = nil
-      trigger.show()
+      trigger.show({ update_type = 'cursor_moved' })
 
     -- prefetch completions without opening window on InsertEnter
     elseif event == 'InsertEnter' and config.prefetch_on_insert then
-      trigger.show({ prefetch = true })
+      trigger.show({ prefetch = true, update_type = 'cursor_moved' })
 
     -- otherwise hide
     else
@@ -157,7 +158,7 @@ function trigger.show_if_on_trigger_character(opts)
   local char_under_cursor = context.get_line():sub(cursor_col, cursor_col)
 
   if trigger.is_trigger_character(char_under_cursor, true) then
-    trigger.show({ trigger_character = char_under_cursor })
+    trigger.show({ trigger_character = char_under_cursor, update_type = 'auto_show_trigger_char' })
   end
 end
 
@@ -187,7 +188,7 @@ function trigger.show(opts)
     or require('blink.cmp.sources.lib').get_enabled_provider_ids(context.get_mode())
 
   trigger.context =
-    context.new({ id = trigger.current_context_id, providers = providers, trigger_character = opts.trigger_character })
+    context.new({ id = trigger.current_context_id, providers = providers, trigger_character = opts.trigger_character, update_type = opts.update_type })
   trigger.prefetch = opts.prefetch == true
 
   if opts.send_upstream ~= false then trigger.show_emitter:emit({ context = trigger.context }) end

@@ -15,6 +15,7 @@
 --- @field line string
 --- @field bounds blink.cmp.ContextBounds
 --- @field trigger { kind: number, character: string | nil }
+--- @field update_type blink.cmp.CompletionTriggerType
 --- @field providers string[]
 ---
 --- @field new fun(opts: blink.cmp.ContextOpts): blink.cmp.Context
@@ -31,6 +32,7 @@
 --- @class blink.cmp.ContextOpts
 --- @field id number
 --- @field providers string[]
+--- @field update_type blink.cmp.CompletionTriggerType
 --- @field trigger_character? string
 
 local keyword_regex = vim.regex(require('blink.cmp.config').completion.keyword.regex)
@@ -56,6 +58,7 @@ function context.new(opts)
       character = opts.trigger_character,
     },
     providers = opts.providers,
+    update_type = opts.update_type,
   }, { __index = context })
 end
 
