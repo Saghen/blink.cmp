@@ -192,7 +192,9 @@ function list.undo_preview()
   if list.preview_undo == nil then return end
 
   require('blink.cmp.lib.text_edits').apply({ list.preview_undo.text_edit })
-  if list.preview_undo.cursor then vim.api.nvim_win_set_cursor(0, list.preview_undo.cursor) end
+  if list.preview_undo.cursor then
+    require('blink.cmp.completion.trigger.context').set_cursor(list.preview_undo.cursor)
+  end
   list.preview_undo = nil
 end
 

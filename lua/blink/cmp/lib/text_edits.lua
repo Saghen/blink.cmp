@@ -52,10 +52,9 @@ end
 --- @param text_edit lsp.TextEdit
 --- @return string
 function text_edits.get_text_to_replace(text_edit)
-  local bufnr = vim.api.nvim_get_current_buf()
   local lines = {}
   for line = text_edit.range.start.line, text_edit.range['end'].line do
-    local line_text = vim.api.nvim_buf_get_lines(bufnr, line, line + 1, false)[1]
+    local line_text = context.get_line()
     local is_start_line = line == text_edit.range.start.line
     local is_end_line = line == text_edit.range['end'].line
 
