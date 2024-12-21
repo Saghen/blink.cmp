@@ -1,3 +1,20 @@
+## [0.8.1](https://github.com/Saghen/blink.cmp/compare/v0.8.0...v0.8.1) (2024-12-21)
+
+### Features
+
+* **path:** sort directories first, then by name lowercase ([400de65](https://github.com/Saghen/blink.cmp/commit/400de65da795b5939ace36978de3d1edeb84b0de))
+
+### Bug Fixes
+
+* checkhealth after checksum changes ([d8ffbe9](https://github.com/Saghen/blink.cmp/commit/d8ffbe95190a776c6a28c86650efcbc23c5f6521)), closes [#669](https://github.com/Saghen/blink.cmp/issues/669)
+* duplicate cursor moved event firing ([e360828](https://github.com/Saghen/blink.cmp/commit/e360828a188dc30658067eac63feded08857c076))
+* get global mapping for fallback in cmdline mode ([92da013](https://github.com/Saghen/blink.cmp/commit/92da0133b240e60100fcb04b32fcd7270f765d94)), closes [#674](https://github.com/Saghen/blink.cmp/issues/674)
+* internal types for config not using strict config ([bdece4e](https://github.com/Saghen/blink.cmp/commit/bdece4e90e70baee956e2351220527a619d25052))
+* **path:** no items when file fails stat ([4218120](https://github.com/Saghen/blink.cmp/commit/421812086661bba3aa318030eee12719fc5da072)), closes [#688](https://github.com/Saghen/blink.cmp/issues/688)
+* type signature for enabled indicating ctx could be passed ([3cb7208](https://github.com/Saghen/blink.cmp/commit/3cb7208546b4e1f0c5e492cbcfccd083a1c89351)), closes [#695](https://github.com/Saghen/blink.cmp/issues/695)
+* use context.get_line() when getting preview undo text edit ([0f92fb8](https://github.com/Saghen/blink.cmp/commit/0f92fb8dcff634e880a60e266f041dfe175b82bf)), closes [#702](https://github.com/Saghen/blink.cmp/issues/702)
+* wrong key upstreamed by cmdline_events ([4757317](https://github.com/Saghen/blink.cmp/commit/475731741bbd8266767d48ad46b63f715577ac8e)), closes [#700](https://github.com/Saghen/blink.cmp/issues/700)
+
 ## [0.8.0](https://github.com/Saghen/blink.cmp/compare/v0.7.6...v0.8.0) (2024-12-20)
 
 > [!IMPORTANT]

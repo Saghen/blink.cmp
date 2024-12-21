@@ -23,7 +23,7 @@
         # define the packages provided by this flake
         packages = let
           src = ./.;
-          version = "0.8.0";
+          version = "0.8.1";
         in rec {
           blink-fuzzy-lib = let
             inherit (inputs.fenix.packages.${system}.minimal) toolchain;
