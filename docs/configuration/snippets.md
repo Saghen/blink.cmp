@@ -81,15 +81,14 @@ capabilities = require('blink.cmp').get_lsp_capabilities({
 Some LSPs may ignore the `snippetSupport` field, in which case, you need to set LSP specific options while setting them up. Some examples:
 
 ```lua
--- If you're using `opts = { ['rust-analyzer'] = { } }` in your lspconfig configuration,
--- simply put these options in there instead
+-- If you're using `opts = { ['rust-analyzer'] = { } }` in your lspconfig configuration, simply put these options in there instead
 
 -- For `rust-analyzer`
 lspconfig['rust-analyzer'].setup({
   completion = {
     capable = {
-        snippets = 'add_parenthesis'
-      }
+      snippets = 'add_parenthesis'
+    }
   }
 })
 
