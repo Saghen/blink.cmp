@@ -19,12 +19,39 @@ Controls when to request completion items from the sources and show the completi
 
 :::tabs
 == Keyword
+Shows after typing a keyword, typically an alphanumeric character or `_`
+
+```lua
+completion.trigger.show_on_keyword = true
+```
+
 <video src="https://github.com/user-attachments/assets/5e8f8f9f-bc6a-4d21-9cce-2e291b6a7de8" muted autoplay loop />
 == Trigger Character
+
+Shows after typing a trigger character, defined by the sources. For example for Lua or Rust, the LSP will define `.` as a trigger character.
+
+```lua
+completion.trigger.show_on_trigger_character = true
+```
+
 <video src="https://github.com/user-attachments/assets/b4ee0069-2de8-44e7-b3ca-51b10bc4cb4a" muted autoplay loop />
 == Insert on Trigger Character
+
+Shows after entering insert mode on top of a trigger character.
+
+```lua
+completion.trigger.show_on_insert_on_trigger_character = true
+```
+
 <video src="https://github.com/user-attachments/assets/9e7aa3c2-4756-4a5e-a0e8-303d3ae0fda9" muted autoplay loop />
 == Accept on Trigger Character
+
+Shows after accepting a completion item, where the cursor ends up on top of a trigger character.
+
+```lua
+completion.trigger.show_on_accept_on_trigger_character = true
+```
+
 TODO: Find a case where this actually fires : )
 :::
 
