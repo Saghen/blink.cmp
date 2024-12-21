@@ -12,6 +12,7 @@ export default defineConfig({
     sidebar: [
       { text: 'Introduction', link: '/' },
       { text: 'Installation', link: '/installation' },
+      { text: 'Recipes', link: '/configuration/recipes' },
       {
         text: 'Configuration',
         items: [
@@ -23,7 +24,6 @@ export default defineConfig({
           { text: 'Signature', link: '/configuration/signature' },
           { text: 'Sources', link: '/configuration/sources' },
           { text: 'Snippets', link: '/configuration/snippets' },
-          { text: 'Recipes', link: '/configuration/recipes' },
           { text: 'Reference', link: '/configuration/reference' },
         ],
       },
