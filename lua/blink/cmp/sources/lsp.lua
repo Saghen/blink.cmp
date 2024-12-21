@@ -1,3 +1,4 @@
+local utils = require('blink.cmp.lib.utils')
 local known_defaults = {
   'commitCharacters',
   'insertTextFormat',
@@ -78,6 +79,7 @@ function lsp:get_completions(context, callback)
     if context.trigger.kind == CompletionTriggerKind.TriggerCharacter then
       params.context.triggerCharacter = context.trigger.character
     end
+    params.partialResultToken = utils.random_string(32)
 
     local _, request_id = client.request('textDocument/completion', params, function(err, result)
       if err or result == nil then
@@ -120,6 +122,18 @@ function lsp:get_completions(context, callback)
         is_incomplete_backward = true,
         items = items,
       })
+
+      vim.print(client.server_capabilities.completionProvider.workDoneProgress)
+      if client.server_capabilities.completionProvider.workDoneProgress then
+        utils.run_on_interval(function()
+          local latest_progress = client.progress:peek()
+          if latest_progress ~= nil then vim.print(latest_progress) end
+          if latest_progress == nil or latest_progress.params.token ~= params.partialResultToken then return end
+
+          client.progress:pop()
+          vim.print('got progress')
+        end, { interval_ms = 5, timeout_ms = 15000 })
+      end
     end)
     if request_id ~= nil then cancel_fns[#cancel_fns + 1] = function() client.cancel_request(request_id) end end
   end
