@@ -106,10 +106,10 @@ vim.api.nvim_create_autocmd('User', {
 
 ```lua
 sources.default = function(ctx)
-  local node = vim.treesitter.get_node()
+  local success, node = pcall(vim.treesitter.get_node)
   if vim.bo.filetype == 'lua' then
     return { 'lsp', 'path' }
-  elseif node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
+  elseif success and node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
     return { 'buffer' }
   else
     return { 'lsp', 'path', 'snippets', 'buffer' }
