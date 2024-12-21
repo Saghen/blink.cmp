@@ -14,7 +14,7 @@
 --- @field cursor number[]
 --- @field line string
 --- @field bounds blink.cmp.ContextBounds
---- @field trigger { kind: number, character: string | nil }
+--- @field trigger blink.cmp.ContextTrigger
 --- @field providers string[]
 ---
 --- @field new fun(opts: blink.cmp.ContextOpts): blink.cmp.Context
@@ -28,9 +28,18 @@
 --- @field get_bounds fun(line: string, cursor: number[]): blink.cmp.ContextBounds
 --- @field get_regex_around_cursor fun(range: string, regex_str: string, exclude_from_prefix_regex_str: string): { start_col: number, length: number }
 
+--- @class blink.cmp.ContextTrigger
+--- @field initial_kind blink.cmp.CompletionTriggerKind The trigger kind when the context was first created
+--- @field initial_character? string The trigger character when initial_kind == 'trigger_character'
+--- @field kind blink.cmp.CompletionTriggerKind The current trigger kind
+--- @field character? string The trigger character when kind == 'trigger_character'
+
 --- @class blink.cmp.ContextOpts
 --- @field id number
 --- @field providers string[]
+--- @field initial_trigger_kind blink.cmp.CompletionTriggerKind
+--- @field initial_trigger_character? string
+--- @field trigger_kind blink.cmp.CompletionTriggerKind
 --- @field trigger_character? string
 
 local keyword_regex = vim.regex(require('blink.cmp.config').completion.keyword.regex)
@@ -51,8 +60,9 @@ function context.new(opts)
     line = line,
     bounds = context.get_bounds(line, cursor),
     trigger = {
-      kind = opts.trigger_character and vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter
-        or vim.lsp.protocol.CompletionTriggerKind.Invoked,
+      initial_kind = opts.initial_trigger_kind,
+      initial_character = opts.initial_trigger_character,
+      kind = opts.trigger_kind,
       character = opts.trigger_character,
     },
     providers = opts.providers,

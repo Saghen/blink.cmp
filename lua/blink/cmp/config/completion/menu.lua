@@ -11,7 +11,7 @@ local validate = require('blink.cmp.config.utils').validate
 --- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
 --- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space
 --- @field order blink.cmp.CompletionMenuOrderConfig TODO: implement
---- @field auto_show boolean Whether to automatically show the window when new completion items are available
+--- @field auto_show boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether to automatically show the window when new completion items are available
 --- @field cmdline_position fun(): number[] Screen coordinates (0-indexed) of the command line
 --- @field draw blink.cmp.Draw Controls how the completion items are rendered on the popup window
 
@@ -151,7 +151,7 @@ function window.validate(config)
       'one of: "n", "s"',
     },
     order = { config.order, 'table' },
-    auto_show = { config.auto_show, 'boolean' },
+    auto_show = { config.auto_show, { 'boolean', 'function' } },
     cmdline_position = { config.cmdline_position, 'function' },
     draw = { config.draw, 'table' },
   }, config)
