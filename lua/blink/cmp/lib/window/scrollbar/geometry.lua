@@ -67,6 +67,7 @@ function M.get_geometry(target_win)
 
   local pct = (start_line - 1) / (buf_height - height)
   local thumb_offset = math.floor((pct * (height - thumb_height)) + 0.5)
+  thumb_height = thumb_offset + thumb_height > height and height - thumb_offset or thumb_height
 
   local common_geometry = {
     width = 1,
