@@ -49,7 +49,7 @@ function M.get_geometry(target_win)
   local buf_height = get_win_buf_height(target_win)
   local thumb_height = math.max(1, math.floor(height * height / buf_height + 0.5) - 1)
 
-  -- calculating display line even if window has been set wrapline
+  -- calculating display line in case window has been set wrapline
   local get_content_start_line = function(winid, win_width)
     local start_line = math.max(1, vim.fn.line('w0', target_win))
     if not vim.wo[winid].wrap then return start_line end
