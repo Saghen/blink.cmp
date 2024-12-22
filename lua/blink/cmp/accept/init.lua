@@ -78,7 +78,7 @@ local function accept(ctx, item)
       -- TODO: why is this so slow? (10ms)
       vim.schedule(function() require('blink.cmp.fuzzy').access(item) end)
     end)
-    :catch(function(err) vim.notify(err, vim.log.levels.ERROR) end)
+    :catch(function(err) vim.notify(err, vim.log.levels.ERROR, { title = 'blink.cmp' }) end)
 end
 
 return accept

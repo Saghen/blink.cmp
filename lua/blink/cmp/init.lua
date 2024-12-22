@@ -7,7 +7,7 @@ cmp.setup = function(opts)
 
   require('blink.cmp.fuzzy.download').ensure_downloaded(function(err)
     if err then
-      vim.notify('Error while downloading blink.cmp pre-built binary: ' .. err, vim.log.levels.ERROR)
+      vim.notify('Error while downloading blink.cmp pre-built binary: ' .. err, vim.log.levels.ERROR, { title = 'blink.cmp' })
       return
     end
 
