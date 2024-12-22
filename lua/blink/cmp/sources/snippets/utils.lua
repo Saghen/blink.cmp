@@ -10,7 +10,8 @@ function utils.parse_json_with_error_msg(path, json)
   if not ok then
     vim.notify(
       'Failed to parse json file "' .. path .. '" for blink.cmp snippets. Error: ' .. parsed,
-      vim.log.levels.ERROR
+      vim.log.levels.ERROR,
+      { title = 'blink.cmp' }
     )
     return {}
   end

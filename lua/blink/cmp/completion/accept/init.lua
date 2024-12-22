@@ -99,7 +99,7 @@ local function accept(ctx, item, callback)
         require('blink.cmp.fuzzy').access(item)
       end)
     end)
-    :catch(function(err) vim.notify(err, vim.log.levels.ERROR) end)
+    :catch(function(err) vim.notify(err, vim.log.levels.ERROR, { title = 'blink.cmp' }) end)
 end
 
 return accept

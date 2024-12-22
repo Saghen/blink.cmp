@@ -41,8 +41,12 @@ function download.ensure_downloaded(callback)
       if state.version == target_version and state.is_downloaded then
         return files.verify_checksum():catch(function(err)
           vim.schedule(function()
-            vim.notify(err, vim.log.levels.WARN)
-            vim.notify('Pre-built binary failed checksum verification, re-downloading', vim.log.levels.WARN)
+            vim.notify(err, vim.log.levels.WARN, { title = 'blink.cmp' })
+            vim.notify(
+              'Pre-built binary failed checksum verification, re-downloading',
+              vim.log.levels.WARN,
+              { title = 'blink.cmp' }
+            )
           end)
           return download.download(target_version)
         end)
@@ -52,7 +56,9 @@ function download.ensure_downloaded(callback)
       if not target_version then error('Unknown error while getting pre-built binary. Consider re-installing') end
 
       -- download as per usual
-      vim.schedule(function() vim.notify('Downloading pre-built binary', vim.log.levels.INFO) end)
+      vim.schedule(
+        function() vim.notify('Downloading pre-built binary', vim.log.levels.INFO, { title = 'blink.cmp' }) end
+      )
       return download.download(target_version)
     end)
     :map(function() callback() end)

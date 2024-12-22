@@ -78,7 +78,7 @@ function cmdline:get_completions(context, callback)
       })
     end)
     :catch(function(err)
-      vim.notify('Error while fetching completions: ' .. err, vim.log.levels.ERROR)
+      vim.notify('Error while fetching completions: ' .. err, vim.log.levels.ERROR, { title = 'blink.cmp' })
       callback({ is_incomplete_backward = false, is_incomplete_forward = false, items = {} })
     end)
 
