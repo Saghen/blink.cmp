@@ -35,7 +35,7 @@ local docs = {
   auto_show_timer = vim.uv.new_timer(),
 }
 
-menu.position_update_emitter:on(docs.update_position)
+menu.position_update_emitter:on(function() docs.update_position() end)
 menu.close_emitter:on(function()
   docs.win:close()
   docs.auto_show_timer:stop()
@@ -109,7 +109,6 @@ function docs.scroll_up(amount)
   local desired_line = math.max(1, top_line - amount)
 
   vim.api.nvim_win_set_cursor(winnr, { desired_line, 0 })
-  if docs.win.scrollbar then docs.win.scrollbar:update(winnr) end
 end
 
 function docs.scroll_down(amount)
@@ -119,7 +118,6 @@ function docs.scroll_down(amount)
   local desired_line = math.min(line_count, bottom_line + amount)
 
   vim.api.nvim_win_set_cursor(winnr, { desired_line, 0 })
-  if docs.win.scrollbar then docs.win.scrollbar:update(winnr) end
 end
 
 function docs.update_position()
