@@ -100,7 +100,7 @@ function docs.show_item(context, item)
         docs.update_position()
       end
     end)
-    :catch(function(err) vim.notify(err, vim.log.levels.ERROR) end)
+    :catch(function(err) vim.notify(err, vim.log.levels.ERROR, { title = 'blink.cmp' }) end)
 end
 
 function docs.scroll_up(amount)
