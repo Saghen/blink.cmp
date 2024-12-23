@@ -1,3 +1,6 @@
+-- TODO: The scrollbar and redrawing logic should be done by wrapping the functions that would
+-- trigger a redraw or update the window
+
 --- @class blink.cmp.WindowOptions
 --- @field min_width? number
 --- @field max_width? number
@@ -16,6 +19,7 @@
 --- @field buf? number
 --- @field config blink.cmp.WindowOptions
 --- @field scrollbar? blink.cmp.Scrollbar
+--- @field redraw_queued boolean
 ---
 --- @field new fun(config: blink.cmp.WindowOptions): blink.cmp.Window
 --- @field get_buf fun(self: blink.cmp.Window): number
@@ -31,8 +35,13 @@
 --- @field get_content_width fun(self: blink.cmp.Window): number
 --- @field get_width fun(self: blink.cmp.Window): number
 --- @field get_cursor_screen_position fun(): { distance_from_top: number, distance_from_bottom: number }
+--- @field set_cursor fun(self: blink.cmp.Window, cursor: number[])
+--- @field set_height fun(self: blink.cmp.Window, height: number)
+--- @field set_width fun(self: blink.cmp.Window, width: number)
+--- @field set_win_config fun(self: blink.cmp.Window, config: table)
 --- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: ("n" | "s")[]): { height: number, direction: 'n' | 's' }?
 --- @field get_direction_with_window_constraints fun(self: blink.cmp.Window, anchor_win: blink.cmp.Window, direction_priority: ("n" | "s" | "e" | "w")[], desired_min_size?: { width: number, height: number }): { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
+--- @field redraw_if_needed fun(self: blink.cmp.Window)
 
 --- @type blink.cmp.Window
 --- @diagnostic disable-next-line: missing-fields
@@ -57,6 +66,7 @@ function win.new(config)
     scrollbar = config.scrollbar,
     filetype = config.filetype,
   }
+  self.redraw_queued = false
 
   if self.config.scrollbar then
     self.scrollbar = require('blink.cmp.lib.window.scrollbar').new({
@@ -111,6 +121,7 @@ function win:open()
   vim.api.nvim_set_option_value('filetype', self.config.filetype, { buf = self.buf })
 
   if self.scrollbar then self.scrollbar:update(self.id) end
+  self:redraw_if_needed()
 end
 
 function win:set_option_value(option, value)
@@ -124,6 +135,7 @@ function win:close()
     self.id = nil
   end
   if self.scrollbar then self.scrollbar:update() end
+  self:redraw_if_needed()
 end
 
 --- Updates the size of the window to match the max width and height of the content/config
@@ -253,6 +265,46 @@ function win.get_cursor_screen_position()
   }
 end
 
+function win:set_cursor(cursor)
+  local winnr = self:get_win()
+  assert(winnr ~= nil, 'Window must be open to set cursor')
+
+  vim.api.nvim_win_set_cursor(winnr, cursor)
+
+  if self.scrollbar then self.scrollbar:update(winnr) end
+  self:redraw_if_needed()
+end
+
+function win:set_height(height)
+  local winnr = self:get_win()
+  assert(winnr ~= nil, 'Window must be open to set height')
+
+  vim.api.nvim_win_set_height(winnr, height)
+
+  if self.scrollbar then self.scrollbar:update(winnr) end
+  self:redraw_if_needed()
+end
+
+function win:set_width(width)
+  local winnr = self:get_win()
+  assert(winnr ~= nil, 'Window must be open to set width')
+
+  vim.api.nvim_win_set_width(winnr, width)
+
+  if self.scrollbar then self.scrollbar:update(winnr) end
+  self:redraw_if_needed()
+end
+
+function win:set_win_config(config)
+  local winnr = self:get_win()
+  assert(winnr ~= nil, 'Window must be open to set window config')
+
+  vim.api.nvim_win_set_config(winnr, config)
+
+  if self.scrollbar then self.scrollbar:update(winnr) end
+  self:redraw_if_needed()
+end
+
 --- Gets the direction with the most space available, prioritizing the directions in the order of the
 --- direction_priority list
 function win:get_vertical_direction_and_height(direction_priority)
@@ -372,6 +424,19 @@ function win:get_direction_with_window_constraints(anchor_win, direction_priorit
     height = height - border_size.vertical,
     direction = direction,
   }
+end
+
+--- In cmdline mode, the window won't be redrawn automatically so we redraw ourselves on schedule
+function win:redraw_if_needed()
+  if self.redraw_queued or vim.api.nvim_get_mode().mode ~= 'c' or self:get_win() == nil then return end
+
+  -- We redraw on schedule to avoid the cmdline disappearing during redraw
+  -- and to batch multiple redraws together
+  self.redraw_queued = true
+  vim.schedule(function()
+    self.redraw_queued = false
+    vim.api.nvim__redraw({ win = self:get_win(), flush = true })
+  end)
 end
 
 return win
