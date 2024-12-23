@@ -20,7 +20,7 @@
 - Command line completion
 - [Comparison with nvim-cmp](#compared-to-nvim-cmp)
 
-## Getting Started
+## Installation
 
 Head over to the [documentation website](https://cmp.saghen.dev) for installation instructions and configuration options.
 
