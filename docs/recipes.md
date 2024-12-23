@@ -32,6 +32,14 @@ completion = {
 }
 ```
 
+## Don't show completion menu automatically in cmdline mode
+
+```lua
+completion = { 
+  menu = { auto_show = function(ctx) return ctx.mode ~= 'cmdline' end }
+}
+```
+
 ## Select Nth item from the list
 
 Here's an example configuration that allows you to select the nth item from the list, based on [#382](https://github.com/Saghen/blink.cmp/issues/382):
