@@ -59,7 +59,7 @@ function cmdline:get_completions(context, callback)
         table.insert(items, {
           label = completion,
           insertText = completion,
-          sortText = completion,
+          sortText = completion:lower(),
           textEdit = {
             newText = new_text,
             range = {
