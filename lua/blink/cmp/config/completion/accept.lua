@@ -37,7 +37,7 @@ local accept = {
       },
       semantic_token_resolution = {
         enabled = true,
-        blocked_filetypes = {},
+        blocked_filetypes = { 'java' },
         timeout_ms = 400,
       },
     },
