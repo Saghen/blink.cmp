@@ -30,12 +30,13 @@ local docs = {
     scrollbar = win_config.scrollbar,
     wrap = true,
     filetype = 'blink-cmp-documentation',
+    scrolloff = 0,
   }),
   last_context_id = nil,
   auto_show_timer = vim.uv.new_timer(),
 }
 
-menu.position_update_emitter:on(docs.update_position)
+menu.position_update_emitter:on(function() docs.update_position() end)
 menu.close_emitter:on(function()
   docs.win:close()
   docs.auto_show_timer:stop()
@@ -96,33 +97,38 @@ function docs.show_item(context, item)
 
       if menu.win:get_win() then
         docs.win:open()
-        vim.api.nvim_win_set_cursor(docs.win:get_win(), { 1, 0 }) -- reset scroll
+        docs.win:set_cursor({ 1, 0 }) -- reset scroll
         docs.update_position()
       end
     end)
     :catch(function(err) vim.notify(err, vim.log.levels.ERROR, { title = 'blink.cmp' }) end)
 end
 
+-- TODO: compensate for wrapped lines
 function docs.scroll_up(amount)
   local winnr = docs.win:get_win()
-  local top_line = math.max(1, vim.fn.line('w0', winnr) - 1)
+  if winnr == nil then return end
+
+  local top_line = math.max(1, vim.fn.line('w0', winnr))
   local desired_line = math.max(1, top_line - amount)
 
-  vim.api.nvim_win_set_cursor(docs.win:get_win(), { desired_line, 0 })
+  docs.win:set_cursor({ desired_line, 0 })
 end
 
+-- TODO: compensate for wrapped lines
 function docs.scroll_down(amount)
   local winnr = docs.win:get_win()
+  if winnr == nil then return end
+
   local line_count = vim.api.nvim_buf_line_count(docs.win:get_buf())
-  local bottom_line = math.max(1, vim.fn.line('w$', winnr) + 1)
+  local bottom_line = math.max(1, vim.fn.line('w$', winnr))
   local desired_line = math.min(line_count, bottom_line + amount)
 
-  vim.api.nvim_win_set_cursor(docs.win:get_win(), { desired_line, 0 })
+  docs.win:set_cursor({ desired_line, 0 })
 end
 
 function docs.update_position()
   if not docs.win:is_open() or not menu.win:is_open() then return end
-  local winnr = docs.win:get_win()
 
   docs.win:update_size()
 
@@ -163,8 +169,8 @@ function docs.update_position()
   end
 
   -- set width and height based on available space
-  vim.api.nvim_win_set_height(docs.win:get_win(), pos.height)
-  vim.api.nvim_win_set_width(docs.win:get_win(), pos.width)
+  docs.win:set_height(pos.height)
+  docs.win:set_width(pos.width)
 
   -- set position based on provided direction
 
@@ -172,7 +178,7 @@ function docs.update_position()
   local width = docs.win:get_width()
 
   local function set_config(opts)
-    vim.api.nvim_win_set_config(winnr, { relative = 'win', win = menu_winnr, row = opts.row, col = opts.col })
+    docs.win:set_win_config({ relative = 'win', win = menu_winnr, row = opts.row, col = opts.col })
   end
   if pos.direction == 'n' then
     if menu_win_is_up then
@@ -214,8 +220,6 @@ function docs.update_position()
       set_config({ row = -menu_border_size.top, col = -width - menu_border_size.left })
     end
   end
-
-  if docs.win.scrollbar then docs.win.scrollbar:update(winnr) end
 end
 
 return docs

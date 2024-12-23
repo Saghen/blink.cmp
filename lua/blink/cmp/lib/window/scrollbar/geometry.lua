@@ -38,6 +38,24 @@ local function get_col_offset(border)
   return 0
 end
 
+--- Gets the starting line, handling line wrapping if enabled
+--- @param target_win number
+--- @param width number
+--- @return number
+local get_content_start_line = function(target_win, width)
+  local start_line = math.max(1, vim.fn.line('w0', target_win))
+  if not vim.wo[target_win].wrap then return start_line end
+
+  local bufnr = vim.api.nvim_win_get_buf(target_win)
+  local wrapped_start_line = 1
+  for _, text in ipairs(vim.api.nvim_buf_get_lines(bufnr, 0, start_line - 1, false)) do
+    -- nvim_buf_get_lines sometimes returns a blob. see hrsh7th/nvim-cmp#2050
+    if vim.fn.type(text) == vim.v.t_blob then text = vim.fn.string(text) end
+    wrapped_start_line = wrapped_start_line + math.max(1, math.ceil(vim.fn.strdisplaywidth(text) / width))
+  end
+  return wrapped_start_line
+end
+
 --- @param target_win number
 --- @return { should_hide: boolean, thumb: blink.cmp.ScrollbarGeometry, gutter: blink.cmp.ScrollbarGeometry }
 function M.get_geometry(target_win)
@@ -47,10 +65,14 @@ function M.get_geometry(target_win)
   local zindex = config.zindex
 
   local buf_height = get_win_buf_height(target_win)
-  local start_line = math.max(1, vim.fn.line('w0', target_win))
-  local pct = (start_line - 1) / (buf_height - height)
   local thumb_height = math.max(1, math.floor(height * height / buf_height + 0.5) - 1)
+
+  local start_line = get_content_start_line(target_win, width or 1)
+
+  local pct = (start_line - 1) / (buf_height - height)
   local thumb_offset = math.floor((pct * (height - thumb_height)) + 0.5)
+  thumb_height = thumb_offset + thumb_height > height and height - thumb_offset or thumb_height
+  thumb_height = math.max(1, thumb_height)
 
   local common_geometry = {
     width = 1,

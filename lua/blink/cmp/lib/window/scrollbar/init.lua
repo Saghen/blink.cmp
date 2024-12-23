@@ -7,12 +7,9 @@
 
 --- @class blink.cmp.Scrollbar
 --- @field win blink.cmp.ScrollbarWin
---- @field autocmd? number
---- @field target_win? number
 ---
 --- @field new fun(opts: blink.cmp.ScrollbarConfig): blink.cmp.Scrollbar
 --- @field is_visible fun(self: blink.cmp.Scrollbar): boolean
---- @field is_mounted fun(self: blink.cmp.Scrollbar): boolean
 --- @field update fun(self: blink.cmp.Scrollbar, target_win: number | nil)
 
 --- @type blink.cmp.Scrollbar
@@ -26,8 +23,6 @@ function scrollbar.new(opts)
 end
 
 function scrollbar:is_visible() return self.win:is_visible() end
-
-function scrollbar:is_mounted() return self.autocmd ~= nil end
 
 function scrollbar:update(target_win)
   if target_win == nil or not vim.api.nvim_win_is_valid(target_win) then return self.win:hide() end

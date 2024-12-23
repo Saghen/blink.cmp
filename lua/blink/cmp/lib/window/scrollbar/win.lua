@@ -14,7 +14,10 @@
 --- @field hide_gutter fun(self: blink.cmp.ScrollbarWin)
 --- @field hide fun(self: blink.cmp.ScrollbarWin)
 --- @field _make_win fun(self: blink.cmp.ScrollbarWin, geometry: blink.cmp.ScrollbarGeometry, hl_group: string): number
+--- @field redraw_if_needed fun(self: blink.cmp.ScrollbarWin)
 
+--- @type blink.cmp.ScrollbarWin
+--- @diagnostic disable-next-line: missing-fields
 local scrollbar_win = {}
 
 function scrollbar_win.new(opts) return setmetatable(opts, { __index = scrollbar_win }) end
