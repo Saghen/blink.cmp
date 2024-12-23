@@ -59,6 +59,14 @@ TODO: Find a case where this actually fires : )
 
 Manages the completion list and its behavior when selecting items. The most commonly changed option is `completion.list.selection`, which controls whether the list will automatically select the first item in the list, and whether selection shows a preview:
 
+To control the selection behavior per mode, pass a function to `completion.list.selection` that returns the selection mode:
+
+```lua
+completion.list.selection = function(ctx)
+  return ctx.mode == 'cmdline' and 'auto_insert' or 'preselect'
+end
+```
+
 :::tabs
 == Preselect
 Selects the first item automatically

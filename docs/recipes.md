@@ -1,6 +1,5 @@
 # Recipes
 
-
 ## Disable per filetype
 
 ```lua
@@ -19,6 +18,18 @@ completion = {
   documentation = { window = { border = 'single' } },
 },
 signature = { window = { border = 'single' } },
+```
+
+## Change selection mode per mode
+
+```lua
+completion = { 
+  list = { 
+    selection = function(ctx)
+      return ctx.mode == 'cmdline' and 'auto_insert' or 'preselect'
+    end
+  }
+}
 ```
 
 ## Select Nth item from the list

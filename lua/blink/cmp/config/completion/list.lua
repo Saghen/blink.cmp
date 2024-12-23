@@ -1,6 +1,6 @@
 --- @class (exact) blink.cmp.CompletionListConfig
 --- @field max_items number Maximum number of items to display
---- @field selection blink.cmp.CompletionListSelection Controls if completion items will be selected automatically, and whether selection automatically inserts
+--- @field selection blink.cmp.CompletionListSelection | fun(ctx: blink.cmp.Context): blink.cmp.CompletionListSelection Controls if completion items will be selected automatically, and whether selection automatically inserts
 --- @field cycle blink.cmp.CompletionListCycleConfig
 
 --- @alias blink.cmp.CompletionListSelection
@@ -30,7 +30,10 @@ function list.validate(config)
     max_items = { config.max_items, 'number' },
     selection = {
       config.selection,
-      function() return vim.tbl_contains({ 'preselect', 'manual', 'auto_insert' }, config.selection) end,
+      function()
+        return vim.tbl_contains({ 'preselect', 'manual', 'auto_insert' }, config.selection)
+          or type(config.selection) == 'function'
+      end,
       'one of: preselect, manual, auto_insert',
     },
     cycle = { config.cycle, 'table' },

@@ -92,9 +92,12 @@ completion.trigger = {
 completion.list = {
   -- Maximum number of items to display
   max_items = 200,
+
   -- Controls if completion items will be selected automatically,
   -- and whether selection automatically inserts
   selection = 'preselect',
+  -- selection = function(ctx) return ctx.mode == 'cmdline' and 'auto_insert' or 'preselect' end,
+
   -- Controls how the completion items are selected
   -- 'preselect' will automatically select the first item in the completion list
   -- 'manual' will not select any item by default

@@ -15,6 +15,7 @@
 --- @field hide fun()
 ---
 --- @field get_selected_item fun(): blink.cmp.CompletionItem?
+--- @field get_selection_mode fun(context: blink.cmp.Context): blink.cmp.CompletionListSelection
 --- @field select fun(idx?: number, opts?: { undo_preview?: boolean, is_explicit_selection?: boolean })
 --- @field select_next fun()
 --- @field select_prev fun()
@@ -57,7 +58,7 @@ local list = {
   config = require('blink.cmp.config').completion.list,
   context = nil,
   items = {},
-  selected_item_idx = nil,
+  selection_mode = nil,
   is_explicitly_selected = false,
   preview_undo = nil,
 }
@@ -83,6 +84,7 @@ function list.show(context, items_by_source)
   -- update the context/list and emit
   list.context = context
   list.items = list.fuzzy(context, items_by_source)
+  list.selection_mode = list.get_selection_mode(list.context)
 
   if #list.items == 0 then
     list.hide_emitter:emit({ context = context })
@@ -98,7 +100,7 @@ function list.show(context, items_by_source)
   -- otherwise, use the default selection
   else
     list.select(
-      list.config.selection == 'preselect' and 1 or nil,
+      list.selection_mode == 'preselect' and 1 or nil,
       { undo_preview = false, is_explicit_selection = false }
     )
   end
@@ -121,6 +123,13 @@ function list.hide() list.hide_emitter:emit({ context = list.context }) end
 
 function list.get_selected_item() return list.items[list.selected_item_idx] end
 
+function list.get_selection_mode(context)
+  assert(context ~= nil, 'Context must be set before getting selection mode')
+  if type(list.config.selection) == 'function' then return list.config.selection(context) end
+  --- @diagnostic disable-next-line: return-type-mismatch
+  return list.config.selection
+end
+
 function list.select(idx, opts)
   opts = opts or {}
   local item = list.items[idx]
@@ -128,7 +137,7 @@ function list.select(idx, opts)
   require('blink.cmp.completion.trigger').suppress_events_for_callback(function()
     -- default to undoing the preview
     if opts.undo_preview ~= false then list.undo_preview() end
-    if list.config.selection == 'auto_insert' and item then list.apply_preview(item) end
+    if list.selection_mode == 'auto_insert' and item then list.apply_preview(item) end
   end)
 
   --- @diagnostic disable-next-line: assign-type-mismatch
@@ -149,7 +158,7 @@ function list.select_next()
     if not list.config.cycle.from_bottom then return end
 
     -- preselect is not enabled, we go back to no selection
-    if list.config.selection ~= 'preselect' then return list.select(nil) end
+    if list.selection_mode ~= 'preselect' then return list.select(nil) end
 
     -- otherwise, we cycle around
     return list.select(1)
@@ -171,7 +180,7 @@ function list.select_prev()
     if not list.config.cycle.from_top then return end
 
     -- auto_insert is enabled, we go back to no selection
-    if list.config.selection == 'auto_insert' then return list.select(nil) end
+    if list.selection_mode == 'auto_insert' then return list.select(nil) end
 
     -- otherwise, we cycle around
     return list.select(#list.items)
