@@ -97,6 +97,7 @@ function buffer_events:listen(opts)
       -- so we schedule to ignore the intermediary modes
       -- TODO: deduplicate requests
       vim.schedule(function()
+        if not require('blink.cmp.config').enabled() then opts.on_insert_leave() end
         if not vim.tbl_contains({ 'i', 's' }, vim.api.nvim_get_mode().mode) then opts.on_insert_leave() end
       end)
     end,
