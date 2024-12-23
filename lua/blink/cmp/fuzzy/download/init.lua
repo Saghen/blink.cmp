@@ -25,7 +25,7 @@ function download.ensure_downloaded(callback)
 
       -- not built locally, not on a git tag, error
       assert(
-        false and version.current.sha ~= nil or target_git_tag ~= nil,
+        version.current.sha ~= nil or target_git_tag ~= nil,
         "\nDetected an out of date or missing fuzzy matching library. Can't download from github due to not being on a git tag and no `fuzzy.prebuilt_binaries.force_version` is set."
           .. '\nEither run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
           .. 'See the docs for more info.'
