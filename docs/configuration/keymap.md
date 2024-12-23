@@ -78,7 +78,7 @@ Set the preset to `none` to disable the presets
 
 ### `super-tab`
 
-You may want to set `completion.trigger.show_in_snippet = false` or use `completion.list.selection = "manual" | "auto_insert"`
+You may want to use `completion.list.selection = "manual" | "auto_insert"`. You can also set it per mode: https://cmp.saghen.dev/configuration/completion.html#list
 
 ```lua
 ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
@@ -105,7 +105,7 @@ You may want to set `completion.trigger.show_in_snippet = false` or use `complet
 
 ### `enter`
 
-You may want to set `completion.list.selection = "manual" | "auto_insert"`
+You may want to set `completion.list.selection = "manual" | "auto_insert"`. You can also set it per mode: https://cmp.saghen.dev/configuration/completion.html#list
 
 ```lua
 ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
