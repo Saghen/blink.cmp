@@ -1,5 +1,7 @@
 # Recipes
 
+[[toc]]
+
 ## Disable per filetype
 
 ```lua
@@ -20,7 +22,7 @@ completion = {
 signature = { window = { border = 'single' } },
 ```
 
-## Change selection mode per mode
+## Change selection type per mode
 
 ```lua
 completion = { 
