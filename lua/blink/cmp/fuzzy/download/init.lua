@@ -25,9 +25,9 @@ function download.ensure_downloaded(callback)
 
       -- not built locally, not on a git tag, error
       assert(
-        version.current.sha ~= nil or target_git_tag ~= nil,
-        "Can't download from github due to not being on a git tag and no fuzzy.prebuilt_binaries.force_version set, but found no built version of the library. "
-          .. 'Either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
+        false and version.current.sha ~= nil or target_git_tag ~= nil,
+        "\nDetected an out of date or missing fuzzy matching library. Can't download from github due to not being on a git tag and no `fuzzy.prebuilt_binaries.force_version` is set."
+          .. '\nEither run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
           .. 'See the docs for more info.'
       )
 
@@ -43,7 +43,7 @@ function download.ensure_downloaded(callback)
       if version.current.sha ~= nil and version.current.sha ~= version.git.sha then
         assert(
           target_git_tag or download_config.ignore_version_mismatch,
-          "Found an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag. "
+          "\nFound an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag. "
             .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config. '
             .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
             .. 'See the docs for more info.'
@@ -67,7 +67,7 @@ function download.ensure_downloaded(callback)
           vim.schedule(function()
             vim.notify(err, vim.log.levels.WARN, { title = 'blink.cmp' })
             vim.notify(
-              'Pre-built binary failed checksum verification, re-downloading',
+              '[blink.cmp]: Pre-built binary failed checksum verification, re-downloading',
               vim.log.levels.WARN,
               { title = 'blink.cmp' }
             )
@@ -81,7 +81,7 @@ function download.ensure_downloaded(callback)
 
       -- download as per usual
       vim.schedule(
-        function() vim.notify('Downloading pre-built binary', vim.log.levels.INFO, { title = 'blink.cmp' }) end
+        function() vim.notify('[blink.cmp]: Downloading pre-built binary', vim.log.levels.INFO, { title = 'blink.cmp' }) end
       )
       return download.download(target_git_tag)
     end)
