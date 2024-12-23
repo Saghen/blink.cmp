@@ -78,6 +78,8 @@
             rust-analyzer-nightly
           ];
         };
+
+        formatter = pkgs.nixfmt-rfc-style;
       };
     };
 }
