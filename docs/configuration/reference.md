@@ -274,7 +274,7 @@ completion.documentation = {
     max_height = 20,
     border = 'padded',
     winblend = 0,
-    winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,CursorLine:BlinkCmpDocCursorLine,Search:None',
+    winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,EndOfBuffer:BlinkCmpDoc',
     -- Note that the gutter will be disabled when border ~= 'none'
     scrollbar = true,
     -- Which directions to show the documentation window,
