@@ -21,7 +21,7 @@ For more common configurations, see the [recipes](../recipes.md).
 
     -- Disable auto brackets
     -- NOTE: some LSPs may add auto brackets themselves anyway
-    accept = { auto_brackets = { enabled = false }, }
+    accept = { auto_brackets = { enabled = false }, },
 
     -- Insert completion item on selection, don't select by default
     list = { selection = 'auto_insert' },
@@ -51,7 +51,7 @@ For more common configurations, see the [recipes](../recipes.md).
     default = { 'lsp', 'path', 'snippets', 'buffer' },
     -- Disable cmdline completions
     cmdline = {},
-  }
+  },
 
   -- Experimental signature help support
   signature = { enabled = true }
