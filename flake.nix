@@ -37,6 +37,8 @@
             useFetchCargoVendor = true;
             cargoHash = "sha256-t84hokb2loZ6FPPt4eN8HzgNQJrQUdiG5//ZbmlasWY=";
 
+            nativeBuildInputs = with pkgs; [ git ];
+
             passthru.updateScript = pkgs.nix-update-script;
           };
 
@@ -88,6 +90,7 @@
         devShells.default = pkgs.mkShell {
           name = "blink";
           packages = with pkgs; [
+            git
             gcc
             fenix.complete.toolchain
             rust-analyzer-nightly
