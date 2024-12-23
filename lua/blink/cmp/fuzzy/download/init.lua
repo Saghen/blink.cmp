@@ -1,5 +1,6 @@
 local download_config = require('blink.cmp.config').fuzzy.prebuilt_binaries
 local async = require('blink.cmp.lib.async')
+local git = require('blink.cmp.fuzzy.download.git')
 local files = require('blink.cmp.fuzzy.download.files')
 local system = require('blink.cmp.fuzzy.download.system')
 
@@ -12,33 +13,56 @@ function download.ensure_downloaded(callback)
   if not download_config.download then return callback() end
 
   async.task
-    .await_all({ download.get_git_tag(), files.get_downloaded_version(), files.is_downloaded() })
-    :map(
-      function(results)
-        return {
-          git_version = results[1],
-          version = results[2],
-          is_downloaded = results[3],
-        }
-      end
-    )
-    :map(function(state)
-      local target_version = download_config.force_version or state.git_version
+    .await_all({ git.get_version(), files.get_version() })
+    :map(function(results)
+      return {
+        git = results[1],
+        current = results[2],
+      }
+    end)
+    :map(function(version)
+      local target_git_tag = download_config.force_version or version.git.tag
 
-      -- not built locally, not a git tag, error
-      if not state.is_downloaded and not target_version then
-        return callback(
-          "Can't download from github due to not being on a git tag and no fuzzy.prebuilt_binaries.force_version set, but found no built version of the library. "
-            .. 'Either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
-            .. 'See the README for more info.'
-        )
-      end
+      -- not built locally, not on a git tag, error
+      assert(
+        version.current.sha ~= nil or target_git_tag ~= nil,
+        "Can't download from github due to not being on a git tag and no fuzzy.prebuilt_binaries.force_version set, but found no built version of the library. "
+          .. 'Either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
+          .. 'See the docs for more info.'
+      )
 
       -- built locally, ignore
-      if state.is_downloaded and (state.version == nil) then return end
+      if
+        version.current.sha == version.git.sha
+        or version.current.sha ~= nil and download_config.ignore_version_mismatch
+      then
+        return
+      end
+
+      -- built locally but outdated and not on a git tag, error
+      if version.current.sha ~= nil and version.current.sha ~= version.git.sha then
+        assert(
+          target_git_tag or download_config.ignore_version_mismatch,
+          "Found an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag. "
+            .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config. '
+            .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
+            .. 'See the docs for more info.'
+        )
+        if not download_config.ignore_version_mismatch then
+          vim.schedule(
+            function()
+              vim.notify(
+                '[blink.cmp]: Found an outdated version of the fuzzy matching library built locally',
+                vim.log.levels.INFO,
+                { title = 'blink.cmp' }
+              )
+            end
+          )
+        end
+      end
 
       -- already downloaded and the correct version, just verify the checksum, and re-download if checksum fails
-      if state.version == target_version and state.is_downloaded then
+      if version.current.tag ~= nil and version.current.tag == target_git_tag then
         return files.verify_checksum():catch(function(err)
           vim.schedule(function()
             vim.notify(err, vim.log.levels.WARN, { title = 'blink.cmp' })
@@ -48,18 +72,18 @@ function download.ensure_downloaded(callback)
               { title = 'blink.cmp' }
             )
           end)
-          return download.download(target_version)
+          return download.download(target_git_tag)
         end)
       end
 
       -- unknown state
-      if not target_version then error('Unknown error while getting pre-built binary. Consider re-installing') end
+      if not target_git_tag then error('Unknown error while getting pre-built binary. Consider re-installing') end
 
       -- download as per usual
       vim.schedule(
         function() vim.notify('Downloading pre-built binary', vim.log.levels.INFO, { title = 'blink.cmp' }) end
       )
-      return download.download(target_version)
+      return download.download(target_git_tag)
     end)
     :map(function() callback() end)
     :catch(function(err) callback(err) end)
@@ -68,38 +92,10 @@ end
 function download.download(version)
   -- NOTE: we set the version to 'v0.0.0' to avoid a failure causing the pre-built binary being marked as locally built
   return files
-    .set_downloaded_version('v0.0.0')
+    .set_version('v0.0.0')
     :map(function() return download.from_github(version) end)
     :map(function() return files.verify_checksum() end)
-    :map(function() return files.set_downloaded_version(version) end)
-end
-
-function download.get_git_tag()
-  return async.task.new(function(resolve, reject)
-    -- If repo_dir is nil, no git reposiory is found, similar to `out.code == 128`
-    local repo_dir = vim.fs.root(files.root_dir, '.git')
-    if not repo_dir then resolve() end
-
-    vim.system({
-      'git',
-      '--git-dir',
-      vim.fs.joinpath(repo_dir, '.git'),
-      '--work-tree',
-      repo_dir,
-      'describe',
-      '--tags',
-      '--exact-match',
-    }, { cwd = files.root_dir }, function(out)
-      if out.code == 128 then return resolve() end
-      if out.code ~= 0 then
-        return reject('While getting git tag, git exited with code ' .. out.code .. ': ' .. out.stderr)
-      end
-
-      local lines = vim.split(out.stdout, '\n')
-      if not lines[1] then return reject('Expected atleast 1 line of output from git describe') end
-      return resolve(lines[1])
-    end)
-  end)
+    :map(function() return files.set_version(version) end)
 end
 
 --- @param tag string

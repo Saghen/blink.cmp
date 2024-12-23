@@ -16,7 +16,7 @@ local lib_filename = 'libblink_cmp_fuzzy' .. get_lib_extension()
 local lib_path = lib_folder .. '/' .. lib_filename
 local checksum_filename = lib_filename .. '.sha256'
 local checksum_path = lib_path .. '.sha256'
-local version_path = lib_folder .. '/version.txt'
+local version_path = lib_folder .. '/version'
 
 local files = {
   get_lib_extension = get_lib_extension,
@@ -73,22 +73,22 @@ end
 
 --- Prebuilt binary ---
 
-function files.is_downloaded()
-  return files.exists(files.lib_path):map(function(exists)
-    if exists then return true end
-
-    -- If not found, check without 'lib' prefix
-    return files.exists(string.gsub(files.lib_path, 'libblink_cmp_fuzzy', 'blink_cmp_fuzzy'))
-  end)
-end
-
-function files.get_downloaded_version()
-  return files.read_file(files.version_path):catch(function() end)
+function files.get_version()
+  return files
+    .read_file(files.version_path)
+    :map(function(version)
+      if #version == 40 then
+        return { sha = version }
+      else
+        return { tag = version }
+      end
+    end)
+    :catch(function() return {} end)
 end
 
 --- @param version string
 --- @return blink.cmp.Task
-function files.set_downloaded_version(version)
+function files.set_version(version)
   return files
     .create_dir(files.root_dir .. '/target')
     :map(function() return files.create_dir(files.lib_folder) end)
