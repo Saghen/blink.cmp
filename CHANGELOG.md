@@ -1,3 +1,24 @@
+## [0.8.2](https://github.com/Saghen/blink.cmp/compare/v0.8.1...v0.8.2) (2024-12-23)
+
+### Features
+
+* improve auto_show flexibility ([#697](https://github.com/Saghen/blink.cmp/issues/697)) ([a937edd](https://github.com/Saghen/blink.cmp/commit/a937edde979a8ff140779fa0d425af566bc73cb7))
+* improve error messages for pre built binaries ([c36b60c](https://github.com/Saghen/blink.cmp/commit/c36b60c22f7357d741c9166e4d509b745cc8b441))
+* sort cmdline completions case insensitive ([b68e924](https://github.com/Saghen/blink.cmp/commit/b68e92426af46d60f08a4d2f58ed1e44d4e56087)), closes [#715](https://github.com/Saghen/blink.cmp/issues/715)
+* support dynamic selection mode ([c1017f0](https://github.com/Saghen/blink.cmp/commit/c1017f0a827736e3397f9b60dfe8e8ebb4a0ae72))
+
+### Bug Fixes
+
+* add git to nix build dependencies and shell ([ed1d4f5](https://github.com/Saghen/blink.cmp/commit/ed1d4f573f8988353d6e437f5e70ee334ea099fe))
+* add java to blocked filetypes for semantic token auto_brackets ([#729](https://github.com/Saghen/blink.cmp/issues/729)) ([140ed36](https://github.com/Saghen/blink.cmp/commit/140ed3633419965e8f2228af0d5fbaa4c1956f78))
+* add missing git.lua for downloader ([f7bef25](https://github.com/Saghen/blink.cmp/commit/f7bef25052820d4d7604a296c739ba9d885117f8))
+* auto_show function logic ([#707](https://github.com/Saghen/blink.cmp/issues/707)) ([4ef6d1e](https://github.com/Saghen/blink.cmp/commit/4ef6d1ee29e8ae9138a47bba9374b7c0c97452b6)), closes [#697](https://github.com/Saghen/blink.cmp/issues/697)
+* check version sha of locally built, better detection ([3ffd31d](https://github.com/Saghen/blink.cmp/commit/3ffd31d0c52a51d064f4761d5c0bfad64129c1e9)), closes [#68](https://github.com/Saghen/blink.cmp/issues/68)
+* doc scrollbar render ([#724](https://github.com/Saghen/blink.cmp/issues/724)) ([8f71ccb](https://github.com/Saghen/blink.cmp/commit/8f71ccbe668860a4ebcaed3928d80d2119559ad9))
+* inherit package.cpath in worker thread ([#726](https://github.com/Saghen/blink.cmp/issues/726)) ([b6c7762](https://github.com/Saghen/blink.cmp/commit/b6c7762407b6c4521b46244f35fab05cfd1c6863)), closes [#725](https://github.com/Saghen/blink.cmp/issues/725)
+* **notifications:** add title to notifications ([#722](https://github.com/Saghen/blink.cmp/issues/722)) ([f93af0f](https://github.com/Saghen/blink.cmp/commit/f93af0f486ada13e8c34f42c911788b9232b811f))
+* prebuilt binary error message always firing ([cab0e8e](https://github.com/Saghen/blink.cmp/commit/cab0e8e169a2c595018f9fdb981e056094bd5aeb))
+
 ## [0.8.1](https://github.com/Saghen/blink.cmp/compare/v0.8.0...v0.8.1) (2024-12-21)
 
 ### Features
