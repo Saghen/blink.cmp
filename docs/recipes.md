@@ -126,7 +126,7 @@ Trigger characters are defined by the sources. For example, for Lua, the trigger
 
 ```lua
 sources.providers.snippets.should_show_items = function(ctx)
-  return ctx.trigger.kind == vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter
+  return ctx.trigger.initial_kind ~= 'trigger_character'
 end
 ```
 
