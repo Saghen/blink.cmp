@@ -135,7 +135,7 @@ completion.accept = {
     -- Asynchronously use semantic token to determine if brackets should be added
     semantic_token_resolution = {
       enabled = true,
-      blocked_filetypes = {},
+      blocked_filetypes = { 'java' },
       -- How long to wait for semantic tokens to return before assuming no brackets should be added
       timeout_ms = 400,
     },
