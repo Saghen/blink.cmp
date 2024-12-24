@@ -42,27 +42,16 @@ function registry:get_snippets_for_ft(filetype)
   local files = self.registry[filetype]
   if not files then return loaded_snippets end
 
-  if type(files) == 'table' then
-    for _, f in ipairs(files) do
-      local contents = utils.read_file(f)
-      if contents then
-        local snippets = utils.parse_json_with_error_msg(f, contents)
-        for _, key in ipairs(vim.tbl_keys(snippets)) do
-          local snippet = utils.read_snippet(snippets[key], key)
-          for _, snippet_def in pairs(snippet) do
-            table.insert(loaded_snippets, snippet_def)
-          end
-        end
-      end
-    end
-  else
-    local contents = utils.read_file(files)
+  files = type(files) == 'table' and files or { files }
+
+  for _, f in ipairs(files) do
+    local contents = utils.read_file(f)
     if contents then
-      local snippets = utils.parse_json_with_error_msg(files, contents)
+      local snippets = utils.parse_json_with_error_msg(f, contents)
       for _, key in ipairs(vim.tbl_keys(snippets)) do
         local snippet = utils.read_snippet(snippets[key], key)
-        for _, snippet in pairs(snippet) do
-          table.insert(loaded_snippets, snippet)
+        for _, snippet_def in pairs(snippet) do
+          table.insert(loaded_snippets, snippet_def)
         end
       end
     end
