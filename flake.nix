@@ -36,6 +36,8 @@
             inherit src version;
             useFetchCargoVendor = true;
             cargoHash = "sha256-t84hokb2loZ6FPPt4eN8HzgNQJrQUdiG5//ZbmlasWY=";
+
+            nativeBuildInputs = with pkgs; [ git ];
           };
 
           blink-cmp = pkgs.vimUtils.buildVimPlugin {
@@ -67,12 +69,13 @@
         # define the default dev environment
         devShells.default = pkgs.mkShell {
           name = "blink";
+          inputsFrom = [
+            self'.packages.blink-fuzzy-lib
+            self'.packages.blink-cmp
+            self'.apps.build-plugin
+          ];
           packages = with pkgs; [
-            git
-            gcc
-            fenix.complete.toolchain
             rust-analyzer-nightly
-            nix-update
           ];
         };
       };
