@@ -60,7 +60,9 @@ function keymap.setup()
   -- This is not called when the plugin loads since it first checks if the binary is
   -- installed. As a result, when lazy-loaded on InsertEnter, the event may be missed
   if vim.api.nvim_get_mode().mode == 'i' and require('blink.cmp.config').enabled() then
-    require('blink.cmp.keymap.apply').keymap_to_current_buffer(mappings)
+    if require('blink.cmp.config').enabled() then
+      require('blink.cmp.keymap.apply').keymap_to_current_buffer(mappings)
+    end
   end
 
   -- Apply cmdline keymaps since they're global, if any sources are defined

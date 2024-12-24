@@ -162,6 +162,8 @@ function trigger.show_if_on_trigger_character(opts)
 end
 
 function trigger.show(opts)
+  if not require('blink.cmp.config').enabled() then return trigger.hide() end
+
   opts = opts or {}
 
   -- already triggered at this position, ignore

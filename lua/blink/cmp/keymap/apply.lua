@@ -16,6 +16,8 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('i', key)
     apply.set('i', key, function()
+      if not require('blink.cmp.config').enabled() then return fallback() end
+
       for _, command in ipairs(commands) do
         -- special case for fallback
         if command == 'fallback' then
@@ -45,6 +47,8 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('s', key)
     apply.set('s', key, function()
+      if not require('blink.cmp.config').enabled() then return fallback() end
+
       for _, command in ipairs(keys_to_commands[key] or {}) do
         -- special case for fallback
         if command == 'fallback' then
