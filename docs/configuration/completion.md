@@ -62,6 +62,8 @@ Manages the completion list and its behavior when selecting items. The most comm
 To control the selection behavior per mode, pass a function to `completion.list.selection` that returns the selection mode:
 
 ```lua
+completion.list.selection = 'preselect'
+-- or
 completion.list.selection = function(ctx)
   return ctx.mode == 'cmdline' and 'auto_insert' or 'preselect'
 end
