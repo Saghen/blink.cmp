@@ -129,7 +129,7 @@ function menu.update_position()
       - border_size.left
     if config.draw.align_to == 'cursor' then col = 0 end
 
-    win:set_win_config({ relative = 'cursor', row = row, col = col - alignment_start_col })
+    win:set_win_config({ relative = 'cursor', row = row, col = col })
   end
 
   win:set_height(pos.height)
