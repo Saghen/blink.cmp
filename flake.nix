@@ -24,7 +24,7 @@
         packages = let
           src = ./.;
           version = "0.8.2";
-        in rec {
+        in {
           blink-fuzzy-lib = let
             inherit (inputs.fenix.packages.${system}.minimal) toolchain;
             rustPlatform = pkgs.makeRustPlatform {
@@ -38,35 +38,15 @@
             cargoHash = "sha256-t84hokb2loZ6FPPt4eN8HzgNQJrQUdiG5//ZbmlasWY=";
 
             nativeBuildInputs = with pkgs; [ git ];
-
-            passthru.updateScript = pkgs.nix-update-script;
           };
 
-          blink-cmp = let
-            inherit (pkgs.stdenv) hostPlatform;
-            libExt = if hostPlatform.isDarwin then
-              "dylib"
-            else if hostPlatform.isWindows then
-              "dll"
-            else
-              "so";
-          in pkgs.vimUtils.buildVimPlugin {
+          blink-cmp = pkgs.vimUtils.buildVimPlugin {
             pname = "blink-cmp";
             inherit src version;
             preInstall = ''
               mkdir -p target/release
-              ln -s ${blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.${libExt} target/release/libblink_cmp_fuzzy.${libExt}
+              ln -s ${self'.packages.blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.* target/release/
             '';
-
-            passthru.updateScript = pkgs.nix-update-script;
-
-            meta = {
-              description =
-                "Performant, batteries-included completion plugin for Neovim ";
-              homepage = "https://github.com/saghen/blink.cmp";
-              license = lib.licenses.mit;
-              maintainers = with lib.maintainers; [ redxtech ];
-            };
           };
 
           default = self'.packages.blink-cmp;
@@ -89,12 +69,13 @@
         # define the default dev environment
         devShells.default = pkgs.mkShell {
           name = "blink";
+          inputsFrom = [
+            self'.packages.blink-fuzzy-lib
+            self'.packages.blink-cmp
+            self'.apps.build-plugin
+          ];
           packages = with pkgs; [
-            git
-            gcc
-            fenix.complete.toolchain
             rust-analyzer-nightly
-            nix-update
           ];
         };
       };
