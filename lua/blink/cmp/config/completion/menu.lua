@@ -55,7 +55,7 @@ local window = {
     -- Controls how the completion items are rendered on the popup window
     draw = {
       -- Aligns the keyword you've typed to a component in the menu
-      align_to_component = 'label', -- or 'none' to disable
+      align_to = 'cursor', -- or 'none' to disable
       -- Left and right padding, optionally { left, right } for different padding on each side
       padding = 1,
       -- Gap between columns
@@ -161,10 +161,10 @@ function window.validate(config)
   }, config.order)
 
   validate('completion.menu.draw', {
-    align_to_component = {
-      config.draw.align_to_component,
+    align_to = {
+      config.draw.align_to,
       function(align)
-        if align == 'none' then return true end
+        if align == 'none' or align == 'cursor' then return true end
         for _, column in ipairs(config.draw.columns) do
           for _, component in ipairs(column) do
             if component == align then return true end

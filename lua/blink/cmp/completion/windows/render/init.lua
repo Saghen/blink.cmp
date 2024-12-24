@@ -138,8 +138,8 @@ function renderer:get_component_start_col(component_name)
 end
 
 function renderer:get_alignment_start_col()
-  local component_name = self.def.align_to_component
-  if component_name == nil or component_name == 'none' then return 0 end
+  local component_name = self.def.align_to
+  if component_name == nil or component_name == 'none' or component_name == 'cursor' then return 0 end
   return self:get_component_start_col(component_name)
 end
 

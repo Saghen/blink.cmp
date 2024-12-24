@@ -106,7 +106,7 @@ function menu.update_position()
     return
   end
 
-  local start_col = menu.renderer:get_alignment_start_col()
+  local alignment_start_col = menu.renderer:get_alignment_start_col()
 
   -- place the window at the start col of the current text we're fuzzy matching against
   -- so the window doesnt move around as we type
@@ -117,12 +117,19 @@ function menu.update_position()
     win:set_win_config({
       relative = 'editor',
       row = cmdline_position[1] + row,
-      col = math.max(cmdline_position[2] + context.bounds.start_col - start_col, 0),
+      col = math.max(cmdline_position[2] + context.bounds.start_col - alignment_start_col, 0),
     })
   else
     local cursor_col = context.get_cursor()[2]
-    local col = context.bounds.start_col - cursor_col - (context.bounds.length == 0 and 0 or 1) - border_size.left
-    win:set_win_config({ relative = 'cursor', row = row, col = col - start_col })
+
+    local col = context.bounds.start_col
+      - alignment_start_col
+      - cursor_col
+      - (context.bounds.length == 0 and 0 or 1)
+      - border_size.left
+    if config.draw.align_to == 'cursor' then col = 0 end
+
+    win:set_win_config({ relative = 'cursor', row = row, col = col - alignment_start_col })
   end
 
   win:set_height(pos.height)
