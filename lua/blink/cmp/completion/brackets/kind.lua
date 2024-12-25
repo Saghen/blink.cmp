@@ -15,7 +15,12 @@ local function add_brackets(ctx, filetype, item)
   -- if there's already the correct brackets in front, skip but indicate the cursor should move in front of the bracket
   -- TODO: what if the brackets_for_filetype[1] == '' or ' ' (haskell/ocaml)?
   if utils.has_brackets_in_front(text_edit, brackets_for_filetype[1]) then
-    return 'skipped', text_edit, #brackets_for_filetype[1]
+    -- if these brackets can be used with the item
+    if utils.can_have_brackets(item, brackets_for_filetype) then
+      return 'skipped', text_edit, #brackets_for_filetype[1]
+    end
+    -- otherwise
+    return 'skipped', text_edit, 0
   end
 
   -- if the item already contains the brackets, conservatively skip adding brackets
@@ -27,11 +32,8 @@ local function add_brackets(ctx, filetype, item)
 
   -- check if configuration incidates we should skip
   if not utils.should_run_resolution(filetype, 'kind') then return 'check_semantic_token', text_edit, 0 end
-  -- not a function, skip
-  local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
-  if item.kind ~= CompletionItemKind.Function and item.kind ~= CompletionItemKind.Method then
-    return 'check_semantic_token', text_edit, 0
-  end
+  -- cannot have brackets, skip
+  if not utils.can_have_brackets(item, brackets_for_filetype) then return 'check_semantic_token', text_edit, 0 end
 
   text_edit = vim.deepcopy(text_edit)
   -- For snippets, we add the cursor position between the brackets as the last placeholder
