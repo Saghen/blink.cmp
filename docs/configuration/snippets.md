@@ -63,7 +63,7 @@ By default, the `snippets` source will check `~/.config/nvim/snippets` for your 
 ## Disable all snippets
 
 ```lua
-sources.providers.transform_items = function(_, items)
+sources.transform_items = function(_, items)
   return vim.tbl_filter(function(item)
     return item.kind ~= require('blink.cmp.types').CompletionItemKind.Snippet
   end, items)
