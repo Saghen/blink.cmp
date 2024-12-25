@@ -61,3 +61,4 @@ Blink can use `nvim-cmp` sources through a compatibility layer developed by [ste
 - [blink-cmp-ctags](https://github.com/netmute/blink-cmp-ctags)
 - [blink-cmp-copilot](https://github.com/giuxtaposition/blink-cmp-copilot)
 - [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim)
+- [blink-emoji.nvim](https://github.com/moyiz/blink-emoji.nvim)
