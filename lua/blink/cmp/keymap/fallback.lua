@@ -1,7 +1,7 @@
 local fallback = {}
 
 --- Add missing types. Remove when fixed upstream
----@class vim.api.keyset.keymap
+---@class blink.cmp.Fallback : vim.api.keyset.keymap
 ---@field lhs string
 ---@field mode string
 ---@field rhs? string
@@ -11,7 +11,7 @@ local fallback = {}
 --- Gets the non blink.cmp global keymap for the given mode and key
 --- @param mode string
 --- @param key string
---- @return vim.api.keyset.keymap | nil
+--- @return blink.cmp.Fallback | nil
 function fallback.get_non_blink_global_mapping_for_key(mode, key)
   local normalized_key = vim.api.nvim_replace_termcodes(key, true, true, true)
 
@@ -19,6 +19,7 @@ function fallback.get_non_blink_global_mapping_for_key(mode, key)
   local mappings = vim.api.nvim_get_keymap(mode)
 
   for _, mapping in ipairs(mappings) do
+    --- @cast mapping blink.cmp.Fallback
     local mapping_key = vim.api.nvim_replace_termcodes(mapping.lhs, true, true, true)
     if mapping_key == normalized_key and mapping.desc ~= 'blink.cmp' then return mapping end
   end
@@ -27,13 +28,14 @@ end
 --- Gets the non blink.cmp buffer keymap for the given mode and key
 --- @param mode string
 --- @param key string
---- @return vim.api.keyset.keymap?
+--- @return blink.cmp.Fallback?
 function fallback.get_non_blink_buffer_mapping_for_key(mode, key)
   local normalized_key = vim.api.nvim_replace_termcodes(key, true, true, true)
 
   local buffer_mappings = vim.api.nvim_buf_get_keymap(0, mode)
 
   for _, mapping in ipairs(buffer_mappings) do
+    --- @cast mapping blink.cmp.Fallback
     local mapping_key = vim.api.nvim_replace_termcodes(mapping.lhs, true, true, true)
     if mapping_key == normalized_key and mapping.desc ~= 'blink.cmp' then return mapping end
   end
@@ -56,7 +58,7 @@ function fallback.wrap(mode, key)
 end
 
 --- Runs the first non blink.cmp keymap for the given mode and key
---- @param mapping vim.api.keyset.keymap
+--- @param mapping blink.cmp.Fallback
 --- @param key string
 --- @return string | nil
 function fallback.run_non_blink_keymap(mapping, key)
