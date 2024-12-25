@@ -22,7 +22,22 @@
 
         # define the packages provided by this flake
         packages = let
-          src = ./.;
+          fs = lib.fileset;
+          # nix source files (*.nix)
+          nixFs = fs.fileFilter (file: file.hasExt == "nix") ./.;
+          # rust source files
+          rustFs = fs.unions [
+            # Cargo.*
+            (fs.fileFilter (file: lib.hasPrefix "Cargo" file.name) ./.)
+            # *.rs
+            (fs.fileFilter (file: file.hasExt "rs") ./.)
+            # additional files
+            ./.cargo
+            ./rust-toolchain.toml
+          ];
+          # nvim source files
+          # all that are not nix, nor rust
+          nvimFs = fs.difference ./. (fs.union nixFs rustFs);
           version = "0.8.2";
         in {
           blink-fuzzy-lib = let
@@ -33,7 +48,11 @@
             };
           in rustPlatform.buildRustPackage {
             pname = "blink-fuzzy-lib";
-            inherit src version;
+            inherit version;
+            src = fs.toSource {
+              root = ./.;
+              fileset = rustFs;
+            };
             cargoLock = {
               lockFile = ./Cargo.lock;
               allowBuiltinFetchGit = true;
@@ -44,7 +63,11 @@
 
           blink-cmp = pkgs.vimUtils.buildVimPlugin {
             pname = "blink-cmp";
-            inherit src version;
+            inherit version;
+            src = fs.toSource {
+              root = ./.;
+              fileset = nvimFs;
+            };
             preInstall = ''
               mkdir -p target/release
               ln -s ${self'.packages.blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.* target/release/
