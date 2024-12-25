@@ -26,7 +26,7 @@
           version = "0.8.2";
         in {
           blink-fuzzy-lib = let
-            inherit (inputs.fenix.packages.${system}.minimal) toolchain;
+            inherit (inputs'.fenix.packages.minimal) toolchain;
             rustPlatform = pkgs.makeRustPlatform {
               cargo = toolchain;
               rustc = toolchain;
