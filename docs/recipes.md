@@ -42,16 +42,13 @@ completion = {
 }
 ```
 
-## Don't show completion menu automatically only when searching
+## Don't show completion menu automatically when searching
 
 ```lua
 completion = {
   menu = {
     auto_show = function(ctx)
-      if ctx.mode == "cmdline" then
-        return not vim.fn.getcmdtype():match("[/\\?]")
-      end
-      return true
+      return ctx.mode ~= "cmdline" or not vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype())
     end,
   },
 }
