@@ -42,6 +42,18 @@ completion = {
 }
 ```
 
+## Don't show completion menu automatically when searching
+
+```lua
+completion = {
+  menu = {
+    auto_show = function(ctx)
+      return ctx.mode ~= "cmdline" or not vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype())
+    end,
+  },
+}
+```
+
 ## Select Nth item from the list
 
 Here's an example configuration that allows you to select the nth item from the list, based on [#382](https://github.com/Saghen/blink.cmp/issues/382):
