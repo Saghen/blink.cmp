@@ -80,12 +80,19 @@ function trigger.activate()
       and event == 'InsertEnter'
       and trigger.is_trigger_character(char_under_cursor, true)
 
+    local removed_char_to_the_right_from_trigger = config.show_on_trigger_character
+      and event == 'CursorMoved'
+      and trigger.is_trigger_character(char_under_cursor, true)
+
     -- check if we're still within the bounds of the query used for the context
     if trigger.context ~= nil and trigger.context:within_query_bounds(cursor) then
       trigger.show({ trigger_kind = 'keyword' })
 
-    -- check if we've entered insert mode on a trigger character
-    elseif insert_enter_on_trigger_character then
+    -- trigger character
+    elseif
+      insert_enter_on_trigger_character -- entered insert mode on a trigger character
+      or removed_char_to_the_right_from_trigger -- character deleted via <BS>
+    then
       trigger.context = nil
       trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
 
