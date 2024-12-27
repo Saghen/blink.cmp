@@ -56,11 +56,15 @@ function utils.flatten(t)
 
   local flattened = {}
   for _, v in ipairs(t) do
+    if type(v) == 'table' and vim.tbl_isempty(v) then goto continue end
+
     if v[1] == nil then
       table.insert(flattened, v)
     else
       vim.list_extend(flattened, utils.flatten(v))
     end
+
+    ::continue::
   end
   return flattened
 end
