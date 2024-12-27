@@ -113,6 +113,14 @@ For a setup similar to nvim-cmp, use the following config:
 completion.menu.draw.columns = { { "label", "label_description", gap = 1 }, { "kind_icon", "kind" } },
 ```
 
+### Treesitter
+
+You may use treesitter to highlight the label text for the given list of sources. This feature is experimental, contributions welcome!
+
+```lua
+completion.menu.draw.treesitter = { 'lsp' }
+```
+
 ## Documentation <a href="./reference#completion-documentation"><Badge type="info" text="Go to default configuration" /></a>
 
 By default, the documentation window will only show when triggered by the `show_documentation` keymap command. However, you may add the following configuration to show the documentation whenever an item is selected.

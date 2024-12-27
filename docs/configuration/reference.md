@@ -190,8 +190,9 @@ completion.menu.draw = {
   padding = 1,
   -- Gap between columns
   gap = 1,
-  -- Use treesitter to highlight the label text
-  treesitter = false,
+  -- Use treesitter to highlight the label text for the given list of sources
+  treesitter = {},
+  -- treesitter = { 'lsp' }
 
   -- Components to render, grouped by column
   columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
