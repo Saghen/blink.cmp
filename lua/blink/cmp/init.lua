@@ -39,7 +39,7 @@ end
 
 --- @params opts? { providers?: string[] }
 function cmp.show(opts)
-  if cmp.is_visible() and not (opts and opts.providers) then return end
+  if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then return end
 
   vim.schedule(function()
     require('blink.cmp.completion.windows.menu').auto_show = true
