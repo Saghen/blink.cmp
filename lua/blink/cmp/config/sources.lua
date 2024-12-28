@@ -102,6 +102,11 @@ local sources = {
         name = 'cmdline',
         module = 'blink.cmp.sources.cmdline',
       },
+			dictionary = {
+				name = 'Dictionary',
+				module = 'blink.cmp.sources.dictionary',
+				score_offset = -3,
+			},
     },
   },
 }
