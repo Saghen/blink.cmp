@@ -22,8 +22,10 @@ function docs.render_detail_and_documentation(opts)
 
   if opts.detail then
     if type(opts.detail) == 'table' then
+      local already_added = {}
       for _, detail in ipairs(opts.detail) do
-        if detail ~= '' then
+        if detail ~= '' and not already_added[detail] then
+          already_added[detail] = true
           for _, v in ipairs(docs.split_lines(detail)) do
             detail_lines[#detail_lines + 1] = v
           end
