@@ -1,10 +1,10 @@
 --- @return string
 local function get_dict_words()
 	local words = {}
-	table.insert(words, "tectos")
-	table.insert(words, "recon")
-	table.insert(words, "gimtool")
-	table.insert(words, "gimtool")
+	table.insert(words, "tectos\n")
+	table.insert(words, "recon\n")
+	table.insert(words, "gimtool\n")
+	table.insert(words, "gimtool\n")
   return table.concat(words, '\n')
 end
 
