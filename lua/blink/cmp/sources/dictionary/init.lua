@@ -1,9 +1,5 @@
 local function get_dict_words()
-	local words = {}
-	table.insert(words, "tectos")
-	table.insert(words, "recon")
-	table.insert(words, "gimtool")
-	table.insert(words, "gimtool")
+	local words = require('blink.cmp.sources.dictionary.lily_db')
   return words
 end
 
