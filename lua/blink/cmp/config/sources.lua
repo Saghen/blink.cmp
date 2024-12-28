@@ -83,6 +83,12 @@ local sources = {
         score_offset = 3,
         fallbacks = { 'buffer' },
       },
+			dictionary = {
+				name = 'Dictionary',
+				module = 'blink.cmp.sources.dictionary',
+				score_offset = 2,
+        fallbacks = { 'buffer' },
+			},
       snippets = {
         name = 'Snippets',
         module = 'blink.cmp.sources.snippets',
@@ -102,11 +108,6 @@ local sources = {
         name = 'cmdline',
         module = 'blink.cmp.sources.cmdline',
       },
-			dictionary = {
-				name = 'Dictionary',
-				module = 'blink.cmp.sources.dictionary',
-				score_offset = -3,
-			},
     },
   },
 }
