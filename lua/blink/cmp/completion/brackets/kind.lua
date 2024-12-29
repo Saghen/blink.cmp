@@ -15,12 +15,8 @@ local function add_brackets(ctx, filetype, item)
   -- if there's already the correct brackets in front, skip but indicate the cursor should move in front of the bracket
   -- TODO: what if the brackets_for_filetype[1] == '' or ' ' (haskell/ocaml)?
   if utils.has_brackets_in_front(text_edit, brackets_for_filetype[1]) then
-    -- if these brackets can be used with the item
-    if utils.can_have_brackets(item, brackets_for_filetype) then
-      return 'skipped', text_edit, #brackets_for_filetype[1]
-    end
-    -- otherwise
-    return 'skipped', text_edit, 0
+    local offset = utils.can_have_brackets(item, brackets_for_filetype) and #brackets_for_filetype[1] or 0
+    return 'skipped', text_edit, offset
   end
 
   -- if the item already contains the brackets, conservatively skip adding brackets

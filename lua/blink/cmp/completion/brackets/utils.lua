@@ -1,5 +1,5 @@
 local config = require('blink.cmp.config').completion.accept.auto_brackets
-local CmpItemKind = require('blink.cmp.types').CompletionItemKind
+local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
 local brackets = require('blink.cmp.completion.brackets.config')
 local utils = {}
 
@@ -54,6 +54,8 @@ end
 --- @param item blink.cmp.CompletionItem
 --- @param _ string[]
 -- TODO: for edge cases, we should probably also take brackets themselves into consideration
-function utils.can_have_brackets(item, _) return item.kind == CmpItemKind.Function or item.kind == CmpItemKind.Method end
+function utils.can_have_brackets(item, _)
+  return item.kind == CompletionItemKind.Function or item.kind == CompletionItemKind.Method
+end
 
 return utils
