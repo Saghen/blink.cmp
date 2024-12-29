@@ -10,5 +10,6 @@ fn main() {
     let sha = String::from_utf8(output.stdout).unwrap();
 
     // write to version
+    std::fs::create_dir_all("target/release").unwrap();
     std::fs::write("target/release/version", sha.trim()).unwrap();
 }
