@@ -26,7 +26,7 @@
           version = "0.8.2";
         in {
           blink-fuzzy-lib = let
-            inherit (inputs.fenix.packages.${system}.minimal) toolchain;
+            inherit (inputs'.fenix.packages.minimal) toolchain;
             rustPlatform = pkgs.makeRustPlatform {
               cargo = toolchain;
               rustc = toolchain;
@@ -34,8 +34,10 @@
           in rustPlatform.buildRustPackage {
             pname = "blink-fuzzy-lib";
             inherit src version;
-            useFetchCargoVendor = true;
-            cargoHash = "sha256-t84hokb2loZ6FPPt4eN8HzgNQJrQUdiG5//ZbmlasWY=";
+            cargoLock = {
+              lockFile = ./Cargo.lock;
+              allowBuiltinFetchGit = true;
+            };
 
             nativeBuildInputs = with pkgs; [ git ];
           };
