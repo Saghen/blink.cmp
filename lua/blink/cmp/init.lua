@@ -130,7 +130,7 @@ function cmp.hide_documentation()
   local documentation = require('blink.cmp.completion.windows.documentation')
   if not documentation.win:is_open() then return end
 
-  vim.schedule(function() documentation.win:close() end)
+  vim.schedule(function() documentation.close() end)
   return true
 end
 

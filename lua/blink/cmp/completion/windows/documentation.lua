@@ -37,10 +37,7 @@ local docs = {
 }
 
 menu.position_update_emitter:on(function() docs.update_position() end)
-menu.close_emitter:on(function()
-  docs.win:close()
-  docs.auto_show_timer:stop()
-end)
+menu.close_emitter:on(function() docs.close() end)
 
 function docs.auto_show_item(context, item)
   docs.auto_show_timer:stop()
@@ -66,7 +63,7 @@ function docs.show_item(context, item)
     ---@param item blink.cmp.CompletionItem
     :map(function(item)
       if item.documentation == nil and item.detail == nil then
-        docs.win:close()
+        docs.close()
         return
       end
 
@@ -220,6 +217,12 @@ function docs.update_position()
       set_config({ row = -menu_border_size.top, col = -width - menu_border_size.left })
     end
   end
+end
+
+function docs.close()
+  docs.win:close()
+  docs.auto_show_timer:stop()
+  docs.shown_item = nil
 end
 
 return docs
