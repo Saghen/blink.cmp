@@ -16,7 +16,7 @@ function cmdline.new()
   return self
 end
 
-function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/' } end
+function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':' } end
 
 function cmdline:get_completions(context, callback)
   local arguments = vim.split(context.line, ' ', { plain = true })
@@ -38,7 +38,7 @@ function cmdline:get_completions(context, callback)
     :map(function()
       -- Special case for help where we read all the tags ourselves
       if vim.tbl_contains({ 'h', 'he', 'hel', 'help' }, arguments[1] or '') then
-        return require('blink.cmp.sources.cmdline.help').get_completions(current_arg or '')
+        return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix)
       end
 
       local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
@@ -53,9 +53,8 @@ function cmdline:get_completions(context, callback)
           filter_text = completion:sub(#current_arg_prefix + 1)
         end
 
-        -- for lua, set the filter text to the label
-        local label = completion
-        if arguments[1] == 'lua' then label = filter_text end
+        -- for lua, use the filter text as the label since it doesn't include the prefix
+        local label = arguments[1] == 'lua' and filter_text or completion
 
         -- add prefix to the newText
         local new_text = completion
