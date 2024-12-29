@@ -2,10 +2,10 @@
 --- for the original implementation
 --- Original License: MIT
 
----@class blink.cmp.Snippet
----@field prefix string
----@field body string[] | string
----@field description? string
+--- @class blink.cmp.Snippet
+--- @field prefix string
+--- @field body string[] | string
+--- @field description? string
 
 local registry = {
   builtin_vars = require('blink.cmp.sources.snippets.builtin'),
@@ -18,6 +18,8 @@ local default_config = {
   global_snippets = { 'all' },
   extended_filetypes = {},
   ignored_filetypes = {},
+  --- @type string?
+  clipboard_register = nil,
 }
 
 --- @param config blink.cmp.SnippetsOpts
@@ -127,7 +129,10 @@ function registry:expand_vars(snippet)
       if eager_vars[data.name] then
         resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', eager_vars[data.name])
       elseif lazy_vars[data.name] then
-        resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', lazy_vars[data.name]())
+        resolved_snippet = resolved_snippet:gsub(
+          '%$[{]?(' .. data.name .. ')[}]?',
+          lazy_vars[data.name]({ clipboard_register = self.config.clipboard_register })
+        )
       end
     end
   end

@@ -15,7 +15,7 @@ function builtin.lazy.TM_DIRECTORY() return vim.fn.expand('%:p:h') end
 
 function builtin.lazy.TM_FILEPATH() return vim.fn.expand('%:p') end
 
-function builtin.lazy.CLIPBOARD() return vim.fn.getreg(vim.v.register, true) end
+function builtin.lazy.CLIPBOARD(opts) return vim.fn.getreg(opts.clipboard_register or vim.v.register, true) end
 
 local function buf_to_ws_part()
   local LSP_WORSKPACE_PARTS = 'LSP_WORSKPACE_PARTS'

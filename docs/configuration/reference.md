@@ -463,6 +463,8 @@ sources.providers = {
       get_filetype = function(context)
         return vim.bo.filetype
       end
+      -- Set to '+' to use the system clipboard, or '"' to use the unnamed register
+      clipboard_register = nil,
     }
   },
   luasnip = {
