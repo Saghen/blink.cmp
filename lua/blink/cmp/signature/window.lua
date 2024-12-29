@@ -52,10 +52,7 @@ function signature.open_with_signature_help(context, signature_help)
 
   local active_signature = signature_help.signatures[(signature_help.activeSignature or 0) + 1]
 
-  local labels = {}
-  for _, v in ipairs(signature_help.signatures) do
-    labels[#labels + 1] = v.label
-  end
+  local labels = vim.tbl_map(function(signature) return signature.label end, signature_help.signatures)
 
   if signature.shown_signature ~= active_signature then
     require('blink.cmp.lib.window.docs').render_detail_and_documentation({
