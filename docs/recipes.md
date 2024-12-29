@@ -2,7 +2,9 @@
 
 [[toc]]
 
-## Disable per filetype
+## General
+
+### Disable per filetype
 
 ```lua
 enabled = function()
@@ -12,7 +14,7 @@ enabled = function()
 end,
 ```
 
-## Border
+### Border
 
 ```lua
 completion = {
@@ -22,7 +24,7 @@ completion = {
 signature = { window = { border = 'single' } },
 ```
 
-## Change selection type per mode
+### Change selection type per mode
 
 ```lua
 completion = { 
@@ -34,7 +36,7 @@ completion = {
 }
 ```
 
-## Don't show completion menu automatically in cmdline mode
+### Don't show completion menu automatically in cmdline mode
 
 ```lua
 completion = { 
@@ -42,7 +44,7 @@ completion = {
 }
 ```
 
-## Don't show completion menu automatically when searching
+### Don't show completion menu automatically when searching
 
 ```lua
 completion = {
@@ -54,7 +56,7 @@ completion = {
 }
 ```
 
-## Select Nth item from the list
+### Select Nth item from the list
 
 Here's an example configuration that allows you to select the nth item from the list, based on [#382](https://github.com/Saghen/blink.cmp/issues/382):
 
@@ -87,7 +89,7 @@ completion = {
 }
 ```
 
-## `mini.icons`
+### `mini.icons`
 
 [Original discussion](https://github.com/Saghen/blink.cmp/discussions/458)
 
@@ -114,7 +116,7 @@ completion = {
 }
 ```
 
-## Hide Copilot on suggestion
+### Hide Copilot on suggestion
 
 ```lua
 vim.api.nvim_create_autocmd('User', {
