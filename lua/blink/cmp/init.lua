@@ -37,9 +37,12 @@ function cmp.is_visible()
     or require('blink.cmp.completion.windows.ghost_text').is_open()
 end
 
---- @params opts? { providers?: string[], callback?: fun() }
+--- @params opts? { providers?: string[], callback?: fun(did_show: boolean) }
 function cmp.show(opts)
-  if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then return end
+  if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then
+    if opts and opts.callback then opts.callback(false) end
+    return
+  end
 
   vim.schedule(function()
     require('blink.cmp.completion.windows.menu').auto_show = true
@@ -48,7 +51,7 @@ function cmp.show(opts)
       providers = opts and opts.providers,
       trigger_kind = 'manual',
     })
-    if opts and opts.callback then opts.callback() end
+    if opts and opts.callback then opts.callback(true) end
   end)
   return true
 end
