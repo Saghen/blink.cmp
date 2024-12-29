@@ -37,7 +37,7 @@ function cmp.is_visible()
     or require('blink.cmp.completion.windows.ghost_text').is_open()
 end
 
---- @params opts? { providers?: string[] }
+--- @params opts? { providers?: string[], callback?: fun() }
 function cmp.show(opts)
   if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then return end
 
@@ -48,6 +48,7 @@ function cmp.show(opts)
       providers = opts and opts.providers,
       trigger_kind = 'manual',
     })
+    if opts and opts.callback then opts.callback() end
   end)
   return true
 end
