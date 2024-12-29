@@ -339,7 +339,8 @@ fuzzy = {
   use_frecency = true,
   -- Proximity bonus boosts the score of items matching nearby words
   use_proximity = true,
-  max_items = 200,
+  -- UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux)
+  use_unsafe_no_lock = false,
   -- Controls which sorts to use and in which order, falling back to the next sort if the first one returns nil
   -- You may pass a function instead of a string to customize the sorting
   sorts = { 'score', 'sort_text' },
@@ -348,6 +349,8 @@ fuzzy = {
     -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`
     -- you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
     download = true,
+    -- Ignores mismatched version between the built binary and the current git sha, when building locally
+    ignore_version_mismatch = false,
     -- When downloading a prebuilt binary, force the downloader to resolve this version. If this is unset
     -- then the downloader will attempt to infer the version from the checked out git tag (if any).
     --

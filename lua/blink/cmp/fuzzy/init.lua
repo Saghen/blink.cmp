@@ -9,7 +9,7 @@ local fuzzy = {
 function fuzzy.init_db()
   if fuzzy.has_init_db then return end
 
-  fuzzy.rust.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db')
+  fuzzy.rust.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db', config.use_unsafe_no_lock)
 
   vim.api.nvim_create_autocmd('VimLeavePre', {
     callback = fuzzy.rust.destroy_db,
