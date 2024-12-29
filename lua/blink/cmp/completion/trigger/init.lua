@@ -197,8 +197,8 @@ function trigger.show(opts)
   trigger.context = context.new({
     id = trigger.current_context_id,
     providers = providers,
-    initial_trigger_kind = trigger.context and trigger.context.trigger.kind or opts.trigger_kind,
-    initial_trigger_character = trigger.context and trigger.context.trigger.character or opts.trigger_character,
+    initial_trigger_kind = trigger.context and trigger.context.trigger.initial_kind or opts.trigger_kind,
+    initial_trigger_character = trigger.context and trigger.context.trigger.initial_character or opts.trigger_character,
     trigger_kind = opts.trigger_kind,
     trigger_character = opts.trigger_character,
   })
