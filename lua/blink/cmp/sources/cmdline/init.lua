@@ -47,11 +47,15 @@ function cmdline:get_completions(context, callback)
     :map(function(completions)
       local items = {}
       for _, completion in ipairs(completions) do
-        -- remove prefix from the label for lua
-        local label = completion
-        if arguments[1] == 'lua' and string.find(completion, current_arg_prefix, 1, true) == 1 then
-          label = label:sub(#current_arg_prefix + 1)
+        -- remove prefix from the filter text for lua
+        local filter_text = completion
+        if string.find(completion, current_arg_prefix, 1, true) == 1 then
+          filter_text = completion:sub(#current_arg_prefix + 1)
         end
+
+        -- for lua, set the filter text to the label
+        local label = completion
+        if arguments[1] == 'lua' then label = filter_text end
 
         -- add prefix to the newText
         local new_text = completion
@@ -59,6 +63,7 @@ function cmdline:get_completions(context, callback)
 
         table.insert(items, {
           label = label,
+          filterText = filter_text,
           sortText = label:lower(),
           textEdit = {
             newText = new_text,
