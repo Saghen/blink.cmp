@@ -21,7 +21,7 @@ function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/' 
 function cmdline:get_completions(context, callback)
   local arguments = vim.split(context.line, ' ', { plain = true })
   local arg_number = #vim.split(context.line:sub(1, context.cursor[2] + 1), ' ', { plain = true })
-  local text_before_cursor = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
+  local text_before_argument = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
     .. (arg_number > 1 and ' ' or '')
 
   local current_arg = arguments[arg_number]
@@ -31,25 +31,26 @@ function cmdline:get_completions(context, callback)
     keyword_config.regex,
     keyword_config.exclude_from_prefix_regex
   )
-  local current_arg_prefix = current_arg:sub(1, keyword.start_col - #text_before_cursor - 1)
+  local current_arg_prefix = current_arg:sub(1, keyword.start_col - #text_before_argument - 1)
 
   local task = async.task
     .empty()
     :map(function()
       -- Special case for help where we read all the tags ourselves
       if vim.tbl_contains({ 'h', 'he', 'hel', 'help' }, arguments[1] or '') then
-        return require('blink.cmp.sources.cmdline.help').get_completions()
+        return require('blink.cmp.sources.cmdline.help').get_completions(current_arg or '')
       end
 
-      local query = (text_before_cursor .. current_arg_prefix):gsub([[\\]], [[\\\\]])
+      local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
       return vim.fn.getcompletion(query, 'cmdline')
     end)
     :map(function(completions)
       local items = {}
       for _, completion in ipairs(completions) do
-        -- remove prefix from the label
-        if string.find(completion, current_arg_prefix, 1, true) == 1 then
-          completion = completion:sub(#current_arg_prefix + 1)
+        -- remove prefix from the label for lua
+        local label = completion
+        if arguments[1] == 'lua' and string.find(completion, current_arg_prefix, 1, true) == 1 then
+          label = label:sub(#current_arg_prefix + 1)
         end
 
         -- add prefix to the newText
@@ -57,14 +58,13 @@ function cmdline:get_completions(context, callback)
         if string.find(new_text, current_arg_prefix, 1, true) ~= 1 then new_text = current_arg_prefix .. completion end
 
         table.insert(items, {
-          label = completion,
-          insertText = completion,
-          sortText = completion:lower(),
+          label = label,
+          sortText = label:lower(),
           textEdit = {
             newText = new_text,
             range = {
-              start = { line = 0, character = #text_before_cursor },
-              ['end'] = { line = 0, character = #text_before_cursor + #current_arg },
+              start = { line = 0, character = #text_before_argument },
+              ['end'] = { line = 0, character = #text_before_argument + #current_arg },
             },
           },
           kind = require('blink.cmp.types').CompletionItemKind.Property,

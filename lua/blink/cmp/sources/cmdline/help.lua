@@ -37,11 +37,19 @@ local function read_tags_from_file(file)
   end)
 end
 
-function help.get_completions()
+--- @param arg string
+function help.get_completions(arg)
   local help_files = vim.api.nvim_get_runtime_file('doc/tags', true)
+  -- TODO: remove after adding support for fuzzy matching on custom range
+  local arg_parts = vim.split(arg, '.', { plain = true })
+  local arg_prefix = table.concat(arg_parts, '.', 1, #arg_parts - 1)
+
   return async.task
     .await_all(vim.tbl_map(read_tags_from_file, help_files))
-    :map(function(results) return require('blink.cmp.lib.utils').flatten(results) end)
+    :map(function(tags_arrs) return require('blink.cmp.lib.utils').flatten(tags_arrs) end)
+    :map(function(tags)
+      return vim.tbl_filter(function(tag) return vim.startswith(tag, arg_prefix) end, tags)
+    end)
 end
 
 return help
