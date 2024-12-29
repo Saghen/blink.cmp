@@ -36,6 +36,7 @@ local trigger = {
 
 function trigger.activate()
   trigger.buffer_events = require('blink.cmp.lib.buffer_events').new({
+    -- TODO: should this ignore trigger.kind == 'prefetch'?
     has_context = function() return trigger.context ~= nil end,
     show_in_snippet = config.show_in_snippet,
   })
@@ -74,6 +75,7 @@ function trigger.activate()
     local cursor_col = cursor[2]
     local char_under_cursor = context.get_line():sub(cursor_col, cursor_col)
     local is_on_keyword_char = keyword_regex:match_str(char_under_cursor) ~= nil
+    local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
 
     local insert_enter_on_trigger_character = config.show_on_trigger_character
       and config.show_on_insert_on_trigger_character
@@ -85,7 +87,11 @@ function trigger.activate()
       trigger.show({ trigger_kind = 'keyword' })
 
     -- check if we've entered insert mode on a trigger character
-    elseif insert_enter_on_trigger_character then
+    -- or if we've moved onto a trigger character while open
+    elseif
+      insert_enter_on_trigger_character
+      or (is_on_trigger_for_show and trigger.context ~= nil and trigger.context.trigger.kind ~= 'prefetch')
+    then
       trigger.context = nil
       trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
 
