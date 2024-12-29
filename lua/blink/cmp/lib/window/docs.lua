@@ -20,20 +20,11 @@ local docs = {}
 function docs.render_detail_and_documentation(opts)
   local detail_lines = {}
 
-  if opts.detail then
-    if type(opts.detail) == 'table' then
-      local already_added = {}
-      for _, detail in ipairs(opts.detail) do
-        if detail ~= '' and not already_added[detail] then
-          already_added[detail] = true
-          for _, v in ipairs(docs.split_lines(detail)) do
-            detail_lines[#detail_lines + 1] = v
-          end
-        end
-      end
-    elseif type(opts.detail) == 'string' then
-      if opts.detail and opts.detail ~= '' then detail_lines = docs.split_lines(opts.detail) end
-    end
+  local details = type(opts.detail) == 'string' and { opts.detail } or opts.detail
+  details = require('blink.cmp.lib.utils').deduplicate(details)
+
+  for _, v in ipairs(details) do
+    vim.list_extend(detail_lines, docs.split_lines(v))
   end
 
   local doc_lines = {}
