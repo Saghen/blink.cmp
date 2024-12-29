@@ -19,10 +19,9 @@ local docs = {}
 --- @param opts blink.cmp.RenderDetailAndDocumentationOpts
 function docs.render_detail_and_documentation(opts)
   local detail_lines = {}
-
-  local details = type(opts.detail) == 'string' and { opts.detail } or opts.detail
+  local details = type(opts.detail) == 'string' and { opts.detail } or opts.detail or {}
+  --- @cast details string[]
   details = require('blink.cmp.lib.utils').deduplicate(details)
-
   for _, v in ipairs(details) do
     vim.list_extend(detail_lines, docs.split_lines(v))
   end
