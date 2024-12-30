@@ -37,37 +37,57 @@ function cmp.is_visible()
     or require('blink.cmp.completion.windows.ghost_text').is_open()
 end
 
---- @params opts? { providers?: string[], callback?: fun(did_show: boolean) }
+--- @params opts? { providers?: string[], callback?: fun() }
 function cmp.show(opts)
-  if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then
-    if opts and opts.callback then opts.callback(false) end
-    return
-  end
+  opts = opts or {}
+
+  -- TODO: when passed a list of providers, we should check if we're already showing the menu
+  -- with that list of providers
+  if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then return end
 
   vim.schedule(function()
     require('blink.cmp.completion.windows.menu').auto_show = true
-    require('blink.cmp.completion.trigger').show({
+
+    -- HACK: because blink is event based, we don't have an easy way to know when the "show"
+    -- event completes. So we wait for the menu to open and check if we're in the same context
+    local context
+    if opts.callback then
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'BlinkCmpShow',
+        callback = function(event)
+          if context ~= nil and event.data.context.id == context.id then opts.callback() end
+        end,
+        once = true,
+      })
+    end
+
+    context = require('blink.cmp.completion.trigger').show({
       force = true,
       providers = opts and opts.providers,
       trigger_kind = 'manual',
     })
-    if opts and opts.callback then opts.callback(true) end
   end)
   return true
 end
 
-function cmp.hide()
+--- @params opts? { callback?: fun() }
+function cmp.hide(opts)
   if not cmp.is_visible() then return end
 
-  vim.schedule(require('blink.cmp.completion.trigger').hide)
+  vim.schedule(function()
+    require('blink.cmp.completion.trigger').hide()
+    if opts and opts.callback then opts.callback() end
+  end)
   return true
 end
 
-function cmp.cancel()
+--- @params opts? { callback?: fun() }
+function cmp.cancel(opts)
   if not cmp.is_visible() then return end
   vim.schedule(function()
     require('blink.cmp.completion.list').undo_preview()
     require('blink.cmp.completion.trigger').hide()
+    if opts and opts.callback then opts.callback() end
   end)
   return true
 end
