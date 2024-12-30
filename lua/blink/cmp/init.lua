@@ -49,7 +49,8 @@ function cmp.show(opts)
     require('blink.cmp.completion.windows.menu').auto_show = true
 
     -- HACK: because blink is event based, we don't have an easy way to know when the "show"
-    -- event completes. So we wait for the menu to open and check if we're in the same context
+    -- event completes. So we wait for the list to trigger the show event and check if we're
+    -- still in the same context
     local context
     if opts.callback then
       vim.api.nvim_create_autocmd('User', {
