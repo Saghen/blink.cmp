@@ -3,6 +3,7 @@
 -- License: MIT
 
 local async = require('blink.cmp.lib.async')
+local constants = require('blink.cmp.sources.cmdline.constants')
 
 --- @class blink.cmp.Source
 local cmdline = {}
@@ -37,12 +38,19 @@ function cmdline:get_completions(context, callback)
     .empty()
     :map(function()
       -- Special case for help where we read all the tags ourselves
-      if vim.tbl_contains({ 'h', 'he', 'hel', 'help' }, arguments[1] or '') then
+      if vim.tbl_contains(constants.help_commands, arguments[1] or '') then
         return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix)
       end
 
       local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
-      return vim.fn.getcompletion(query, 'cmdline')
+      local completions = vim.fn.getcompletion(query, 'cmdline')
+
+      -- Special case for files, escape special characters
+      if vim.tbl_contains(constants.file_commands, arguments[1] or '') then
+        completions = vim.tbl_map(function(completion) return vim.fn.fnameescape(completion) end, completions)
+      end
+
+      return completions
     end)
     :map(function(completions)
       local items = {}
