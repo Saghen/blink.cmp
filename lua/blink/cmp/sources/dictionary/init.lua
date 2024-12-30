@@ -39,7 +39,7 @@ function dictionary.update_items()
 	local dict_paths = vim.opt_global.dictionary:get()
 	-- Then add the local opts dictionaries to the table
 	for _, local_dict in ipairs(vim.opt_local.dictionary:get()) do
-		table:insert(dict_paths, local_dict)
+		table.insert(dict_paths, local_dict)
 	end
 
 	-- Deduplicate dictionary paths because local and global may be equivalent
@@ -50,7 +50,7 @@ function dictionary.update_items()
 	for _, dict in ipairs(dict_paths) do
 		local dict_words = get_dict_words(dict)
 		for _, word in ipairs(dict_words) do
-			table:insert(all_words, word)
+			table.insert(all_words, word)
 		end
 	end
 
