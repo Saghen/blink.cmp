@@ -3,7 +3,7 @@ local function get_dict_words(dict_path)
 	local dict = io.open(dict_path, "r")
 	if dict then
 		for line in dict:lines() do
-			for word in string.gmatch(line "%g+") do
+			for word in string.gmatch(line, "%g+") do
 				table.insert(words, word)
 			end
 		end
