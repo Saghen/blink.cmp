@@ -66,6 +66,8 @@ function list.new(provider, context, on_items, opts)
 end
 
 function list:append(response)
+  if self.has_completed and #response.items == 0 then return end
+
   if not self.has_completed then
     self.has_completed = true
     self.is_incomplete_backward = response.is_incomplete_backward
