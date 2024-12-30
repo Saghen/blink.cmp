@@ -38,7 +38,7 @@ function dictionary.update_items()
 	-- First get the global options dictionary
 	local dict_paths = vim.opt_global.dictionary:get()
 	-- Then add the local opts dictionaries to the table
-	for _, local_dict in ipairs(vim.opt_local_dictionary:get()) do
+	for _, local_dict in ipairs(vim.opt_local.dictionary:get()) do
 		table:insert(dict_paths, local_dict)
 	end
 
