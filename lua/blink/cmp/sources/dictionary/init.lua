@@ -26,12 +26,15 @@ end
 
 local dictionary = {}
 dictionary.items = {}
+dictionary.paths = {}
+
 --- @param callback fun(items: blink.cmp.CompletionItem[])
 local function run_sync(callback) callback(dictionary.items) end
 
 --- Public API
 
 function dictionary.update_items()
+	print("foi")
 	-- First get the global options dictionary
 	local dict_paths = vim.opt_global.dictionary:get()
 	-- Then add the local opts dictionaries to the table
@@ -61,10 +64,18 @@ function dictionary.new()
 	vim.api.nvim_create_autocmd("OptionSet", {
 		desc = "Callback to update the dictionaries items when the global and local dictionary option is changed",
 		pattern = { "dictionary" },
-		callback = function(ev)
-			print("hello")
-		end
+		callback = function()
+			self.update_items()
+		end,
 	})
+
+	vim.api.nvim_create_autocmd("BufRead", {
+		desc = "Callback to update the dictionaries items when reading a new buffer",
+		callback = function()
+			self.update_items()
+		end,
+	})
+
 	return self
 end
 
