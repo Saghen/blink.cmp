@@ -34,11 +34,11 @@ local menu = {
   items = {},
   context = nil,
   auto_show = config.auto_show,
-  open_emitter = require('blink.cmp.lib.event_emitter').new('completion_menu_open', 'BlinkCmpCompletionMenuOpen'),
-  close_emitter = require('blink.cmp.lib.event_emitter').new('completion_menu_close', 'BlinkCmpCompletionMenuClose'),
+  open_emitter = require('blink.cmp.lib.event_emitter').new('completion_menu_open', 'BlinkCmpMenuOpen'),
+  close_emitter = require('blink.cmp.lib.event_emitter').new('completion_menu_close', 'BlinkCmpMenuClose'),
   position_update_emitter = require('blink.cmp.lib.event_emitter').new(
     'completion_menu_position_update',
-    'BlinkCmpCompletionMenuPositionUpdate'
+    'BlinkCmpMenuPositionUpdate'
   ),
 }
 
