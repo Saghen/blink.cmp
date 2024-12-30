@@ -34,7 +34,6 @@ local function run_sync(callback) callback(dictionary.items) end
 --- Public API
 
 function dictionary.update_items()
-	print("foi")
 	-- First get the global options dictionary
 	local dict_paths = vim.opt_global.dictionary:get()
 	-- Then add the local opts dictionaries to the table
@@ -43,7 +42,7 @@ function dictionary.update_items()
 	end
 
 	-- Deduplicate dictionary paths because local and global may be equivalent
-	require('blink.cmp.lib.utils').deduplicate(dict_paths)
+	dict_paths = require('blink.cmp.lib.utils').deduplicate(dict_paths)
 
 	-- Get all words from all dictionaries
 	local all_words = {}
