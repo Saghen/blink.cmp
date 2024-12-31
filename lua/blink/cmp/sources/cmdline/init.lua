@@ -43,7 +43,9 @@ function cmdline:get_completions(context, callback)
       end
 
       local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
-      local completions = vim.fn.getcompletion(query, vim.fn.getcmdcompltype())
+      local completion_type = vim.fn.getcmdcompltype()
+      if completion_type == '' then completion_type = 'cmdline' end
+      local completions = vim.fn.getcompletion(query, completion_type)
 
       -- Special case for files, escape special characters
       if vim.tbl_contains(constants.file_commands, arguments[1] or '') then
