@@ -84,7 +84,14 @@ function source.new()
 		end,
 	})
 
-	vim.api.nvim_create_autocmd("BufEnter", {
+	vim.api.nvim_create_autocmd("BufRead", {
+		desc = "Callback to update the dictionaries items when reading a new buffer",
+		callback = function()
+			self.reset_items()
+		end,
+	})
+
+	vim.api.nvim_create_autocmd("FileType", {
 		desc = "Callback to update the dictionaries items when reading a new buffer",
 		callback = function()
 			self.reset_items()
