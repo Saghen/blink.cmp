@@ -1,10 +1,8 @@
 -- credit to https://github.com/hrsh7th/cmp-path for the original implementation
 -- and https://codeberg.org/FelipeLema/cmp-async-path for the async implementation
 
+local regex = require('blink.cmp.sources.path.regex')
 local path = {}
-local NAME_REGEX = '\\%([^/\\\\:\\*?<>\'"`\\|]\\)'
-local PATH_REGEX =
-  assert(vim.regex(([[\%(\%(/PAT*[^/\\\\:\\*?<>\'"`\\| .~]\)\|\%(/\.\.\)\)*/\zePAT*$]]):gsub('PAT', NAME_REGEX)))
 
 function path.new(opts)
   local self = setmetatable({}, { __index = path })
@@ -34,7 +32,7 @@ function path:get_completions(context, callback)
 
   local lib = require('blink.cmp.sources.path.lib')
 
-  local dirname = lib.dirname(PATH_REGEX, self.opts.get_cwd, context)
+  local dirname = lib.dirname(self.opts.get_cwd, context)
   if not dirname then return callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} }) end
 
   local include_hidden = self.opts.show_hidden_files_by_default
