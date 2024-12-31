@@ -13,7 +13,7 @@
 --- | 'scroll_documentation_down' Scroll the documentation window down
 --- | 'snippet_forward' Move the cursor forward to the next snippet placeholder
 --- | 'snippet_backward' Move the cursor backward to the previous snippet placeholder
---- | (fun(cmp: table): boolean?) Custom function where returning true will prevent the next command from running
+--- | (fun(cmp: blink.cmp.PublicAPI): boolean?) Custom function where returning true will prevent the next command from running
 
 --- @alias blink.cmp.KeymapPreset
 --- | 'none' No keymaps

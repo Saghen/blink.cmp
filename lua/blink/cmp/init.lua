@@ -1,4 +1,5 @@
 local has_setup = false
+---@class blink.cmp.PublicAPI
 local cmp = {}
 
 --- @param opts? blink.cmp.Config
