@@ -27,7 +27,6 @@ end
 
 local dictionary = {}
 dictionary.items = {}
-dictionary.dictionary_names = {}
 
 --- @param callback fun(items: blink.cmp.CompletionItem[])
 local function run_sync(callback) callback(dictionary.items) end
