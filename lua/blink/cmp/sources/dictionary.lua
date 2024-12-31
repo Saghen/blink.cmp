@@ -14,9 +14,11 @@ end
 local function words_to_items(words, dictionary_name)
 	local items = {}
 	for _, word in ipairs(words) do
+		local label_details = {}
+		label_details.description = dictionary_name
 		table.insert(items, {
 			label = word,
-			labelDetails = dictionary_name,
+			labelDetails = label_details,
 			kind = require('blink.cmp.types').CompletionItemKind.Keyword,
 			insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
 			insertText = word,
