@@ -9,7 +9,10 @@ local CompletionTriggerKind = vim.lsp.protocol.CompletionTriggerKind
 
 local completion = {}
 
-function completion.get_completion_for_client(client, context)
+--- @param context blink.cmp.Context
+--- @param client vim.lsp.Client
+--- @return blink.cmp.Task
+function completion.get_completion_for_client(context, client)
   return async.task.new(function(resolve)
     local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
     params.context = {
