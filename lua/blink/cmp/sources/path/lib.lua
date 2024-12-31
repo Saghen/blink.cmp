@@ -40,6 +40,8 @@ function lib.dirname(path_regex, get_cwd, context)
     accept = accept and (not prefix:match('^[%s/]*$') or not lib.is_slash_comment())
     if accept then return vim.fn.resolve('/' .. dirname) end
   end
+  -- Windows drive letter (C:/)
+  if prefix:match('(%a:)[/\\]$') then return vim.fn.resolve(prefix:match('(%a:)[/\\]$') .. '/' .. dirname) end
   return nil
 end
 
