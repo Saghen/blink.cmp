@@ -1,3 +1,14 @@
+--- @class blink.cmp.DictionarySource : blink.cmp.Source
+--- @field items blink.cmp.CompletionItem[]
+--- @field reset_items fun()
+
+--- @type blink.cmp.DictionarySource
+--- @diagnostic disable-next-line: missing-fields
+local source = {}
+source.items = {}
+
+---@param dict_path string
+---@return string[]
 local function get_dict_words(dict_path)
 	local words = {}
 	local dict = io.open(dict_path, "r")
@@ -11,6 +22,9 @@ local function get_dict_words(dict_path)
 	return words
 end
 
+---@param words string[]
+---@param dictionary_name string
+---@return blink.cmp.CompletionItem[]
 local function words_to_items(words, dictionary_name)
 	local items = {}
 	for _, word in ipairs(words) do
@@ -27,15 +41,12 @@ local function words_to_items(words, dictionary_name)
 	return items
 end
 
-local dictionary = {}
-dictionary.items = {}
-
 --- @param callback fun(items: blink.cmp.CompletionItem[])
-local function run_sync(callback) callback(dictionary.items) end
+local function run_sync(callback) callback(source.items) end
 
 --- Public API
 
-function dictionary.reset_items()
+function source.reset_items()
 	-- First get the global options dictionary
 	local dict_paths = vim.opt_global.dictionary:get()
 	-- Then add the local opts dictionaries to the table
@@ -59,11 +70,11 @@ function dictionary.reset_items()
 		end
 	end
 
-	dictionary.items = all_items
+	source.items = all_items
 end
 
-function dictionary.new()
-	local self = setmetatable({}, { __index = dictionary })
+function source.new()
+	local self = setmetatable({}, { __index = source })
 
 	vim.api.nvim_create_autocmd("OptionSet", {
 		desc = "Callback to update the dictionaries items when the global and local dictionary option is changed",
@@ -83,7 +94,7 @@ function dictionary.new()
 	return self
 end
 
-function dictionary:get_completions(_, callback)
+function source:get_completions(_, callback)
 	local transformed_callback = function(items)
 		callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
 	end
@@ -96,4 +107,4 @@ function dictionary:get_completions(_, callback)
 	return function() end
 end
 
-return dictionary
+return source
