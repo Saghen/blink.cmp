@@ -1,7 +1,9 @@
-local has_setup = false
----@class blink.cmp.PublicAPI
+--- @class blink.cmp.API
 local cmp = {}
 
+local has_setup = false
+--- Initializes blink.cmp with the given configuration and initiates the download
+--- for the fuzzy matcher's prebuilt binaries, if necessary
 --- @param opts? blink.cmp.Config
 function cmp.setup(opts)
   if has_setup then return end
@@ -11,7 +13,7 @@ function cmp.setup(opts)
 
   local version = vim.version()
   if version.major == 0 and version.minor < 10 then
-    vim.notify('blink.cmp only supports nvim 0.10 and newer', vim.log.levels.ERROR, { title = 'blink.cmp' })
+    vim.notify('blink.cmp requires nvim 0.10 and newer', vim.log.levels.ERROR, { title = 'blink.cmp' })
     return
   end
 
@@ -38,6 +40,7 @@ function cmp.is_visible()
     or require('blink.cmp.completion.windows.ghost_text').is_open()
 end
 
+--- Show the completion window
 --- @params opts? { providers?: string[], callback?: fun() }
 function cmp.show(opts)
   opts = opts or {}
@@ -72,6 +75,7 @@ function cmp.show(opts)
   return true
 end
 
+--- Hide the completion window
 --- @params opts? { callback?: fun() }
 function cmp.hide(opts)
   if not cmp.is_visible() then return end
@@ -83,6 +87,7 @@ function cmp.hide(opts)
   return true
 end
 
+--- Cancel the current completion, undoing the preview from auto_insert
 --- @params opts? { callback?: fun() }
 function cmp.cancel(opts)
   if not cmp.is_visible() then return end
@@ -94,6 +99,7 @@ function cmp.cancel(opts)
   return true
 end
 
+--- Accept the current completion item
 --- @param opts? blink.cmp.CompletionListAcceptOpts
 function cmp.accept(opts)
   opts = opts or {}
@@ -107,6 +113,7 @@ function cmp.accept(opts)
   return true
 end
 
+--- Select the first completion item, if there's no selection, and accept
 --- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
 function cmp.select_and_accept(opts)
   if not cmp.is_visible() then return end
@@ -123,18 +130,21 @@ function cmp.select_and_accept(opts)
   return true
 end
 
+--- Select the previous completion item
 function cmp.select_prev()
   if not cmp.is_visible() then return end
   vim.schedule(function() require('blink.cmp.completion.list').select_prev() end)
   return true
 end
 
+--- Select the next completion item
 function cmp.select_next()
   if not cmp.is_visible() then return end
   vim.schedule(function() require('blink.cmp.completion.list').select_next() end)
   return true
 end
 
+--- Show the documentation window
 function cmp.show_documentation()
   local menu = require('blink.cmp.completion.windows.menu')
   local documentation = require('blink.cmp.completion.windows.documentation')
@@ -148,6 +158,7 @@ function cmp.show_documentation()
   return true
 end
 
+--- Hide the documentation window
 function cmp.hide_documentation()
   local documentation = require('blink.cmp.completion.windows.documentation')
   if not documentation.win:is_open() then return end
@@ -156,6 +167,7 @@ function cmp.hide_documentation()
   return true
 end
 
+--- Scroll the documentation window up
 --- @param count? number
 function cmp.scroll_documentation_up(count)
   local documentation = require('blink.cmp.completion.windows.documentation')
@@ -165,6 +177,7 @@ function cmp.scroll_documentation_up(count)
   return true
 end
 
+--- Scroll the documentation window down
 --- @param count? number
 function cmp.scroll_documentation_down(count)
   local documentation = require('blink.cmp.completion.windows.documentation')
@@ -174,9 +187,11 @@ function cmp.scroll_documentation_down(count)
   return true
 end
 
+--- Check if a snippet is active, optionally filtering by direction
 --- @param filter? { direction?: number }
 function cmp.snippet_active(filter) return require('blink.cmp.config').snippets.active(filter) end
 
+--- Move the cursor forward to the next snippet placeholder
 function cmp.snippet_forward()
   local snippets = require('blink.cmp.config').snippets
   if not snippets.active({ direction = 1 }) then return end
@@ -184,6 +199,7 @@ function cmp.snippet_forward()
   return true
 end
 
+--- Move the cursor backward to the previous snippet placeholder
 function cmp.snippet_backward()
   local snippets = require('blink.cmp.config').snippets
   if not snippets.active({ direction = -1 }) then return end
@@ -195,12 +211,14 @@ end
 --- @param provider? string
 function cmp.reload(provider) require('blink.cmp.sources.lib').reload(provider) end
 
---- @param override? lsp.ClientCapabilities
---- @param include_nvim_defaults? boolean
+--- Gets the capabilities to pass to the LSP client
+--- @param override? lsp.ClientCapabilities Overrides blink.cmp's default capabilities
+--- @param include_nvim_defaults? boolean Whether to include nvim's default capabilities
 function cmp.get_lsp_capabilities(override, include_nvim_defaults)
   return require('blink.cmp.sources.lib').get_lsp_capabilities(override, include_nvim_defaults)
 end
 
+--- Add a new source provider at runtime
 --- @param id string
 --- @param provider_config blink.cmp.SourceProviderConfig
 function cmp.add_provider(id, provider_config)
