@@ -86,7 +86,7 @@ local sources = {
 			dictionary = {
 				name = 'Dictionary',
 				module = 'blink.cmp.sources.dictionary',
-				score_offset = 3,
+				score_offset = -3,
         fallbacks = { 'buffer' },
 			},
       snippets = {
