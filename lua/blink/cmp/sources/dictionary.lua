@@ -91,6 +91,13 @@ function source.new()
 		end,
 	})
 
+	vim.api.nvim_create_autocmd("VimEnter", {
+		desc = "Callback to update the dictionaries items when entering Vim",
+		callback = function()
+			self.reset_items()
+		end,
+	})
+
 	return self
 end
 
