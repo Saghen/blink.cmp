@@ -20,7 +20,7 @@ function completion.get_completion_for_client(client, context)
 
     local _, request_id = client.request('textDocument/completion', params, function(err, result)
       if err or result == nil then
-        resolve({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
+        resolve({ is_incomplete_forward = true, is_incomplete_backward = true, items = {} })
         return
       end
 
