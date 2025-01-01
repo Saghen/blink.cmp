@@ -400,11 +400,14 @@ function win:get_direction_with_window_constraints(anchor_win, direction_priorit
     local is_desired_b = desired_min_size.height <= constraints_b.vertical
       and desired_min_size.width <= constraints_b.horizontal
 
-    -- prioritize "a" if it has the desired size
+    -- If both have desired size, preserve original priority
+    if is_desired_a and is_desired_b then return 0 end
+
+    -- prioritize "a" if it has the desired size and "b" doesn't
     if is_desired_a then return -1 end
 
     -- prioritize "b" if it has the desired size and "a" doesn't
-    if not is_desired_a and is_desired_b then return 1 end
+    if is_desired_b then return 1 end
 
     -- neither have the desired size, so pick based on which has the most space
     local distance_a = math.min(max_height, constraints_a.vertical, constraints_a.horizontal)
