@@ -1,21 +1,44 @@
 --- @class blink.cmp.DictionarySource : blink.cmp.Source
---- @field items blink.cmp.CompletionItem[]
---- @field load_items fun()
---- @field reset_items fun()
+--- Table containing the dictionary name label as key and and array of completion items for each dictionary
+--- @field dictionaries table<string, blink.cmp.CompletionItem[]>
 
 --- @type blink.cmp.DictionarySource
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
-source.items = nil
+source.dictionaries = nil
 
----@param dict_path string
+---Function to concatenate two CompletionItem lists
+---@param items1 blink.cmp.CompletionItem[]
+---@param items2 blink.cmp.CompletionItem[]
+---@return blink.cmp.CompletionItem[]
+local function items_add(items1, items2)
+	---@type blink.cmp.CompletionItem[]
+	local items = items1
+	for _, item in ipairs(items2) do
+		table.insert(items, item)
+	end
+	return items
+end
+
+---@return blink.cmp.CompletionItem[]
+local function get_all_items()
+	---@type blink.cmp.CompletionItem[]
+	local all_items = setmetatable({}, { __add = items_add })
+	for _, items in pairs(source.dictionaries) do
+		all_items = all_items + items
+	end
+	return all_items
+end
+
+---@param dictionary_path string
 ---@return string[]
-local function get_dict_words(dict_path)
+local function get_dictionary_words(dictionary_path)
+	---@type string[]
 	local words = {}
-	local dict = io.open(dict_path, "r")
-	if dict then
-		for line in dict:lines() do
-			for word in string.gmatch(line, "%g+") do
+	local dictionary_file = io.open(dictionary_path, "r")
+	if dictionary_file then
+		for line in dictionary_file:lines() do
+			for word in string.gmatch(line, "%S+") do
 				table.insert(words, word)
 			end
 		end
@@ -27,14 +50,16 @@ end
 ---@param dictionary_name string
 ---@return blink.cmp.CompletionItem[]
 local function words_to_items(words, dictionary_name)
+	---@type blink.cmp.CompletionItem[]
 	local items = {}
 	for _, word in ipairs(words) do
+		---@type lsp.CompletionItemLabelDetails
 		local label_details = {}
 		label_details.description = dictionary_name
 		table.insert(items, {
 			label = word,
 			labelDetails = label_details,
-			kind = require('blink.cmp.types').CompletionItemKind.Keyword,
+			kind = require('blink.cmp.types').CompletionItemKind.Text,
 			insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
 			insertText = word,
 		})
@@ -42,59 +67,51 @@ local function words_to_items(words, dictionary_name)
 	return items
 end
 
---- @param callback fun(items: blink.cmp.CompletionItem[])
-local function run_sync(callback) callback(source.items) end
+---Load all the dictionaries words and create the completion items
+local function load_dictionaries()
+	-- Create new dictionaries table
+	---@type table<string, blink.cmp.CompletionItem[]>
+	local dictionaries = {}
 
---- Public API
-function source.reset_items()
-	source.items = {}
-end
-
-function source.load_items()
 	-- First get the global options dictionary
-	local dict_paths = vim.opt_global.dictionary:get()
+	local dictionaries_paths = vim.opt_global.dictionary:get()
 	-- Then add the local opts dictionaries to the table
-	for _, local_dict in ipairs(vim.opt_local.dictionary:get()) do
-		table.insert(dict_paths, local_dict)
+	for _, local_dictionary in ipairs(vim.opt_local.dictionary:get()) do
+		table.insert(dictionaries_paths, local_dictionary)
 	end
 
 	-- Deduplicate dictionary paths because local and global may be equivalent
-	dict_paths = require('blink.cmp.lib.utils').deduplicate(dict_paths)
+	dictionaries_paths = require('blink.cmp.lib.utils').deduplicate(dictionaries_paths)
 
-	-- Get all words from all dictionaries
+	-- Check if a dictionary already exists in the source
+	-- If it exists, just take the items from the existing source dictionary
+	-- If not, get all words from the dictionary
 	-- Create all the completion items from each dictionary word
-	local all_items = {}
+	---@type string
 	local dictionary_name = ""
-	for _, dict in ipairs(dict_paths) do
-		dictionary_name = string.match(dict, "([^/\\]+)$")
-		local dict_words = get_dict_words(dict)
-		local dict_items = words_to_items(dict_words, dictionary_name)
-		for _, item in ipairs(dict_items) do
-			table.insert(all_items, item)
+	for _, dictionary_path in ipairs(dictionaries_paths) do
+		dictionary_name = string.match(dictionary_path, "([^/\\]+)$")
+		-- Add table with key = dictoinary_name and empty items list to new dictionaries
+		table.insert(dictionaries, { dictionary_name, {} })
+		-- If the dictionary exists in the source dictionaries table, get the items from there
+		if (source.dictionaries[dictionary_name]) then
+			dictionaries[dictionary_name] = source.dictionaries[dictionary_name]
+		else
+			local dictionary_words = get_dictionary_words(dictionary_path)
+			dictionaries[dictionary_name] = words_to_items(dictionary_words, dictionary_name)
 		end
 	end
 
-	source.items = all_items
+	source.dictionaries = dictionaries
 end
+
+--- @param callback fun(items: blink.cmp.CompletionItem[])
+local function run_sync(callback) callback(get_all_items()) end
+
+--- Public API
 
 function source.new()
 	local self = setmetatable({}, { __index = source })
-
-	vim.api.nvim_create_autocmd("OptionSet", {
-		desc = "Callback to update the dictionaries items when the global and local dictionary option is changed",
-		pattern = { "dictionary" },
-		callback = function()
-			self.reset_items()
-		end,
-	})
-
-	vim.api.nvim_create_autocmd("BufRead", {
-		desc = "Callback to update the dictionaries items when reading a new buffer",
-		callback = function()
-			self.reset_items()
-		end,
-	})
-
 	return self
 end
 
@@ -103,9 +120,7 @@ function source:get_completions(_, callback)
 		callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
 	end
 
-	if(self.items == nil) then
-		self.load_items()
-	end
+	load_dictionaries()
 
 	vim.schedule(function()
 		run_sync(transformed_callback)
