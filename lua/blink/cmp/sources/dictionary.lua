@@ -1,11 +1,12 @@
 --- @class blink.cmp.DictionarySource : blink.cmp.Source
 --- @field items blink.cmp.CompletionItem[]
+--- @field load_items fun()
 --- @field reset_items fun()
 
 --- @type blink.cmp.DictionarySource
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
-source.items = {}
+source.items = nil
 
 ---@param dict_path string
 ---@return string[]
@@ -45,8 +46,11 @@ end
 local function run_sync(callback) callback(source.items) end
 
 --- Public API
-
 function source.reset_items()
+	source.items = {}
+end
+
+function source.load_items()
 	-- First get the global options dictionary
 	local dict_paths = vim.opt_global.dictionary:get()
 	-- Then add the local opts dictionaries to the table
@@ -91,19 +95,16 @@ function source.new()
 		end,
 	})
 
-	vim.api.nvim_create_autocmd("FileType", {
-		desc = "Callback to update the dictionaries items when reading a new buffer",
-		callback = function()
-			self.reset_items()
-		end,
-	})
-
 	return self
 end
 
 function source:get_completions(_, callback)
 	local transformed_callback = function(items)
 		callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
+	end
+
+	if(self.items == nil) then
+		self.load_items()
 	end
 
 	vim.schedule(function()
