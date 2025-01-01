@@ -116,13 +116,13 @@ function source.new()
 end
 
 function source:get_completions(_, callback)
+	---@param items blink.cmp.CompletionItem[]
 	local transformed_callback = function(items)
 		callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
 	end
 
-	load_dictionaries()
-
-	vim.schedule(function()
+	vim.schedule(function ()
+		load_dictionaries()
 		run_sync(transformed_callback)
 	end)
 
