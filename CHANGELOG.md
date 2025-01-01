@@ -1,3 +1,53 @@
+## [0.9.0](https://github.com/Saghen/blink.cmp/compare/v0.8.2...v0.9.0) (2024-12-31)
+
+### BREAKING CHANGES
+
+* rename `BlinkCmpCompletionMenu*` autocmds to `BlinkCmpMenu*`
+* set default documentation max_width to 80
+* rename `align_to_component` to `align_to`, add `cursor` option
+
+### Features
+
+* add back support for showing when moving onto trigger character ([cf9cc6e](https://github.com/Saghen/blink.cmp/commit/cf9cc6e43edd2718294ef9801a223c463f50a4ce)), closes [#780](https://github.com/Saghen/blink.cmp/issues/780) [#745](https://github.com/Saghen/blink.cmp/issues/745)
+* add callback option to cmp.show ([33b82e5](https://github.com/Saghen/blink.cmp/commit/33b82e5832757319c485ab45c0db4ace554e3183)), closes [#806](https://github.com/Saghen/blink.cmp/issues/806)
+* add callback to hide/cancel, rework show callback ([73a5f4e](https://github.com/Saghen/blink.cmp/commit/73a5f4e387ade764a833d290dbb5da77b0d84b4c)), closes [#806](https://github.com/Saghen/blink.cmp/issues/806)
+* add type annotation for keymap function params ([#829](https://github.com/Saghen/blink.cmp/issues/829)) ([3d7e773](https://github.com/Saghen/blink.cmp/commit/3d7e773d3e8a02720b23f58ffee631a0c1e2e1d1))
+* escape filenames in cmdline ([e53db6a](https://github.com/Saghen/blink.cmp/commit/e53db6a53f85b1c0d56eed66811bfbac520abd6c)), closes [#751](https://github.com/Saghen/blink.cmp/issues/751)
+* **nix:** use Cargo.lock instead of hash ([#773](https://github.com/Saghen/blink.cmp/issues/773)) ([d9513ee](https://github.com/Saghen/blink.cmp/commit/d9513ee9f8b111a46e262be2b36172ca335051a2))
+* **nix:** use filesets ([#772](https://github.com/Saghen/blink.cmp/issues/772)) ([e524347](https://github.com/Saghen/blink.cmp/commit/e524347697b6664870536dfcdd17e3ab56177b99))
+* rename `align_to_component` to `align_to`, add `cursor` option ([9387c75](https://github.com/Saghen/blink.cmp/commit/9387c75af7f8ec1495f4ed5a35cd29f054647dfc)), closes [#344](https://github.com/Saghen/blink.cmp/issues/344)
+* rename `BlinkCmpCompletionMenu*` autocmds to `BlinkCmpMenu*` ([fa4312c](https://github.com/Saghen/blink.cmp/commit/fa4312c11f9ab102333f5a18f1a30af5ae636c04))
+* run callback for cmp.show, even if menu is open ([a1476d3](https://github.com/Saghen/blink.cmp/commit/a1476d3596f032be3f2d77630c8eee3951d3f74c))
+* set default documentation max_width to 80 ([1a61625](https://github.com/Saghen/blink.cmp/commit/1a61625ad2a25c4e1ffffacb4bd0826c244af88f))
+* support `@` mode for cmdline ([4c2744d](https://github.com/Saghen/blink.cmp/commit/4c2744d99a13c687e4995fe0a050f40c15dbb2d9)), closes [#696](https://github.com/Saghen/blink.cmp/issues/696)
+* support configuring clipboard register for snippets ([8f51a4e](https://github.com/Saghen/blink.cmp/commit/8f51a4ec23773cc96ec6b3ca336a5d70eebb2fb2)), closes [#800](https://github.com/Saghen/blink.cmp/issues/800)
+* support unsafe no lock for fuzzy matcher ([6f8da35](https://github.com/Saghen/blink.cmp/commit/6f8da35fc8f1f8046d25b88b7708178cb4126abe)), closes [#817](https://github.com/Saghen/blink.cmp/issues/817)
+* support windows drives for path source ([98fded2](https://github.com/Saghen/blink.cmp/commit/98fded25d772a749cbf26e569e735ca7a3fb9d12)), closes [#612](https://github.com/Saghen/blink.cmp/issues/612)
+* use filter text on non-prefixed test in cmdline ([8c194b6](https://github.com/Saghen/blink.cmp/commit/8c194b6fa34b174b2ab30ff1d005c6b1b03ba523))
+
+### Bug Fixes
+
+* **accept/brackets:** respect `item.kind` when moving cursor ([#779](https://github.com/Saghen/blink.cmp/issues/779)) ([c54dfbf](https://github.com/Saghen/blink.cmp/commit/c54dfbfdfabac3b5a66ba90c89fab86d7651d106))
+* add missing regex file for path source ([1118d07](https://github.com/Saghen/blink.cmp/commit/1118d07c1b720873fe3498a662a265ae8a9a7ee4)), closes [#834](https://github.com/Saghen/blink.cmp/issues/834)
+* alignment double offset on align_to ([24d6868](https://github.com/Saghen/blink.cmp/commit/24d6868d0a18bb02cbee7fc5cc2a09fa309e3eb7))
+* apply non-snippet detection to non-snippet kinds ([434ea2b](https://github.com/Saghen/blink.cmp/commit/434ea2b05c2bae0cff6249893c8324fa3a56d865)), closes [#790](https://github.com/Saghen/blink.cmp/issues/790)
+* avoid namespace collision with vim.api.keyset.keymap ([63718e9](https://github.com/Saghen/blink.cmp/commit/63718e93d46f07b869f033fd13b78597ebbde72b)), closes [#767](https://github.com/Saghen/blink.cmp/issues/767)
+* check enabled before showing trigger and on mapping ([e670720](https://github.com/Saghen/blink.cmp/commit/e6707202772be974ae2d54239b806707bb72ccdb)), closes [#716](https://github.com/Saghen/blink.cmp/issues/716)
+* clamp text edit end character to start character, if lines equal ([6891bcb](https://github.com/Saghen/blink.cmp/commit/6891bcb06b6f21de68278991f29e53452b822d48)), closes [#634](https://github.com/Saghen/blink.cmp/issues/634)
+* create target/release dir, if it doesn't exist ([4020c23](https://github.com/Saghen/blink.cmp/commit/4020c2353b906950cb80be2fc1fabee8a9a9c291)), closes [#819](https://github.com/Saghen/blink.cmp/issues/819)
+* documentation losing syntax highlighting on doc reopen ([#768](https://github.com/Saghen/blink.cmp/issues/768)) ([ef59763](https://github.com/Saghen/blink.cmp/commit/ef59763c8a58fb1dedfb2d58a2ebd0fbe247f96c)), closes [#703](https://github.com/Saghen/blink.cmp/issues/703)
+* don't prevent show() when ghost-text is visible ([#796](https://github.com/Saghen/blink.cmp/issues/796)) ([59d6b4f](https://github.com/Saghen/blink.cmp/commit/59d6b4fbe94cfc350b1392772a61cbcf942619c7))
+* filter help tags by arg prefix ([21da714](https://github.com/Saghen/blink.cmp/commit/21da71413bf749f21d2174c1cd7e8efa40809a93)), closes [#818](https://github.com/Saghen/blink.cmp/issues/818)
+* flatten leaving empty tables ([#799](https://github.com/Saghen/blink.cmp/issues/799)) ([021216d](https://github.com/Saghen/blink.cmp/commit/021216da4683db5627d4b321dbde075aa771b5e7))
+* getcmdcompltype returning empty string ([eb9e651](https://github.com/Saghen/blink.cmp/commit/eb9e651bca40bbfb4de2a77a293a1e18bb373ee8)), closes [#696](https://github.com/Saghen/blink.cmp/issues/696)
+* remove redundant is enabled check ([f4add54](https://github.com/Saghen/blink.cmp/commit/f4add54f999962e6385d42bad341366b85184217))
+* return incomplete on err/nil from lsp ([1ef9bb9](https://github.com/Saghen/blink.cmp/commit/1ef9bb97740e7b55401e213da5dd6b04b77e56ff)), closes [#719](https://github.com/Saghen/blink.cmp/issues/719)
+* set default details to empty array ([0350fee](https://github.com/Saghen/blink.cmp/commit/0350feedfa8adb07b6750f6d9150c26e13eae0d2))
+* trigger context initial_kind resetting ([3ef27bc](https://github.com/Saghen/blink.cmp/commit/3ef27bcd7ff2367c6053421d4a8981bedc33d53e)), closes [#803](https://github.com/Saghen/blink.cmp/issues/803)
+* use correct regex for filenames ([8df826f](https://github.com/Saghen/blink.cmp/commit/8df826f168f102d0fbea92cbd85995ce66a821c7)), closes [#761](https://github.com/Saghen/blink.cmp/issues/761)
+* use existing arg prefix for help filtering in cmdline ([c593e83](https://github.com/Saghen/blink.cmp/commit/c593e8385d9f8f82a6e108fbabcd1f64fce72684))
+* wait for all LSPs to respond before showing ([86a13ae](https://github.com/Saghen/blink.cmp/commit/86a13aeb104d6ea782557518ee1a350712df7bd7)), closes [#691](https://github.com/Saghen/blink.cmp/issues/691)
+
 ## [0.8.2](https://github.com/Saghen/blink.cmp/compare/v0.8.1...v0.8.2) (2024-12-23)
 
 ### Features

@@ -38,7 +38,7 @@
           # nvim source files
           # all that are not nix, nor rust
           nvimFs = fs.difference ./. (fs.union nixFs rustFs);
-          version = "0.8.2";
+          version = "0.9.0";
         in {
           blink-fuzzy-lib = let
             inherit (inputs'.fenix.packages.minimal) toolchain;
@@ -99,9 +99,7 @@
             self'.packages.blink-cmp
             self'.apps.build-plugin
           ];
-          packages = with pkgs; [
-            rust-analyzer-nightly
-          ];
+          packages = with pkgs; [ rust-analyzer-nightly ];
         };
       };
     };
