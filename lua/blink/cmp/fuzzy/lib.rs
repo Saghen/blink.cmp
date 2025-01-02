@@ -13,7 +13,6 @@ mod lsp_item;
 
 lazy_static! {
     static ref REGEX: Regex = Regex::new(r"\p{L}[\p{L}0-9_\\-]{2,}").unwrap();
-    static ref REGEX_MOD: Regex = Regex::new(r"[\p{L}\\][\p{L}0-9_\\-]{2,}").unwrap();
     static ref FRECENCY: RwLock<Option<FrecencyTracker>> = RwLock::new(None);
     static ref HAYSTACKS_BY_PROVIDER: RwLock<HashMap<String, Vec<LspItem>>> =
         RwLock::new(HashMap::new());
@@ -100,16 +99,6 @@ pub fn fuzzy_matched_indices(
     ))
 }
 
-pub fn get_words_mod(_: &Lua, text: String) -> LuaResult<Vec<String>> {
-    Ok(REGEX_MOD
-        .find_iter(&text)
-        .map(|m| m.as_str().to_string())
-        .filter(|s| s.len() < 512)
-        .collect::<HashSet<String>>()
-        .into_iter()
-        .collect())
-}
-
 pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
     Ok(REGEX
         .find_iter(&text)
@@ -135,7 +124,6 @@ fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
         lua.create_function(fuzzy_matched_indices)?,
     )?;
     exports.set("get_words", lua.create_function(get_words)?)?;
-    exports.set("get_words_mod", lua.create_function(get_words_mod)?)?;
     exports.set("init_db", lua.create_function(init_db)?)?;
     exports.set("destroy_db", lua.create_function(destroy_db)?)?;
     exports.set("access", lua.create_function(access)?)?;

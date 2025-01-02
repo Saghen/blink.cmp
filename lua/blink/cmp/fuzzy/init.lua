@@ -34,9 +34,6 @@ end
 ---@param lines string
 function fuzzy.get_words(lines) return fuzzy.rust.get_words(lines) end
 
----@param lines string
-function fuzzy.get_words_mod(lines) return fuzzy.rust.get_words_mod(lines) end
-
 function fuzzy.fuzzy_matched_indices(needle, haystack) return fuzzy.rust.fuzzy_matched_indices(needle, haystack) end
 
 --- @param needle string

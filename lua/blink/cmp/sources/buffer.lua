@@ -47,14 +47,14 @@ end
 
 --- @param buf_text string
 --- @param callback fun(items: blink.cmp.CompletionItem[])
-local function run_sync(buf_text, callback) callback(words_to_items(require('blink.cmp.fuzzy').get_words_mod(buf_text))) end
+local function run_sync(buf_text, callback) callback(words_to_items(require('blink.cmp.fuzzy').get_words(buf_text))) end
 
 local function run_async(buf_text, callback)
   local worker = uv.new_work(
     -- must use ffi directly since the normal one requires the config which isnt present
     function(items, cpath)
       package.cpath = cpath
-      return table.concat(require('blink.cmp.fuzzy.rust').get_words_mod(items), '\n')
+      return table.concat(require('blink.cmp.fuzzy.rust').get_words(items), '\n')
     end,
     function(words)
       local items = words_to_items(vim.split(words, '\n'))
