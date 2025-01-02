@@ -1,7 +1,7 @@
 --- Allows chaining of async operations without callback hell
 ---
 --- @class blink.cmp.Task
---- @field status 1 | 2 | 3 | 4
+--- @field status blink.cmp.TaskStatus
 --- @field result any | nil
 --- @field error any | nil
 --- @field new fun(fn: fun(resolve: fun(result: any), reject: fun(err: any))): blink.cmp.Task
@@ -13,16 +13,20 @@
 --- @field on_completion fun(self: blink.cmp.Task, cb: fun(result: any))
 --- @field on_failure fun(self: blink.cmp.Task, cb: fun(err: any))
 --- @field on_cancel fun(self: blink.cmp.Task, cb: fun())
+--- @field _completion_cbs function[]
+--- @field _failure_cbs function[]
+--- @field _cancel_cbs function[]
+--- @field _cancel? fun()
+local task = {
+  __task = true,
+}
 
+---@enum blink.cmp.TaskStatus
 local STATUS = {
   RUNNING = 1,
   COMPLETED = 2,
   FAILED = 3,
   CANCELLED = 4,
-}
-
-local task = {
-  __task = true,
 }
 
 function task.new(fn)
