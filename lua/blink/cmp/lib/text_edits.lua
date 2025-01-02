@@ -1,5 +1,6 @@
 local config = require('blink.cmp.config')
 local context = require('blink.cmp.completion.trigger.context')
+local feedkeys = require('blink.cmp.lib.feedkeys.feedkeys')
 
 local text_edits = {}
 
@@ -7,7 +8,36 @@ local text_edits = {}
 --- @param edits lsp.TextEdit[]
 function text_edits.apply(edits)
   local mode = context.get_mode()
-  if mode == 'default' then return vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8') end
+  if mode == 'default' then
+    local fuzzy = require('blink.cmp.fuzzy')
+    -- Fill the `.` register so that dot-repeat works. This also changes the
+    -- text in the buffer - currently there is no way to do this in Neovim
+    -- (only adding new text is supported, but we also want to replace the
+    -- current word). See the tracking issue for this feature at
+    -- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
+
+    -- only redoing the first edit is supported
+    local edit = edits[1]
+    local cursor = context.get_cursor()
+    local kwstart, kwend = fuzzy.get_keyword_range(context.get_line(), cursor[2], 'prefix')
+    local repeat_keys = {}
+    local original_line = context.get_line()
+    table.insert(repeat_keys, feedkeys.backspace(kwend - kwstart))
+    table.insert(repeat_keys, edit.newText)
+
+    local repeat_str = table.concat(repeat_keys, '')
+
+    feedkeys.call(repeat_str, 'in', function()
+      -- undo the changes to the buffer (but keep them in the `.` register for
+      -- repeating)
+      vim.api.nvim_set_current_line(original_line)
+      vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8')
+      -- TODO need to move the cursor to the left once for some reason
+
+      vim.cmd('normal! h')
+    end)
+    return
+  end
 
   assert(mode == 'cmdline', 'Unsupported mode for text edits: ' .. mode)
   assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
