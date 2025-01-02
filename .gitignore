@@ -1,6 +1,7 @@
 target/
 .archive.lua
 _*.lua
+.lazy.lua
 dual/
 result
 .direnv

@@ -2,7 +2,9 @@
 
 [[toc]]
 
-## Disable per filetype
+## General
+
+### Disable per filetype
 
 ```lua
 enabled = function()
@@ -12,7 +14,7 @@ enabled = function()
 end,
 ```
 
-## Border
+### Border
 
 ```lua
 completion = {
@@ -22,7 +24,7 @@ completion = {
 signature = { window = { border = 'single' } },
 ```
 
-## Change selection type per mode
+### Change selection type per mode
 
 ```lua
 completion = { 
@@ -34,7 +36,7 @@ completion = {
 }
 ```
 
-## Don't show completion menu automatically in cmdline mode
+### Don't show completion menu automatically in cmdline mode
 
 ```lua
 completion = { 
@@ -42,7 +44,7 @@ completion = {
 }
 ```
 
-## Don't show completion menu automatically when searching
+### Don't show completion menu automatically when searching
 
 ```lua
 completion = {
@@ -54,7 +56,7 @@ completion = {
 }
 ```
 
-## Select Nth item from the list
+### Select Nth item from the list
 
 Here's an example configuration that allows you to select the nth item from the list, based on [#382](https://github.com/Saghen/blink.cmp/issues/382):
 
@@ -87,7 +89,7 @@ completion = {
 }
 ```
 
-## `mini.icons`
+### `mini.icons`
 
 [Original discussion](https://github.com/Saghen/blink.cmp/discussions/458)
 
@@ -114,11 +116,11 @@ completion = {
 }
 ```
 
-## Hide Copilot on suggestion
+### Hide Copilot on suggestion
 
 ```lua
 vim.api.nvim_create_autocmd('User', {
-  pattern = 'BlinkCmpCompletionMenuOpen',
+  pattern = 'BlinkCmpMenuOpen',
   callback = function()
     require("copilot.suggestion").dismiss()
     vim.b.copilot_suggestion_hidden = true
@@ -126,7 +128,7 @@ vim.api.nvim_create_autocmd('User', {
 })
 
 vim.api.nvim_create_autocmd('User', {
-  pattern = 'BlinkCmpCompletionMenuClose',
+  pattern = 'BlinkCmpMenuClose',
   callback = function()
     vim.b.copilot_suggestion_hidden = false
   end,
@@ -173,4 +175,50 @@ See the [relevant section in the snippets documentation](./configuration/snippet
 sources.min_keyword_length = function()
   return vim.bo.filetype == 'markdown' and 2 or 0
 end
+```
+
+## For writers
+
+When writing prose, you may want significantly different behavior than typical LSP completions. If you find any interesting configurations, please open a PR adding it here!
+
+### Keep first letter capitalization on buffer source
+
+```lua
+sources = {
+  providers = {
+    buffer = {
+      -- keep case of first char
+      transform_items = function (a, items)
+        local keyword = a.get_keyword()
+        local correct, case
+        if keyword:match('^%l') then
+            correct = '^%u%l+$'
+            case = string.lower
+        elseif keyword:match('^%u') then
+            correct = '^%l+$'
+            case = string.upper
+        else
+            return items
+        end
+
+        -- avoid duplicates from the corrections
+        local seen = {}
+        local out = {}
+        for _, item in ipairs(items) do
+            local raw = item.insertText
+            if raw:match(correct) then
+                local text = case(raw:sub(1,1)) .. raw:sub(2)
+                item.insertText = text
+                item.label = text
+            end
+            if not seen[item.insertText] then
+                seen[item.insertText] = true
+                table.insert(out, item)
+            end
+        end
+        return out
+      end
+    }
+  }
+}
 ```

@@ -18,14 +18,14 @@ lazy_static! {
         RwLock::new(HashMap::new());
 }
 
-pub fn init_db(_: &Lua, db_path: String) -> LuaResult<bool> {
+pub fn init_db(_: &Lua, (db_path, use_unsafe_no_lock): (String, bool)) -> LuaResult<bool> {
     let mut frecency = FRECENCY.write().map_err(|_| {
         mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
     })?;
     if frecency.is_some() {
         return Ok(false);
     }
-    *frecency = Some(FrecencyTracker::new(&db_path)?);
+    *frecency = Some(FrecencyTracker::new(&db_path, use_unsafe_no_lock)?);
     Ok(true)
 }
 

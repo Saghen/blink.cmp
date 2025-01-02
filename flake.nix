@@ -22,27 +22,52 @@
 
         # define the packages provided by this flake
         packages = let
-          src = ./.;
-          version = "0.8.2";
+          fs = lib.fileset;
+          # nix source files (*.nix)
+          nixFs = fs.fileFilter (file: file.hasExt == "nix") ./.;
+          # rust source files
+          rustFs = fs.unions [
+            # Cargo.*
+            (fs.fileFilter (file: lib.hasPrefix "Cargo" file.name) ./.)
+            # *.rs
+            (fs.fileFilter (file: file.hasExt "rs") ./.)
+            # additional files
+            ./.cargo
+            ./rust-toolchain.toml
+          ];
+          # nvim source files
+          # all that are not nix, nor rust
+          nvimFs = fs.difference ./. (fs.union nixFs rustFs);
+          version = "0.9.0";
         in {
           blink-fuzzy-lib = let
-            inherit (inputs.fenix.packages.${system}.minimal) toolchain;
+            inherit (inputs'.fenix.packages.minimal) toolchain;
             rustPlatform = pkgs.makeRustPlatform {
               cargo = toolchain;
               rustc = toolchain;
             };
           in rustPlatform.buildRustPackage {
             pname = "blink-fuzzy-lib";
-            inherit src version;
-            useFetchCargoVendor = true;
-            cargoHash = "sha256-t84hokb2loZ6FPPt4eN8HzgNQJrQUdiG5//ZbmlasWY=";
+            inherit version;
+            src = fs.toSource {
+              root = ./.;
+              fileset = rustFs;
+            };
+            cargoLock = {
+              lockFile = ./Cargo.lock;
+              allowBuiltinFetchGit = true;
+            };
 
             nativeBuildInputs = with pkgs; [ git ];
           };
 
           blink-cmp = pkgs.vimUtils.buildVimPlugin {
             pname = "blink-cmp";
-            inherit src version;
+            inherit version;
+            src = fs.toSource {
+              root = ./.;
+              fileset = nvimFs;
+            };
             preInstall = ''
               mkdir -p target/release
               ln -s ${self'.packages.blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.* target/release/
@@ -74,9 +99,7 @@
             self'.packages.blink-cmp
             self'.apps.build-plugin
           ];
-          packages = with pkgs; [
-            rust-analyzer-nightly
-          ];
+          packages = with pkgs; [ rust-analyzer-nightly ];
         };
       };
     };

@@ -15,7 +15,7 @@
 --- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
---- @field show fun(opts?: { trigger_kind: blink.cmp.CompletionTriggerKind, trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[] })
+--- @field show fun(opts?: { trigger_kind: blink.cmp.CompletionTriggerKind, trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[] }): blink.cmp.Context
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
 --- @field get_bounds fun(regex: vim.regex, line: string, cursor: number[]): blink.cmp.ContextBounds
@@ -36,6 +36,7 @@ local trigger = {
 
 function trigger.activate()
   trigger.buffer_events = require('blink.cmp.lib.buffer_events').new({
+    -- TODO: should this ignore trigger.kind == 'prefetch'?
     has_context = function() return trigger.context ~= nil end,
     show_in_snippet = config.show_in_snippet,
   })
@@ -74,6 +75,7 @@ function trigger.activate()
     local cursor_col = cursor[2]
     local char_under_cursor = context.get_line():sub(cursor_col, cursor_col)
     local is_on_keyword_char = keyword_regex:match_str(char_under_cursor) ~= nil
+    local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
 
     local insert_enter_on_trigger_character = config.show_on_trigger_character
       and config.show_on_insert_on_trigger_character
@@ -85,7 +87,11 @@ function trigger.activate()
       trigger.show({ trigger_kind = 'keyword' })
 
     -- check if we've entered insert mode on a trigger character
-    elseif insert_enter_on_trigger_character then
+    -- or if we've moved onto a trigger character while open
+    elseif
+      insert_enter_on_trigger_character
+      or (is_on_trigger_for_show and trigger.context ~= nil and trigger.context.trigger.kind ~= 'prefetch')
+    then
       trigger.context = nil
       trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
 
@@ -191,13 +197,14 @@ function trigger.show(opts)
   trigger.context = context.new({
     id = trigger.current_context_id,
     providers = providers,
-    initial_trigger_kind = trigger.context and trigger.context.trigger.kind or opts.trigger_kind,
-    initial_trigger_character = trigger.context and trigger.context.trigger.character or opts.trigger_character,
+    initial_trigger_kind = trigger.context and trigger.context.trigger.initial_kind or opts.trigger_kind,
+    initial_trigger_character = trigger.context and trigger.context.trigger.initial_character or opts.trigger_character,
     trigger_kind = opts.trigger_kind,
     trigger_character = opts.trigger_character,
   })
 
   if opts.send_upstream ~= false then trigger.show_emitter:emit({ context = trigger.context }) end
+  return trigger.context
 end
 
 function trigger.hide()

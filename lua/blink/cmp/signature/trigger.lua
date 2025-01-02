@@ -11,6 +11,7 @@
 --- @field line string
 --- @field is_retrigger boolean
 --- @field active_signature_help lsp.SignatureHelp | nil
+--- @field trigger { kind: lsp.SignatureHelpTriggerKind, character?: string }
 
 --- @class blink.cmp.SignatureTrigger
 --- @field current_context_id number

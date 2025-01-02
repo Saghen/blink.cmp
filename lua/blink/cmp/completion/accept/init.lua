@@ -41,7 +41,11 @@ local function accept(ctx, item, callback)
       end
 
       -- Ignore snippets that only contain text
-      if item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+      -- FIXME: doesn't handle escaped snippet placeholders "\\$1" should output "$1", not "\$1"
+      if
+        item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet
+        and item.kind ~= require('blink.cmp.types').CompletionItemKind.Snippet
+      then
         local parsed_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(item.textEdit.newText)
         if
           parsed_snippet ~= nil

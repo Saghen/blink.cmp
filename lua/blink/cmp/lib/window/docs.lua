@@ -4,7 +4,7 @@ local docs = {}
 
 --- @class blink.cmp.RenderDetailAndDocumentationOpts
 --- @field bufnr number
---- @field detail? string
+--- @field detail? string|string[]
 --- @field documentation? lsp.MarkupContent | string
 --- @field max_width number
 --- @field use_treesitter_highlighting boolean?
@@ -19,7 +19,12 @@ local docs = {}
 --- @param opts blink.cmp.RenderDetailAndDocumentationOpts
 function docs.render_detail_and_documentation(opts)
   local detail_lines = {}
-  if opts.detail and opts.detail ~= '' then detail_lines = docs.split_lines(opts.detail) end
+  local details = type(opts.detail) == 'string' and { opts.detail } or opts.detail or {}
+  --- @cast details string[]
+  details = require('blink.cmp.lib.utils').deduplicate(details)
+  for _, v in ipairs(details) do
+    vim.list_extend(detail_lines, docs.split_lines(v))
+  end
 
   local doc_lines = {}
   if opts.documentation ~= nil then

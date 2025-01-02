@@ -4,7 +4,7 @@
 --- | 'hide' Hide the completion window
 --- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
---- | 'select_and_accept' Select the current completion item and accept it
+--- | 'select_and_accept' Select the first completion item, if there's no selection, and accept
 --- | 'select_prev' Select the previous completion item
 --- | 'select_next' Select the next completion item
 --- | 'show_documentation' Show the documentation window
@@ -13,7 +13,7 @@
 --- | 'scroll_documentation_down' Scroll the documentation window down
 --- | 'snippet_forward' Move the cursor forward to the next snippet placeholder
 --- | 'snippet_backward' Move the cursor backward to the previous snippet placeholder
---- | (fun(cmp: table): boolean?) Custom function where returning true will prevent the next command from running
+--- | (fun(cmp: blink.cmp.API): boolean?) Custom function where returning true will prevent the next command from running
 
 --- @alias blink.cmp.KeymapPreset
 --- | 'none' No keymaps
@@ -108,7 +108,7 @@
 --- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
 --- @class (exact) blink.cmp.BaseKeymapConfig
 --- @field preset? blink.cmp.KeymapPreset
---- @field [string] blink.cmp.KeymapCommand[]> Table of keys => commands[]
+--- @field [string] blink.cmp.KeymapCommand[] Table of keys => commands[]
 
 --- @class (exact) blink.cmp.KeymapConfig : blink.cmp.BaseKeymapConfig
 --- @field cmdline? blink.cmp.BaseKeymapConfig Optionally, define a separate keymap for cmdline

@@ -1,4 +1,5 @@
 local config = require('blink.cmp.config').completion.accept.auto_brackets
+local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
 local brackets = require('blink.cmp.completion.brackets.config')
 local utils = {}
 
@@ -48,6 +49,13 @@ function utils.has_brackets_in_front(text_edit, bracket)
   local line = vim.api.nvim_get_current_line()
   local col = text_edit.range['end'].character + 1
   return line:sub(col, col) == bracket
+end
+
+--- @param item blink.cmp.CompletionItem
+--- @param _ string[]
+-- TODO: for edge cases, we should probably also take brackets themselves into consideration
+function utils.can_have_brackets(item, _)
+  return item.kind == CompletionItemKind.Function or item.kind == CompletionItemKind.Method
 end
 
 return utils

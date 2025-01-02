@@ -2,6 +2,7 @@
 --- @field use_typo_resistance boolean When enabled, allows for a number of typos relative to the length of the query. Disabling this matches the behavior of fzf
 --- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item
 --- @field use_proximity boolean Boosts the score of items matching nearby words
+--- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux)
 --- @field sorts ("label" | "sort_text" | "kind" | "score" | blink.cmp.SortFunction)[] Controls which sorts to use and in which order, these three are currently the only allowed options
 --- @field prebuilt_binaries blink.cmp.PrebuiltBinariesConfig
 
@@ -21,6 +22,7 @@ local fuzzy = {
     use_typo_resistance = true,
     use_frecency = true,
     use_proximity = true,
+    use_unsafe_no_lock = false,
     sorts = { 'score', 'sort_text' },
     prebuilt_binaries = {
       download = true,
@@ -37,6 +39,7 @@ function fuzzy.validate(config)
     use_typo_resistance = { config.use_typo_resistance, 'boolean' },
     use_frecency = { config.use_frecency, 'boolean' },
     use_proximity = { config.use_proximity, 'boolean' },
+    use_unsafe_no_lock = { config.use_unsafe_no_lock, 'boolean' },
     sorts = {
       config.sorts,
       function(sorts)

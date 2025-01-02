@@ -179,7 +179,10 @@ function text_edits.clamp_range_to_bounds(range)
   range.start.character = math.min(math.max(range.start.character, 0), #start_line)
 
   local end_line = context.get_line(range['end'].line)
-  range['end'].character = math.min(math.max(range['end'].character, 0), #end_line)
+  range['end'].character = math.min(
+    math.max(range['end'].character, range.start.line == range['end'].line and range.start.character or 0),
+    #end_line
+  )
 
   return range
 end

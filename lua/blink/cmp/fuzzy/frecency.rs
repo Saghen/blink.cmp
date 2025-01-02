@@ -1,5 +1,5 @@
 use crate::lsp_item::LspItem;
-use heed::types::*;
+use heed::{types::*, EnvFlags};
 use heed::{Database, Env, EnvOpenOptions};
 use mlua::Result as LuaResult;
 use serde::{Deserialize, Serialize};
@@ -31,14 +31,18 @@ pub struct FrecencyTracker {
 }
 
 impl FrecencyTracker {
-    pub fn new(db_path: &str) -> LuaResult<Self> {
+    pub fn new(db_path: &str, use_unsafe_no_lock: bool) -> LuaResult<Self> {
         fs::create_dir_all(db_path).map_err(|err| {
             mlua::Error::RuntimeError(
                 "Failed to create frecency database directory: ".to_string() + &err.to_string(),
             )
         })?;
         let env = unsafe {
-            EnvOpenOptions::new().open(db_path).map_err(|err| {
+            let mut opts = EnvOpenOptions::new();
+            if use_unsafe_no_lock {
+                opts.flags(EnvFlags::NO_LOCK | EnvFlags::NO_SYNC | EnvFlags::NO_META_SYNC);
+            }
+            opts.open(db_path).map_err(|err| {
                 mlua::Error::RuntimeError(
                     "Failed to open frecency database: ".to_string() + &err.to_string(),
                 )

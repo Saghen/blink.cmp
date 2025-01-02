@@ -1,19 +1,20 @@
 --- @class blink.cmp.SnippetsOpts
---- @field friendly_snippets boolean
---- @field search_paths string[]
---- @field global_snippets string[]
---- @field extended_filetypes table<string, string[]>
---- @field ignored_filetypes string[]
---- @field get_filetype fun(context: blink.cmp.Context): string
+--- @field friendly_snippets? boolean
+--- @field search_paths? string[]
+--- @field global_snippets? string[]
+--- @field extended_filetypes? table<string, string[]>
+--- @field ignored_filetypes? string[]
+--- @field get_filetype? fun(context: blink.cmp.Context): string
+--- @field clipboard_register? string
 
 local snippets = {}
 
 function snippets.new(opts)
+  --- @type blink.cmp.SnippetsOpts
   opts = opts or {}
   local self = setmetatable({}, { __index = snippets })
   --- @type table<string, blink.cmp.CompletionItem[]>
   self.cache = {}
-  --- @type blink.cmp.SnippetsOpts
   self.registry = require('blink.cmp.sources.snippets.registry').new(opts)
   self.get_filetype = opts.get_filetype or function() return vim.bo.filetype end
   return self
