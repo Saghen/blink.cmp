@@ -37,7 +37,8 @@ local function accept(ctx, item, callback)
         -- https://github.com/Saghen/blink.cmp/commit/284dd37f9bbc632f8281d6361e877db5b45e6ff0#r150498482
         and item.kind ~= require('blink.cmp.types').CompletionItemKind.Snippet
       then
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-g>u', true, true, true), 'n', true)
+        -- setting the undolevels forces neovim to create an undo point
+        vim.o.undolevels = vim.o.undolevels
       end
 
       -- Ignore snippets that only contain text
