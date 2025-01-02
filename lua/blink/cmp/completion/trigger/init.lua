@@ -194,10 +194,16 @@ function trigger.show(opts)
     or (trigger.context and trigger.context.providers)
     or require('blink.cmp.sources.lib').get_enabled_provider_ids(context.get_mode())
 
+  local initial_trigger_kind = trigger.context and trigger.context.trigger.initial_kind or opts.trigger_kind
+  -- if we prefetched, don't keep that as the initial trigger kind
+  if initial_trigger_kind == 'prefetch' then initial_trigger_kind = opts.trigger_kind end
+  -- if we're manually triggering, set it as the initial trigger kind
+  if opts.trigger_kind == 'manual' then initial_trigger_kind = 'manual' end
+
   trigger.context = context.new({
     id = trigger.current_context_id,
     providers = providers,
-    initial_trigger_kind = trigger.context and trigger.context.trigger.initial_kind or opts.trigger_kind,
+    initial_trigger_kind = initial_trigger_kind,
     initial_trigger_character = trigger.context and trigger.context.trigger.initial_character or opts.trigger_character,
     trigger_kind = opts.trigger_kind,
     trigger_character = opts.trigger_character,

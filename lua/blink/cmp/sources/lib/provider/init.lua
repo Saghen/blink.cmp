@@ -95,12 +95,18 @@ end
 
 function source:should_show_items(context, items)
   -- if keyword length is configured, check if the context is long enough
-  local global_min_keyword_length_func_or_num = require('blink.cmp.config').sources.min_keyword_length
-  local global_min_keyword_length = type(global_min_keyword_length_func_or_num) == 'function'
-      and global_min_keyword_length_func_or_num(context)
-    or global_min_keyword_length_func_or_num
-  --- @cast global_min_keyword_length number
   local provider_min_keyword_length = self.config.min_keyword_length(context)
+
+  -- for manual trigger, we ignore the min_keyword_length set globally, but still respect per-provider
+  local global_min_keyword_length = 0
+  if context.trigger.initial_kind ~= 'manual' then
+    local global_min_keyword_length_func_or_num = require('blink.cmp.config').sources.min_keyword_length
+    if type(global_min_keyword_length_func_or_num) == 'function' then
+      global_min_keyword_length = global_min_keyword_length_func_or_num(context)
+    else
+      global_min_keyword_length = global_min_keyword_length_func_or_num
+    end
+  end
 
   local min_keyword_length = math.max(provider_min_keyword_length, global_min_keyword_length)
   local current_keyword_length = context.bounds.length
