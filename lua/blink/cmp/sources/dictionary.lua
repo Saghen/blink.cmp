@@ -91,7 +91,7 @@ local function load_dictionaries()
 	local dictionary_name = ""
 	for _, dictionary_path in ipairs(dictionaries_paths) do
 		dictionary_name = string.match(dictionary_path, "([^/\\]+)$")
-		-- Add table with key = dictoinary_name and empty items list to new dictionaries
+		-- Add table with key = dictionary_name and empty items list to new dictionaries
 		dictionaries[dictionary_name] = {}
 		-- If the dictionary exists in the source dictionaries table, get the items from there
 		if (source.dictionaries[dictionary_name]) then
