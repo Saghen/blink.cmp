@@ -6,7 +6,7 @@ lazy_static! {
     static ref FORWARD_REGEX: Regex = Regex::new(r"^[\p{L}0-9_\\-]+").unwrap();
 }
 
-/// Given a string, returns the start and end indices of the keyword
+/// Given a line and cursor position, returns the start and end indices of the keyword
 pub fn get_keyword_range(line: &str, col: usize, match_suffix: bool) -> (usize, usize) {
     let line_before = line.chars().take(col).collect::<String>();
     let before_match_start = BACKWARD_REGEX.find(&line_before).map(|m| m.start());
@@ -15,13 +15,27 @@ pub fn get_keyword_range(line: &str, col: usize, match_suffix: bool) -> (usize, 
     }
 
     let line_after = line.chars().skip(col).collect::<String>();
-    let after_match_end = FORWARD_REGEX.find(&line_after).map(|m| m.end());
+    let after_match_end = FORWARD_REGEX.find(&line_after).map(|m| m.end() + col);
     (
         before_match_start.unwrap_or(col),
         after_match_end.unwrap_or(col),
     )
 }
 
+/// Given a string, guesses the start and end indices in the line for the specific item
+/// 1. Get the keyword range (alphanumeric, underscore, hyphen) on the line and end of the item
+///    text
+/// 2. Check if the suffix of the item text matches the suffix of the line text, if so, include the
+///    suffix in the range
+///
+/// Example:
+///   line: example/str/trim
+///   item: str/trim
+///   matches on: str/trim
+///
+///   line: example/trim
+///   item: str/trim
+///   matches on: trim
 pub fn guess_keyword_range_from_item(
     item_text: &str,
     line: &str,

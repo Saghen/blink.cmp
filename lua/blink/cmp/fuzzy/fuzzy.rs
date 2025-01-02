@@ -55,7 +55,7 @@ fn group_by_needle(
 ) -> HashMap<String, Vec<(usize, String)>> {
     let mut items_by_needle: HashMap<String, Vec<(usize, String)>> = HashMap::new();
     for (idx, item_text) in haystack.iter().enumerate() {
-        let needle = keyword::guess_keyword_from_item(&item_text, line, cursor_col, match_suffix);
+        let needle = keyword::guess_keyword_from_item(item_text, line, cursor_col, match_suffix);
         let entry = items_by_needle.entry(needle).or_default();
         entry.push((idx, item_text.to_string()));
     }
