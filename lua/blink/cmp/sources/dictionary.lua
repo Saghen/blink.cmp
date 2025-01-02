@@ -5,7 +5,7 @@
 --- @type blink.cmp.DictionarySource
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
-source.dictionaries = nil
+source.dictionaries = {}
 
 ---Function to concatenate two CompletionItem lists
 ---@param items1 blink.cmp.CompletionItem[]
@@ -92,7 +92,7 @@ local function load_dictionaries()
 	for _, dictionary_path in ipairs(dictionaries_paths) do
 		dictionary_name = string.match(dictionary_path, "([^/\\]+)$")
 		-- Add table with key = dictoinary_name and empty items list to new dictionaries
-		table.insert(dictionaries, { dictionary_name, {} })
+		dictionaries[dictionary_name] = {}
 		-- If the dictionary exists in the source dictionaries table, get the items from there
 		if (source.dictionaries[dictionary_name]) then
 			dictionaries[dictionary_name] = source.dictionaries[dictionary_name]
