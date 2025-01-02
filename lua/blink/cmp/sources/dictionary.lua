@@ -126,6 +126,8 @@ function source:get_completions(_, callback)
 		run_sync(transformed_callback)
 	end)
 
+	-- TODO: implement run_async 
+
 	-- TODO: cancel run_async
 	return function() end
 end
