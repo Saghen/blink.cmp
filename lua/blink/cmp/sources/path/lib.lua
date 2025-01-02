@@ -81,14 +81,13 @@ end
 function lib.entry_to_completion_item(context, entry, dirname, opts)
   local is_dir = entry.type == 'directory'
   local CompletionItemKind = require('blink.cmp.types').CompletionItemKind
-  local insert_text = is_dir and entry.name .. '/' or entry.name
+  local insert_text = is_dir and opts.trailing_slash and entry.name .. '/' or entry.name
   return {
     label = (opts.label_trailing_slash and is_dir) and entry.name .. '/' or entry.name,
     kind = is_dir and CompletionItemKind.Folder or CompletionItemKind.File,
     insertText = insert_text,
     textEdit = lib.get_text_edit(context, insert_text),
     sortText = (is_dir and '1' or '2') .. entry.name:lower(), -- Sort directories before files
-    word = opts.trailing_slash and entry.name or nil,
     data = { path = entry.name, full_path = dirname .. '/' .. entry.name, type = entry.type, stat = entry.stat },
   }
 end
