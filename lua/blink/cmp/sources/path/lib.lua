@@ -6,8 +6,7 @@ local lib = {}
 function lib.dirname(get_cwd, context)
   -- HACK: move this :sub logic into the context?
   -- it's not obvious that you need to avoid going back a char if the start_col == end_col
-  local line_before_cursor =
-    context.line:sub(1, context.bounds.start_col - (context.bounds.start_col ~= context.bounds.end_col and 1 or 0))
+  local line_before_cursor = context.line:sub(1, context.bounds.start_col - (context.bounds.length == 0 and 1 or 0))
   local s = regex.PATH:match_str(line_before_cursor)
   if not s then return nil end
 

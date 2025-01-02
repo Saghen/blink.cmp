@@ -27,11 +27,7 @@ function cmdline:get_completions(context, callback)
 
   local current_arg = arguments[arg_number]
   local keyword_config = require('blink.cmp.config').completion.keyword
-  local keyword = context.get_regex_around_cursor(
-    keyword_config.range,
-    keyword_config.regex,
-    keyword_config.exclude_from_prefix_regex
-  )
+  local keyword = context.get_bounds(keyword_config.range)
   local current_arg_prefix = current_arg:sub(1, keyword.start_col - #text_before_argument - 1)
 
   local task = async.task

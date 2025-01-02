@@ -4,7 +4,6 @@
 --- @field line string
 --- @field line_number number
 --- @field start_col number
---- @field end_col number
 --- @field length number
 
 --- @class blink.cmp.Context
@@ -25,8 +24,7 @@
 --- @field get_cursor fun(): number[]
 --- @field set_cursor fun(cursor: number[])
 --- @field get_line fun(num?: number): string
---- @field get_bounds fun(line: string, cursor: number[]): blink.cmp.ContextBounds
---- @field get_regex_around_cursor fun(range: string, regex_str: string, exclude_from_prefix_regex_str: string): { start_col: number, length: number }
+--- @field get_bounds fun(range: blink.cmp.CompletionKeywordRange): blink.cmp.ContextBounds
 
 --- @class blink.cmp.ContextTrigger
 --- @field initial_kind blink.cmp.CompletionTriggerKind The trigger kind when the context was first created
@@ -42,8 +40,6 @@
 --- @field trigger_kind blink.cmp.CompletionTriggerKind
 --- @field trigger_character? string
 
-local keyword_regex = vim.regex(require('blink.cmp.config').completion.keyword.regex)
-
 --- @type blink.cmp.Context
 --- @diagnostic disable-next-line: missing-fields
 local context = {}
@@ -58,7 +54,7 @@ function context.new(opts)
     bufnr = vim.api.nvim_get_current_buf(),
     cursor = cursor,
     line = line,
-    bounds = context.get_bounds(line, cursor),
+    bounds = context.get_bounds('full'),
     trigger = {
       initial_kind = opts.initial_trigger_kind,
       initial_character = opts.initial_trigger_character,
@@ -71,7 +67,7 @@ end
 
 function context.get_keyword()
   local keyword = require('blink.cmp.config').completion.keyword
-  local range = context.get_regex_around_cursor(keyword.range, keyword.regex, keyword.exclude_from_prefix_regex)
+  local range = context.get_bounds(keyword.range)
   return string.sub(context.get_line(), range.start_col, range.start_col + range.length - 1)
 end
 
@@ -80,7 +76,7 @@ end
 function context:within_query_bounds(cursor)
   local row, col = cursor[1], cursor[2]
   local bounds = self.bounds
-  return row == bounds.line_number and col >= bounds.start_col and col <= bounds.end_col
+  return row == bounds.line_number and col >= bounds.start_col and col <= (bounds.start_col + bounds.length)
 end
 
 function context.get_mode() return vim.api.nvim_get_mode().mode == 'c' and 'cmdline' or 'default' end
@@ -111,78 +107,12 @@ function context.get_line(num)
   return vim.api.nvim_buf_get_lines(0, num, num + 1, false)[1]
 end
 
---- Moves forward and backwards around the cursor looking for word boundaries
-function context.get_bounds(line, cursor)
-  local cursor_line = cursor[1]
-  local cursor_col = cursor[2]
-
-  local start_col = cursor_col
-  while start_col >= 1 do
-    local char = line:sub(start_col, start_col)
-    if keyword_regex:match_str(char) == nil then
-      start_col = start_col + 1
-      break
-    end
-    start_col = start_col - 1
-  end
-  start_col = math.max(start_col, 1)
-
-  local end_col = cursor_col
-  while end_col < #line do
-    local char = line:sub(end_col + 1, end_col + 1)
-    if keyword_regex:match_str(char) == nil then break end
-    end_col = end_col + 1
-  end
-
-  -- hack: why do we have to math.min here?
-  start_col = math.min(start_col, end_col)
-
-  local length = end_col - start_col + 1
-  -- Since sub(1, 1) returns a single char string, we need to check if that single char matches
-  -- and otherwise mark the length as 0
-  if start_col == end_col and keyword_regex:match_str(line:sub(start_col, end_col)) == nil then length = 0 end
-
-  return { line_number = cursor_line, start_col = start_col, end_col = end_col, length = length }
-end
-
 --- Gets characters around the cursor and returns the range, 0-indexed
-function context.get_regex_around_cursor(range, regex_str, exclude_from_prefix_regex_str)
+function context.get_bounds(range)
   local line = context.get_line()
-  local current_col = context.get_cursor()[2] + 1
-
-  local backward_regex = vim.regex('\\(' .. regex_str .. '\\)\\+$')
-  local forward_regex = vim.regex('^\\(' .. regex_str .. '\\)\\+')
-
-  local length = 0
-  local start_col = current_col
-
-  -- Search backward for the start of the word
-  local line_before = line:sub(1, current_col - 1)
-  local before_match_start, _ = backward_regex:match_str(line_before)
-  if before_match_start ~= nil then
-    start_col = before_match_start + 1
-    length = current_col - start_col
-  end
-
-  -- Search forward for the end of the word if configured
-  if range == 'full' then
-    local line_after = line:sub(current_col)
-    local _, after_match_end = forward_regex:match_str(line_after)
-    if after_match_end ~= nil then length = length + after_match_end end
-  end
-
-  -- exclude characters matching exclude_prefix_regex from the beginning of the bounds
-  if exclude_from_prefix_regex_str ~= nil then
-    local exclude_from_prefix_regex = vim.regex(exclude_from_prefix_regex_str)
-    while length > 0 do
-      local char = line:sub(start_col, start_col)
-      if exclude_from_prefix_regex:match_str(char) == nil then break end
-      start_col = start_col + 1
-      length = length - 1
-    end
-  end
-
-  return { start_col = start_col, length = length }
+  local cursor = context.get_cursor()
+  local start_col, end_col = require('blink.cmp.fuzzy').get_keyword_range(line, cursor[2], range)
+  return { line_number = cursor[1], start_col = start_col + 1, length = end_col - start_col }
 end
 
 return context

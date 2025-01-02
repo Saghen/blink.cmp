@@ -9,6 +9,7 @@ use std::sync::RwLock;
 
 mod frecency;
 mod fuzzy;
+mod keyword;
 mod lsp_item;
 
 lazy_static! {
@@ -67,7 +68,7 @@ pub fn set_provider_items(
 
 pub fn fuzzy(
     _lua: &Lua,
-    (needle, provider_id, opts): (String, String, FuzzyOptions),
+    (line, cursor_col, provider_id, opts): (String, usize, String, FuzzyOptions),
 ) -> LuaResult<(Vec<i32>, Vec<u32>)> {
     let mut frecency_handle = FRECENCY.write().map_err(|_| {
         mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
@@ -86,16 +87,37 @@ pub fn fuzzy(
         ))
     })?;
 
-    Ok(fuzzy::fuzzy(needle, haystack, frecency, opts))
+    Ok(fuzzy::fuzzy(&line, cursor_col, haystack, frecency, opts))
 }
 
 pub fn fuzzy_matched_indices(
     _lua: &Lua,
-    (needle, haystack): (String, Vec<String>),
+    (line, cursor_col, haystack, match_suffix): (String, usize, Vec<String>, bool),
 ) -> LuaResult<Vec<Vec<usize>>> {
-    Ok(frizbee::match_list_for_matched_indices(
-        &needle,
-        &haystack.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
+    Ok(fuzzy::fuzzy_matched_indices(
+        &line,
+        cursor_col,
+        &haystack,
+        match_suffix,
+    ))
+}
+
+pub fn get_keyword_range(
+    _lua: &Lua,
+    (line, col, match_suffix): (String, usize, bool),
+) -> LuaResult<(usize, usize)> {
+    Ok(keyword::get_keyword_range(&line, col, match_suffix))
+}
+
+pub fn guess_edit_range(
+    _lua: &Lua,
+    (item, line, cursor_col, match_suffix): (LspItem, String, usize, bool),
+) -> LuaResult<(usize, usize)> {
+    Ok(keyword::guess_keyword_range_from_item(
+        item.insert_text.as_ref().unwrap_or(&item.label),
+        &line,
+        cursor_col,
+        match_suffix,
     ))
 }
 
@@ -114,6 +136,9 @@ pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
 #[mlua::lua_module(skip_memory_check)]
 fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
     let exports = lua.create_table()?;
+    exports.set("init_db", lua.create_function(init_db)?)?;
+    exports.set("destroy_db", lua.create_function(destroy_db)?)?;
+    exports.set("access", lua.create_function(access)?)?;
     exports.set(
         "set_provider_items",
         lua.create_function(set_provider_items)?,
@@ -123,9 +148,8 @@ fn blink_cmp_fuzzy(lua: &Lua) -> LuaResult<LuaTable> {
         "fuzzy_matched_indices",
         lua.create_function(fuzzy_matched_indices)?,
     )?;
+    exports.set("get_keyword_range", lua.create_function(get_keyword_range)?)?;
+    exports.set("guess_edit_range", lua.create_function(guess_edit_range)?)?;
     exports.set("get_words", lua.create_function(get_words)?)?;
-    exports.set("init_db", lua.create_function(init_db)?)?;
-    exports.set("destroy_db", lua.create_function(destroy_db)?)?;
-    exports.set("access", lua.create_function(access)?)?;
     Ok(exports)
 }

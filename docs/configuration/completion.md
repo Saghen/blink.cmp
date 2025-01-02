@@ -19,7 +19,7 @@ Controls when to request completion items from the sources and show the completi
 
 :::tabs
 == Keyword
-Shows after typing a keyword, typically an alphanumeric character or `_`
+Shows after typing a keyword, typically an alphanumeric character, `-` or `_`
 
 ```lua
 completion.trigger.show_on_keyword = true

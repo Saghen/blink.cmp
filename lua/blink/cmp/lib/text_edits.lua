@@ -152,17 +152,20 @@ end
 --- TODO: doesnt work when the item contains characters not included in the context regex
 function text_edits.guess(item)
   local word = item.insertText or item.label
-  local context = require('blink.cmp.completion.trigger.context')
 
-  local keyword = config.completion.keyword
-  local range = context.get_regex_around_cursor(keyword.range, keyword.regex, keyword.exclude_from_prefix_regex)
+  local start_col, end_col = require('blink.cmp.fuzzy').guess_edit_range(
+    item,
+    context.get_line(),
+    context.get_cursor()[2],
+    config.completion.keyword.range
+  )
   local current_line = context.get_cursor()[1]
 
   -- convert to 0-index
   return {
     range = {
-      start = { line = current_line - 1, character = range.start_col - 1 },
-      ['end'] = { line = current_line - 1, character = range.start_col - 1 + range.length },
+      start = { line = current_line - 1, character = start_col },
+      ['end'] = { line = current_line - 1, character = end_col },
     },
     newText = word,
   }

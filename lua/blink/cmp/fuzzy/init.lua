@@ -1,5 +1,6 @@
 local config = require('blink.cmp.config')
 
+--- @class blink.cmp.Fuzzy
 local fuzzy = {
   rust = require('blink.cmp.fuzzy.rust'),
   haystacks_by_provider_cache = {},
@@ -34,12 +35,20 @@ end
 ---@param lines string
 function fuzzy.get_words(lines) return fuzzy.rust.get_words(lines) end
 
-function fuzzy.fuzzy_matched_indices(needle, haystack) return fuzzy.rust.fuzzy_matched_indices(needle, haystack) end
+--- @param line string
+--- @param cursor_col number
+--- @param haystack string[]
+--- @param range blink.cmp.CompletionKeywordRange
+function fuzzy.fuzzy_matched_indices(line, cursor_col, haystack, range)
+  return fuzzy.rust.fuzzy_matched_indices(line, cursor_col, haystack, range == 'full')
+end
 
---- @param needle string
+--- @param line string
+--- @param cursor_col number
 --- @param haystacks_by_provider table<string, blink.cmp.CompletionItem[]>
+--- @param range blink.cmp.CompletionKeywordRange
 --- @return blink.cmp.CompletionItem[]
-function fuzzy.fuzzy(needle, haystacks_by_provider)
+function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
   fuzzy.init_db()
 
   for provider_id, haystack in pairs(haystacks_by_provider) do
@@ -57,19 +66,26 @@ function fuzzy.fuzzy(needle, haystacks_by_provider)
   local nearby_text = table.concat(vim.api.nvim_buf_get_lines(0, start_row, end_row, false), '\n')
   local nearby_words = #nearby_text < 10000 and fuzzy.rust.get_words(nearby_text) or {}
 
+  local keyword_start_col, keyword_end_col =
+    require('blink.cmp.fuzzy').get_keyword_range(line, cursor_col, config.completion.keyword.range)
+  local keyword_length = keyword_end_col - keyword_start_col
+
   local filtered_items = {}
   for provider_id, haystack in pairs(haystacks_by_provider) do
     -- perform fuzzy search
-    local scores, matched_indices = fuzzy.rust.fuzzy(needle, provider_id, {
-      -- each matching char is worth 4 points and it receives a bonus for capitalization, delimiter and prefix
+    local scores, matched_indices = fuzzy.rust.fuzzy(line, cursor_col, provider_id, {
+      -- each matching char is worth 7 points (+ 1 for matching capitalization)
+      -- and it receives a bonus for capitalization, delimiter and prefix
       -- so this should generally be good
       -- TODO: make this configurable
-      min_score = config.fuzzy.use_typo_resistance and (6 * needle:len()) or 0,
+      -- TODO: instead of a min score, set X number of allowed typos
+      min_score = config.fuzzy.use_typo_resistance and (6 * keyword_length) or 0,
       use_typo_resistance = config.fuzzy.use_typo_resistance,
-      use_frecency = config.fuzzy.use_frecency and #needle > 0,
-      use_proximity = config.fuzzy.use_proximity and #needle > 0,
+      use_frecency = config.fuzzy.use_frecency and keyword_length > 0,
+      use_proximity = config.fuzzy.use_proximity and keyword_length > 0,
       sorts = config.fuzzy.sorts,
       nearby_words = nearby_words,
+      match_suffix = range == 'full',
     })
 
     for idx, item_index in ipairs(matched_indices) do
@@ -80,6 +96,23 @@ function fuzzy.fuzzy(needle, haystacks_by_provider)
   end
 
   return require('blink.cmp.fuzzy.sort').sort(filtered_items, config.fuzzy.sorts)
+end
+
+--- @param line string
+--- @param col number
+--- @param range? blink.cmp.CompletionKeywordRange
+--- @return number, number
+function fuzzy.get_keyword_range(line, col, range)
+  return require('blink.cmp.fuzzy.rust').get_keyword_range(line, col, range == 'full')
+end
+
+--- @param item blink.cmp.CompletionItem
+--- @param line string
+--- @param col number
+--- @param range blink.cmp.CompletionKeywordRange
+--- @return number, number
+function fuzzy.guess_edit_range(item, line, col, range)
+  return require('blink.cmp.fuzzy.rust').guess_edit_range(item, line, col, range == 'full')
 end
 
 return fuzzy

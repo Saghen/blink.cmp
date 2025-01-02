@@ -50,7 +50,7 @@ completion.trigger = {
   -- When false, will not show the completion window automatically when in a snippet
   show_in_snippet = true,
 
-  -- When true, will show the completion window after typing a character that matches the `keyword.regex`
+  -- When true, will show the completion window after typing any of alphanumerics, `-` or `_`
   show_on_keyword = true,
 
   -- When true, will show the completion window after typing a trigger character

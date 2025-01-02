@@ -12,19 +12,17 @@
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
 ---
 --- @field activate fun()
+--- @field is_keyword_character fun(char: string): boolean
 --- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
---- @field show fun(opts?: { trigger_kind: blink.cmp.CompletionTriggerKind, trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[] }): blink.cmp.Context
+--- @field show fun(opts?: { trigger_kind: blink.cmp.CompletionTriggerKind, trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[] }): blink.cmp.Context?
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
 --- @field get_bounds fun(regex: vim.regex, line: string, cursor: number[]): blink.cmp.ContextBounds
 
-local keyword_config = require('blink.cmp.config').completion.keyword
 local config = require('blink.cmp.config').completion.trigger
 local context = require('blink.cmp.completion.trigger.context')
-
-local keyword_regex = vim.regex(keyword_config.regex)
 
 --- @type blink.cmp.CompletionTrigger
 --- @diagnostic disable-next-line: missing-fields
@@ -54,7 +52,7 @@ function trigger.activate()
       trigger.show({ trigger_kind = 'trigger_character', trigger_character = char })
 
     -- character is part of a keyword
-    elseif keyword_regex:match_str(char) ~= nil and (config.show_on_keyword or trigger.context ~= nil) then
+    elseif trigger.is_keyword_character(char) and (config.show_on_keyword or trigger.context ~= nil) then
       trigger.show({ trigger_kind = 'keyword' })
 
     -- nothing matches so hide
@@ -74,7 +72,6 @@ function trigger.activate()
     local cursor = context.get_cursor()
     local cursor_col = cursor[2]
     local char_under_cursor = context.get_line():sub(cursor_col, cursor_col)
-    local is_on_keyword_char = keyword_regex:match_str(char_under_cursor) ~= nil
     local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
 
     local insert_enter_on_trigger_character = config.show_on_trigger_character
@@ -96,7 +93,11 @@ function trigger.activate()
       trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
 
     -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
-    elseif is_on_keyword_char and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
+    elseif
+      trigger.is_keyword_character(char_under_cursor)
+      and trigger.context ~= nil
+      and cursor_col == trigger.context.bounds.start_col - 1
+    then
       trigger.context = nil
       trigger.show({ trigger_kind = 'keyword' })
 
@@ -120,6 +121,11 @@ function trigger.activate()
     on_cursor_moved = on_cursor_moved,
     on_leave = function() trigger.hide() end,
   })
+end
+
+function trigger.is_keyword_character(char)
+  local keyword_start_col, keyword_end_col = require('blink.cmp.fuzzy').get_keyword_range(char, 1, 'prefix')
+  return keyword_start_col ~= keyword_end_col
 end
 
 function trigger.is_trigger_character(char, is_show_on_x)
