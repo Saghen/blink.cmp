@@ -63,10 +63,8 @@ function source.new(opts)
   return self
 end
 
-function source:enabled()
-  local ok, _ = pcall(require, 'mini.snippets')
-  return ok
-end
+-- Ensure that user has explicitly setup mini.snippets
+function source:enabled() return _G.MiniSnippets ~= nil end
 
 function source:get_completions(ctx, callback)
   local cache_key = get_cache_key()
