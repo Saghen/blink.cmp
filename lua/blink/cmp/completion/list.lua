@@ -100,7 +100,7 @@ function list.show(context, items_by_source)
   -- otherwise, use the default selection
   else
     list.select(
-      list.selection_mode == 'preselect' and 1 or nil,
+      (list.selection_mode == 'preselect' or list.selection_mode == 'auto_insert') and 1 or nil,
       { undo_preview = false, is_explicit_selection = false }
     )
   end
@@ -142,7 +142,7 @@ function list.select(idx, opts)
   require('blink.cmp.completion.trigger').suppress_events_for_callback(function()
     -- default to undoing the preview
     if opts.undo_preview ~= false then list.undo_preview() end
-    if list.selection_mode == 'auto_insert' and item then list.apply_preview(item) end
+    if (list.selection_mode == 'auto_insert' and idx ~= 1) and item then list.apply_preview(item) end
   end)
 
   --- @diagnostic disable-next-line: assign-type-mismatch
