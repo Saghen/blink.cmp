@@ -26,6 +26,7 @@ local default_config = {
 function registry.new(config)
   local self = setmetatable({}, { __index = registry })
   self.config = vim.tbl_deep_extend('force', default_config, config)
+  self.config.search_paths = vim.tbl_map(function(path) return vim.fs.normalize(path) end, self.config.search_paths)
 
   if self.config.friendly_snippets then
     for _, path in ipairs(vim.api.nvim_list_runtime_paths()) do
