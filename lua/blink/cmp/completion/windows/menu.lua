@@ -122,11 +122,7 @@ function menu.update_position()
   else
     local cursor_col = context.get_cursor()[2]
 
-    local col = context.bounds.start_col
-      - alignment_start_col
-      - cursor_col
-      - (context.bounds.length == 0 and 0 or 1)
-      - border_size.left
+    local col = context.bounds.start_col - alignment_start_col - cursor_col - 1 - border_size.left
     if config.draw.align_to == 'cursor' then col = 0 end
 
     win:set_win_config({ relative = 'cursor', row = row, col = col })
