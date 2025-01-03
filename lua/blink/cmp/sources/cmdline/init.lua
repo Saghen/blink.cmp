@@ -61,23 +61,24 @@ function cmdline:get_completions(context, callback)
     :map(function(completions)
       local items = {}
       for _, completion in ipairs(completions) do
-        -- remove prefix from the filter text for lua
+        local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
+
+        -- remove prefix from the filter text
         local filter_text = completion
-        if string.find(completion, current_arg_prefix, 1, true) == 1 then
-          filter_text = completion:sub(#current_arg_prefix + 1)
-        end
+        if has_prefix then filter_text = completion:sub(#current_arg_prefix + 1) end
 
         -- for lua, use the filter text as the label since it doesn't include the prefix
         local label = arguments[1] == 'lua' and filter_text or completion
 
         -- add prefix to the newText
         local new_text = completion
-        if string.find(new_text, current_arg_prefix, 1, true) ~= 1 then new_text = current_arg_prefix .. completion end
+        if has_prefix then new_text = current_arg_prefix .. completion end
 
         table.insert(items, {
           label = label,
           filterText = filter_text,
-          sortText = label:lower(),
+          -- move items starting with special characters to the end of the list
+          sortText = label:lower():gsub('^([!-@\\[-`])', '~%1'),
           textEdit = {
             newText = new_text,
             range = {
