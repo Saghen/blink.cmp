@@ -30,7 +30,7 @@
 - [@stefanboca](https://github.com/stefanboca) Author of [blink.compat](https://github.com/saghen/blink.compat)
 - [@lopi-py](https://github.com/lopi-py) Contributes to the windowing code
 - [@scottmckendry](https://github.com/scottmckendry) Contributes to the CI and prebuilt binaries
-- [@balssh](https://github.com/Balssh) Manages nixpkg and nixvim
+- [@balssh](https://github.com/Balssh) + [@konradmalik](https://github.com/konradmalik) Manages nix flake, nixpkg and nixvim
 
 ## Compared to nvim-cmp
 
