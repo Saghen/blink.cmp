@@ -1,3 +1,30 @@
+## [0.9.1](https://github.com/Saghen/blink.cmp/compare/v0.9.0...v0.9.1) (2025-01-03)
+
+### Features
+
+* ignore global min_keyword_length for manual trigger ([56f5d31](https://github.com/Saghen/blink.cmp/commit/56f5d314f772617b506d92e46b8e946535edc04e)), closes [#643](https://github.com/Saghen/blink.cmp/issues/643)
+* **nix:** add formatter ([#867](https://github.com/Saghen/blink.cmp/issues/867)) ([a0274b1](https://github.com/Saghen/blink.cmp/commit/a0274b10f04ea625b602f6383e3cb2fc38dcfd71)), closes [#736](https://github.com/Saghen/blink.cmp/issues/736)
+* normalize search paths ([8a64275](https://github.com/Saghen/blink.cmp/commit/8a64275948cead4de55cd78c7dc74b2c6465605e)), closes [#835](https://github.com/Saghen/blink.cmp/issues/835)
+* smarter edit/fuzzy range guessing ([768bcc0](https://github.com/Saghen/blink.cmp/commit/768bcc08282919168cd9bdf29aa8fcbf968fc457)), closes [#46](https://github.com/Saghen/blink.cmp/issues/46)
+* sort cmdline items starting with special characters last ([ae3bf0d](https://github.com/Saghen/blink.cmp/commit/ae3bf0d51902df20121378da2ee6893bcc92fa63)), closes [#818](https://github.com/Saghen/blink.cmp/issues/818)
+* support custom/customlist cmdline completions directly ([7e7deaa](https://github.com/Saghen/blink.cmp/commit/7e7deaa8bfa578d147e2d1f04a3373fac2afd58f)), closes [#849](https://github.com/Saghen/blink.cmp/issues/849)
+
+### Bug Fixes
+
+* column alignment off by 1 when bounds length == 0 ([0d162bd](https://github.com/Saghen/blink.cmp/commit/0d162bd1b0bbd80a1b5a2dc23d98249d4f8c28f6))
+* get full unicode char at cursor position ([e831cab](https://github.com/Saghen/blink.cmp/commit/e831cab7a4c31da02c72044190e9afc1a9ed584c)), closes [#864](https://github.com/Saghen/blink.cmp/issues/864)
+* hyphen not being considered a keyword ([8ca8ca4](https://github.com/Saghen/blink.cmp/commit/8ca8ca444e0801411e077cdee655e5efa3f77b36)), closes [#866](https://github.com/Saghen/blink.cmp/issues/866)
+* ignore non custom/customlist completion types ([f7857fc](https://github.com/Saghen/blink.cmp/commit/f7857fcb98e52899eb06f07ecb972a430d0de6e0)), closes [#849](https://github.com/Saghen/blink.cmp/issues/849)
+* keyword range not being respected for fuzzy matching ([4cc4e37](https://github.com/Saghen/blink.cmp/commit/4cc4e37dd39eec683a9e1a82e71cd1791bda7761))
+* path provider not respecting trailing_slash=false ([#862](https://github.com/Saghen/blink.cmp/issues/862)) ([0ff2ed5](https://github.com/Saghen/blink.cmp/commit/0ff2ed566e753844825cd8d2483933861cea55ff))
+* set undolevels to force undo point ([4c63b4e](https://github.com/Saghen/blink.cmp/commit/4c63b4e29738268950911bb0c70ffaaba26b53d7)), closes [#852](https://github.com/Saghen/blink.cmp/issues/852)
+* use tmp file for downloading to prevent crash on mac on update ([84e065b](https://github.com/Saghen/blink.cmp/commit/84e065bef1504076a0cc3f75f9867b9bce6f328b)), closes [#68](https://github.com/Saghen/blink.cmp/issues/68)
+* window direction sorting on Windows ([#846](https://github.com/Saghen/blink.cmp/issues/846)) ([00ad008](https://github.com/Saghen/blink.cmp/commit/00ad008cbea4d0d2b5880e7c7386caa9fc4e5e2b))
+
+### Performance Improvements
+
+* use faster 0.11 vim.validate ([#868](https://github.com/Saghen/blink.cmp/issues/868)) ([a8957ba](https://github.com/Saghen/blink.cmp/commit/a8957bab8faad4436e7ad62244c39335b95450a4))
+
 ## [0.9.0](https://github.com/Saghen/blink.cmp/compare/v0.8.2...v0.9.0) (2024-12-31)
 
 ### BREAKING CHANGES
