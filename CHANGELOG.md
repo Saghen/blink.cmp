@@ -1,3 +1,9 @@
+## [0.9.2](https://github.com/Saghen/blink.cmp/compare/v0.9.1...v0.9.2) (2025-01-03)
+
+### Bug Fixes
+
+* unicode range when checking if char is keyword ([100d3c8](https://github.com/Saghen/blink.cmp/commit/100d3c8bfc8059c2fd2347d00ab70ee91c7ff3ca)), closes [#878](https://github.com/Saghen/blink.cmp/issues/878)
+
 ## [0.9.1](https://github.com/Saghen/blink.cmp/compare/v0.9.0...v0.9.1) (2025-01-03)
 
 ### Features
