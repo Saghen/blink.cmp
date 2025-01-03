@@ -23,6 +23,7 @@
 
 local config = require('blink.cmp.config').completion.trigger
 local context = require('blink.cmp.completion.trigger.context')
+local utils = require('blink.cmp.completion.trigger.utils')
 
 --- @type blink.cmp.CompletionTrigger
 --- @diagnostic disable-next-line: missing-fields
@@ -71,7 +72,8 @@ function trigger.activate()
 
     local cursor = context.get_cursor()
     local cursor_col = cursor[2]
-    local char_under_cursor = context.get_line():sub(cursor_col, cursor_col)
+
+    local char_under_cursor = utils.get_char_at_cursor()
     local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
 
     local insert_enter_on_trigger_character = config.show_on_trigger_character

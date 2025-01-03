@@ -8,14 +8,16 @@ lazy_static! {
 
 /// Given a line and cursor position, returns the start and end indices of the keyword
 pub fn get_keyword_range(line: &str, col: usize, match_suffix: bool) -> (usize, usize) {
-    let line_before = line.chars().take(col).collect::<String>();
-    let before_match_start = BACKWARD_REGEX.find(&line_before).map(|m| m.start());
+    let before_match_start = BACKWARD_REGEX
+        .find(&line[0..col.min(line.len())])
+        .map(|m| m.start());
     if !match_suffix {
         return (before_match_start.unwrap_or(col), col);
     }
 
-    let line_after = line.chars().skip(col).collect::<String>();
-    let after_match_end = FORWARD_REGEX.find(&line_after).map(|m| m.end() + col);
+    let after_match_end = FORWARD_REGEX
+        .find(&line[col.min(line.len())..])
+        .map(|m| m.end() + col);
     (
         before_match_start.unwrap_or(col),
         after_match_end.unwrap_or(col),
@@ -62,4 +64,16 @@ pub fn guess_keyword_from_item(
 ) -> String {
     let (start, end) = guess_keyword_range_from_item(item_text, line, cursor_col, match_suffix);
     line[start..end].to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_keyword_range_unicode() {
+        let line = "'вest'";
+        let col = line.len() - 1;
+        assert_eq!(get_keyword_range(line, col, false), (1, line.len() - 1));
+    }
 }
