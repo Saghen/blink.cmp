@@ -33,14 +33,21 @@ function download.ensure_downloaded(callback)
 
       -- built locally, ignore
       if
-        version.current.sha == version.git.sha
-        or version.current.sha ~= nil and download_config.ignore_version_mismatch
+        not download_config.force_version
+        and (
+          version.current.sha == version.git.sha
+          or version.current.sha ~= nil and download_config.ignore_version_mismatch
+        )
       then
         return
       end
 
       -- built locally but outdated and not on a git tag, error
-      if version.current.sha ~= nil and version.current.sha ~= version.git.sha then
+      if
+        not download_config.force_version
+        and version.current.sha ~= nil
+        and version.current.sha ~= version.git.sha
+      then
         assert(
           target_git_tag or download_config.ignore_version_mismatch,
           "\nFound an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag. "
@@ -112,10 +119,23 @@ function download.from_github(tag)
     local library_url = base_url .. system_triple .. files.get_lib_extension()
     local checksum_url = base_url .. system_triple .. files.get_lib_extension() .. '.sha256'
 
-    return async.task.await_all({
-      download.download_file(library_url, files.lib_filename),
-      download.download_file(checksum_url, files.checksum_filename),
-    })
+    return async
+      .task
+      .await_all({
+        download.download_file(library_url, files.lib_filename .. '.tmp'),
+        download.download_file(checksum_url, files.checksum_filename),
+      })
+      -- Mac caches the library in the kernel, so updating in place causes a crash
+      -- We instead write to a temporary file and rename it, as mentioned in:
+      -- https://developer.apple.com/documentation/security/updating-mac-software
+      :map(
+        function()
+          return files.rename(
+            files.lib_folder .. '/' .. files.lib_filename .. '.tmp',
+            files.lib_folder .. '/' .. files.lib_filename
+          )
+        end
+      )
   end)
 end
 

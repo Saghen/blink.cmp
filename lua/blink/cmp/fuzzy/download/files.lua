@@ -166,4 +166,16 @@ function files.create_dir(path)
     end)
 end
 
+--- Renames a file
+--- @param old_path string
+--- @param new_path string
+function files.rename(old_path, new_path)
+  return async.task.new(function(resolve, reject)
+    vim.uv.fs_rename(old_path, new_path, function(err)
+      if err then return reject(err) end
+      resolve()
+    end)
+  end)
+end
+
 return files
