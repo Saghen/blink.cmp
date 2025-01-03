@@ -17,7 +17,7 @@ function path.new(opts)
 
   --- @type blink.cmp.PathOpts
   opts = vim.tbl_deep_extend('keep', opts or {}, {
-    trailing_slash = false,
+    trailing_slash = true,
     label_trailing_slash = true,
     get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,
     show_hidden_files_by_default = false,
