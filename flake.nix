@@ -101,6 +101,8 @@
           ];
           packages = with pkgs; [ rust-analyzer-nightly ];
         };
+
+        formatter = pkgs.nixfmt-classic;
       };
     };
 }
