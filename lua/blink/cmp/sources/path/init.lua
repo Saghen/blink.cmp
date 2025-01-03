@@ -22,7 +22,7 @@ function path.new(opts)
     get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,
     show_hidden_files_by_default = false,
   })
-  vim.validate({
+  require("blink.cmp.config.utils").fastValidate({
     trailing_slash = { opts.trailing_slash, 'boolean' },
     label_trailing_slash = { opts.label_trailing_slash, 'boolean' },
     get_cwd = { opts.get_cwd, 'function' },
