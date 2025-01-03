@@ -168,7 +168,7 @@ function keymap.validate(config)
       }
     end
   end
-  vim.validate(validation_schema)
+  require('blink.cmp.config.utils')._validate(validation_schema)
 end
 
 return keymap
