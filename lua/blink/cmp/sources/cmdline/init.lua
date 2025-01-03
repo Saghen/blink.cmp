@@ -38,12 +38,18 @@ function cmdline:get_completions(context, callback)
         return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix)
       end
 
-      local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
+      local completions = {}
       local completion_type = vim.fn.getcmdcompltype()
-      if not vim.startswith(completion_type, 'custom,') and not vim.startswith(completion_type, 'customlist,') then
-        completion_type = 'cmdline'
+      -- Handle custom completions explicitly, since otherwise they won't work in input() mode (getcmdtype() == '@')
+      if vim.startswith(completion_type, 'custom,') or vim.startswith(completion_type, 'customlist,') then
+        local fun = completion_type:gsub('custom,', ''):gsub('customlist,', '')
+        completions = vim.fn.call(fun, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
+        -- `custom,` type returns a string, delimited by newlines
+        if type(completions) == 'string' then completions = vim.split(completions, '\n') end
+      else
+        local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
+        completions = vim.fn.getcompletion(query, 'cmdline')
       end
-      local completions = vim.fn.getcompletion(query, completion_type)
 
       -- Special case for files, escape special characters
       if vim.tbl_contains(constants.file_commands, arguments[1] or '') then
