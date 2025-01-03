@@ -491,6 +491,12 @@ sources.providers = {
       end,
     }
   },
+  dictionary = {
+    name = 'Dictionary',
+    module = 'blink.cmp.sources.dictionary',
+    score_offset = -3,
+    fallbacks = { 'buffer' },
+  },
 }
 ```
 
