@@ -7,9 +7,8 @@
 --- @field get_cwd fun(context: blink.cmp.Context): string
 --- @field show_hidden_files_by_default boolean
 
-local regex = require('blink.cmp.sources.path.regex')
-
 --- @class blink.cmp.Source
+--- @field opts blink.cmp.PathOpts
 local path = {}
 
 function path.new(opts)
@@ -22,12 +21,12 @@ function path.new(opts)
     get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,
     show_hidden_files_by_default = false,
   })
-  require("blink.cmp.config.utils").fastValidate({
+  require('blink.cmp.config.utils').validate('sources.providers.path', {
     trailing_slash = { opts.trailing_slash, 'boolean' },
     label_trailing_slash = { opts.label_trailing_slash, 'boolean' },
     get_cwd = { opts.get_cwd, 'function' },
     show_hidden_files_by_default = { opts.show_hidden_files_by_default, 'boolean' },
-  })
+  }, opts)
 
   self.opts = opts
   return self
