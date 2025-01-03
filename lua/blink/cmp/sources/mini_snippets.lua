@@ -70,8 +70,6 @@ end
 
 function source:get_completions(ctx, callback)
   local cache_key = get_cache_key()
-  vim.notify(cache_key)
-
   --- @type blink.cmp.CompletionItem[] | nil
   local items = self.items_cache[cache_key]
 
