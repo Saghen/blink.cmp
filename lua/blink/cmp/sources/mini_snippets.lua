@@ -7,6 +7,7 @@
 --- @type blink.cmp.MiniSnippetsSource
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
+
 local defaults_config = {}
 
 -- Copied from mini.snippets: H.get_default_context
@@ -86,8 +87,26 @@ function source:get_completions(ctx, callback)
   })
 end
 
--- TODO: Implement...
-function source:resolve(item, callback) callback(item) end
+function source:resolve(item, callback)
+  local snip = item.data.snip
+  local resolved_item = vim.deepcopy(item)
+
+  ---@diagnostic disable-next-line: undefined-field
+  local detail = snip.body
+  if type(detail) == 'table' then detail = table.concat(detail, '\n') end
+  resolved_item.detail = detail
+
+  ---@diagnostic disable-next-line: undefined-field
+  local desc = snip.desc
+  if desc then
+    resolved_item.documentation = {
+      kind = 'markdown',
+      value = table.concat(vim.lsp.util.convert_input_to_markdown_lines(desc), '\n'),
+    }
+  end
+
+  callback(resolved_item)
+end
 
 function source:execute(_, item)
   -- Remove the word inserted by blink and insert snippet
