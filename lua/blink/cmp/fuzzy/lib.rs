@@ -113,6 +113,7 @@ pub fn guess_edit_range(
     _lua: &Lua,
     (item, line, cursor_col, match_suffix): (LspItem, String, usize, bool),
 ) -> LuaResult<(usize, usize)> {
+    // TODO: take the max range from insert_text and filter_text
     Ok(keyword::guess_keyword_range_from_item(
         item.insert_text.as_ref().unwrap_or(&item.label),
         &line,

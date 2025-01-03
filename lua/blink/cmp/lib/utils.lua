@@ -96,8 +96,8 @@ end
 --- Slices an array
 --- @generic T
 --- @param arr T[]
---- @param start number
---- @param finish number
+--- @param start number?
+--- @param finish number?
 --- @return T[]
 function utils.slice(arr, start, finish)
   start = start or 1

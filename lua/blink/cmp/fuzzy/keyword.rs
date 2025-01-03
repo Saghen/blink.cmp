@@ -38,6 +38,11 @@ pub fn get_keyword_range(line: &str, col: usize, match_suffix: bool) -> (usize, 
 ///   line: example/trim
 ///   item: str/trim
 ///   matches on: trim
+///
+/// TODO:
+///   line: '
+///   item: 'tabline'
+///   matches on: '
 pub fn guess_keyword_range_from_item(
     item_text: &str,
     line: &str,
