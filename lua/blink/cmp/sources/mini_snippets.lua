@@ -4,6 +4,11 @@
 --- @field config blink.cmp.MiniSnippetsSourceOptions
 --- @field items_cache table<string, blink.cmp.CompletionItem[]>
 
+--- @class blink.cmp.MiniSnippetsSnippet
+--- @field prefix string string snippet identifier.
+--- @field body string string snippet content with appropriate syntax.
+--- @field desc string string snippet description in human readable form.
+
 --- @type blink.cmp.MiniSnippetsSource
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
@@ -77,22 +82,19 @@ function source:get_completions(ctx, callback)
 end
 
 function source:resolve(item, callback)
+  --- @type blink.cmp.MiniSnippetsSnippet
   local snip = item.data.snip
 
-  ---@diagnostic disable-next-line: undefined-field
   local desc = snip.desc
   if desc and not item.documentation then
-    vim.notify('building doc')
     item.documentation = {
       kind = 'markdown',
       value = table.concat(vim.lsp.util.convert_input_to_markdown_lines(desc), '\n'),
     }
   end
 
-  ---@diagnostic disable-next-line: undefined-field
   local detail = snip.body
   if not item.detail then
-    vim.notify('building detail')
     if type(detail) == 'table' then detail = table.concat(detail, '\n') end
     item.detail = detail
   end
@@ -103,6 +105,8 @@ end
 function source:execute(_, item)
   -- Remove the word inserted by blink and insert snippet
   -- It's safe to assume that mode is insert during completion
+
+  --- @type blink.cmp.MiniSnippetsSnippet
   local snip = item.data.snip
 
   local cursor = vim.api.nvim_win_get_cursor(0)
@@ -111,7 +115,7 @@ function source:execute(_, item)
   vim.api.nvim_buf_set_text(0, cursor[1], start_col, cursor[1], cursor[2], {})
 
   local insert = MiniSnippets.config.expand.insert or MiniSnippets.default_insert
-  ---@diagnostic disable-next-line: undefined-field, missing-return
+  ---@diagnostic disable-next-line: missing-return
   insert({ body = snip.body }) -- insert at cursor
 end
 
