@@ -117,8 +117,8 @@ end
 
 -- For external integrations to force reloading the snippets
 function source:reload()
-  -- mini.snippets: snippets can not be added/deleted/changed dynamically
-  -- self.items_cache = {}
+  MiniSnippets.setup(MiniSnippets.config)
+  self.items_cache = {}
 end
 
 return source
