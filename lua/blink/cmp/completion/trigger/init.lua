@@ -83,8 +83,11 @@ function trigger.activate()
       and event == 'InsertEnter'
       and trigger.is_trigger_character(char_under_cursor, true)
 
+    local is_keyword_character = trigger.is_keyword_character(char_under_cursor)
+    local moved_off_word = event == 'CursorMoved' and not is_keyword_character
+
     -- check if we're still within the bounds of the query used for the context
-    if trigger.context ~= nil and trigger.context:within_query_bounds(cursor) then
+    if trigger.context ~= nil and trigger.context:within_query_bounds(cursor) and not moved_off_word then
       trigger.show({ trigger_kind = 'keyword' })
 
     -- check if we've entered insert mode on a trigger character
@@ -97,11 +100,7 @@ function trigger.activate()
       trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
 
     -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
-    elseif
-      trigger.is_keyword_character(char_under_cursor)
-      and trigger.context ~= nil
-      and cursor_col == trigger.context.bounds.start_col - 1
-    then
+    elseif is_keyword_character and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
       trigger.context = nil
       trigger.show({ trigger_kind = 'keyword' })
 
