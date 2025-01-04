@@ -72,7 +72,7 @@ function cmdline:get_completions(context, callback)
 
         -- add prefix to the newText
         local new_text = completion
-        if has_prefix then new_text = current_arg_prefix .. completion end
+        if not has_prefix then new_text = current_arg_prefix .. completion end
 
         table.insert(items, {
           label = label,
