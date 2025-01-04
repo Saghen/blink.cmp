@@ -1,4 +1,5 @@
 --- @class blink.cmp.MiniSnippetsSourceOptions
+--- @field use_items_cache? boolean completion items are cached using default mini.snippets context
 
 --- @class blink.cmp.MiniSnippetsSource : blink.cmp.Source
 --- @field config blink.cmp.MiniSnippetsSourceOptions
@@ -13,20 +14,25 @@
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
 
-local defaults_config = {} -- currently, no options needed
+local defaults_config = {
+  use_items_cache = true, -- allow the user to disable caching completion items
+}
 
 function source.new(opts)
   local config = vim.tbl_deep_extend('keep', opts or {}, defaults_config)
+  vim.validate({
+    use_items_cache = { config.use_items_cache, 'boolean' },
+  })
+
   local self = setmetatable({}, { __index = source })
   self.config = config
   self.items_cache = {}
   return self
 end
 
--- Ensure that user has explicitly setup mini.snippets
 function source:enabled()
   ---@diagnostic disable-next-line: undefined-field
-  return _G.MiniSnippets ~= nil
+  return _G.MiniSnippets ~= nil -- ensure that user has explicitly setup mini.snippets
 end
 
 local function to_completion_items(snippets)
@@ -46,15 +52,18 @@ local function to_completion_items(snippets)
   return result
 end
 
--- Cached by buf_id/ft combination:
--- vim.b.minisnippets_config can contain buffer-local snippets.
+-- NOTE: Completion items are cached by default using the default 'mini.snippets' context
 --
--- From the help, MiniSnippets.default_prepare:
--- Unlike |MiniSnippets.gen_loader| entries, there is no output caching. This
--- avoids duplicating data from `gen_loader` cache and reduces memory usage.
--- It also means that every |MiniSnippets.expand()| call prepares snippets, which
--- is usually fast enough. If not, consider manual caching:
+-- vim.b.minisnippets_config can contain buffer-local snippets.
+-- a buffer can contain code in multiple languages
+--
+-- See :h MiniSnippets.default_prepare
+--
+-- Return completion items produced from snippets either directly or from cache
 local function get_completion_items(cache)
+  if not cache then return to_completion_items(MiniSnippets.expand({ match = false, insert = false })) end
+
+  -- Compute cache id
   local _, context = MiniSnippets.default_prepare({})
   local id = 'buf=' .. context.buf_id .. ',lang=' .. context.lang
 
@@ -62,7 +71,7 @@ local function get_completion_items(cache)
   if cache[id] then return cache[id] end
 
   -- Retrieve all raw snippets in context and transform into completion items
-  local snippets = MiniSnippets.expand({ match = false, insert = false }) or {}
+  local snippets = MiniSnippets.expand({ match = false, insert = false })
   local items = to_completion_items(vim.deepcopy(snippets))
   cache[id] = items
 
@@ -70,8 +79,10 @@ local function get_completion_items(cache)
 end
 
 function source:get_completions(ctx, callback)
+  local cache = self.config.use_items_cache and self.items_cache or nil
+
   --- @type blink.cmp.CompletionItem[]
-  local items = get_completion_items(self.items_cache)
+  local items = get_completion_items(cache)
   callback({
     is_incomplete_forward = false,
     is_incomplete_backward = false,
