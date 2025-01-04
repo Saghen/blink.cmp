@@ -78,23 +78,26 @@ end
 
 function source:resolve(item, callback)
   local snip = item.data.snip
-  local resolved_item = vim.deepcopy(item)
-
-  ---@diagnostic disable-next-line: undefined-field
-  local detail = snip.body
-  if type(detail) == 'table' then detail = table.concat(detail, '\n') end
-  resolved_item.detail = detail
 
   ---@diagnostic disable-next-line: undefined-field
   local desc = snip.desc
-  if desc then
-    resolved_item.documentation = {
+  if desc and not item.documentation then
+    vim.notify('building doc')
+    item.documentation = {
       kind = 'markdown',
       value = table.concat(vim.lsp.util.convert_input_to_markdown_lines(desc), '\n'),
     }
   end
 
-  callback(resolved_item)
+  ---@diagnostic disable-next-line: undefined-field
+  local detail = snip.body
+  if not item.detail then
+    vim.notify('building detail')
+    if type(detail) == 'table' then detail = table.concat(detail, '\n') end
+    item.detail = detail
+  end
+
+  callback(item)
 end
 
 function source:execute(_, item)
