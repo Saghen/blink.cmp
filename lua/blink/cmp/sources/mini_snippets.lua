@@ -1,4 +1,4 @@
---- @class blink.cmp.MiniSnippetsSourceOptions -- for future options
+--- @class blink.cmp.MiniSnippetsSourceOptions
 
 --- @class blink.cmp.MiniSnippetsSource : blink.cmp.Source
 --- @field config blink.cmp.MiniSnippetsSourceOptions
@@ -8,36 +8,23 @@
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
 
-local defaults_config = {}
+local defaults_config = {} -- currently, no options needed
 
--- Copied from mini.snippets: H.get_default_context
--- In mini.snippets the  context function can be overridden in the config
--- For now, only return lang.
-local get_cache_key = function()
-  local buf_id = vim.api.nvim_get_current_buf()
-  local lang = vim.bo[buf_id].filetype
-
-  -- TODO: Remove `opts.error` after compatibility with Neovim=0.11 is dropped
-  local has_parser, parser = pcall(vim.treesitter.get_parser, buf_id, nil, { error = false })
-  if not has_parser or parser == nil then return lang end
-
-  -- Compute local TS language from the deepest parser covering position
-  local lnum, col = vim.fn.line('.'), vim.fn.col('.')
-  local ref_range, res_level = { lnum - 1, col - 1, lnum - 1, col }, 0
-  local traverse
-  traverse = function(lang_tree, level)
-    if lang_tree:contains(ref_range) and level > res_level then lang = lang_tree:lang() or lang end
-    for _, child_lang_tree in pairs(lang_tree:children()) do
-      traverse(child_lang_tree, level + 1)
-    end
-  end
-  traverse(parser, 1)
-
-  return lang
+function source.new(opts)
+  local config = vim.tbl_deep_extend('keep', opts or {}, defaults_config)
+  local self = setmetatable({}, { __index = source })
+  self.config = config
+  self.items_cache = {}
+  return self
 end
 
-local function expand()
-  local snippets = MiniSnippets.expand({ match = false, insert = false }) or {}
+-- Ensure that user has explicitly setup mini.snippets
+function source:enabled()
+  ---@diagnostic disable-next-line: undefined-field
+  return _G.MiniSnippets ~= nil
+end
+
+local function to_completion_items(snippets)
   local result = {}
 
   for _, snip in ipairs(snippets) do
@@ -54,30 +41,32 @@ local function expand()
   return result
 end
 
-function source.new(opts)
-  local config = vim.tbl_deep_extend('keep', opts or {}, defaults_config)
-  -- vim.validate: no items in default_config for now
+-- Cached by buf_id/ft combination:
+-- vim.b.minisnippets_config can contain buffer-local snippets.
+--
+-- From the help, MiniSnippets.default_prepare:
+-- Unlike |MiniSnippets.gen_loader| entries, there is no output caching. This
+-- avoids duplicating data from `gen_loader` cache and reduces memory usage.
+-- It also means that every |MiniSnippets.expand()| call prepares snippets, which
+-- is usually fast enough. If not, consider manual caching:
+local function get_completion_items(cache)
+  local _, context = MiniSnippets.default_prepare({})
+  local id = 'buf=' .. context.buf_id .. ',lang=' .. context.lang
 
-  local self = setmetatable({}, { __index = source })
-  self.config = config
-  self.items_cache = {}
-  return self
+  -- Return the completion items for this context from cache
+  if cache[id] then return cache[id] end
+
+  -- Retrieve all raw snippets in context and transform into completion items
+  local snippets = MiniSnippets.expand({ match = false, insert = false }) or {}
+  local items = to_completion_items(vim.deepcopy(snippets))
+  cache[id] = items
+
+  return items
 end
 
--- Ensure that user has explicitly setup mini.snippets
-function source:enabled() return _G.MiniSnippets ~= nil end
-
 function source:get_completions(ctx, callback)
-  local cache_key = get_cache_key()
-  --- @type blink.cmp.CompletionItem[] | nil
-  local items = self.items_cache[cache_key]
-
-  if not items then -- initialize cache for this context
-    local new_items = expand()
-    self.items_cache[cache_key] = new_items
-    items = new_items
-  end
-
+  --- @type blink.cmp.CompletionItem[]
+  local items = get_completion_items(self.items_cache)
   callback({
     is_incomplete_forward = false,
     is_incomplete_backward = false,
