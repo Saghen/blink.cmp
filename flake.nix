@@ -83,7 +83,12 @@
           program = let
             buildScript = pkgs.writeShellApplication {
               name = "build-plugin";
-              runtimeInputs = with pkgs; [ fenix.minimal.toolchain gcc ];
+              runtimeInputs = with pkgs;
+                [
+                  fenix.minimal.toolchain
+                ]
+                # use the native gcc on macos, see #652
+                ++ lib.optionals (!pkgs.stdenv.isDarwin) [ gcc ];
               text = ''
                 cargo build --release
               '';
