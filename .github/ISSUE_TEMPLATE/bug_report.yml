@@ -7,14 +7,15 @@ body:
     attributes:
       label: Make sure you have done the following
       options:
-        - label: I have updated to the latest version of `blink.cmp`
+        - label: Updated to the latest version of `blink.cmp`
           required: true
-        - label: I have read the README
+        - label: Searched for existing issues and documentation (try <C-k> on https://cmp.saghen.dev!)
           required: true
   - type: textarea
     id: bug-description
     attributes:
       label: Bug Description
+      description: If the issue may be related to your configuration, please include a [repro.lua](https://github.com/Saghen/blink.cmp/blob/main/repro.lua)
     validations: { required: true }
   - type: textarea
     id: user-config
@@ -24,9 +25,7 @@ body:
       render: lua
       placeholder: |
         sources = {
-          completion = {
-            enabled_providers = { "lsp", "path", "snippets", "buffer" },
-          },
+          default = { 'lsp', 'path', 'snippets', 'buffer' },
         },
     validations: { required: false }
   - type: input
@@ -39,5 +38,5 @@ body:
     id: branch-or-tag
     attributes:
       label: "`blink.cmp` version: branch, tag, or commit"
-      placeholder: "for example: main or v0.4.0"
+      placeholder: "examples: main, d2b411c or v0.9.2"
     validations: { required: true }
