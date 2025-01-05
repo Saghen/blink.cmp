@@ -18,18 +18,18 @@ local function preview(item)
     text_edit.range.start.character + #text_edit.newText,
   }
 
-  text_edits_lib.apply({ text_edit })
+  text_edits_lib.apply({ text_edit }):map(function()
+    local original_cursor = vim.api.nvim_win_get_cursor(0)
+    local cursor_moved = false
 
-  local original_cursor = vim.api.nvim_win_get_cursor(0)
-  local cursor_moved = false
+    -- TODO: remove when text_edits_lib.apply begins setting cursor position
+    if vim.api.nvim_get_mode().mode ~= 'c' then
+      vim.api.nvim_win_set_cursor(0, cursor_pos)
+      cursor_moved = true
+    end
 
-  -- TODO: remove when text_edits_lib.apply begins setting cursor position
-  if vim.api.nvim_get_mode().mode ~= 'c' then
-    vim.api.nvim_win_set_cursor(0, cursor_pos)
-    cursor_moved = true
-  end
-
-  return undo_text_edit, cursor_moved and original_cursor or nil
+    return undo_text_edit, cursor_moved and original_cursor or nil
+  end)
 end
 
 return preview

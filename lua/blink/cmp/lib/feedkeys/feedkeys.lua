@@ -1,9 +1,18 @@
+--- Provides a way to enter keys in a sequence. We want to do this because it
+--- also appends these keys to the `.` register, which is used with
+--- dot-repeating.
+--- The implementation is based on the one in nvim-cmp, except that it's using
+--- blink's async utilities.
+---
+--- vim.api.nvim_feedkeys is blocking, but to truly wait for the keys to
+--- actually have been inserted, 'x' (immediate mode) should be used.
+
 local feedkeys = {}
 
-feedkeys.call = setmetatable({
-  callbacks = {},
-}, {
-  __call = function(self, keys, mode, callback)
+---@nodiscard
+feedkeys.call_async = function(keys, mode)
+  local task = require('blink.cmp.lib.async').task
+  return task.new(function(resolve)
     local is_insert = string.match(mode, 'i') ~= nil
     local is_immediate = string.match(mode, 'x') ~= nil
 
@@ -18,17 +27,6 @@ feedkeys.call = setmetatable({
       table.insert(queue, { feedkeys.t('<Cmd>setlocal backspace=%s<CR>'):format(vim.go.backspace or 2), 'n' })
     end
 
-    if callback then
-      -- since we run inserting keys in a queue, we need to run the callback in
-      -- a queue as well so it runs after the keys have been inserted
-      local id = feedkeys.id('blink.feedkeys.call')
-      self.callbacks[id] = callback
-      table.insert(
-        queue,
-        { feedkeys.t('<Cmd>lua require"blink.cmp.lib.feedkeys.feedkeys".run(%s)<CR>'):format(id), 'n', true }
-      )
-    end
-
     if is_insert then
       for i = #queue, 1, -1 do
         vim.api.nvim_feedkeys(queue[i][1], queue[i][2] .. 'i', queue[i][3])
@@ -40,28 +38,10 @@ feedkeys.call = setmetatable({
     end
 
     if is_immediate then vim.api.nvim_feedkeys('', 'x', true) end
-  end,
-})
 
-feedkeys.run = function(id)
-  if feedkeys.call.callbacks[id] then
-    local ok, err = pcall(feedkeys.call.callbacks[id])
-    if not ok then vim.notify(err, vim.log.levels.ERROR) end
-    feedkeys.call.callbacks[id] = nil
-  end
-  return ''
+    return resolve()
+  end)
 end
-
----Generate id for group name
-feedkeys.id = setmetatable({
-  group = {},
-}, {
-  __call = function(_, group)
-    feedkeys.id.group[group] = feedkeys.id.group[group] or 0
-    feedkeys.id.group[group] = feedkeys.id.group[group] + 1
-    return feedkeys.id.group[group]
-  end,
-})
 
 ---Shortcut for nvim_replace_termcodes
 ---@param keys string
