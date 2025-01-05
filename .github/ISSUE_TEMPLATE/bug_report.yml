@@ -9,7 +9,7 @@ body:
       options:
         - label: Updated to the latest version of `blink.cmp`
           required: true
-        - label: Searched for existing issues and documentation (try <C-k> on https://cmp.saghen.dev!)
+        - label: Searched for existing issues and documentation (try `<C-k>` on https://cmp.saghen.dev!)
           required: true
   - type: textarea
     id: bug-description
@@ -37,6 +37,6 @@ body:
   - type: input
     id: branch-or-tag
     attributes:
-      label: "`blink.cmp` version: branch, tag, or commit"
+      label: "`blink.cmp` version"
       placeholder: "examples: main, d2b411c or v0.9.2"
     validations: { required: true }
