@@ -31,7 +31,7 @@ body:
   - type: input
     id: version-info
     attributes:
-      label: neovim version
+      label: "`neovim` version"
       placeholder: "output of `nvim --version`"
     validations: { required: true }
   - type: input
