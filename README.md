@@ -22,7 +22,7 @@
 
 ## Installation
 
-Head over to the [documentation website](https://cmp.saghen.dev) for installation instructions and configuration options.
+Head over to the [documentation website](https://cmp.saghen.dev/installation) for installation instructions and configuration options.
 
 ## Special Thanks
 
