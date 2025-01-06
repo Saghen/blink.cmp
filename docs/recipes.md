@@ -137,6 +137,8 @@ vim.api.nvim_create_autocmd('User', {
 
 ### Show on newline, tab and space
 
+Note that you may want to add the override to other sources as well, since if the LSP doesnt return any items, we won't show the menu if it was triggered by any of these three characters.
+
 ```lua
 -- by default, blink.cmp will block newline, tab and space trigger characters, disable that behavior
 completion.trigger.blocked_trigger_characters = {}
