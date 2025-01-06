@@ -57,6 +57,9 @@
 }
 ```
 
+> [!IMPORTANT]
+> On Neovim 0.11+ and Blink.cmp 0.10+, you may skip this step
+
 Setting capabilities for `nvim-lspconfig`:
 
 ```lua

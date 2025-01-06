@@ -11,8 +11,7 @@ function cmp.setup(opts)
 
   opts = opts or {}
 
-  local version = vim.version()
-  if version.major == 0 and version.minor < 10 then
+  if vim.fn.has('nvim-0.10') == 0 then
     vim.notify('blink.cmp requires nvim 0.10 and newer', vim.log.levels.ERROR, { title = 'blink.cmp' })
     return
   end
