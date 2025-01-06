@@ -8,9 +8,6 @@ local MAX_CACHE_SIZE = 1000
 --- @param ctx blink.cmp.DrawItemContext
 --- @param opts? {offset?: number}
 function treesitter.highlight(ctx, opts)
-  -- early return if treesitter highlight is disabled
-  if not vim.b.ts_highlight then return {} end
-
   local ret = cache[ctx.label]
   if not ret then
     -- cleanup cache if it's too big
