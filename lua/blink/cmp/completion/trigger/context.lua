@@ -76,7 +76,7 @@ end
 function context:within_query_bounds(cursor)
   local row, col = cursor[1], cursor[2]
   local bounds = self.bounds
-  return row == bounds.line_number and col >= bounds.start_col and col <= (bounds.start_col + bounds.length)
+  return row == bounds.line_number and col >= bounds.start_col and col < (bounds.start_col + bounds.length)
 end
 
 function context.get_mode() return vim.api.nvim_get_mode().mode == 'c' and 'cmdline' or 'default' end
