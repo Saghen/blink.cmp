@@ -1,3 +1,19 @@
+## [0.9.3](https://github.com/Saghen/blink.cmp/compare/v0.9.2...v0.9.3) (2025-01-06)
+
+### Features
+
+* add plaintex, tex and context brackets ([9ffdb7b](https://github.com/Saghen/blink.cmp/commit/9ffdb7b71d0ee9abcccb61d3b8fb60defc4d47ff))
+* **path:** replace `/` in front of cursor on directory ([d2b411c](https://github.com/Saghen/blink.cmp/commit/d2b411ca2ec894ccab9d7dc0bd506e44920983ef))
+
+### Bug Fixes
+
+* add .repro to gitignore ([0d1e3c3](https://github.com/Saghen/blink.cmp/commit/0d1e3c34b172bf93380f8675ec962c301f2b5aaa))
+* cmdline completion new text not including prefix ([bc480aa](https://github.com/Saghen/blink.cmp/commit/bc480aa927ef4afbf5431f566e8aea7458e9f8df)), closes [#883](https://github.com/Saghen/blink.cmp/issues/883)
+* ignore buffer local treesitter option ([d704244](https://github.com/Saghen/blink.cmp/commit/d704244327c1bc1fdd9c0218fe4fff04ca78d3c0)), closes [#913](https://github.com/Saghen/blink.cmp/issues/913)
+* ignore non-key char in cmdline completion ([cc0e632](https://github.com/Saghen/blink.cmp/commit/cc0e6329e7603b5749c7fe98a76e39ed17bab860)), closes [#893](https://github.com/Saghen/blink.cmp/issues/893)
+* **nix:** use native gcc on macos ([3ab6832](https://github.com/Saghen/blink.cmp/commit/3ab6832b2fc3e49aad9c984089cfc0c5ec788531)), closes [#652](https://github.com/Saghen/blink.cmp/issues/652)
+* **nix:** use nix gcc and provide libiconv ([#916](https://github.com/Saghen/blink.cmp/issues/916)) ([5d2d601](https://github.com/Saghen/blink.cmp/commit/5d2d6010d9a5376f9073c1182887e547e3c0ec17))
+
 ## [0.9.2](https://github.com/Saghen/blink.cmp/compare/v0.9.1...v0.9.2) (2025-01-03)
 
 ### Bug Fixes
