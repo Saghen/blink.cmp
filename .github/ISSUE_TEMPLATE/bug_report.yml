@@ -9,7 +9,7 @@ body:
       options:
         - label: Updated to the latest version of `blink.cmp`
           required: true
-        - label: Searched for existing issues and documentation (try `<C-k>` on https://cmp.saghen.dev!)
+        - label: Searched for existing issues and documentation (try `<C-k>` on https://cmp.saghen.dev)
           required: true
   - type: textarea
     id: bug-description
