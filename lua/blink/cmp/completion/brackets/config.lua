@@ -28,5 +28,10 @@ return {
     wolfram = { '[', ']' },
     mma = { '[', ']' },
     mathematica = { '[', ']' },
+    context = { '[', ']' },
+
+    -- languages with curly brackets
+    tex = { '{', '}' },
+    plaintex = { '{', '}' },
   },
 }
