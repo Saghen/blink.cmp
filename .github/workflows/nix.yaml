@@ -1,0 +1,38 @@
+name: Test Nix
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    name: Test Nix Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+        with:
+          extra-conf: |
+            accept-flake-config = true
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Check the flake
+        run: nix flake check
+
+      - name: Build devshell
+        run: nix develop --command "rustc"
+
+      - name: Build the library
+        run: nix build .#blink-fuzzy-lib
+
+      - name: Build the plugin in nix
+        run: nix build .#blink-cmp
+
+      - name: Build the library (outside nix)
+        run: nix run .#build-plugin
