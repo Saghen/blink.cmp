@@ -39,6 +39,7 @@ function cmdline_events:listen(opts)
     local key = vim.fn.keytrans(escaped_key)
     if key == '<BS>' and not is_change_queued then did_backspace = true end
     if key:sub(1, 1) == '<' and key:sub(#key, #key) == '>' and raw_key ~= ' ' then return end
+    if key == '' then return end
 
     if not is_change_queued then
       is_change_queued = true
