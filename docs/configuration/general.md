@@ -25,10 +25,10 @@ For more common configurations, see the [recipes](../recipes.md).
     -- NOTE: some LSPs may add auto brackets themselves anyway
     accept = { auto_brackets = { enabled = false }, },
 
-    -- Insert completion item on selection, don't select by default
-    list = { selection = 'auto_insert' },
-    -- or set per mode
-    list = { selection = function(ctx) return ctx.mode == 'cmdline' and 'auto_insert' or 'preselect' end },
+    -- Don't select by default, auto insert on selection    
+    list = { selection = { preselect = false, auto_insert = true } },
+    -- or set either per mode via a function
+    list = { selection = { preselect = function(ctx) return ctx.mode ~= 'cmdline' end } },
 
     menu = {
       -- Don't automatically show the completion menu

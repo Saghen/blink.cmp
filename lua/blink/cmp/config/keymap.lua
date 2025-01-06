@@ -36,7 +36,7 @@
 --- ```
 --- | 'default'
 --- Mappings similar to VSCode.
---- You may want to set `completion.trigger.show_in_snippet = false` or use `completion.list.selection = "manual" | "auto_insert"` when using this mapping:
+--- You may want to set `completion.trigger.show_in_snippet = false` or use `completion.list.selection.preselect = function(ctx) return not require('blink.cmp').snippet_active({ direction = 1 }) end` when using this mapping:
 --- ```lua
 --- {
 ---   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
@@ -63,7 +63,7 @@
 --- ```
 --- | 'super-tab'
 --- Similar to 'super-tab' but with `enter` to accept
---- You may want to set `completion.list.selection = "manual" | "auto_insert"` when using this keymap:
+--- You may want to set `completion.list.selection.preselect = false` when using this keymap:
 --- ```lua
 --- {
 ---   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },

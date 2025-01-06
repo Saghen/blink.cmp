@@ -22,7 +22,10 @@
 --- @class (exact) blink.cmp.CompletionTriggerConfigPartial : blink.cmp.CompletionTriggerConfig, {}
 
 --- @class (exact) blink.cmp.CompletionListConfigPartial : blink.cmp.CompletionListConfig, {}
+--- @field selection? blink.cmp.CompletionListSelectionConfigPartial
 --- @field cycle? blink.cmp.CompletionListCycleConfigPartial
+
+--- @class (exact) blink.cmp.CompletionListSelectionConfigPartial : blink.cmp.CompletionListSelectionConfig, {}
 
 --- @class (exact) blink.cmp.CompletionListCycleConfigPartial : blink.cmp.CompletionListCycleConfig, {}
 

@@ -78,7 +78,7 @@ function completion.setup()
   -- run 'resolve' on the item ahead of time to avoid delays
   -- when accepting the item or showing documentation
   list.select_emitter:on(function(event)
-    -- when selection == 'manual' | 'auto_insert', we still want to prefetch the first item
+    -- when selection.preselect == false, we still want to prefetch the first item
     local item = event.item or list.items[1]
     if item == nil then return end
     require('blink.cmp.completion.prefetch')(event.context, event.item)

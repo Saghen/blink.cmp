@@ -131,16 +131,18 @@ function cmp.select_and_accept(opts)
 end
 
 --- Select the previous completion item
-function cmp.select_prev()
+--- @param opts? blink.cmp.CompletionListSelectOpts
+function cmp.select_prev(opts)
   if not cmp.is_visible() then return end
-  vim.schedule(function() require('blink.cmp.completion.list').select_prev() end)
+  vim.schedule(function() require('blink.cmp.completion.list').select_prev(opts) end)
   return true
 end
 
 --- Select the next completion item
-function cmp.select_next()
+--- @param opts? blink.cmp.CompletionListSelectOpts
+function cmp.select_next(opts)
   if not cmp.is_visible() then return end
-  vim.schedule(function() require('blink.cmp.completion.list').select_next() end)
+  vim.schedule(function() require('blink.cmp.completion.list').select_next(opts) end)
   return true
 end
 

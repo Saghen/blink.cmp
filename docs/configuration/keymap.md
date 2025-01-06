@@ -41,13 +41,15 @@ keymap = {
 - `show`: Shows the completion menu
   - Optionally use `function(cmp) cmp.show({ providers = { 'snippets' } }) end` to show with a specific list of providers
 - `hide`: Hides the completion menu
-- `cancel`: Reverts `completion.list.selection = 'auto_insert'` and hides the completion menu
+- `cancel`: Reverts `completion.list.selection.auto_insert` and hides the completion menu
 - `accept`: Accepts the currently selected item
   - Optionally pass an index to select a specific item in the list: `function(cmp) cmp.accept({ index = 1 }) end`
   - Optionally pass a `callback` to run after the item is accepted: `function(cmp) cmp.accept({ callback = function() vim.api.nvim_feedkeys('\n', 'n', true) end }) end`
 - `select_and_accept`: Accepts the currently selected item, or the first item if none are selected
 - `select_prev`: Selects the previous item, cycling to the bottom of the list if at the top, if `completion.list.cycle.from_top == true`
+  - Optionally control the `auto_insert` property of `completion.list.selection`: `function(cmp) cmp.select_prev({ auto_insert = false }) end`
 - `select_next`: Selects the next item, cycling to the top of the list if at the bottom, if `completion.list.cycle.from_bottom == true`
+  - Optionally control the `auto_insert` property of `completion.list.selection`: `function(cmp) cmp.select_next({ auto_insert = false }) end`
 - `show_documentation`: Shows the documentation for the currently selected item
 - `hide_documentation`: Hides the documentation
 - `scroll_documentation_up`: Scrolls the documentation up by 4 lines
@@ -96,7 +98,7 @@ Set the preset to `none` to disable the presets
 
 ### `super-tab`
 
-You may want to use `completion.list.selection = "manual" | "auto_insert"`. You can also set it per mode: https://cmp.saghen.dev/configuration/completion.html#list
+You may want to set `completion.trigger.show_in_snippet = false` or use `completion.list.selection.preselect = function(ctx) return not require('blink.cmp').snippet_active({ direction = 1 }) end`. See more info in: https://cmp.saghen.dev/configuration/completion.html#list
 
 ```lua
 ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
@@ -123,7 +125,7 @@ You may want to use `completion.list.selection = "manual" | "auto_insert"`. You 
 
 ### `enter`
 
-You may want to set `completion.list.selection = "manual" | "auto_insert"`. You can also set it per mode: https://cmp.saghen.dev/configuration/completion.html#list
+You may want to set `completion.list.selection.preselect = false`. See more info in: https://cmp.saghen.dev/configuration/completion.html#list
 
 ```lua
 ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },

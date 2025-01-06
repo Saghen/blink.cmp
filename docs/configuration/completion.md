@@ -57,32 +57,57 @@ TODO: Find a case where this actually fires : )
 
 ## List <a href="./reference#completion-list"><Badge type="info" text="Go to default configuration" /></a>
 
-Manages the completion list and its behavior when selecting items. The most commonly changed option is `completion.list.selection`, which controls whether the list will automatically select the first item in the list, and whether selection shows a preview:
-
-To control the selection behavior per mode, pass a function to `completion.list.selection` that returns the selection mode:
-
-```lua
-completion.list.selection = 'preselect'
--- or
-completion.list.selection = function(ctx)
-  return ctx.mode == 'cmdline' and 'auto_insert' or 'preselect'
-end
-```
+Manages the completion list and its behavior when selecting items. The most commonly changed option is `selection.preselect/auto_insert`, which controls whether the list will automatically select the first item in the list, and whether a "preview" will be inserted on selection.
 
 :::tabs
+== Preselect, Auto Insert (default)
+```lua
+completion.list.selection = { preselect = true, auto_insert = true }
+```
+Selects the first item automatically, and inserts a preview of the item on selection. The `cancel` keymap (default `<C-e>`) will close the menu and undo the preview.
+
+<video src="https://github.com/user-attachments/assets/ef295526-8332-4ad0-9a2a-e2f6484081b2" muted autoplay loop />
+
 == Preselect
+```lua
+completion.list.selection = { preselect = true, auto_insert = false }
+```
 Selects the first item automatically
 
 <img src="https://github.com/user-attachments/assets/69079ced-43f1-437e-8a45-3cb13f841d61" />
 == Manual
+```lua
+completion.list.selection = { preselect = false, auto_insert = false }
+```
+
 No item will be selected by default. You may use the `select_and_accept` keymap command to select the first item and accept it when there's no selection. The `accept` keymap command, on the other hand, will only trigger if an item is selected.
 
 <video src="https://github.com/user-attachments/assets/09cd9b4b-18b3-456b-bb0a-074ae54e9d77" muted autoplay loop />
-== Auto Insert
-No item will be selected by default, and selecting an item will insert a "preview" of the item automatically. You may use the `select_and_accept` keymap command to select the first item and accept it when there's no selection. The `accept` keymap command, on the other hand, will only trigger if an item is selected.
+== Manual, Auto Insert
+```lua
+completion.list.selection = { preselect = false, auto_insert = true }
+```
+
+Selecting an item will insert a "preview" of the item automatically. You may use the `select_and_accept` keymap command to select the first item and accept it when there's no selection. The `accept` keymap command will only trigger if an item is selected. The `cancel` keymap (default `<C-e>`) will close the menu and undo the preview.
 
 <video src="https://github.com/user-attachments/assets/4658b61d-1b95-404a-b6b5-3a4afbfb8112" muted autoplay loop />
 :::
+
+To control the selection behavior per mode, pass a function to `selection.preselect/auto_insert`:
+
+```lua
+completion.list.selection = {
+  preselect = true,
+  auto_insert = true,
+
+  -- or a function
+  preselect = function(ctx)
+    return ctx.mode ~= 'cmdline' and not require('blink.cmp').snippet_active({ direction = 1 })
+  end,
+  -- auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end,
+}
+```
+
 
 ## Accept <a href="./reference#completion-accept"><Badge type="info" text="Go to default configuration" /></a>
 
