@@ -144,6 +144,9 @@ function cmp.select_next()
   return true
 end
 
+--- Gets the currently selected completion item
+function cmp.get_selected_item() return require('blink.cmp.completion.list').get_selected_item() end
+
 --- Show the documentation window
 function cmp.show_documentation()
   local menu = require('blink.cmp.completion.windows.menu')
