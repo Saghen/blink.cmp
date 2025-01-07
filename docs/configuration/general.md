@@ -57,6 +57,9 @@ For more common configurations, see the [recipes](../recipes.md).
     cmdline = {},
   },
 
+  -- Use a preset for snippets, check the snippets documentation for more information
+  snippets = { preset = 'default' | 'luasnip' | 'mini_snippets' },
+
   -- Experimental signature help support
   signature = { enabled = true }
 }

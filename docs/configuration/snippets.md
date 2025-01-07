@@ -44,8 +44,9 @@ By default, the `snippets` source will check `~/.config/nvim/snippets` for your 
   dependencies = { 'L3MON4D3/LuaSnip', version = 'v2.*' },
   opts = {
     snippets = { preset = 'luasnip' },
+    -- ensure you have the `snippets` source (enabled by default)
     sources = {
-      default = { 'lsp', 'path', 'luasnip', 'buffer' },
+      default = { 'lsp', 'path', 'snippets', 'buffer' },
     },
   }
 }
@@ -58,12 +59,14 @@ By default, the `snippets` source will check `~/.config/nvim/snippets` for your 
   'saghen/blink.cmp',
   dependencies = 'echasnovski/mini.snippets',
   opts = {
-    snippets = { preset = 'mini.snippets' },
+    snippets = { preset = 'mini_snippets' },
+    -- ensure you have the `snippets` source (enabled by default)
     sources = {
-      default = { 'lsp', 'path', 'mini_snippets', 'buffer' },
+      default = { 'lsp', 'path', 'snippets', 'buffer' },
     },
   }
 }
+```
 
 ## Disable all snippets
 

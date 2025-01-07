@@ -16,7 +16,7 @@ local defaults_config = {
 }
 
 function source.new(opts)
-  local config = vim.tbl_deep_extend('keep', opts or {}, defaults_config)
+  local config = vim.tbl_deep_extend('keep', opts, defaults_config)
   require('blink.cmp.config.utils').validate('sources.providers.luasnip', {
     use_show_condition = { config.use_show_condition, 'boolean' },
     show_autosnippets = { config.show_autosnippets, 'boolean' },

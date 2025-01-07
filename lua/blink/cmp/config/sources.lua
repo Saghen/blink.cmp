@@ -88,16 +88,6 @@ local sources = {
         module = 'blink.cmp.sources.snippets',
         score_offset = -3,
       },
-      luasnip = {
-        name = 'Luasnip',
-        module = 'blink.cmp.sources.luasnip',
-        score_offset = -3,
-      },
-      mini_snippets = {
-        name = 'MiniSnippets',
-        module = 'blink.cmp.sources.mini_snippets',
-        score_offset = -3,
-      },
       buffer = {
         name = 'Buffer',
         module = 'blink.cmp.sources.buffer',

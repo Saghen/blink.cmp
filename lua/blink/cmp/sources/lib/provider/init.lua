@@ -33,7 +33,7 @@ function source.new(id, config)
   self.id = id
   self.name = config.name
   self.module = require('blink.cmp.sources.lib.provider.override').new(
-    require(config.module).new(config.opts, config),
+    require(config.module).new(config.opts or {}, config),
     config.override
   )
   self.config = require('blink.cmp.sources.lib.provider.config').new(config)

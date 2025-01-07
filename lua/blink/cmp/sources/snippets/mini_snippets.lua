@@ -17,11 +17,12 @@
 local source = {}
 
 local defaults_config = {
-  use_items_cache = true, -- allow the user to disable caching completion items
+  --- Whether to use a cache for completion items
+  use_items_cache = true,
 }
 
 function source.new(opts)
-  local config = vim.tbl_deep_extend('keep', opts or {}, defaults_config)
+  local config = vim.tbl_deep_extend('keep', opts, defaults_config)
   vim.validate({
     use_items_cache = { config.use_items_cache, 'boolean' },
   })
