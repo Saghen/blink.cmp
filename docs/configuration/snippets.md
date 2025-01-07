@@ -43,22 +43,27 @@ By default, the `snippets` source will check `~/.config/nvim/snippets` for your 
   -- `main` does not work at the moment
   dependencies = { 'L3MON4D3/LuaSnip', version = 'v2.*' },
   opts = {
-    snippets = {
-      expand = function(snippet) require('luasnip').lsp_expand(snippet) end,
-      active = function(filter)
-        if filter and filter.direction then
-          return require('luasnip').jumpable(filter.direction)
-        end
-        return require('luasnip').in_snippet()
-      end,
-      jump = function(direction) require('luasnip').jump(direction) end,
-    },
+    snippets = { preset = 'luasnip' },
     sources = {
       default = { 'lsp', 'path', 'luasnip', 'buffer' },
     },
   }
 }
 ```
+
+## `mini.snippets`
+
+```lua
+{
+  'saghen/blink.cmp',
+  dependencies = 'echasnovski/mini.snippets',
+  opts = {
+    snippets = { preset = 'mini.snippets' },
+    sources = {
+      default = { 'lsp', 'path', 'mini_snippets', 'buffer' },
+    },
+  }
+}
 
 ## Disable all snippets
 

@@ -1,3 +1,5 @@
+--- @module 'mini.snippets'
+
 --- @class blink.cmp.MiniSnippetsSourceOptions
 --- @field use_items_cache? boolean completion items are cached using default mini.snippets context
 
@@ -72,6 +74,7 @@ local function get_completion_items(cache)
 
   -- Retrieve all raw snippets in context and transform into completion items
   local snippets = MiniSnippets.expand({ match = false, insert = false })
+  --- @cast snippets table
   local items = to_completion_items(vim.deepcopy(snippets))
   cache[id] = items
 
