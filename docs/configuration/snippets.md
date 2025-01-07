@@ -1,4 +1,4 @@
-# Snippets <a href="./reference#snippets"><Badge type="info" text="Go to default configuration" /></a>
+# Snippets <Badge type="info"><a href="./reference#snippets">Go to default configuration</a></Badge>
 
 Blink uses the `vim.snippet` API by default for expanding and navigating snippets. The built-in `snippets` source will load [friendly-snippets](https://github.com/rafamadriz/friendly-snippets), if available, and load any snippets found at `~/.config/nvim/snippets/`. For use with Luasnip, see the [Luasnip section](#luasnip).
 

@@ -1,4 +1,4 @@
-# Sources <a href="./reference#sources"><Badge type="info" text="Go to default configuration" /></a>
+# Sources <Badge type="info"><a href="./reference#sources">Go to default configuration</a></Badge>
 
 > [!NOTE]
 > Check out the [recipes](../recipes.md) for some common configurations
