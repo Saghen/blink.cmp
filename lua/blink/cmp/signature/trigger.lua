@@ -45,15 +45,18 @@ function trigger.activate()
     has_context = function() return trigger.context ~= nil end,
   })
   trigger.buffer_events:listen({
-    on_char_added = function(char)
+    on_char_added = function()
+      local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
+      local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
+
       -- ignore if disabled
       if not require('blink.cmp.config').enabled() then
         return trigger.hide()
       -- character forces a trigger according to the sources, refresh the existing context if it exists
-      elseif trigger.is_trigger_character(char) then
-        return trigger.show({ trigger_character = char })
+      elseif trigger.is_trigger_character(char_under_cursor) then
+        return trigger.show({ trigger_character = char_under_cursor })
       -- character forces a re-trigger according to the sources, show if we have a context
-      elseif trigger.is_trigger_character(char, true) and trigger.context ~= nil then
+      elseif trigger.is_trigger_character(char_under_cursor, true) and trigger.context ~= nil then
         return trigger.show()
       end
     end,
