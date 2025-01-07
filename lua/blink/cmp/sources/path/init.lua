@@ -15,7 +15,7 @@ function path.new(opts)
   local self = setmetatable({}, { __index = path })
 
   --- @type blink.cmp.PathOpts
-  opts = vim.tbl_deep_extend('keep', opts or {}, {
+  opts = vim.tbl_deep_extend('keep', opts, {
     trailing_slash = true,
     label_trailing_slash = true,
     get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,

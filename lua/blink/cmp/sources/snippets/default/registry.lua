@@ -8,7 +8,7 @@
 --- @field description? string
 
 local registry = {
-  builtin_vars = require('blink.cmp.sources.snippets.builtin'),
+  builtin_vars = require('blink.cmp.sources.snippets.default.builtin'),
 }
 
 local utils = require('blink.cmp.sources.snippets.utils')
@@ -33,7 +33,7 @@ function registry.new(config)
       if string.match(path, 'friendly.snippets') then table.insert(self.config.search_paths, path) end
     end
   end
-  self.registry = require('blink.cmp.sources.snippets.scan').register_snippets(self.config.search_paths)
+  self.registry = require('blink.cmp.sources.snippets.default.scan').register_snippets(self.config.search_paths)
 
   return self
 end

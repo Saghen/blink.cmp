@@ -72,7 +72,8 @@ end
 local buffer = {}
 
 function buffer.new(opts)
-  opts = opts or {} ---@type blink.cmp.BufferOpts
+  --- @cast opts blink.cmp.BufferOpts
+
   local self = setmetatable({}, { __index = buffer })
   self.get_bufnrs = opts.get_bufnrs
     or function()
