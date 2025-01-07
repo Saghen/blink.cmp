@@ -36,8 +36,9 @@
             ./rust-toolchain.toml
           ];
           # nvim source files
-          # all that are not nix, nor rust
-          nvimFs = fs.difference ./. (fs.union nixFs rustFs);
+          # all that are not nix, nor rust, nor other ignored files
+          nvimFs =
+            fs.difference ./. (fs.unions [ nixFs rustFs ./docs ./repro.lua ]);
           version = "0.9.3";
         in {
           blink-fuzzy-lib = let
