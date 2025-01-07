@@ -39,11 +39,17 @@ function cmdline:get_completions(context, callback)
       end
 
       local completions = {}
-      local completion_type = vim.fn.getcmdcompltype()
+      local completion_args = vim.split(vim.fn.getcmdcompltype(), ',', { plain = true })
+      local completion_type = completion_args[1]
+      local completion_func = completion_args[2]
+
       -- Handle custom completions explicitly, since otherwise they won't work in input() mode (getcmdtype() == '@')
-      if vim.startswith(completion_type, 'custom,') or vim.startswith(completion_type, 'customlist,') then
-        local fun = completion_type:gsub('custom,', ''):gsub('customlist,', '')
-        completions = vim.fn.call(fun, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
+      if
+        vim.startswith(completion_type, 'custom')
+        and not vim.startswith(completion_func, 's:')
+        and not vim.startswith(completion_func, '<sid>')
+      then
+        completions = vim.fn.call(completion_func, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
         -- `custom,` type returns a string, delimited by newlines
         if type(completions) == 'string' then completions = vim.split(completions, '\n') end
       else
