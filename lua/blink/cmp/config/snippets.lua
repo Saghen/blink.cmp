@@ -17,8 +17,8 @@ local snippets = {
   --- @type blink.cmp.SnippetsConfig
   default = {
     preset = 'default',
+    -- NOTE: we wrap `vim.snippet` calls to reduce startup by 1-2ms
     expand = by_preset({
-      -- NOTE:
       default = function(snippet) vim.snippet.expand(snippet) end,
       luasnip = function(snippet) require('luasnip').lsp_expand(snippet) end,
       mini_snippets = function(snippet)
