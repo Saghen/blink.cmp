@@ -65,6 +65,37 @@ function utils.read_snippet(snippet, fallback)
   return snippets
 end
 
+local function text_to_lines(text)
+  text = type(text) == 'string' and { text } or text
+  --- @cast text string[]
+  return vim.split(table.concat(text), '\n', { plain = true })
+end
+
+-- Add the current line's identation for a snippet raw text,
+-- which is abtained by calling tostring(snippet).
+---@param text string
+function utils.add_identation(text)
+  local base_indent = vim.api.nvim_get_current_line():match('^%s*') or ''
+  local snippet_lines = text_to_lines(text)
+
+  local shiftwidth = vim.fn.shiftwidth()
+  local curbuf = vim.api.nvim_get_current_buf()
+  local expandtab = vim.bo[curbuf].expandtab
+
+  local lines = {} --- @type string[]
+  for i, line in ipairs(snippet_lines) do
+    -- Replace tabs by spaces.
+    if expandtab then
+      line = line:gsub('\t', (' '):rep(shiftwidth)) --- @type string
+    end
+    -- Add the base indentation.
+    if i > 1 then line = base_indent .. line end
+    lines[#lines + 1] = line
+  end
+
+  return table.concat(lines, '\n')
+end
+
 function utils.get_tab_stops(snippet)
   local expanded_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(snippet)
   if not expanded_snippet then return end
