@@ -63,17 +63,27 @@ function trigger.activate()
   end
 
   local function on_cursor_moved(event, is_ignored)
-    -- we were told to ignore the cursor moved event, so we update the context
-    -- but don't send an on_show event upstream
-    if is_ignored and event == 'CursorMoved' then
-      if trigger.context ~= nil then trigger.show({ send_upstream = false, trigger_kind = 'keyword' }) end
-      return
-    end
-
     local cursor = context.get_cursor()
     local cursor_col = cursor[2]
 
     local char_under_cursor = utils.get_char_at_cursor()
+    local is_keyword = trigger.is_keyword_character(char_under_cursor)
+
+    -- we were told to ignore the cursor moved event, so we update the context
+    -- but don't send an on_show event upstream
+    if is_ignored and event == 'CursorMoved' then
+      if trigger.context ~= nil then
+        -- TODO: If we `auto_insert` with the `path` source, we may end up on a trigger character
+        -- i.e. `downloads/`. If we naively update the context, we'll show the menu with the
+        -- existing context. So we clear the context if we're not on a keyword character.
+        -- Is there a better solution here?
+        if not is_keyword then trigger.context = nil end
+
+        trigger.show({ send_upstream = false, trigger_kind = 'keyword' })
+      end
+      return
+    end
+
     local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
 
     -- TODO: doesn't handle `a` where the cursor moves immediately after
@@ -97,11 +107,7 @@ function trigger.activate()
       trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
 
     -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
-    elseif
-      trigger.is_keyword_character(char_under_cursor)
-      and trigger.context ~= nil
-      and cursor_col == trigger.context.bounds.start_col - 1
-    then
+    elseif is_keyword and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
       trigger.context = nil
       trigger.show({ trigger_kind = 'keyword' })
 
