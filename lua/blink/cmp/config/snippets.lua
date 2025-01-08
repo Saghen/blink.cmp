@@ -24,7 +24,7 @@ local snippets = {
       mini_snippets = function(snippet)
         if not _G.MiniSnippets then error('mini.snippets has not been setup') end
         local insert = MiniSnippets.config.expand.insert or MiniSnippets.default_insert
-        insert(snippet)
+        insert({ body = snippet })
       end,
     }),
     active = by_preset({
