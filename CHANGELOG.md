@@ -1,3 +1,27 @@
+## [0.10.0](https://github.com/Saghen/blink.cmp/compare/v0.9.3...v0.10.0) (2025-01-08)
+
+### BREAKING CHANGES
+
+* mini.snippets and snippets presets (#877)
+* support `preselect` with `auto_insert`, set as default
+
+### Features
+
+* add `get_selected_item` public function ([9e1e7e6](https://github.com/Saghen/blink.cmp/commit/9e1e7e604e3419fa0777a2b747ded74d35013c06))
+* mini.snippets and snippets presets ([#877](https://github.com/Saghen/blink.cmp/issues/877)) ([854ab87](https://github.com/Saghen/blink.cmp/commit/854ab87aefdac2b757d97595f98673d64f1878bc))
+* set default capabilities on 0.11 ([#897](https://github.com/Saghen/blink.cmp/issues/897)) ([af1febb](https://github.com/Saghen/blink.cmp/commit/af1febb17f9ddc87cf73e69d3f61218cdc18ed85))
+* support `preselect` with `auto_insert`, set as default ([8126d0e](https://github.com/Saghen/blink.cmp/commit/8126d0e6a2a0e62d3872d718c3d50313f9f7fe3a)), closes [#668](https://github.com/Saghen/blink.cmp/issues/668)
+
+### Bug Fixes
+
+* `get_char_at_cursor` attempting to get char on empty line ([7d6bf9a](https://github.com/Saghen/blink.cmp/commit/7d6bf9adea67a200067effe5ef589515e71230c8)), closes [#926](https://github.com/Saghen/blink.cmp/issues/926)
+* `within_query_bounds` including 1 position after bounds ([36ba8eb](https://github.com/Saghen/blink.cmp/commit/36ba8eb9c166c21d6d2a8b5f88f9c55d1966b383)), closes [#890](https://github.com/Saghen/blink.cmp/issues/890) [#875](https://github.com/Saghen/blink.cmp/issues/875)
+* assert vim.lsp.config fn exists before calling ([#927](https://github.com/Saghen/blink.cmp/issues/927)) ([47efef8](https://github.com/Saghen/blink.cmp/commit/47efef83802b26bd2ff7193b24af4c7f747dc145))
+* buildVimPlugin ([#933](https://github.com/Saghen/blink.cmp/issues/933)) ([3f5dcbc](https://github.com/Saghen/blink.cmp/commit/3f5dcbc1c28edd2ab31b9bac27cc63de4e56b87c))
+* clear context on ignored cursor moved when not on keyword ([0f8de3a](https://github.com/Saghen/blink.cmp/commit/0f8de3abd560f38415d71fc6ee9885c2bf53b814)), closes [#937](https://github.com/Saghen/blink.cmp/issues/937)
+* ignore cursor moved when cursor equal before vs after ([17eea33](https://github.com/Saghen/blink.cmp/commit/17eea330a5d111f3cd67f59bb3832cc78f55db14))
+* **signature:** use `char_under_cursor` in `on_char_added` handler ([#935](https://github.com/Saghen/blink.cmp/issues/935)) ([275d407](https://github.com/Saghen/blink.cmp/commit/275d40713191e6c0012783ecf762a4faa138098b)), closes [#909](https://github.com/Saghen/blink.cmp/issues/909)
+
 ## [0.9.3](https://github.com/Saghen/blink.cmp/compare/v0.9.2...v0.9.3) (2025-01-06)
 
 ### Features
