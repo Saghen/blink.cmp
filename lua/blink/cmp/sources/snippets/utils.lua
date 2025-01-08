@@ -65,18 +65,12 @@ function utils.read_snippet(snippet, fallback)
   return snippets
 end
 
-local function text_to_lines(text)
-  text = type(text) == 'string' and { text } or text
-  --- @cast text string[]
-  return vim.split(table.concat(text), '\n', { plain = true })
-end
-
--- Add the current line's identation for a snippet raw text,
--- which is abtained by calling tostring(snippet).
+-- Add the current line's identation to all but the first line of
+-- the provided text
 ---@param text string
-function utils.add_identation(text)
+function utils.add_current_line_indentation(text)
   local base_indent = vim.api.nvim_get_current_line():match('^%s*') or ''
-  local snippet_lines = text_to_lines(text)
+  local snippet_lines = vim.split(text, '\n', { plain = true })
 
   local shiftwidth = vim.fn.shiftwidth()
   local curbuf = vim.api.nvim_get_current_buf()
@@ -84,11 +78,11 @@ function utils.add_identation(text)
 
   local lines = {} --- @type string[]
   for i, line in ipairs(snippet_lines) do
-    -- Replace tabs by spaces.
+    -- Replace tabs with spaces
     if expandtab then
       line = line:gsub('\t', (' '):rep(shiftwidth)) --- @type string
     end
-    -- Add the base indentation.
+    -- Add the base indentation
     if i > 1 then line = base_indent .. line end
     lines[#lines + 1] = line
   end

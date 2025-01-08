@@ -71,7 +71,7 @@ function ghost_text.draw_preview(bufnr)
 
   if ghost_text.selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
     local expanded_snippet = snippets_utils.safe_parse(text_edit.newText)
-    text_edit.newText = expanded_snippet and snippets_utils.add_identation(tostring(expanded_snippet))
+    text_edit.newText = expanded_snippet and snippets_utils.add_current_line_indentation(tostring(expanded_snippet))
       or text_edit.newText
   end
 
