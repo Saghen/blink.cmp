@@ -64,5 +64,15 @@ export default defineConfig({
       md.use(tabsMarkdownPlugin)
       md.use(taskLists)
     },
+    anchor: {
+      getTokensText(tokens) {
+        let text = ''
+        for (const t of tokens) {
+          if (t.type === 'text' || t.type === 'code_inline') text += t.content
+          if (t.type === 'html_inline' && /<badge/i.test(t.content)) return text
+        }
+        return text
+      },
+    },
   },
 })
