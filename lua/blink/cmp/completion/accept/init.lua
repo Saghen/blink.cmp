@@ -54,6 +54,7 @@ local function accept(ctx, item, callback)
           and parsed_snippet.data.children[1].type == vim.lsp._snippet_grammar.NodeType.Text
         then
           item.insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText
+          item.textEdit.newText = tostring(parsed_snippet)
         end
       end
 
