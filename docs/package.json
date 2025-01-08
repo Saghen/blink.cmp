@@ -2,6 +2,7 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
+    "build:release": "IS_RELEASE=true vitepress build",
     "preview": "vitepress preview"
   },
   "devDependencies": {

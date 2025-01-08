@@ -3,14 +3,14 @@ import { tabsMarkdownPlugin } from 'vitepress-plugin-tabs'
 import taskLists from 'markdown-it-task-lists'
 import { execSync } from 'node:child_process'
 
-const branch = execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf-8' }).trim()
+const isMain = process.env.IS_RELEASE !== 'true'
 const version = execSync('git describe --tags --abbrev=0', { encoding: 'utf-8' }).trim()
 
-const siteUrl = branch === 'main' ? 'https://main.cmp.saghen.dev' : 'https://cmp.saghen.dev'
-const otherSiteUrl = branch === 'main' ? 'https://cmp.saghen.dev' : 'https://main.cmp.saghen.dev'
+const siteUrl = isMain ? 'https://main.cmp.saghen.dev' : 'https://cmp.saghen.dev'
+const otherSiteUrl = isMain ? 'https://cmp.saghen.dev' : 'https://main.cmp.saghen.dev'
 
-const title = branch === 'main' ? 'Main' : version
-const otherTitle = branch === 'main' ? version : 'Main'
+const title = isMain ? 'Main' : version
+const otherTitle = isMain ? version : 'Main'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
