@@ -41,7 +41,6 @@ version = "0.1.0"
 dependencies = [
  "frizbee",
  "heed",
- "lazy_static",
  "mlua",
  "regex",
  "serde",
@@ -65,9 +64,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "cc"
-version = "1.2.11"
+version = "1.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4730490333d58093109dc02c23174c3f4d490998c3fed3cc8e82d57afedb9cf"
+checksum = "755717a7de9ec452bf7f3f1a3099085deabd7f2962b861dae91ecd7a365903d2"
 dependencies = [
  "shlex",
 ]
@@ -131,7 +130,7 @@ dependencies = [
 [[package]]
 name = "frizbee"
 version = "0.1.0"
-source = "git+https://github.com/saghen/frizbee#a535bd75abc6bfe76f532dbb5c374ea0a38e88fd"
+source = "git+https://github.com/saghen/frizbee#75c9dc534f459580dba8a45847bfae2e384f1a54"
 dependencies = [
  "memchr",
 ]
@@ -318,12 +317,6 @@ name = "itoa"
 version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d75a2a4b1b190afb6f5425f10f6a8f959d2ea0b9c2b1d79553551850539e4674"
-
-[[package]]
-name = "lazy_static"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
@@ -650,9 +643,9 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
 name = "syn"
-version = "2.0.97"
+version = "2.0.98"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5dabd04e3b9a8c3c03d5e743f5ef5e1207befc9de704d477f7198cc28049763e"
+checksum = "36147f1a48ae0ec2b5b3bc5b537d267457555a10dc06f3dbc8cb11ba3006d3b1"
 dependencies = [
  "proc-macro2",
  "quote",

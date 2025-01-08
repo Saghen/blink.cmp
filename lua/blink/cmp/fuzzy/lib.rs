@@ -1,23 +1,20 @@
 use crate::frecency::FrecencyTracker;
 use crate::fuzzy::FuzzyOptions;
 use crate::lsp_item::LspItem;
-use lazy_static::lazy_static;
 use mlua::prelude::*;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
-use std::sync::RwLock;
+use std::sync::{LazyLock, RwLock};
 
 mod frecency;
 mod fuzzy;
 mod keyword;
 mod lsp_item;
 
-lazy_static! {
-    static ref REGEX: Regex = Regex::new(r"[\p{L}_][\p{L}0-9_\\-]{2,}").unwrap();
-    static ref FRECENCY: RwLock<Option<FrecencyTracker>> = RwLock::new(None);
-    static ref HAYSTACKS_BY_PROVIDER: RwLock<HashMap<String, Vec<LspItem>>> =
-        RwLock::new(HashMap::new());
-}
+static REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\p{L}_[\p{L}0-9_\\-]{2,}").unwrap());
+static FRECENCY: LazyLock<RwLock<Option<FrecencyTracker>>> = LazyLock::new(|| RwLock::new(None));
+static HAYSTACKS_BY_PROVIDER: LazyLock<RwLock<HashMap<String, Vec<LspItem>>>> =
+    LazyLock::new(|| RwLock::new(HashMap::new()));
 
 pub fn init_db(_: &Lua, (db_path, use_unsafe_no_lock): (String, bool)) -> LuaResult<bool> {
     let mut frecency = FRECENCY.write().map_err(|_| {
