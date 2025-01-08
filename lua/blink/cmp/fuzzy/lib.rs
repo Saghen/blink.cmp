@@ -67,10 +67,10 @@ pub fn fuzzy(
     _lua: &Lua,
     (line, cursor_col, provider_id, opts): (mlua::String, usize, String, FuzzyOptions),
 ) -> LuaResult<(Vec<i32>, Vec<u32>)> {
-    let mut frecency_handle = FRECENCY.write().map_err(|_| {
+    let frecency_handle = FRECENCY.read().map_err(|_| {
         mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
     })?;
-    let frecency = frecency_handle.as_mut().ok_or_else(|| {
+    let frecency = frecency_handle.as_ref().ok_or_else(|| {
         mlua::Error::RuntimeError("Attempted to use frencecy before initialization".to_string())
     })?;
 
