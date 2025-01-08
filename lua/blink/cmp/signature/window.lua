@@ -58,7 +58,7 @@ function signature.open_with_signature_help(context, signature_help)
     require('blink.cmp.lib.window.docs').render_detail_and_documentation({
       bufnr = signature.win:get_buf(),
       detail = labels,
-      documentation = active_signature.documentation,
+      documentation = config.show_documentation and active_signature.documentation or nil,
       max_width = config.max_width,
       use_treesitter_highlighting = config.treesitter_highlighting,
     })

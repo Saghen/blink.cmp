@@ -320,6 +320,7 @@ signature = {
     direction_priority = { 'n', 's' },
     -- Disable if you run into performance issues
     treesitter_highlighting = true,
+    show_documentation = true,
   },
 }
 ```
