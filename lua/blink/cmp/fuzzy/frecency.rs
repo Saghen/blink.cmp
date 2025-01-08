@@ -1,7 +1,7 @@
+use crate::error::Error;
 use crate::lsp_item::LspItem;
 use heed::{types::*, EnvFlags};
 use heed::{Database, Env, EnvOpenOptions};
-use mlua::Result as LuaResult;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -31,42 +31,23 @@ pub struct FrecencyTracker {
 }
 
 impl FrecencyTracker {
-    pub fn new(db_path: &str, use_unsafe_no_lock: bool) -> LuaResult<Self> {
-        fs::create_dir_all(db_path).map_err(|err| {
-            mlua::Error::RuntimeError(
-                "Failed to create frecency database directory: ".to_string() + &err.to_string(),
-            )
-        })?;
+    pub fn new(db_path: &str, use_unsafe_no_lock: bool) -> Result<Self, Error> {
+        fs::create_dir_all(db_path).map_err(Error::CreateDir)?;
         let env = unsafe {
             let mut opts = EnvOpenOptions::new();
             if use_unsafe_no_lock {
                 opts.flags(EnvFlags::NO_LOCK | EnvFlags::NO_SYNC | EnvFlags::NO_META_SYNC);
             }
-            opts.open(db_path).map_err(|err| {
-                mlua::Error::RuntimeError(
-                    "Failed to open frecency database: ".to_string() + &err.to_string(),
-                )
-            })?
+            opts.open(db_path).map_err(Error::EnvOpen)?
         };
-        env.clear_stale_readers().map_err(|err| {
-            mlua::Error::RuntimeError(
-                "Failed to clear stale readers for frecency database: ".to_string()
-                    + &err.to_string(),
-            )
-        })?;
+        env.clear_stale_readers()
+            .map_err(Error::DbClearStaleReaders)?;
 
         // we will open the default unnamed database
-        let mut wtxn = env.write_txn().map_err(|err| {
-            mlua::Error::RuntimeError(
-                "Failed to open write transaction for frecency database: ".to_string()
-                    + &err.to_string(),
-            )
-        })?;
-        let db = env.create_database(&mut wtxn, None).map_err(|err| {
-            mlua::Error::RuntimeError(
-                "Failed to create frecency database: ".to_string() + &err.to_string(),
-            )
-        })?;
+        let mut wtxn = env.write_txn().map_err(Error::DbStartWriteTxn)?;
+        let db = env
+            .create_database(&mut wtxn, None)
+            .map_err(Error::DbCreate)?;
 
         let access_thresholds = [
             (1., 1000 * 60 * 2),             // 2 minutes
@@ -83,20 +64,11 @@ impl FrecencyTracker {
         })
     }
 
-    fn get_accesses(&self, item: &LspItem) -> LuaResult<Option<Vec<u64>>> {
-        let rtxn = self.env.read_txn().map_err(|err| {
-            mlua::Error::RuntimeError(
-                "Failed to start read transaction for frecency database: ".to_string()
-                    + &err.to_string(),
-            )
-        })?;
+    fn get_accesses(&self, item: &LspItem) -> Result<Option<Vec<u64>>, Error> {
+        let rtxn = self.env.read_txn().map_err(Error::DbStartReadTxn)?;
         self.db
             .get(&rtxn, &CompletionItemKey::from(item))
-            .map_err(|err| {
-                mlua::Error::RuntimeError(
-                    "Failed to read from frecency database: ".to_string() + &err.to_string(),
-                )
-            })
+            .map_err(Error::DbRead)
     }
 
     fn get_now(&self) -> u64 {
@@ -106,31 +78,17 @@ impl FrecencyTracker {
             .as_secs()
     }
 
-    pub fn access(&mut self, item: &LspItem) -> LuaResult<()> {
-        let mut wtxn = self.env.write_txn().map_err(|err| {
-            mlua::Error::RuntimeError(
-                "Failed to start write transaction for frecency database: ".to_string()
-                    + &err.to_string(),
-            )
-        })?;
+    pub fn access(&self, item: &LspItem) -> Result<(), Error> {
+        let mut wtxn = self.env.write_txn().map_err(Error::DbStartWriteTxn)?;
 
         let mut accesses = self.get_accesses(item)?.unwrap_or_default();
         accesses.push(self.get_now());
 
         self.db
             .put(&mut wtxn, &CompletionItemKey::from(item), &accesses)
-            .map_err(|err| {
-                mlua::Error::RuntimeError(
-                    "Failed to write to frecency database: ".to_string() + &err.to_string(),
-                )
-            })?;
+            .map_err(Error::DbWrite)?;
 
-        wtxn.commit().map_err(|err| {
-            mlua::Error::RuntimeError(
-                "Failed to commit write transaction for frecency database: ".to_string()
-                    + &err.to_string(),
-            )
-        })?;
+        wtxn.commit().map_err(Error::DbCommit)?;
 
         Ok(())
     }
