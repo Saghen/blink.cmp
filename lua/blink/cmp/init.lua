@@ -91,7 +91,7 @@ end
 function cmp.cancel(opts)
   if not cmp.is_visible() then return end
   vim.schedule(function()
-    require('blink.cmp.completion.list').undo_preview()
+    require('blink.cmp.completion.list').restore_content()
     require('blink.cmp.completion.trigger').hide()
     if opts and opts.callback then opts.callback() end
   end)

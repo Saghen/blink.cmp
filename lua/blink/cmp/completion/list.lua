@@ -9,7 +9,6 @@
 --- @field context? blink.cmp.Context
 --- @field items blink.cmp.CompletionItem[]
 --- @field selected_item_idx? number
---- @field preview_undo? { text_edit: lsp.TextEdit, cursor: integer[]?}
 ---
 --- @field show fun(context: blink.cmp.Context, items: table<string, blink.cmp.CompletionItem[]>)
 --- @field fuzzy fun(context: blink.cmp.Context, items: table<string, blink.cmp.CompletionItem[]>): blink.cmp.CompletionItem[]
@@ -22,7 +21,7 @@
 --- @field select_next fun(opts?: blink.cmp.CompletionListSelectOpts)
 --- @field select_prev fun(opts?: blink.cmp.CompletionListSelectOpts)
 ---
---- @field undo_preview fun()
+--- @field restore_content fun()
 --- @field apply_preview fun(item: blink.cmp.CompletionItem)
 --- @field accept fun(opts?: blink.cmp.CompletionListAcceptOpts): boolean Applies the currently selected item, returning true if it succeeded
 
@@ -63,7 +62,6 @@ local list = {
   context = nil,
   items = {},
   is_explicitly_selected = false,
-  preview_undo = nil,
 }
 
 ---------- State ----------
@@ -71,10 +69,7 @@ local list = {
 function list.show(context, items_by_source)
   -- reset state for new context
   local is_new_context = not list.context or list.context.id ~= context.id
-  if is_new_context then
-    list.preview_undo = nil
-    list.is_explicitly_selected = false
-  end
+  if is_new_context then list.is_explicitly_selected = false end
 
   -- if the keyword changed, the list is no longer explicitly selected
   local bounds_equal = list.context ~= nil
@@ -157,7 +152,7 @@ function list.select(idx, opts)
   if auto_insert == nil then auto_insert = list.get_selection_mode(list.context).auto_insert end
 
   require('blink.cmp.completion.trigger').suppress_events_for_callback(function()
-    if opts.undo_preview ~= false then list.undo_preview() end
+    if opts.undo_preview ~= false then list.restore_content() end
     if auto_insert and item ~= nil then list.apply_preview(item) end
   end)
 
@@ -213,22 +208,21 @@ end
 
 ---------- Preview ----------
 
-function list.undo_preview()
-  if list.preview_undo == nil then return end
+function list.restore_content()
+  -- compute the diff between the current cursor column and the cursor column when the request was sent.
+  local diff = vim.api.nvim_win_get_cursor(0)[2] - list.context.bounds.start_col
+  if diff <= 0 then return end
 
-  require('blink.cmp.lib.text_edits').apply({ list.preview_undo.text_edit })
-  if list.preview_undo.cursor then
-    require('blink.cmp.completion.trigger.context').set_cursor(list.preview_undo.cursor)
-  end
-  list.preview_undo = nil
+  -- delete those chars added by previous auto-insert
+  local row = list.context.cursor[1] - 1
+  vim.api.nvim_buf_set_text(0, row, list.context.bounds.start_col - 1, row, vim.api.nvim_win_get_cursor(0)[2], { '' })
 end
 
 function list.apply_preview(item)
-  -- undo the previous preview if it exists
-  list.undo_preview()
+  -- restore the original line content before auto_insert
+  list.restore_content()
   -- apply the new preview
   local undo_text_edit, undo_cursor = require('blink.cmp.completion.accept.preview')(item)
-  list.preview_undo = { text_edit = undo_text_edit, cursor = undo_cursor }
 end
 
 ---------- Accept ----------
@@ -238,7 +232,7 @@ function list.accept(opts)
   local item = list.items[opts.index or list.selected_item_idx]
   if item == nil then return false end
 
-  list.undo_preview()
+  list.restore_content()
   local accept = require('blink.cmp.completion.accept')
   accept(list.context, item, function()
     list.accept_emitter:emit({ item = item, context = list.context })
