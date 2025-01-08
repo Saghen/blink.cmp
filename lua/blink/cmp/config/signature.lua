@@ -18,6 +18,7 @@
 --- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
 --- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space, or another window is in the way.
 --- @field treesitter_highlighting boolean Disable if you run into performance issues
+--- @field show_documentation boolean
 
 local validate = require('blink.cmp.config.utils').validate
 local signature = {
@@ -40,6 +41,7 @@ local signature = {
       scrollbar = false,
       direction_priority = { 'n', 's' },
       treesitter_highlighting = true,
+      show_documentation = true,
     },
   },
 }
@@ -66,6 +68,7 @@ function signature.validate(config)
     scrollbar = { config.window.scrollbar, 'boolean' },
     direction_priority = { config.window.direction_priority, 'table' },
     treesitter_highlighting = { config.window.treesitter_highlighting, 'boolean' },
+    show_documentation = { config.window.show_documentation, 'boolean' },
   }, config.window)
 end
 
