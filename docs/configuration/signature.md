@@ -1,3 +1,6 @@
+---
+title: Signature
+---
 # Signature <Badge type="info"><a href="./reference#signature">Go to default configuration</a></Badge>
 
 > [!IMPORTANT]

@@ -1,3 +1,6 @@
+---
+title: Sources
+---
 # Sources <Badge type="info"><a href="./reference#sources">Go to default configuration</a></Badge>
 
 > [!NOTE]
