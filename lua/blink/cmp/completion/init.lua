@@ -69,13 +69,8 @@ function completion.setup()
 
   -- setup ghost text
   if config.completion.ghost_text.enabled then
-    if config.completion.ghost_text.show_on_unselected then
-      list.show_emitter:on(
-        function(event) require('blink.cmp.completion.windows.ghost_text').show_preview(event.items[1]) end
-      )
-    end
     list.select_emitter:on(
-      function(event) require('blink.cmp.completion.windows.ghost_text').show_preview(event.item) end
+      function(event) require('blink.cmp.completion.windows.ghost_text').show_preview(event.items, event.idx) end
     )
     list.hide_emitter:on(function() require('blink.cmp.completion.windows.ghost_text').clear_preview() end)
   end
