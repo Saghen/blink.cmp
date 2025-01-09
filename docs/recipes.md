@@ -37,6 +37,22 @@ completion = {
 }
 ```
 
+### Buffer completion from all open buffers
+
+```lua
+        providers = {
+          buffer = {
+            name = "Buffer",
+            module = "blink.cmp.sources.buffer",
+            opts = {
+              get_bufnrs = function()
+                return vim.api.nvim_list_bufs()
+              end,
+            },
+          },
+        },
+```
+
 ### Don't show completion menu automatically in cmdline mode
 
 ```lua
