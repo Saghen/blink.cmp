@@ -40,7 +40,7 @@ function ghost_text.is_open() return ghost_text.extmark_id ~= nil end
 function ghost_text.show_preview(selected_item)
   -- nothing to show, clear the preview
   if not selected_item then
-    ghost_text.clear_preview()
+    if not require('blink.cmp.config').completion.ghost_text.show_on_unselected then ghost_text.clear_preview() end
     return
   end
 
