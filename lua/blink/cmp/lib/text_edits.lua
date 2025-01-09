@@ -14,7 +14,6 @@ function text_edits.apply(edits)
   return async.task.new(function(resolve)
     local mode = context.get_mode()
     if mode == 'default' then
-      local fuzzy = require('blink.cmp.fuzzy')
       -- Fill the `.` register so that dot-repeat works. This also changes the
       -- text in the buffer - currently there is no way to do this in Neovim
       -- (only adding new text is supported, but we also want to replace the
@@ -24,7 +23,7 @@ function text_edits.apply(edits)
       -- only redoing the first edit is supported
       local edit = edits[1]
       local original_cursor = context.get_cursor()
-      local kwstart, kwend = fuzzy.get_keyword_range(context.get_line(), original_cursor[2], 'prefix')
+      local kwstart, kwend = edit.range.start.character, edit.range['end'].character
       local repeat_keys = {}
       local original_line = context.get_line()
       table.insert(repeat_keys, feedkeys.backspace(kwend - kwstart))
@@ -37,7 +36,7 @@ function text_edits.apply(edits)
       feedkeys.call_async(repeat_str, 'in'):map(function()
         local row = original_cursor[1]
         local end_col = kwstart + #edit.newText
-        local old_text = original_line:sub(1, end_col - 1)
+        local old_text = original_line:sub(1, end_col)
         vim.api.nvim_buf_set_text(context.bufnr, row, 0, row, end_col, { old_text })
         -- undo the changes to the buffer (but keep them in the `.` register for
         -- repeating)
