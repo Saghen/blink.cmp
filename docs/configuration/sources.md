@@ -54,7 +54,7 @@ Blink can use `nvim-cmp` sources through a compatibility layer developed by [ste
 
 ## Checking status of sources providers
 
-The command `:BlinkCmpStatus` can be used to view which sources providers are enabled or not enabled.
+The command `:BlinkCmp status` can be used to view which sources providers are enabled or not enabled.
 
 ## Community sources
 

@@ -33,11 +33,13 @@ function commands.status()
 end
 
 function commands.setup()
-  vim.api.nvim_create_user_command(
-    'BlinkCmpStatus',
-    function() commands.status() end,
-    { desc = 'Check status of blink.cmp sources providers' }
-  )
+  vim.api.nvim_create_user_command('BlinkCmp', function(cmd)
+    if cmd.fargs[1] == 'status' then
+      commands.status()
+    else
+      vim.notify("[blink.cmp] invalid command '" .. cmd.args .. "'", vim.log.levels.ERROR)
+    end
+  end, { nargs = 1, complete = function() return { 'status' } end, desc = 'blink.cmp' })
 end
 
 return commands
