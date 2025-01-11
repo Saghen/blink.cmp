@@ -30,11 +30,14 @@ function cmdline:get_completions(context, callback)
   local keyword = context.get_bounds(keyword_config.range)
   local current_arg_prefix = current_arg:sub(1, keyword.start_col - #text_before_argument - 1)
 
+  -- Parse the command to ignore modifiers like :vert help
+  -- Fails in some cases, like context.line = ':vert' so we fallback to the first argument
   local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, context.line, {})
+  local cmd = (valid_cmd and parsed.cmd) or arguments[1] or ''
+
   local task = async.task
     .empty()
     :map(function()
-      local cmd = (valid_cmd and parsed.cmd) or arguments[1] or ''
       -- Special case for help where we read all the tags ourselves
       if vim.tbl_contains(constants.help_commands, cmd) then
         return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix)
