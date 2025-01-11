@@ -55,6 +55,10 @@ sources.providers.lsp = {
 
 Blink can use `nvim-cmp` sources through a compatibility layer developed by [stefanboca](https://github.com/stefanboca): [blink.compat](https://github.com/Saghen/blink.compat). Please open any issues with `blink.compat` in that repo
 
+## Checking status of sources providers
+
+The command `:BlinkCmp status` can be used to view which sources providers are enabled or not enabled.
+
 ## Community sources
 
 - [lazydev](https://github.com/folke/lazydev.nvim)
