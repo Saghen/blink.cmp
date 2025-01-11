@@ -30,11 +30,13 @@ function cmdline:get_completions(context, callback)
   local keyword = context.get_bounds(keyword_config.range)
   local current_arg_prefix = current_arg:sub(1, keyword.start_col - #text_before_argument - 1)
 
+  local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, context.line, {})
   local task = async.task
     .empty()
     :map(function()
+      local cmd = (valid_cmd and parsed.cmd) or arguments[1] or ''
       -- Special case for help where we read all the tags ourselves
-      if vim.tbl_contains(constants.help_commands, arguments[1] or '') then
+      if vim.tbl_contains(constants.help_commands, cmd) then
         return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix)
       end
 
@@ -52,7 +54,7 @@ function cmdline:get_completions(context, callback)
       end
 
       -- Special case for files, escape special characters
-      if vim.tbl_contains(constants.file_commands, arguments[1] or '') then
+      if vim.tbl_contains(constants.file_commands, cmd) then
         completions = vim.tbl_map(function(completion) return vim.fn.fnameescape(completion) end, completions)
       end
 
@@ -68,7 +70,7 @@ function cmdline:get_completions(context, callback)
         if has_prefix then filter_text = completion:sub(#current_arg_prefix + 1) end
 
         -- for lua, use the filter text as the label since it doesn't include the prefix
-        local label = arguments[1] == 'lua' and filter_text or completion
+        local label = cmd == 'lua' and filter_text or completion
 
         -- add prefix to the newText
         local new_text = completion
