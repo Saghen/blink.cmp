@@ -44,6 +44,8 @@ function cmdline:get_completions(context, callback)
       local completion_func = completion_args[2]
 
       -- Handle custom completions explicitly, since otherwise they won't work in input() mode (getcmdtype() == '@')
+      -- TODO: however, we cannot handle s: and <sid> completions. is there a better solution here where we can get
+      -- completions in input() mode without calling ourselves?
       if
         vim.startswith(completion_type, 'custom')
         and not vim.startswith(completion_func, 's:')
