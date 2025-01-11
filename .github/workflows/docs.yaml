@@ -1,0 +1,27 @@
+name: Deploy `main` docs
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-docs:
+    name: Deploy docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+
+      - name: Build
+        run: npm ci && npm run build
+        working-directory: docs
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy docs/.vitepress/dist --project-name=blink-cmp-main
