@@ -65,7 +65,7 @@ function utils.read_snippet(snippet, fallback)
   return snippets
 end
 
--- Add the current line's identation to all but the first line of
+-- Add the current line's indentation to all but the first line of
 -- the provided text
 ---@param text string
 function utils.add_current_line_indentation(text)
