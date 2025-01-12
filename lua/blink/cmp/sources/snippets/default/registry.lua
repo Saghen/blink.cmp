@@ -17,7 +17,6 @@ local default_config = {
   search_paths = { vim.fn.stdpath('config') .. '/snippets' },
   global_snippets = { 'all' },
   extended_filetypes = {},
-  ignored_filetypes = {},
   --- @type string?
   clipboard_register = nil,
 }
