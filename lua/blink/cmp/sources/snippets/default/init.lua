@@ -3,8 +3,8 @@
 --- @field search_paths? string[]
 --- @field global_snippets? string[]
 --- @field extended_filetypes? table<string, string[]>
---- @field ignored_filetypes? string[]
 --- @field get_filetype? fun(context: blink.cmp.Context): string
+--- @field filter_snippets? fun(filetype: string, file: string): boolean
 --- @field clipboard_register? string
 
 local snippets = {}
@@ -22,7 +22,6 @@ end
 
 function snippets:get_completions(context, callback)
   local filetype = self.get_filetype(context)
-  if vim.tbl_contains(self.registry.config.ignored_filetypes, filetype) then return callback() end
 
   if not self.cache[filetype] then
     local global_snippets = self.registry:get_global_snippets()
