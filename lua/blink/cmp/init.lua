@@ -33,12 +33,21 @@ end
 
 ------- Public API -------
 
---- Checks if the completion menu is currently visible
+--- Checks if the completion menu or ghost text is visible
 --- @return boolean
-function cmp.is_visible()
-  return require('blink.cmp.completion.windows.menu').win:is_open()
-    or require('blink.cmp.completion.windows.ghost_text').is_open()
-end
+function cmp.is_visible() return cmp.is_menu_visible() or cmp.is_ghost_text_visible() end
+
+--- Checks if the completion menu is visible
+--- @return boolean
+function cmp.is_menu_visible() return require('blink.cmp.completion.windows.menu').win:is_open() end
+
+--- Checks if the ghost text is visible
+--- @return boolean
+function cmp.is_ghost_text_visible() return require('blink.cmp.completion.windows.ghost_text').is_open() end
+
+--- Checks if the documentation window is visible
+--- @return boolean
+function cmp.is_documentation_visible() return require('blink.cmp.completion.windows.documentation').win:is_open() end
 
 --- Show the completion window
 --- @params opts? { providers?: string[], callback?: fun() }
