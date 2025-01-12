@@ -35,6 +35,18 @@ function registry.new(config)
   end
   self.registry = require('blink.cmp.sources.snippets.default.scan').register_snippets(self.config.search_paths)
 
+  if self.config.filter_snippets then
+    local filtered_registry = {}
+    for ft, files in pairs(self.registry) do
+      filtered_registry[ft] = {}
+      for _, file in ipairs(files) do
+        if self.config.filter_snippets(ft, file) then table.insert(filtered_registry[ft], file) end
+      end
+    end
+
+    self.registry = filtered_registry
+  end
+
   return self
 end
 

@@ -5,6 +5,7 @@
 --- @field extended_filetypes? table<string, string[]>
 --- @field ignored_filetypes? string[]
 --- @field get_filetype? fun(context: blink.cmp.Context): string
+--- @field filter_snippets? fun(filetype: string, file: string): boolean
 --- @field clipboard_register? string
 
 local snippets = {}
