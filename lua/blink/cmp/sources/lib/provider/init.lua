@@ -112,6 +112,10 @@ function source:should_show_items(context, items)
   local current_keyword_length = context.bounds.length
   if current_keyword_length < min_keyword_length then return false end
 
+  -- check if the source wants to show items
+  if self.module.should_show_items ~= nil and not self.module:should_show_items(context, items) then return false end
+
+  -- check if the user wants to show items
   if self.config.should_show_items == nil then return true end
   return self.config.should_show_items(context, items)
 end
