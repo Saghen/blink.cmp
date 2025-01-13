@@ -105,7 +105,6 @@ function win:open()
     height = self.config.max_height,
     row = 1,
     col = 1,
-    focusable = false,
     zindex = 1001,
     border = self.config.border == 'padded' and { ' ', '', '', ' ', '', '', ' ', ' ' } or self.config.border,
   })
