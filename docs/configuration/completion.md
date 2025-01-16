@@ -66,7 +66,7 @@ completion.list.selection = { preselect = true, auto_insert = true }
 ```
 Selects the first item automatically, and inserts a preview of the item on selection. The `cancel` keymap (default `<C-e>`) will close the menu and undo the preview.
 
-You may use the `show_and_select` keymap to show the completion menu and select the first item, with `auto_insert`. The default keymap (`<C-space>`) uses the `show` command, which will have the first item selected, but will not `auto_insert`.
+You may use the `show_and_insert` keymap to show the completion menu and select the first item, with `auto_insert`. The default keymap (`<C-space>`) uses the `show` command, which will have the first item selected, but will not `auto_insert`.
 
 <video src="https://github.com/user-attachments/assets/ef295526-8332-4ad0-9a2a-e2f6484081b2" muted autoplay loop />
 
@@ -84,7 +84,7 @@ completion.list.selection = { preselect = false, auto_insert = false }
 
 No item will be selected by default. You may use the `select_and_accept` keymap command to select the first item and accept it when there's no selection. The `accept` keymap command, on the other hand, will only trigger if an item is selected.
 
-You may use the `show_and_select` keymap to show the completion menu and select the first item. The default keymap (`<C-space>`) uses the `show` command, which will not select the first item.
+You may use the `show_and_insert` keymap to show the completion menu and select the first item. The default keymap (`<C-space>`) uses the `show` command, which will not select the first item.
 
 <video src="https://github.com/user-attachments/assets/09cd9b4b-18b3-456b-bb0a-074ae54e9d77" muted autoplay loop />
 == Manual, Auto Insert
@@ -94,7 +94,7 @@ completion.list.selection = { preselect = false, auto_insert = true }
 
 Selecting an item will insert a "preview" of the item automatically. You may use the `select_and_accept` keymap command to select the first item and accept it when there's no selection. The `accept` keymap command will only trigger if an item is selected. The `cancel` keymap (default `<C-e>`) will close the menu and undo the preview.
 
-You may use the `show_and_select` keymap to show the completion menu and select the first item, with `auto_insert`. The default keymap (`<C-space>`) uses the `show` command, which will not select the first item.
+You may use the `show_and_insert` keymap to show the completion menu and select the first item, with `auto_insert`. The default keymap (`<C-space>`) uses the `show` command, which will not select the first item.
 
 <video src="https://github.com/user-attachments/assets/4658b61d-1b95-404a-b6b5-3a4afbfb8112" muted autoplay loop />
 :::

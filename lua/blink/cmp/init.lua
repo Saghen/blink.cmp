@@ -87,7 +87,7 @@ end
 
 -- Show the completion window and select the first item
 --- @params opts? { providers?: string[], callback?: fun() }
-function cmp.show_and_select(opts)
+function cmp.show_and_insert(opts)
   opts = opts or {}
   opts.initial_selected_item_idx = 1
   return cmp.show(opts)

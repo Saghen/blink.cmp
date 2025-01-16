@@ -1,7 +1,7 @@
 --- @alias blink.cmp.KeymapCommand
 --- | 'fallback' Fallback to the built-in behavior
 --- | 'show' Show the completion window
---- | 'show_and_select' Show the completion window and select the first item
+--- | 'show_and_insert' Show the completion window and select the first item
 --- | 'hide' Hide the completion window
 --- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
@@ -126,7 +126,7 @@ function keymap.validate(config)
   local commands = {
     'fallback',
     'show',
-    'show_and_select',
+    'show_and_insert',
     'hide',
     'cancel',
     'accept',
