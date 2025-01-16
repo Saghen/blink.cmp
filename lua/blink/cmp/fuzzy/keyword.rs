@@ -52,7 +52,7 @@ pub fn guess_keyword_range_from_item(
     let line_range = get_keyword_range(line, cursor_col, match_suffix);
     let text_range = get_keyword_range(item_text, item_text.len(), false);
 
-    let line_prefix = &line[..text_range.0];
+    let line_prefix = &line[..line_range.0];
     let text_prefix = &item_text[..text_range.0];
     if line_prefix.ends_with(&text_prefix) {
         return (line_range.0 - text_prefix.len(), line_range.1);
