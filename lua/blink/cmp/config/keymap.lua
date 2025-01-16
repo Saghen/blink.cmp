@@ -5,6 +5,7 @@
 --- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
 --- | 'select_and_accept' Select the first completion item, if there's no selection, and accept
+--- | 'select_and_enter' Select the first completion item, if there's no selection, and enter
 --- | 'select_prev' Select the previous completion item
 --- | 'select_next' Select the next completion item
 --- | 'show_documentation' Show the documentation window
@@ -129,6 +130,7 @@ function keymap.validate(config)
     'cancel',
     'accept',
     'select_and_accept',
+    'select_and_enter',
     'select_prev',
     'select_next',
     'show_documentation',
