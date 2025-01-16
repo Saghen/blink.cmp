@@ -99,7 +99,7 @@ local window = {
               table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
             end
 
-            if vim.list_contains(ctx.self.treesitter, ctx.source_id) then
+            if vim.list_contains(ctx.self.treesitter, ctx.source_id) and not ctx.deprecated then
               -- add treesitter highlights
               vim.list_extend(highlights, require('blink.cmp.completion.windows.render.treesitter').highlight(ctx))
             end
