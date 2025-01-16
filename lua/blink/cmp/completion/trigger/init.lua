@@ -16,10 +16,18 @@
 --- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
---- @field show fun(opts?: { trigger_kind: blink.cmp.CompletionTriggerKind, trigger_character?: string, force?: boolean, send_upstream?: boolean, providers?: string[] }): blink.cmp.Context?
+--- @field show fun(opts?: blink.cmp.CompletionTriggerShowOptions): blink.cmp.Context?
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
 --- @field get_bounds fun(regex: vim.regex, line: string, cursor: number[]): blink.cmp.ContextBounds
+
+--- @class blink.cmp.CompletionTriggerShowOptions
+--- @field trigger_kind blink.cmp.CompletionTriggerKind
+--- @field trigger_character? string
+--- @field force? boolean
+--- @field send_upstream? boolean
+--- @field providers? string[]
+--- @field initial_selected_item_idx? number
 
 local config = require('blink.cmp.config').completion.trigger
 local context = require('blink.cmp.completion.trigger.context')
@@ -226,6 +234,7 @@ function trigger.show(opts)
     initial_trigger_character = trigger.context and trigger.context.trigger.initial_character or opts.trigger_character,
     trigger_kind = opts.trigger_kind,
     trigger_character = opts.trigger_character,
+    initial_selected_item_idx = opts.initial_selected_item_idx,
   })
 
   if opts.send_upstream ~= false then trigger.show_emitter:emit({ context = trigger.context }) end

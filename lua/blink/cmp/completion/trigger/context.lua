@@ -15,6 +15,7 @@
 --- @field bounds blink.cmp.ContextBounds
 --- @field trigger blink.cmp.ContextTrigger
 --- @field providers string[]
+--- @field initial_selected_item_idx? number
 ---
 --- @field new fun(opts: blink.cmp.ContextOpts): blink.cmp.Context
 --- @field get_keyword fun(): string
@@ -39,6 +40,7 @@
 --- @field initial_trigger_character? string
 --- @field trigger_kind blink.cmp.CompletionTriggerKind
 --- @field trigger_character? string
+--- @field initial_selected_item_idx? number
 
 --- @type blink.cmp.Context
 --- @diagnostic disable-next-line: missing-fields
@@ -62,6 +64,7 @@ function context.new(opts)
       character = opts.trigger_character,
     },
     providers = opts.providers,
+    initial_selected_item_idx = opts.initial_selected_item_idx,
   }, { __index = context })
 end
 

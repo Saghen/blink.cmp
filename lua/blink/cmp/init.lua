@@ -50,7 +50,7 @@ function cmp.is_ghost_text_visible() return require('blink.cmp.completion.window
 function cmp.is_documentation_visible() return require('blink.cmp.completion.windows.documentation').win:is_open() end
 
 --- Show the completion window
---- @params opts? { providers?: string[], callback?: fun() }
+--- @param opts? { providers?: string[], initial_selected_item_idx?: number, callback?: fun() }
 function cmp.show(opts)
   opts = opts or {}
 
@@ -79,13 +79,22 @@ function cmp.show(opts)
       force = true,
       providers = opts and opts.providers,
       trigger_kind = 'manual',
+      initial_selected_item_idx = opts.initial_selected_item_idx,
     })
   end)
   return true
 end
 
+-- Show the completion window and select the first item
+--- @params opts? { providers?: string[], callback?: fun() }
+function cmp.show_and_select(opts)
+  opts = opts or {}
+  opts.initial_selected_item_idx = 1
+  return cmp.show(opts)
+end
+
 --- Hide the completion window
---- @params opts? { callback?: fun() }
+--- @param opts? { callback?: fun() }
 function cmp.hide(opts)
   if not cmp.is_visible() then return end
 
@@ -97,7 +106,7 @@ function cmp.hide(opts)
 end
 
 --- Cancel the current completion, undoing the preview from auto_insert
---- @params opts? { callback?: fun() }
+--- @param opts? { callback?: fun() }
 function cmp.cancel(opts)
   if not cmp.is_visible() then return end
   vim.schedule(function()

@@ -98,11 +98,13 @@ function list.show(context, items_by_source)
   local previous_item_idx = list.get_item_idx_in_list(previous_selected_item)
   if list.is_explicitly_selected and previous_item_idx ~= nil and previous_item_idx <= 10 then
     list.select(previous_item_idx, { auto_insert = false, undo_preview = false })
-
+  -- respect the context's initial selected item idx
+  elseif context.initial_selected_item_idx ~= nil then
+    list.select(context.initial_selected_item_idx, { undo_preview = false, is_explicit_selection = true })
   -- otherwise, use the default selection
   else
     list.select(
-      list.get_selection_mode(list.context).preselect and 1 or nil,
+      list.get_selection_mode(context).preselect and 1 or nil,
       { auto_insert = false, undo_preview = false, is_explicit_selection = false }
     )
   end
