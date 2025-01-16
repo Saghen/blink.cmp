@@ -78,10 +78,27 @@ local function accept(ctx, item, callback)
 
       -- OR Normal: Apply the text edit and move the cursor
       else
+        -- TODO: cursor row, handle multi line edits
+        local output_cursor_column = item.textEdit.range.start.character + #item.textEdit.newText + offset
+
+        local cursor_position = ctx.get_cursor()
+        local cursor_line_zero_indexed = cursor_position[1] - 1
+
+        for _, additional_edit in ipairs(all_text_edits) do
+          local is_same_line_as_cursor = additional_edit.range.start.line == cursor_line_zero_indexed
+          local is_before_cursor = additional_edit.range.start.character <= cursor_position[2]
+
+          if is_same_line_as_cursor and is_before_cursor then
+            local remove_amount = additional_edit.range['end'].character - additional_edit.range.start.character
+            output_cursor_column = output_cursor_column + #additional_edit.newText - remove_amount
+          end
+        end
+
         table.insert(all_text_edits, item.textEdit)
         text_edits_lib.apply(all_text_edits)
+
         -- TODO: should move the cursor only by the offset since text edit handles everything else?
-        ctx.set_cursor({ ctx.get_cursor()[1], item.textEdit.range.start.character + #item.textEdit.newText + offset })
+        ctx.set_cursor({ ctx.get_cursor()[1], output_cursor_column })
       end
 
       -- Let the source execute the item itself
