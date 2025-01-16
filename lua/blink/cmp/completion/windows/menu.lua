@@ -4,6 +4,7 @@
 --- @field renderer blink.cmp.Renderer
 --- @field selected_item_idx? number
 --- @field context blink.cmp.Context?
+--- @field north boolean
 --- @field open_emitter blink.cmp.EventEmitter<{}>
 --- @field close_emitter blink.cmp.EventEmitter<{}>
 --- @field position_update_emitter blink.cmp.EventEmitter<{}>
@@ -49,6 +50,7 @@ vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
 function menu.open_with_items(context, items)
   menu.context = context
   menu.items = items
+  menu.north = false
   menu.selected_item_idx = menu.selected_item_idx ~= nil and math.min(menu.selected_item_idx, #items) or nil
 
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
@@ -76,7 +78,7 @@ end
 function menu.close()
   menu.auto_show = config.auto_show
   if not menu.win:is_open() then return end
-
+  menu.selected_item_idx = nil
   menu.win:close()
   menu.close_emitter:emit()
 end
@@ -97,14 +99,29 @@ function menu.update_position()
 
   win:update_size()
 
+  local item = menu.items[menu.selected_item_idx]
+  local prefer_north = false
+  -- If there are multiline text and user turns on ghost text, we should prefer opening upwards.
+  -- Once we go up, we don't go down again even if the text is only one line, to reduce visual interference
+  -- when keeps holding down <c-p>/<c-n>.
+  if
+    require('blink.cmp.config').completion.ghost_text.enabled and menu.north
+    or (item ~= nil and item.insertText ~= nil and string.find(item.insertText, '\n') ~= nil)
+  then
+    prefer_north = true
+  end
+
   local border_size = win:get_border_size()
-  local pos = win:get_vertical_direction_and_height(config.direction_priority)
+  local pos = win:get_vertical_direction_and_height(prefer_north and { 'n', 's' } or config.direction_priority)
 
   -- couldn't find anywhere to place the window
   if not pos then
     win:close()
     return
   end
+
+  -- record it, reset to false at next time when item changes
+  if prefer_north and pos.direction == 'n' then menu.north = true end
 
   local alignment_start_col = menu.renderer:get_alignment_start_col()
 
