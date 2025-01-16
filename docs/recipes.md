@@ -217,6 +217,20 @@ sources.min_keyword_length = function()
 end
 ```
 
+### Set minimum keyword length for command only in cmdline
+
+If you'd prefer the menu doesn't popup when typing abbreviations like `wq`, you may set the minimum keyword length to 2 when typing the command.
+
+```lua
+sources = {
+  min_keyword_length = function(ctx)
+    -- only applies when typing a command, doesn't apply to arguments
+    if ctx.mode == 'cmdline' and string.find(ctx.line, ' ') == nil then return 2 end
+    return 0
+  end
+}
+```
+
 ## For writers
 
 When writing prose, you may want significantly different behavior than typical LSP completions. If you find any interesting configurations, please open a PR adding it here!
