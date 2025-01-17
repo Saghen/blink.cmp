@@ -145,6 +145,24 @@ end
 function download.download_file(url, filename)
   return async.task.new(function(resolve, reject)
     local args = { 'curl' }
+      
+    -- Automatically add proxy settings from environment variables if available
+    local http_proxy = os.getenv("HTTP_PROXY") or os.getenv("http_proxy")
+    local https_proxy = os.getenv("HTTPS_PROXY") or os.getenv("https_proxy")
+
+    -- Insert proxy settings into args if they exist and match the URL scheme
+    local function insert_proxy(proxy_url)
+      if proxy_url then
+        table.insert(args, '--proxy')
+        table.insert(args, proxy_url)
+      end
+    end
+
+    if url:match("^https://") and https_proxy then
+      insert_proxy(https_proxy)
+    elseif url:match("^http://") and http_proxy then
+      insert_proxy(http_proxy)
+    end
     vim.list_extend(args, download_config.extra_curl_args)
     vim.list_extend(args, {
       '--fail', -- Fail on 4xx/5xx
