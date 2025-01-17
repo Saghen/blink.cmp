@@ -86,6 +86,8 @@ Set the preset to `none` to disable the presets
 ['<C-e>'] = { 'hide' },
 ['<C-y>'] = { 'select_and_accept' },
 
+['<Up>'] = { 'select_prev', 'fallback' },
+['<Down>'] = { 'select_next', 'fallback' },
 ['<C-p>'] = { 'select_prev', 'fallback' },
 ['<C-n>'] = { 'select_next', 'fallback' },
 
