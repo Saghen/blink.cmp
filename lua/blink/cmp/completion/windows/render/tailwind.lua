@@ -15,7 +15,7 @@ end
 --- @return string?
 function tailwind.get_kind_icon(item)
   local config = require('blink.cmp.config').appearance
-  if tailwind.get_hex_color(item) then return config.kind_icons.Color or '██' end
+  if tailwind.get_hex_color(item) then return config.kind_icons.ColorPreview or '██' end
 end
 
 --- @param ctx blink.cmp.DrawItemContext
