@@ -145,6 +145,13 @@ end
 function download.download_file(url, filename)
   return async.task.new(function(resolve, reject)
     local args = { 'curl' }
+
+    -- Load https_proxy if available
+    if download_config.use_system_proxy then
+      local proxy_url = download_config.system_proxy_url or os.getenv('HTTPS_PROXY') or os.getenv('https_proxy')
+      vim.list_extend(args, { '--proxy', proxy_url })
+    end
+
     vim.list_extend(args, download_config.extra_curl_args)
     vim.list_extend(args, {
       '--fail', -- Fail on 4xx/5xx
