@@ -7,10 +7,11 @@ local text_edits = {}
 
 --- Applies one or more text edits to the current buffer, assuming utf-8 encoding
 --- @async
---- @param edits lsp.TextEdit[]
+--- @param additional_text_edits lsp.TextEdit[] # additional text edits that can e.g. add import statements.
+--- @param edit lsp.TextEdit # the main text edit (at the cursor). Can be repeated.
 --- @return blink.cmp.Task
 --- @nodiscard
-function text_edits.apply(edits)
+function text_edits.apply(additional_text_edits, edit)
   return async.task.new(function(resolve)
     local mode = context.get_mode()
     if mode == 'default' then
@@ -20,8 +21,8 @@ function text_edits.apply(edits)
       -- current word). See the tracking issue for this feature at
       -- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
 
-      -- only redoing the first edit is supported
-      local edit = edits[1]
+      vim.lsp.util.apply_text_edits(additional_text_edits, vim.api.nvim_get_current_buf(), 'utf-8')
+
       local original_cursor = context.get_cursor()
       local kwstart, kwend = edit.range.start.character, edit.range['end'].character
       local repeat_keys = {}
@@ -40,7 +41,7 @@ function text_edits.apply(edits)
         vim.api.nvim_buf_set_text(context.bufnr, row, 0, row, end_col, { old_text })
         -- undo the changes to the buffer (but keep them in the `.` register for
         -- repeating)
-        vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8')
+        vim.lsp.util.apply_text_edits({ edit }, vim.api.nvim_get_current_buf(), 'utf-8')
         resolve()
       end)
 
@@ -48,9 +49,7 @@ function text_edits.apply(edits)
     end
 
     assert(mode == 'cmdline', 'Unsupported mode for text edits: ' .. mode)
-    assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
 
-    local edit = edits[1]
     local line = context.get_line()
     local edited_line = line:sub(1, edit.range.start.character)
       .. edit.newText

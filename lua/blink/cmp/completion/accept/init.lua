@@ -70,16 +70,15 @@ local function accept(ctx, item, callback)
         -- so we empty the newText and apply
         local temp_text_edit = vim.deepcopy(item.textEdit)
         temp_text_edit.newText = ''
-        table.insert(all_text_edits, temp_text_edit)
-        return text_edits_lib.apply(all_text_edits):map(function()
+        return text_edits_lib.apply(all_text_edits, temp_text_edit):map(function()
           -- Expand the snippet
           require('blink.cmp.config').snippets.expand(item.textEdit.newText)
           return brackets_status
         end)
       else
         -- OR Normal: Apply the text edit and move the cursor
-        table.insert(all_text_edits, item.textEdit)
-        return text_edits_lib.apply(all_text_edits):map(function()
+        local main_text_edit = item.textEdit
+        return text_edits_lib.apply(all_text_edits, main_text_edit):map(function()
           -- TODO: should move the cursor only by the offset since text edit handles everything else?
           ctx.set_cursor({ ctx.get_cursor()[1], item.textEdit.range.start.character + #item.textEdit.newText + offset })
           return brackets_status
