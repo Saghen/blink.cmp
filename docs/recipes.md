@@ -165,7 +165,7 @@ Note that you may want to add the override to other sources as well, since if th
 
 ```lua
 -- by default, blink.cmp will block newline, tab and space trigger characters, disable that behavior
-completion.trigger.blocked_trigger_characters = {}
+completion.trigger.show_on_blocked_trigger_characters = {}
 
 -- add newline, tab and space to LSP source trigger characters
 sources.providers.lsp.override.get_trigger_characters = function(self)
