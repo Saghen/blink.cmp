@@ -109,4 +109,16 @@ function utils.slice(arr, start, finish)
   return sliced
 end
 
+--- Reverses an array
+--- @generic T
+--- @param arr T[]
+--- @return T[]
+function utils.reverse(arr)
+  local reversed = {}
+  for i = #arr, 1, -1 do
+    reversed[#reversed + 1] = arr[i]
+  end
+  return reversed
+end
+
 return utils
