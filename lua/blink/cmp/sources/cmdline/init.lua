@@ -95,7 +95,11 @@ function cmdline:get_completions(context, callback)
           sortText = label:lower():gsub('^([!-@\\[-`])', '~%1'),
           textEdit = {
             newText = new_text,
-            range = {
+            insert = {
+              start = { line = 0, character = #text_before_argument },
+              ['end'] = { line = 0, character = math.min(#text_before_argument + #current_arg, vim.fn.getcmdpos() - 1) },
+            },
+            replace = {
               start = { line = 0, character = #text_before_argument },
               ['end'] = { line = 0, character = #text_before_argument + #current_arg },
             },
