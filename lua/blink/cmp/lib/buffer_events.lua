@@ -42,6 +42,8 @@ function buffer_events:listen(opts)
   vim.api.nvim_create_autocmd('InsertCharPre', {
     callback = function()
       if snippet.active() and not self.show_in_snippet and not self.has_context() then return end
+      -- FIXME: vim.v.char can be an escape code such as <95> in the case of <F2>. This breaks downstream
+      -- since this isn't a valid utf-8 string. How can we identify and ignore these?
       last_char = vim.v.char
     end,
   })

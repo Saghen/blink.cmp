@@ -145,8 +145,9 @@ function trigger.is_keyword_character(char)
   -- special case for hyphen, since we don't consider a lone hyphen to be a keyword
   if char == '-' then return true end
 
-  local keyword_start_col, keyword_end_col = require('blink.cmp.fuzzy').get_keyword_range(char, #char, 'prefix')
-  return keyword_start_col ~= keyword_end_col
+  local success, keyword_start_col, keyword_end_col =
+    pcall(require('blink.cmp.fuzzy').get_keyword_range, char, #char, 'prefix')
+  return success and keyword_start_col ~= keyword_end_col
 end
 
 function trigger.is_trigger_character(char, is_show_on_x)
