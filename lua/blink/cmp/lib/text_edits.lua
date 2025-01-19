@@ -115,13 +115,7 @@ function text_edits.get_from_item(item)
   text_edit.replace = nil
   --- @cast text_edit lsp.TextEdit
 
-  -- Adjust the position of the text edit to be the current cursor position
-  -- since the data might be outdated. We compare the cursor column position
-  -- from when the items were fetched versus the current.
-  -- HACK: is there a better way?
-  -- TODO: take into account the offset_encoding
-  local offset = context.get_cursor()[2] - item.cursor_column
-  text_edit.range['end'].character = text_edit.range['end'].character + offset
+  text_edit = text_edits.compensate_for_cursor_movement(text_edit, item.cursor_column, context.get_cursor()[2])
 
   -- convert the offset encoding to utf-8
   -- TODO: we have to do this last because it applies a max on the position based on the length of the line
@@ -131,6 +125,21 @@ function text_edits.get_from_item(item)
 
   text_edit.range = text_edits.clamp_range_to_bounds(text_edit.range)
 
+  return text_edit
+end
+
+--- Adjust the position of the text edit to be the current cursor position
+--- since the data might be outdated. We compare the cursor column position
+--- from when the items were fetched versus the current.
+--- HACK: is there a better way?
+--- TODO: take into account the offset_encoding
+--- @param text_edit lsp.TextEdit
+--- @param old_cursor_col number Position of the cursor when the text edit was created
+--- @param new_cursor_col number New position of the cursor
+function text_edits.compensate_for_cursor_movement(text_edit, old_cursor_col, new_cursor_col)
+  text_edit = vim.deepcopy(text_edit)
+  local offset = new_cursor_col - old_cursor_col
+  text_edit.range['end'].character = text_edit.range['end'].character + offset
   return text_edit
 end
 
