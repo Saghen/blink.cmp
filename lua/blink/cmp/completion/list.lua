@@ -218,11 +218,12 @@ end
 function list.undo_preview()
   if list.preview_undo == nil then return end
 
-  require('blink.cmp.lib.text_edits').apply({ list.preview_undo.text_edit })
-  if list.preview_undo.cursor then
-    require('blink.cmp.completion.trigger.context').set_cursor(list.preview_undo.cursor)
-  end
-  list.preview_undo = nil
+  require('blink.cmp.lib.text_edits').apply({ list.preview_undo.text_edit }):map(function()
+    if list.preview_undo.cursor then
+      require('blink.cmp.completion.trigger.context').set_cursor(list.preview_undo.cursor)
+    end
+    list.preview_undo = nil
+  end)
 end
 
 function list.apply_preview(item)
@@ -242,7 +243,7 @@ function list.accept(opts)
 
   list.undo_preview()
   local accept = require('blink.cmp.completion.accept')
-  accept(list.context, item, function()
+  local _ = accept(list.context, item, function()
     list.accept_emitter:emit({ item = item, context = list.context })
     if opts.callback then opts.callback() end
   end)
