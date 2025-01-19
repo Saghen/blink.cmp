@@ -5,7 +5,7 @@
 --- @field config blink.cmp.SourceProviderConfigWrapper
 --- @field module blink.cmp.Source
 --- @field list blink.cmp.SourceProviderList | nil
---- @field resolve_tasks table<blink.cmp.CompletionItem, blink.cmp.Task>
+--- @field cached_resolve { item: blink.cmp.CompletionItem, task: blink.cmp.Task } | nil
 ---
 --- @field new fun(id: string, config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProvider
 --- @field enabled fun(self: blink.cmp.SourceProvider): boolean
@@ -129,20 +129,23 @@ end
 --- Resolve ---
 
 function source:resolve(context, item)
-  local tasks = self.resolve_tasks
-  if tasks[item] == nil or tasks[item].status == async.STATUS.CANCELLED then
-    tasks[item] = async.task.new(function(resolve)
-      if self.module.resolve == nil then return resolve(item) end
+  local cached = self.cached_resolve
+  if cached == nil or cached.item ~= item or cached.task.status == async.STATUS.CANCELLED then
+    self.cached_resolve = {
+      item = item,
+      task = async.task.new(function(resolve)
+        if self.module.resolve == nil then return resolve(item) end
 
-      return self.module:resolve(item, function(resolved_item)
-        -- HACK: it's out of spec to update keys not in resolveSupport.properties but some LSPs do it anyway
-        local merged_item = vim.tbl_deep_extend('force', item, resolved_item or {})
-        local transformed_item = self:transform_items(context, { merged_item })[1] or merged_item
-        vim.schedule(function() resolve(transformed_item) end)
-      end)
-    end)
+        return self.module:resolve(item, function(resolved_item)
+          -- HACK: it's out of spec to update keys not in resolveSupport.properties but some LSPs do it anyway
+          local merged_item = vim.tbl_deep_extend('force', item, resolved_item or {})
+          local transformed_item = self:transform_items(context, { merged_item })[1] or merged_item
+          vim.schedule(function() resolve(transformed_item) end)
+        end)
+      end),
+    }
   end
-  return tasks[item]
+  return self.cached_resolve.task
 end
 
 --- Execute ---
