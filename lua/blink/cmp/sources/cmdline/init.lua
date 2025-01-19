@@ -72,6 +72,7 @@ function cmdline:get_completions(context, callback)
 
       return completions
     end)
+    :schedule()
     :map(function(completions)
       local items = {}
       for _, completion in ipairs(completions) do

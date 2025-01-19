@@ -9,6 +9,7 @@
 --- @field cancel fun(self: blink.cmp.Task)
 --- @field map fun(self: blink.cmp.Task, fn: fun(result: any): blink.cmp.Task | any): blink.cmp.Task
 --- @field catch fun(self: blink.cmp.Task, fn: fun(err: any): blink.cmp.Task | any): blink.cmp.Task
+--- @field schedule fun(self: blink.cmp.Task): blink.cmp.Task
 ---
 --- @field on_completion fun(self: blink.cmp.Task, cb: fun(result: any))
 --- @field on_failure fun(self: blink.cmp.Task, cb: fun(err: any))
@@ -131,6 +132,14 @@ function task:catch(fn)
     return function() chained_task:cancel() end
   end)
   return chained_task
+end
+
+function task:schedule()
+  return self:map(function(value)
+    return task.new(function(resolve)
+      vim.schedule(function() resolve(value) end)
+    end)
+  end)
 end
 
 --- events
