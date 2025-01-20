@@ -96,7 +96,7 @@ Setting capabilities for `nvim-lspconfig`:
     local capabilities = require('blink.cmp').get_lsp_capabilities()
     local lspconfig = require('lspconfig')
 
-    lspconfig['lua-ls'].setup({ capabilities = capabilities })
+    lspconfig['lua_ls'].setup({ capabilities = capabilities })
   end
 }
 ```
