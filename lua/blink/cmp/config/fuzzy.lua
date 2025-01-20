@@ -11,6 +11,8 @@
 --- @field ignore_version_mismatch boolean Ignores mismatched version between the built binary and the current git sha, when building locally
 --- @field force_version? string When downloading a prebuilt binary, force the downloader to resolve this version. If this is unset then the downloader will attempt to infer the version from the checked out git tag (if any). WARN: Beware that `main` may be incompatible with the version you select
 --- @field force_system_triple? string When downloading a prebuilt binary, force the downloader to use this system triple. If this is unset then the downloader will attempt to infer the system triple from `jit.os` and `jit.arch`. Check the latest release for all available system triples. WARN: Beware that `main` may be incompatible with the version you select
+--- @field use_system_proxy boolean When downloading a prebuilt binary, use the system proxy settings. This will load the HTTPS_PROXY environment variable by default
+--- @field system_proxy_url? string When downloading a prebuilt binary, use this proxy URL. This will override the system proxy settings
 --- @field extra_curl_args string[] Extra arguments that will be passed to curl like { 'curl', ..extra_curl_args, ..built_in_args }
 
 --- @alias blink.cmp.SortFunction fun(a: blink.cmp.CompletionItem, b: blink.cmp.CompletionItem): boolean | nil
@@ -29,6 +31,8 @@ local fuzzy = {
       ignore_version_mismatch = false,
       force_version = nil,
       force_system_triple = nil,
+      use_system_proxy = true,
+      system_proxy_url = nil,
       extra_curl_args = {},
     },
   },
