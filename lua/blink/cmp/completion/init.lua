@@ -17,7 +17,12 @@ function completion.setup()
   local list = require('blink.cmp.completion.list')
 
   -- trigger -> sources: request completion items from the sources on show
-  trigger.show_emitter:on(function(event) sources.request_completions(event.context) end)
+  trigger.show_emitter:on(function(event)
+    vim.schedule(function()
+      -- schedule to avoid outdated completion items
+      sources.request_completions(event.context)
+    end)
+  end)
   trigger.hide_emitter:on(function()
     sources.cancel_completions()
     list.hide()
