@@ -1,28 +1,25 @@
+use crate::error::Error;
 use crate::frecency::FrecencyTracker;
 use crate::fuzzy::FuzzyOptions;
 use crate::lsp_item::LspItem;
-use lazy_static::lazy_static;
 use mlua::prelude::*;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
-use std::sync::RwLock;
+use std::sync::{LazyLock, RwLock};
 
+mod error;
 mod frecency;
 mod fuzzy;
 mod keyword;
 mod lsp_item;
 
-lazy_static! {
-    static ref REGEX: Regex = Regex::new(r"\p{L}[\p{L}0-9_\\-]{2,}").unwrap();
-    static ref FRECENCY: RwLock<Option<FrecencyTracker>> = RwLock::new(None);
-    static ref HAYSTACKS_BY_PROVIDER: RwLock<HashMap<String, Vec<LspItem>>> =
-        RwLock::new(HashMap::new());
-}
+static REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\p{L}[\p{L}0-9_\\-]{2,}").unwrap());
+static FRECENCY: LazyLock<RwLock<Option<FrecencyTracker>>> = LazyLock::new(|| RwLock::new(None));
+static HAYSTACKS_BY_PROVIDER: LazyLock<RwLock<HashMap<String, Vec<LspItem>>>> =
+    LazyLock::new(|| RwLock::new(HashMap::new()));
 
 pub fn init_db(_: &Lua, (db_path, use_unsafe_no_lock): (String, bool)) -> LuaResult<bool> {
-    let mut frecency = FRECENCY.write().map_err(|_| {
-        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
-    })?;
+    let mut frecency = FRECENCY.write().map_err(|_| Error::AcquireFrecencyLock)?;
     if frecency.is_some() {
         return Ok(false);
     }
@@ -31,26 +28,18 @@ pub fn init_db(_: &Lua, (db_path, use_unsafe_no_lock): (String, bool)) -> LuaRes
 }
 
 pub fn destroy_db(_: &Lua, _: ()) -> LuaResult<bool> {
-    let frecency = FRECENCY.write().map_err(|_| {
-        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
-    })?;
+    let frecency = FRECENCY.write().map_err(|_| Error::AcquireFrecencyLock)?;
     drop(frecency);
 
-    let mut frecency = FRECENCY.write().map_err(|_| {
-        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
-    })?;
+    let mut frecency = FRECENCY.write().map_err(|_| Error::AcquireFrecencyLock)?;
     *frecency = None;
 
     Ok(true)
 }
 
 pub fn access(_: &Lua, item: LspItem) -> LuaResult<bool> {
-    let mut frecency_handle = FRECENCY.write().map_err(|_| {
-        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
-    })?;
-    let frecency = frecency_handle.as_mut().ok_or_else(|| {
-        mlua::Error::RuntimeError("Attempted to use frencecy before initialization".to_string())
-    })?;
+    let mut frecency = FRECENCY.write().map_err(|_| Error::AcquireFrecencyLock)?;
+    let frecency = frecency.as_mut().ok_or(Error::UseFrecencyBeforeInit)?;
     frecency.access(&item)?;
     Ok(true)
 }
@@ -59,10 +48,10 @@ pub fn set_provider_items(
     _: &Lua,
     (provider_id, items): (String, Vec<LspItem>),
 ) -> LuaResult<bool> {
-    let mut items_by_provider = HAYSTACKS_BY_PROVIDER.write().map_err(|_| {
-        mlua::Error::RuntimeError("Failed to acquire lock for items by provider".to_string())
-    })?;
-    items_by_provider.insert(provider_id, items);
+    HAYSTACKS_BY_PROVIDER
+        .write()
+        .map_err(|_| Error::AcquireItemLock)?
+        .insert(provider_id, items);
     Ok(true)
 }
 
@@ -70,22 +59,15 @@ pub fn fuzzy(
     _lua: &Lua,
     (line, cursor_col, provider_id, opts): (String, usize, String, FuzzyOptions),
 ) -> LuaResult<(Vec<i32>, Vec<u32>)> {
-    let mut frecency_handle = FRECENCY.write().map_err(|_| {
-        mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
-    })?;
-    let frecency = frecency_handle.as_mut().ok_or_else(|| {
-        mlua::Error::RuntimeError("Attempted to use frencecy before initialization".to_string())
-    })?;
+    let frecency = FRECENCY.read().map_err(|_| Error::AcquireFrecencyLock)?;
+    let frecency = frecency.as_ref().ok_or(Error::UseFrecencyBeforeInit)?;
 
-    let haystacks_by_provider = HAYSTACKS_BY_PROVIDER.read().map_err(|_| {
-        mlua::Error::RuntimeError("Failed to acquire lock for items by provider".to_string())
-    })?;
-    let haystack = haystacks_by_provider.get(&provider_id).ok_or_else(|| {
-        mlua::Error::RuntimeError(format!(
-            "Attempted to fuzzy match for provider {} before setting the provider's items",
-            provider_id
-        ))
-    })?;
+    let haystacks_by_provider = HAYSTACKS_BY_PROVIDER
+        .read()
+        .map_err(|_| Error::AcquireItemLock)?;
+    let haystack = haystacks_by_provider
+        .get(&provider_id)
+        .ok_or(Error::FuzzyBeforeSetItems { provider_id })?;
 
     Ok(fuzzy::fuzzy(&line, cursor_col, haystack, frecency, opts))
 }
