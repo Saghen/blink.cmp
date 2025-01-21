@@ -4,7 +4,7 @@
 --- @field gap number
 --- @field columns blink.cmp.DrawColumn[]
 ---
---- @field new fun(draw: blink.cmp.Draw): blink.cmp.Renderer
+--- @field new fun(context: blink.cmp.Context, draw: blink.cmp.Draw): blink.cmp.Renderer
 --- @field draw fun(self: blink.cmp.Renderer, context: blink.cmp.Context, bufnr: number, items: blink.cmp.CompletionItem[])
 --- @field get_component_column_location fun(self: blink.cmp.Renderer, component_name: string): { column_idx: number, component_idx: number }
 --- @field get_component_start_col fun(self: blink.cmp.Renderer, component_name: string): number
@@ -16,8 +16,16 @@ local ns = vim.api.nvim_create_namespace('blink_cmp_renderer')
 --- @diagnostic disable-next-line: missing-fields
 local renderer = {}
 
-function renderer.new(draw)
+function renderer.new(context, draw)
   --- Convert the component names in the columns to the component definitions
+  --- @type blink.cmp.DrawColumn[]
+  local columns = draw.columns
+  if type(columns) == "function" then
+      columns = columns(context)
+      draw.columns = columns
+  end
+  --- @cast columns blink.cmp.DrawColumn[]
+
   --- @type blink.cmp.DrawComponent[][]
   local columns_definitions = vim.tbl_map(function(column)
     local components = {}
@@ -31,7 +39,7 @@ function renderer.new(draw)
       components = components,
       gap = column.gap or 0,
     }
-  end, draw.columns)
+  end, columns)
 
   local padding = type(draw.padding) == 'number' and { draw.padding, draw.padding } or draw.padding
   --- @cast padding number[]

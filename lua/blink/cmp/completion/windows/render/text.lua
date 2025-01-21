@@ -9,7 +9,12 @@ function text_lib.apply_component_width(text, component)
   local width = component.width or {}
   if width.fixed ~= nil then return text_lib.set_width(text, width.fixed, component) end
   if width.min ~= nil then text = text_lib.pad(text, width.min) end
+  if type(width.max) == 'function' then
+    local max_width = width.max()
+    if max_width ~= nil then text = text_lib.truncate(text, max_width, component.ellipsis) end
+else
   if width.max ~= nil then text = text_lib.truncate(text, width.max, component.ellipsis) end
+  end
   return text
 end
 
