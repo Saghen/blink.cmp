@@ -4,8 +4,9 @@
 --- @field gap number
 --- @field columns blink.cmp.DrawColumn[]
 ---
---- @field new fun(draw: blink.cmp.Draw): blink.cmp.Renderer
---- @field draw fun(self: blink.cmp.Renderer, context: blink.cmp.Context, bufnr: number, items: blink.cmp.CompletionItem[])
+--- @field new fun(context: blink.cmp.Context, draw: blink.cmp.Draw): blink.cmp.Renderer
+--- @field draw fun(self: blink.cmp.Renderer, context: blink.cmp.Context, bufnr: number, items: blink.cmp.CompletionItem[], draw: blink.cmp.Draw)
+--- @field pre_column fun(self: blink.cmp.Renderer, context: blink.cmp.Context, draw: blink.cmp.Draw)
 --- @field get_component_column_location fun(self: blink.cmp.Renderer, component_name: string): { column_idx: number, component_idx: number }
 --- @field get_component_start_col fun(self: blink.cmp.Renderer, component_name: string): number
 --- @field get_alignment_start_col fun(self: blink.cmp.Renderer): number
@@ -15,23 +16,13 @@ local ns = vim.api.nvim_create_namespace('blink_cmp_renderer')
 --- @type blink.cmp.Renderer
 --- @diagnostic disable-next-line: missing-fields
 local renderer = {}
+--- @type blink.cmp.DrawColumn[]
+local columns = {}
 
-function renderer.new(draw)
+function renderer.new(context, draw)
   --- Convert the component names in the columns to the component definitions
-  --- @type blink.cmp.DrawComponent[][]
-  local columns_definitions = vim.tbl_map(function(column)
-    local components = {}
-    for _, component_name in ipairs(column) do
-      local component = draw.components[component_name]
-      assert(component ~= nil, 'No component definition found for component: "' .. component_name .. '"')
-      table.insert(components, draw.components[component_name])
-    end
-
-    return {
-      components = components,
-      gap = column.gap or 0,
-    }
-  end, draw.columns)
+  columns = draw.columns
+  if type(columns) == 'function' then draw.columns = columns(context) end
 
   local padding = type(draw.padding) == 'number' and { draw.padding, draw.padding } or draw.padding
   --- @cast padding number[]
@@ -40,6 +31,27 @@ function renderer.new(draw)
   self.padding = padding
   self.gap = draw.gap
   self.def = draw
+  renderer:pre_column(context, draw)
+  return self
+end
+
+function renderer:pre_column(context, draw)
+  if type(columns) == 'function' then draw.columns = columns(context) end
+
+  --- @type blink.cmp.DrawComponent[][]
+  local columns_definitions = vim.tbl_map(function(column)
+    local components = {}
+    for _, component_name in ipairs(column) do
+      local component = draw.components[component_name]
+      assert(component ~= nil, 'No component definition found for component: "' .. component_name .. '"')
+      table.insert(components, draw.components[component_name])
+    end
+    return {
+      components = components,
+      gap = column.gap or 0,
+    }
+  end, draw.columns)
+
   self.columns = vim.tbl_map(
     function(column_definition)
       return require('blink.cmp.completion.windows.render.column').new(
@@ -49,16 +61,15 @@ function renderer.new(draw)
     end,
     columns_definitions
   )
-  return self
 end
 
 function renderer:draw(context, bufnr, items)
-  -- gather contexts
+  renderer:pre_column(context, self.def)
   local draw_contexts = require('blink.cmp.completion.windows.render.context').get_from_items(context, self.def, items)
 
   -- render the columns
   for _, column in ipairs(self.columns) do
-    column:render(draw_contexts)
+    column:render(context, draw_contexts)
   end
 
   -- apply to the buffer

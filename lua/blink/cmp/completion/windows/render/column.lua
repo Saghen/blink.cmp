@@ -6,7 +6,7 @@
 --- @field ctxs blink.cmp.DrawItemContext[]
 ---
 --- @field new fun(components: blink.cmp.DrawComponent[], gap: number): blink.cmp.DrawColumn
---- @field render fun(self: blink.cmp.DrawColumn, ctxs: blink.cmp.DrawItemContext[])
+--- @field render fun(self: blink.cmp.DrawColumn,context: blink.cmp.Context, ctxs: blink.cmp.DrawItemContext[])
 --- @field get_line_text fun(self: blink.cmp.DrawColumn, line_idx: number): string
 --- @field get_line_highlights fun(self: blink.cmp.DrawColumn, line_idx: number): blink.cmp.DrawHighlight[]
 
@@ -26,7 +26,7 @@ function column.new(components, gap)
   return self
 end
 
-function column:render(ctxs)
+function column:render(context, ctxs)
   --- render text and get the max widths of each component
   --- @type string[][]
   local lines = {}
@@ -35,7 +35,7 @@ function column:render(ctxs)
     --- @type string[]
     local line = {}
     for component_idx, component in ipairs(self.components) do
-      local text = text_lib.apply_component_width(component.text(ctx) or '', component)
+      local text = text_lib.apply_component_width(context, component.text(ctx) or '', component)
       table.insert(line, text)
       max_component_widths[component_idx] =
         math.max(max_component_widths[component_idx] or 0, vim.api.nvim_strwidth(text))
