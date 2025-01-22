@@ -52,10 +52,11 @@ function cmdline:get_completions(context, callback)
       -- TODO: however, we cannot handle v:lua, s:, and <sid> completions. is there a better solution here where we can
       -- get completions in input() mode without calling ourselves?
       if
-        vim.startswith(completion_type, 'custom')
-        and not vim.startswith(completion_func, 's:')
-        and not vim.startswith(completion_func, 'v:lua')
-        and not vim.startswith(completion_func, '<sid>')
+        vim.fn.getcmdtype() == '@'
+        and vim.startswith(completion_type, 'custom')
+        and not vim.startswith(completion_func:lower(), 's:')
+        and not vim.startswith(completion_func:lower(), 'v:lua')
+        and not vim.startswith(completion_func:lower(), '<sid>')
       then
         completions = vim.fn.call(completion_func, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
         -- `custom,` type returns a string, delimited by newlines
