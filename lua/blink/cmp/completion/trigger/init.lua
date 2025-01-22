@@ -12,7 +12,6 @@
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
 ---
 --- @field activate fun()
---- @field is_keyword_character fun(char: string): boolean
 --- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
@@ -31,7 +30,8 @@
 
 local config = require('blink.cmp.config').completion.trigger
 local context = require('blink.cmp.completion.trigger.context')
-local utils = require('blink.cmp.completion.trigger.utils')
+local utils = require('blink.cmp.lib.utils')
+local fuzzy = require('blink.cmp.fuzzy')
 
 --- @type blink.cmp.CompletionTrigger
 --- @diagnostic disable-next-line: missing-fields
@@ -61,7 +61,7 @@ function trigger.activate()
       trigger.show({ trigger_kind = 'trigger_character', trigger_character = char })
 
     -- character is part of a keyword
-    elseif trigger.is_keyword_character(char) and (config.show_on_keyword or trigger.context ~= nil) then
+    elseif fuzzy.is_keyword_character(char) and (config.show_on_keyword or trigger.context ~= nil) then
       trigger.show({ trigger_kind = 'keyword' })
 
     -- nothing matches so hide
@@ -75,7 +75,7 @@ function trigger.activate()
     local cursor_col = cursor[2]
 
     local char_under_cursor = utils.get_char_at_cursor()
-    local is_keyword = trigger.is_keyword_character(char_under_cursor)
+    local is_keyword = fuzzy.is_keyword_character(char_under_cursor)
 
     -- we were told to ignore the cursor moved event, so we update the context
     -- but don't send an on_show event upstream
@@ -139,15 +139,6 @@ function trigger.activate()
     on_cursor_moved = on_cursor_moved,
     on_leave = function() trigger.hide() end,
   })
-end
-
-function trigger.is_keyword_character(char)
-  -- special case for hyphen, since we don't consider a lone hyphen to be a keyword
-  if char == '-' then return true end
-
-  local success, keyword_start_col, keyword_end_col =
-    pcall(require('blink.cmp.fuzzy').get_keyword_range, char, #char, 'prefix')
-  return success and keyword_start_col ~= keyword_end_col
 end
 
 function trigger.is_trigger_character(char, is_show_on_x)

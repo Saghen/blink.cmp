@@ -4,9 +4,13 @@
 --- @field window blink.cmp.SignatureWindowConfig
 
 --- @class (exact) blink.cmp.SignatureTriggerConfig
+--- @field enabled boolean Show the signature help automatically
+--- @field show_on_keyword boolean Show the signature help window after typing any of alphanumerics, `-` or `_`
 --- @field blocked_trigger_characters string[]
 --- @field blocked_retrigger_characters string[]
---- @field show_on_insert_on_trigger_character boolean When true, will show the signature help window when the cursor comes after a trigger character when entering insert mode
+--- @field show_on_trigger_character boolean Show the signature help window after typing a trigger character
+--- @field show_on_insert boolean Show the signature help window when entering insert mode
+--- @field show_on_insert_on_trigger_character boolean Show the signature help window when the cursor comes after a trigger character when entering insert mode
 
 --- @class (exact) blink.cmp.SignatureWindowConfig
 --- @field min_width number
@@ -27,8 +31,11 @@ local signature = {
     enabled = false,
     trigger = {
       enabled = true,
+      show_on_keyword = false,
       blocked_trigger_characters = {},
       blocked_retrigger_characters = {},
+      show_on_trigger_character = true,
+      show_on_insert = false,
       show_on_insert_on_trigger_character = true,
     },
     window = {
@@ -41,7 +48,7 @@ local signature = {
       scrollbar = false,
       direction_priority = { 'n', 's' },
       treesitter_highlighting = true,
-      show_documentation = true,
+      show_documentation = false,
     },
   },
 }
@@ -54,8 +61,11 @@ function signature.validate(config)
   }, config)
   validate('signature.trigger', {
     enabled = { config.trigger.enabled, 'boolean' },
+    show_on_keyword = { config.trigger.show_on_keyword, 'boolean' },
     blocked_trigger_characters = { config.trigger.blocked_trigger_characters, 'table' },
     blocked_retrigger_characters = { config.trigger.blocked_retrigger_characters, 'table' },
+    show_on_trigger_character = { config.trigger.show_on_trigger_character, 'boolean' },
+    show_on_insert = { config.trigger.show_on_insert, 'boolean' },
     show_on_insert_on_trigger_character = { config.trigger.show_on_insert_on_trigger_character, 'boolean' },
   }, config.trigger)
   validate('signature.window', {

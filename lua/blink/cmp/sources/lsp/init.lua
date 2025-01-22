@@ -142,7 +142,7 @@ function lsp:get_signature_help(context, callback)
         table.insert(signature_helps, signature_help)
       end
     end
-    -- todo: pick intelligently
+    -- TODO: pick intelligently
     callback(signature_helps[1])
   end)
 end

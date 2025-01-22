@@ -56,6 +56,8 @@ keymap = {
   - Optionally use `function(cmp) cmp.scroll_documentation_up(4) end` to scroll by a specific number of lines
 - `scroll_documentation_down`: Scrolls the documentation down by 4 lines
   - Optionally use `function(cmp) cmp.scroll_documentation_down(4) end` to scroll by a specific number of lines
+- `show_signature`: Shows the signature help window
+- `hide_signature`: Hides the signature help window
 - `snippet_forward`: Jumps to the next snippet placeholder
 - `snippet_backward`: Jumps to the previous snippet placeholder
 - `fallback`: Runs the next non-blink keymap, or runs the built-in neovim binding
@@ -96,6 +98,8 @@ Set the preset to `none` to disable the presets
 
 ['<Tab>'] = { 'snippet_forward', 'fallback' },
 ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+
+['<C-k>'] = { 'show_signature', 'hide_signature' },
 ```
 
 ### `super-tab`
@@ -123,6 +127,8 @@ You may want to set `completion.trigger.show_in_snippet = false` or use `complet
 
 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+
+['<C-k>'] = { 'show_signature', 'hide_signature' },
 ```
 
 ### `enter`
@@ -144,4 +150,6 @@ You may want to set `completion.list.selection.preselect = false`. See more info
 
 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+
+['<C-k>'] = { 'show_signature', 'hide_signature' },
 ```

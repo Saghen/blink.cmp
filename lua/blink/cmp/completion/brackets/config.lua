@@ -38,7 +38,7 @@ return {
     by_filetype = {
       -- ignore `use` imports
       rust = function(ctx) return ctx.line:find('^%s*use%s') == nil end,
-      -- ignore import statements
+      -- ignore `from` and `import` statements
       python = function(ctx) return ctx.line:find('^%s*import%s') == nil and ctx.line:find('^%s*from%s') == nil end,
     },
   },

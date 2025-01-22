@@ -1,4 +1,4 @@
--- TODO: remove the end_col field from ContextBounds
+-- TODO: move the get_line, get_cursor, etc.. to a separate lib
 
 --- @class blink.cmp.ContextBounds
 --- @field line string

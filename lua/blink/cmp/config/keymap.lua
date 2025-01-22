@@ -139,6 +139,8 @@ function keymap.validate(config)
     'hide_documentation',
     'scroll_documentation_up',
     'scroll_documentation_down',
+    'show_signature',
+    'hide_signature',
     'snippet_forward',
     'snippet_backward',
   }

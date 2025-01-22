@@ -210,6 +210,24 @@ function cmp.scroll_documentation_down(count)
   return true
 end
 
+--- Check if the signature help window is visible
+--- @return boolean
+function cmp.is_signature_visible() return require('blink.cmp.signature.window').win:is_open() end
+
+--- Show the signature help window
+function cmp.show_signature()
+  if cmp.is_signature_visible() then return end
+  require('blink.cmp.signature.trigger').show()
+  return true
+end
+
+--- Hide the signature help window
+function cmp.hide_signature()
+  if not cmp.is_signature_visible() then return end
+  require('blink.cmp.signature.trigger').hide()
+  return true
+end
+
 --- Check if a snippet is active, optionally filtering by direction
 --- @param filter? { direction?: number }
 function cmp.snippet_active(filter) return require('blink.cmp.config').snippets.active(filter) end

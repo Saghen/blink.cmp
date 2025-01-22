@@ -23,7 +23,7 @@ local config = require('blink.cmp.config')
 --- @field execute fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
 ---
 --- @field get_signature_help_trigger_characters fun(mode: blink.cmp.Mode): { trigger_characters: string[], retrigger_characters: string[] }
---- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil))
+--- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext): blink.cmp.Task
 --- @field cancel_signature_help fun()
 ---
 --- @field reload fun(provider?: string)
@@ -218,16 +218,16 @@ function sources.get_signature_help_trigger_characters(mode)
   return { trigger_characters = trigger_characters, retrigger_characters = retrigger_characters }
 end
 
-function sources.get_signature_help(context, callback)
+function sources.get_signature_help(context)
   local tasks = {}
   for _, source in pairs(sources.providers) do
     table.insert(tasks, source:get_signature_help(context))
   end
 
   sources.current_signature_help = async.task.await_all(tasks):map(function(signature_helps)
-    signature_helps = vim.tbl_filter(function(signature_help) return signature_help ~= nil end, signature_helps)
-    callback(signature_helps[1])
+    return vim.tbl_filter(function(signature_help) return signature_help ~= nil end, signature_helps)
   end)
+  return sources.current_signature_help
 end
 
 function sources.cancel_signature_help()
