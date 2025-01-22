@@ -343,9 +343,9 @@ signature = {
 
 ```lua
 fuzzy = {
-  -- When enabled, allows for a number of typos relative to the length of the query
-  -- Disabling this matches the behavior of fzf
-  use_typo_resistance = true,
+  -- Allows for a number of typos relative to the length of the query
+  -- Set this to 0 to match the behavior of fzf
+  max_typos = function(keyword) return math.floor(#keyword / 4) end,
   -- Frecency tracks the most recently/frequently used items and boosts the score of the item
   use_frecency = true,
   -- Proximity bonus boosts the score of items matching nearby words

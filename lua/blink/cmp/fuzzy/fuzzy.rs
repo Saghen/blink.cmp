@@ -12,30 +12,27 @@ use std::collections::HashSet;
 #[derive(Clone, Hash)]
 pub struct FuzzyOptions {
     match_suffix: bool,
-    use_typo_resistance: bool,
+    max_typos: u16,
     use_frecency: bool,
     use_proximity: bool,
     nearby_words: Option<Vec<String>>,
-    min_score: u16,
 }
 
 impl FromLua for FuzzyOptions {
     fn from_lua(value: LuaValue, _lua: &'_ Lua) -> LuaResult<Self> {
         if let Some(tab) = value.as_table() {
             let match_suffix: bool = tab.get("match_suffix").unwrap_or_default();
-            let use_typo_resistance: bool = tab.get("use_typo_resistance").unwrap_or_default();
+            let max_typos: u16 = tab.get("max_typos").unwrap_or_default();
             let use_frecency: bool = tab.get("use_frecency").unwrap_or_default();
             let use_proximity: bool = tab.get("use_proximity").unwrap_or_default();
             let nearby_words: Option<Vec<String>> = tab.get("nearby_words").ok();
-            let min_score: u16 = tab.get("min_score").unwrap_or_default();
 
             Ok(FuzzyOptions {
                 match_suffix,
-                use_typo_resistance,
+                max_typos,
                 use_frecency,
                 use_proximity,
                 nearby_words,
-                min_score,
             })
         } else {
             Err(mlua::Error::FromLuaConversionError {
@@ -74,9 +71,7 @@ pub fn fuzzy(
         .map(|s| s.filter_text.clone().unwrap_or(s.label.clone()))
         .collect::<Vec<_>>();
     let options = frizbee::Options {
-        prefilter: !opts.use_typo_resistance,
-        min_score: opts.min_score,
-        stable_sort: false,
+        max_typos: Some(opts.max_typos),
         ..Default::default()
     };
 
@@ -101,9 +96,6 @@ pub fn fuzzy(
         .collect::<Vec<_>>();
 
     matches.sort_by_key(|mtch| mtch.index_in_haystack);
-    for (idx, mtch) in matches.iter_mut().enumerate() {
-        mtch.index = idx;
-    }
 
     // Get the score for each match, adding score_offset, frecency and proximity bonus
     let nearby_words: HashSet<String> = HashSet::from_iter(opts.nearby_words.unwrap_or_default());
@@ -129,22 +121,9 @@ pub fn fuzzy(
         })
         .collect::<Vec<_>>();
 
-    // Find the highest score and filter out matches that are unreasonably lower than it
-    if opts.use_typo_resistance {
-        let max_score = matches.iter().map(|mtch| mtch.score).max().unwrap_or(0);
-        let secondary_min_score = max_score.max(16) - 16;
-        matches = matches
-            .into_iter()
-            .filter(|mtch| mtch.score >= secondary_min_score)
-            .collect::<Vec<_>>();
-    }
-
     // Return scores and indices
     (
-        matches
-            .iter()
-            .map(|mtch| match_scores[mtch.index])
-            .collect::<Vec<_>>(),
+        match_scores,
         matches
             .iter()
             .map(|mtch| mtch.index_in_haystack as u32)

@@ -1,5 +1,5 @@
 --- @class (exact) blink.cmp.FuzzyConfig
---- @field use_typo_resistance boolean When enabled, allows for a number of typos relative to the length of the query. Disabling this matches the behavior of fzf
+--- @field max_typos fun(keyword: string): number Allows for a number of typos relative to the length of the query. Set this to 0 to match the behavior of fzf
 --- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item
 --- @field use_proximity boolean Boosts the score of items matching nearby words
 --- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux)
@@ -24,7 +24,7 @@ local validate = require('blink.cmp.config.utils').validate
 local fuzzy = {
   --- @type blink.cmp.FuzzyConfig
   default = {
-    use_typo_resistance = true,
+    max_typos = function(keyword) return math.floor(#keyword / 4) end,
     use_frecency = true,
     use_proximity = true,
     use_unsafe_no_lock = false,
@@ -45,7 +45,7 @@ local fuzzy = {
 
 function fuzzy.validate(config)
   validate('fuzzy', {
-    use_typo_resistance = { config.use_typo_resistance, 'boolean' },
+    max_typos = { config.max_typos, 'function' },
     use_frecency = { config.use_frecency, 'boolean' },
     use_proximity = { config.use_proximity, 'boolean' },
     use_unsafe_no_lock = { config.use_unsafe_no_lock, 'boolean' },
