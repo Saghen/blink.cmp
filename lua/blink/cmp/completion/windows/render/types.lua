@@ -2,7 +2,7 @@
 --- @field align_to? string | 'none' | 'cursor' Align the window to the component with the given name, or to the cursor
 --- @field padding? number | number[] Padding on the left and right of the grid
 --- @field gap? number Gap between columns
---- @field columns? { [number]: string, gap?: number }[] Components to render, grouped by column
+--- @field columns? blink.cmp.DrawColumnDefinition[] | fun(context: blink.cmp.Context): blink.cmp.DrawColumnDefinition[] Components to render, grouped by column
 --- @field components? table<string, blink.cmp.DrawComponent> Component definitions
 --- @field treesitter? string[] Use treesitter to highlight the label text of completions from these sources
 ---
@@ -22,3 +22,5 @@
 --- @field ellipsis? boolean Whether to add an ellipsis when truncating the text
 --- @field text? fun(ctx: blink.cmp.DrawItemContext): string? Renders the text of the component
 --- @field highlight? string | fun(ctx: blink.cmp.DrawItemContext, text: string): string | blink.cmp.DrawHighlight[] Renders the highlights of the component
+---
+--- @alias blink.cmp.DrawColumnDefinition { [number]: string, gap?: number }

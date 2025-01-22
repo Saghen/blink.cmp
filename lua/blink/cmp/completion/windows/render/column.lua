@@ -1,11 +1,12 @@
 --- @class blink.cmp.DrawColumn
+--- @field component_names string[]
 --- @field components blink.cmp.DrawComponent[]
 --- @field gap number
 --- @field lines string[][]
 --- @field width number
 --- @field ctxs blink.cmp.DrawItemContext[]
 ---
---- @field new fun(components: blink.cmp.DrawComponent[], gap: number): blink.cmp.DrawColumn
+--- @field new fun(component_names: string[], components: blink.cmp.DrawComponent[], gap: number): blink.cmp.DrawColumn
 --- @field render fun(self: blink.cmp.DrawColumn,context: blink.cmp.Context, ctxs: blink.cmp.DrawItemContext[])
 --- @field get_line_text fun(self: blink.cmp.DrawColumn, line_idx: number): string
 --- @field get_line_highlights fun(self: blink.cmp.DrawColumn, line_idx: number): blink.cmp.DrawHighlight[]
@@ -16,8 +17,9 @@ local text_lib = require('blink.cmp.completion.windows.render.text')
 --- @diagnostic disable-next-line: missing-fields
 local column = {}
 
-function column.new(components, gap)
+function column.new(component_names, components, gap)
   local self = setmetatable({}, { __index = column })
+  self.component_names = component_names
   self.components = components
   self.gap = gap
   self.lines = {}
