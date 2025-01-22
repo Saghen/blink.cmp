@@ -134,7 +134,7 @@ Manages the appearance of the completion menu. You may prevent the menu from aut
 
 ### Menu Draw <Badge type="info"><a href="./reference#completion-menu-draw">Go to default configuration</a></Badge>
 
-blink.cmp uses a grid-based layout to render the completion menu. The components, defined in `draw.components[string]`, define `text` and `highlight` functions which are called for each completion item. The `highlight` function will be called only when the item appears on screen, so expensive operations such as Treesitter highlighting may be performed (contributions welcome!, [for example](https://www.reddit.com/r/neovim/comments/1ca4gm2/colorful_cmp_menu_powered_by_treesitter/)). The components may define their min and max width, where `ellipsis = true` (enabled by default), will draw the `…` character when the text is truncated. Setting `width.fill = true` will fill the remaining space, effectively making subsequent components right aligned, with respect to their column.
+blink.cmp uses a grid-based layout to render the completion menu. The components, defined in `draw.components[string]`, define `text` and `highlight` functions which are called for each completion item. The `highlight` function will be called only when the item appears on screen, so expensive operations such as Treesitter highlighting may be performed. The components may define their min and max width, where `ellipsis = true` (enabled by default), will draw the `…` character when the text is truncated. Setting `width.fill = true` will fill the remaining space, effectively making subsequent components right aligned, with respect to their column.
 
 Columns effectively allow you to vertically align a set of components. Each column, defined as an array in `draw.columns`, will be rendered for all of the completion items, where the longest rendered row will determine the width of the column. You may define `gap = number` in your column to insert a gap between components.
 
@@ -144,13 +144,26 @@ For a setup similar to nvim-cmp, use the following config:
 completion.menu.draw.columns = { { "label", "label_description", gap = 1 }, { "kind_icon", "kind" } },
 ```
 
+#### Available components
+
+- `kind_icon`: Shows the icon for the kind of the item
+- `kind`: Shows the kind of the item as text (e.g. `Function`)
+- `label`: Shows the label of the item as well as the `label_detail` (e.g. `into(as Into)` where `into` is the label and `(as Into)` is the label detail)
+  - If the `label_detail` is missing from your items, ensure you've [setup LSP capabilities](../installation) and that your LSP supports the feature
+- `label_description`: Shows the label description of the item (e.g. `date-fns/formatDistance`, the module that the item will be auto-imported from)
+  - If the `label_description` is missing from your items, ensure you've [setup LSP capabilities](../installation) and that your LSP supports the feature
+- `source_name`: Shows the name of the source that provided the item, from the `sources.providers.*.name` (e.g. `LSP`)
+- `source_id`: Shows the id of the source that provided the item, from the `sources.providers[id]` (e.g. `lsp`)
+
 ### Treesitter
 
-You may use treesitter to highlight the label text for the given list of sources. This feature is experimental, contributions welcome!
+You may use treesitter to highlight the label text for the given list of sources. This feature is barebones, as it highlights the item as-is.
 
 ```lua
 completion.menu.draw.treesitter = { 'lsp' }
 ```
+
+The wonderful [colorful-menu.nvim](https://github.com/xzbdmw/colorful-menu.nvim) takes this a step further by including context around the item before highlighting.
 
 ## Documentation <Badge type="info"><a href="./reference#completion-documentation">Go to default configuration</a></Badge>
 
