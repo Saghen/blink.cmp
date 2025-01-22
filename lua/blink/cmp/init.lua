@@ -216,15 +216,17 @@ function cmp.is_signature_visible() return require('blink.cmp.signature.window')
 
 --- Show the signature help window
 function cmp.show_signature()
-  if cmp.is_signature_visible() then return end
-  require('blink.cmp.signature.trigger').show()
+  local config = require('blink.cmp.config').signature
+  if not config.enabled or cmp.is_signature_visible() then return end
+  vim.schedule(function() require('blink.cmp.signature.trigger').show() end)
   return true
 end
 
 --- Hide the signature help window
 function cmp.hide_signature()
-  if not cmp.is_signature_visible() then return end
-  require('blink.cmp.signature.trigger').hide()
+  local config = require('blink.cmp.config').signature
+  if not config.enabled or not cmp.is_signature_visible() then return end
+  vim.schedule(function() require('blink.cmp.signature.trigger').hide() end)
   return true
 end
 

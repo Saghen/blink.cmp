@@ -17,7 +17,7 @@ local presets = {
     ['<Tab>'] = { 'snippet_forward', 'fallback' },
     ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
 
-    ['<C-k>'] = { 'show_signature', 'hide_signature' },
+    ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
   },
 
   ['super-tab'] = {
@@ -45,7 +45,7 @@ local presets = {
     ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
     ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 
-    ['<C-k>'] = { 'show_signature', 'hide_signature' },
+    ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
   },
 
   enter = {
@@ -64,7 +64,7 @@ local presets = {
     ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
     ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
 
-    ['<C-k>'] = { 'show_signature', 'hide_signature' },
+    ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
   },
 }
 
