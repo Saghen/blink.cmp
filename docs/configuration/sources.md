@@ -66,6 +66,7 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
 - [blink-cmp-ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 - [blink-cmp-ctags](https://github.com/netmute/blink-cmp-ctags)
+- [blink-copilot](https://github.com/fang2hou/blink-copilot)
 - [blink-cmp-copilot](https://github.com/giuxtaposition/blink-cmp-copilot)
 - [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim)
 - [blink-emoji.nvim](https://github.com/moyiz/blink-emoji.nvim)
