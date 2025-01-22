@@ -72,6 +72,14 @@ function lsp:resolve(item, callback)
       resolved_item.detail = snippet
     end
 
+    -- Lua LSP returns the detail like `table` while the documentation contains the signature
+    -- We extract this into the detail instead
+    if client.name == 'lua_ls' and resolved_item.documentation ~= nil and resolved_item.detail ~= nil then
+      local docs = require('blink.cmp.sources.lsp.hacks.docs')
+      resolved_item.detail, resolved_item.documentation.value =
+        docs.extract_detail_from_doc(resolved_item.detail, resolved_item.documentation.value)
+    end
+
     callback(resolved_item)
   end)
   if not success then callback(item) end
