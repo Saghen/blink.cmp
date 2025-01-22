@@ -5,7 +5,8 @@
 --- @field config blink.cmp.SourceProviderConfigWrapper
 --- @field module blink.cmp.Source
 --- @field list blink.cmp.SourceProviderList | nil
---- @field cached_resolve { item: blink.cmp.CompletionItem, task: blink.cmp.Task } | nil
+--- @field resolve_cache_context_id number | nil
+--- @field resolve_cache table<blink.cmp.CompletionItem, blink.cmp.Task>
 ---
 --- @field new fun(id: string, config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProvider
 --- @field enabled fun(self: blink.cmp.SourceProvider): boolean
@@ -38,7 +39,7 @@ function source.new(id, config)
   )
   self.config = require('blink.cmp.sources.lib.provider.config').new(config)
   self.list = nil
-  self.resolve_tasks = {}
+  self.resolve_cache = {}
 
   return self
 end
@@ -129,23 +130,26 @@ end
 --- Resolve ---
 
 function source:resolve(context, item)
-  local cached = self.cached_resolve
-  if cached == nil or cached.item ~= item or cached.task.status == async.STATUS.CANCELLED then
-    self.cached_resolve = {
-      item = item,
-      task = async.task.new(function(resolve)
-        if self.module.resolve == nil then return resolve(item) end
-
-        return self.module:resolve(item, function(resolved_item)
-          -- HACK: it's out of spec to update keys not in resolveSupport.properties but some LSPs do it anyway
-          local merged_item = vim.tbl_deep_extend('force', item, resolved_item or {})
-          local transformed_item = self:transform_items(context, { merged_item })[1] or merged_item
-          vim.schedule(function() resolve(transformed_item) end)
-        end)
-      end),
-    }
+  -- reset the cache when the context changes
+  if self.resolve_cache_context_id ~= context.id then
+    self.resolve_cache_context_id = context.id
+    self.resolve_cache = {}
   end
-  return self.cached_resolve.task
+
+  local cached_task = self.resolve_cache[item]
+  if cached_task == nil or cached_task.status == async.STATUS.CANCELLED then
+    self.resolve_cache[item] = async.task.new(function(resolve)
+      if self.module.resolve == nil then return resolve(item) end
+
+      return self.module:resolve(item, function(resolved_item)
+        -- HACK: it's out of spec to update keys not in resolveSupport.properties but some LSPs do it anyway
+        local merged_item = vim.tbl_deep_extend('force', item, resolved_item or {})
+        local transformed_item = self:transform_items(context, { merged_item })[1] or merged_item
+        vim.schedule(function() resolve(transformed_item) end)
+      end)
+    end)
+  end
+  return self.resolve_cache[item]
 end
 
 --- Execute ---
