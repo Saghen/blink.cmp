@@ -1,6 +1,6 @@
 --- @class (exact) blink.cmp.CompletionAcceptConfig
 --- @field create_undo_point boolean Create an undo point when accepting a completion item
---- @field resolve_timeout_ms number How long to wait for the LSP to resolve the item with additonal information before continuing as-is
+--- @field resolve_timeout_ms number How long to wait for the LSP to resolve the item with additional information before continuing as-is
 --- @field auto_brackets blink.cmp.AutoBracketsConfig
 
 --- @class (exact) blink.cmp.AutoBracketsConfig

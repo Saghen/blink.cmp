@@ -118,7 +118,7 @@ completion.list = {
 completion.accept = {
   -- Create an undo point when accepting a completion item
   create_undo_point = true,
-  -- How long to wait for the LSP to resolve the item with additonal information before continuing as-is
+  -- How long to wait for the LSP to resolve the item with additional information before continuing as-is
   resolve_timeout_ms = 100,
   -- Experimental auto-brackets support
   auto_brackets = {
