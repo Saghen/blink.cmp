@@ -1,3 +1,4 @@
+local config = require('blink.cmp.config').completion.accept
 local text_edits_lib = require('blink.cmp.lib.text_edits')
 local brackets_lib = require('blink.cmp.completion.brackets')
 
@@ -14,6 +15,10 @@ local function accept(ctx, item, callback)
   -- without i.e. auto-imports
   sources
     .resolve(ctx, item)
+    -- Some LSPs may take a long time to resolve the item, so we timeout
+    :timeout(config.resolve_timeout_ms)
+    -- and use the item as-is
+    :catch(function() return item end)
     :map(function(item)
       item = vim.deepcopy(item)
 
