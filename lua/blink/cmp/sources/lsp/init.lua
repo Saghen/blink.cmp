@@ -60,7 +60,10 @@ function lsp:resolve(item, callback)
   item = require('blink.cmp.sources.lib.utils').blink_item_to_lsp_item(item)
 
   local success, request_id = client.request('completionItem/resolve', item, function(error, resolved_item)
-    if error or resolved_item == nil then callback(item) end
+    if error or resolved_item == nil then
+      callback(item)
+      return
+    end
 
     -- Snippet with no detail, fill in the detail with the snippet
     if resolved_item.detail == nil and resolved_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
