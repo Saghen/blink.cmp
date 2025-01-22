@@ -14,14 +14,24 @@ pub struct LspItem {
 impl FromLua for LspItem {
     fn from_lua(value: LuaValue, _: &Lua) -> LuaResult<Self> {
         if let Some(tab) = value.as_table() {
-            let label = tab.get("label").unwrap_or_default();
-            let filter_text = tab.get("filterText").ok();
-            let sort_text = tab.get("sortText").ok();
+            let label = tab
+                .get::<mlua::String>("label")
+                .map(|s| s.to_string_lossy())
+                .unwrap_or_default();
+            let filter_text = tab
+                .get::<mlua::String>("filterText")
+                .ok()
+                .map(|s| s.to_string_lossy());
+            let sort_text = tab
+                .get::<mlua::String>("sortText")
+                .ok()
+                .map(|s| s.to_string_lossy());
             let insert_text = tab
                 .get::<LuaTable>("textEdit")
-                .and_then(|text_edit| text_edit.get("newText"))
+                .and_then(|text_edit| text_edit.get::<mlua::String>("newText"))
                 .ok()
-                .or_else(|| tab.get("insertText").ok());
+                .or_else(|| tab.get::<mlua::String>("insertText").ok())
+                .map(|s| s.to_string_lossy());
             let kind = tab.get("kind").unwrap_or_default();
             let score_offset = tab.get("score_offset").unwrap_or(0);
             let source_id = tab.get("source_id").unwrap_or_default();

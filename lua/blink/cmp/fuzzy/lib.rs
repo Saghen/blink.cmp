@@ -68,7 +68,7 @@ pub fn set_provider_items(
 
 pub fn fuzzy(
     _lua: &Lua,
-    (line, cursor_col, provider_id, opts): (String, usize, String, FuzzyOptions),
+    (line, cursor_col, provider_id, opts): (mlua::String, usize, String, FuzzyOptions),
 ) -> LuaResult<(Vec<i32>, Vec<u32>)> {
     let mut frecency_handle = FRECENCY.write().map_err(|_| {
         mlua::Error::RuntimeError("Failed to acquire lock for frecency".to_string())
@@ -87,44 +87,57 @@ pub fn fuzzy(
         ))
     })?;
 
-    Ok(fuzzy::fuzzy(&line, cursor_col, haystack, frecency, opts))
+    Ok(fuzzy::fuzzy(
+        &line.to_string_lossy(),
+        cursor_col,
+        haystack,
+        frecency,
+        opts,
+    ))
 }
 
 pub fn fuzzy_matched_indices(
     _lua: &Lua,
-    (line, cursor_col, haystack, match_suffix): (String, usize, Vec<String>, bool),
+    (line, cursor_col, haystack, match_suffix): (mlua::String, usize, Vec<mlua::String>, bool),
 ) -> LuaResult<Vec<Vec<usize>>> {
     Ok(fuzzy::fuzzy_matched_indices(
-        &line,
+        &line.to_string_lossy(),
         cursor_col,
-        &haystack,
+        &haystack
+            .iter()
+            .map(|s| s.to_string_lossy())
+            .collect::<Vec<_>>(),
         match_suffix,
     ))
 }
 
 pub fn get_keyword_range(
     _lua: &Lua,
-    (line, col, match_suffix): (String, usize, bool),
+    (line, col, match_suffix): (mlua::String, usize, bool),
 ) -> LuaResult<(usize, usize)> {
-    Ok(keyword::get_keyword_range(&line, col, match_suffix))
+    Ok(keyword::get_keyword_range(
+        &line.to_string_lossy(),
+        col,
+        match_suffix,
+    ))
 }
 
 pub fn guess_edit_range(
     _lua: &Lua,
-    (item, line, cursor_col, match_suffix): (LspItem, String, usize, bool),
+    (item, line, cursor_col, match_suffix): (LspItem, mlua::String, usize, bool),
 ) -> LuaResult<(usize, usize)> {
     // TODO: take the max range from insert_text and filter_text
     Ok(keyword::guess_keyword_range_from_item(
         item.insert_text.as_ref().unwrap_or(&item.label),
-        &line,
+        &line.to_string_lossy(),
         cursor_col,
         match_suffix,
     ))
 }
 
-pub fn get_words(_: &Lua, text: String) -> LuaResult<Vec<String>> {
+pub fn get_words(_: &Lua, text: mlua::String) -> LuaResult<Vec<String>> {
     Ok(REGEX
-        .find_iter(&text)
+        .find_iter(&text.to_string_lossy())
         .map(|m| m.as_str().to_string())
         .filter(|s| s.len() < 512)
         .collect::<HashSet<String>>()
