@@ -39,7 +39,7 @@ function cmdline:get_completions(context, callback)
     .empty()
     :map(function()
       -- Special case for help where we read all the tags ourselves
-      if vim.tbl_contains(constants.help_commands, cmd) then
+      if vim.tbl_contains(constants.help_commands, cmd) and arg_number > 1 then
         return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix)
       end
 
