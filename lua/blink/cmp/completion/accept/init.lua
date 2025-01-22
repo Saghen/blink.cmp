@@ -90,7 +90,7 @@ local function accept(ctx, item, callback)
         if brackets_status == 'check_semantic_token' then
           -- TODO: since we apply the additional text edits after, auto imported functions will not
           -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
-          brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
+          brackets_lib.add_brackets_via_semantic_token(ctx, vim.bo.filetype, item, function()
             require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
             require('blink.cmp.signature.trigger').show_if_on_trigger_character()
             callback()
