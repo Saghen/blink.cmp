@@ -12,6 +12,7 @@ local utils = require('blink.cmp.lib.utils')
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
 
+local luasnip
 local defaults_config = {
   use_show_condition = true,
   show_autosnippets = true,
@@ -28,7 +29,7 @@ function source.new(opts)
   self.config = config
   self.items_cache = {}
 
-  local luasnip_ag = vim.api.nvim_create_augroup('BlinkCmpLuaSnipReload', { clear = true })
+  local luasnip_ag = vim.api.nvim_create_augroup('BlinkCmpLuasnipReload', { clear = true })
   vim.api.nvim_create_autocmd('User', {
     pattern = 'LuasnipSnippetsAdded',
     callback = function() self:reload() end,
@@ -46,7 +47,8 @@ function source.new(opts)
 end
 
 function source:enabled()
-  local ok, _ = pcall(require, 'luasnip')
+  local ok, ls = pcall(require, 'luasnip')
+  if ok then luasnip = ls end
   return ok
 end
 
@@ -54,23 +56,22 @@ function source:get_completions(ctx, callback)
   --- @type blink.cmp.CompletionItem[]
   local items = {}
 
-  -- gather snippets from relevant filetypes, including extensions
+  -- Gather snippets from relevant filetypes, including extensions
   for _, ft in ipairs(require('luasnip.util.util').get_snippet_filetypes()) do
     if self.items_cache[ft] then
       for _, item in ipairs(self.items_cache[ft]) do
-        table.insert(items, utils.shallow_copy(item))
+        items[#items + 1] = utils.shallow_copy(item)
       end
-      vim.list_extend(items, self.items_cache[ft])
       goto continue
     end
 
-    -- cache not yet available for this filetype
+    -- Cache not yet available for this filetype
     self.items_cache[ft] = {}
     -- Gather filetype snippets and, optionally, autosnippets
-    local snippets = require('luasnip').get_snippets(ft, { type = 'snippets' })
+    local snippets = luasnip.get_snippets(ft, { type = 'snippets' })
     if self.config.show_autosnippets then
-      local autosnippets = require('luasnip').get_snippets(ft, { type = 'autosnippets' })
-      snippets = require('blink.cmp.lib.utils').shallow_copy(snippets)
+      local autosnippets = luasnip.get_snippets(ft, { type = 'autosnippets' })
+      snippets = utils.shallow_copy(snippets)
       vim.list_extend(snippets, autosnippets)
     end
     snippets = vim.tbl_filter(function(snip) return not snip.hidden end, snippets)
@@ -96,10 +97,12 @@ function source:get_completions(ctx, callback)
         sortText = sort_text,
         data = { snip_id = snip.id, show_condition = snip.show_condition },
       }
-      -- populate snippet cache for this filetype
-      table.insert(self.items_cache[ft], item)
-      -- while we're at it, also populate completion items for this request
-      table.insert(items, utils.shallow_copy(item))
+
+      -- Populate snippet cache for this filetype
+      self.items_cache[ft][#self.items_cache[ft] + 1] = item
+
+      -- While we're at it, also populate completion items for this request
+      items[#items + 1] = utils.shallow_copy(item)
     end
 
     ::continue::
@@ -120,7 +123,7 @@ function source:get_completions(ctx, callback)
 end
 
 function source:resolve(item, callback)
-  local snip = require('luasnip').get_id_snippet(item.data.snip_id)
+  local snip = luasnip.get_id_snippet(item.data.snip_id)
 
   local resolved_item = vim.deepcopy(item)
 
@@ -139,14 +142,13 @@ function source:resolve(item, callback)
 end
 
 function source:execute(_, item)
-  local luasnip = require('luasnip')
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
-  -- if trigger is a pattern, expand "pattern" instead of actual snippet
+  -- If trigger is a pattern, expand "pattern" instead of actual snippet
   if snip.regTrig then snip = snip:get_pattern_expand_helper() end
 
-  -- get (0, 0) indexed cursor position
-  -- the completion has been accepted by this point, so ctx.cursor is out of date
+  -- Get (0, 0) indexed cursor position
+  -- The completion has been accepted by this point, so ctx.cursor is out of date
   local cursor = vim.api.nvim_win_get_cursor(0)
   cursor[1] = cursor[1] - 1
 
