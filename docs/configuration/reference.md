@@ -41,7 +41,7 @@ completion.keyword = {
 ```lua
 completion.trigger = {
   -- When true, will prefetch the completion items when entering insert mode
-  prefetch_on_insert = false,
+  prefetch_on_insert = true,
 
   -- When false, will not show the completion window automatically when in a snippet
   show_in_snippet = true,
