@@ -81,14 +81,14 @@ function cmdline:get_completions(context, callback)
 
         -- remove prefix from the filter text
         local filter_text = completion
-        if has_prefix then filter_text = completion:sub(#current_arg_prefix + 1) end
+        if has_prefix and cmd == 'lua' then filter_text = completion:sub(#current_arg_prefix + 1) end
 
         -- for lua, use the filter text as the label since it doesn't include the prefix
         local label = cmd == 'lua' and filter_text or completion
 
         -- add prefix to the newText
         local new_text = completion
-        if not has_prefix then new_text = current_arg_prefix .. completion end
+        if not has_prefix and cmd == 'lua' then new_text = current_arg_prefix .. completion end
 
         table.insert(items, {
           label = label,
