@@ -60,7 +60,6 @@ function source:get_completions(ctx, callback)
       for _, item in ipairs(self.items_cache[ft]) do
         table.insert(items, utils.shallow_copy(item))
       end
-      vim.list_extend(items, self.items_cache[ft])
       goto continue
     end
 
