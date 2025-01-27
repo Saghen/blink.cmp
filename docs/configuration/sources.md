@@ -72,3 +72,5 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-emoji.nvim](https://github.com/moyiz/blink-emoji.nvim)
 - [blink-cmp-dictionary](https://github.com/Kaiser-Yang/blink-cmp-dictionary)
 - [blink-cmp-git](https://github.com/Kaiser-Yang/blink-cmp-git)
+- [blink-cmp-spell](https://github.com/ribru17/blink-cmp-spell.git)
+  
