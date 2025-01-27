@@ -69,7 +69,7 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
   local keyword_start_col, keyword_end_col =
     require('blink.cmp.fuzzy').get_keyword_range(line, cursor_col, config.completion.keyword.range)
   local keyword_length = keyword_end_col - keyword_start_col
-  local keyword = line:sub(keyword_start_col, keyword_end_col - 1)
+  local keyword = line:sub(keyword_start_col, keyword_end_col)
 
   local filtered_items = {}
   for provider_id, haystack in pairs(haystacks_by_provider) do
