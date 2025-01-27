@@ -25,6 +25,7 @@ local snippets = {
         if not _G.MiniSnippets then error('mini.snippets has not been setup') end
         local insert = MiniSnippets.config.expand.insert or MiniSnippets.default_insert
         insert({ body = snippet })
+        require('blink.cmp').resubscribe()
       end,
     }),
     active = by_preset({

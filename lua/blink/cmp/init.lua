@@ -250,6 +250,12 @@ function cmp.snippet_backward()
   return true
 end
 
+--- Ensures that blink.cmp will be notified last when a user adds a character
+function cmp.resubscribe()
+  local trigger = require('blink.cmp.completion.trigger')
+  trigger.resubscribe()
+end
+
 --- Tells the sources to reload a specific provider or all providers (when nil)
 --- @param provider? string
 function cmp.reload(provider) require('blink.cmp.sources.lib').reload(provider) end
