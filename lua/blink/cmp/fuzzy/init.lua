@@ -43,6 +43,14 @@ function fuzzy.fuzzy_matched_indices(line, cursor_col, haystack, range)
   return fuzzy.rust.fuzzy_matched_indices(line, cursor_col, haystack, range == 'full')
 end
 
+---@param keyword string
+---@param item blink.cmp.CompletionItem
+---@return boolean
+local function is_exact_match(keyword, item)
+  local keyword_trimmed, _ = keyword:gsub('^%s+', '')
+  return keyword_trimmed == item.sortText
+end
+
 --- @param line string
 --- @param cursor_col number
 --- @param haystacks_by_provider table<string, blink.cmp.CompletionItem[]>
@@ -86,7 +94,9 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
 
     for idx, item_index in ipairs(matched_indices) do
       local item = haystack[item_index + 1]
+      --TODO: maybe we should declare these fields in `blink.cmp.CompletionItem`?
       item.score = scores[idx]
+      item.exact = is_exact_match(keyword, item)
       table.insert(filtered_items, item)
     end
   end
