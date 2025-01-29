@@ -147,4 +147,12 @@ function lsp:get_signature_help(context, callback)
   end)
 end
 
+--- Execute ---
+
+function lsp:execute(_, item)
+  local client = vim.lsp.get_client_by_id(item.client_id)
+  if client and item.command then client.request('workspace/executeCommand', item.command) end
+  return function() end
+end
+
 return lsp
