@@ -97,6 +97,10 @@ local sources = {
         name = 'cmdline',
         module = 'blink.cmp.sources.cmdline',
       },
+      omni = {
+        name = 'Omni',
+        module = 'blink.cmp.sources.omni',
+      },
     },
   },
 }
