@@ -7,15 +7,17 @@ local omni = {}
 
 ---@class blink.cmp.CompleteFuncItem
 ---@field word string
----@field abbr string?
----@field menu string?
----@field info string?
----@field kind string?
----@field icase integer?
----@field equal integer?
----@field dup integer?
----@field empty integer?
----@field user_data any?
+---@field abbr? string
+---@field menu? string
+---@field info? string
+---@field kind? string
+---@field icase? integer
+---@field equal? integer
+---@field dup? integer
+---@field empty? integer
+---@field user_data? any
+
+---@alias blink.cmp.CompleteFuncWords (string | blink.cmp.CompleteFuncItem)[]
 
 ---@param _ string
 ---@param config blink.cmp.SourceProviderConfig
@@ -43,10 +45,9 @@ function omni:enabled()
 end
 
 ---Invoke an omnifunc handling `v:lua.*`
----@param func string
----@param findstart integer
----@param base string
----@return integer|(string|blink.cmp.CompleteFuncItem)[]
+---@return (table<{ words: blink.cmp.CompleteFuncWords, refresh: string }> | blink.cmp.CompleteFuncWords) | integer
+---@overload fun(func: string, findstart: 1, base: ''): integer
+---@overload fun(func: string, findstart: 0, base: string): table<{ words: blink.cmp.CompleteFuncWords, refresh: string }> | blink.cmp.CompleteFuncWords
 local function invoke_omnifunc(func, findstart, base)
   local prev_pos = vim.api.nvim_win_get_cursor(0)
 
@@ -94,9 +95,8 @@ function omni:get_completions(context, resolve)
   -- for info on omnifunc results see `:h complete-items`
   -- get the actual omnifunc completion results
   local cmp_results = invoke_omnifunc(vim.bo.omnifunc, 0, string.sub(context.line, start_col + 1, cur_col))
-  ---@cast cmp_results (string|blink.cmp.CompleteFuncItem)[]
-
   cmp_results = cmp_results['words'] or cmp_results
+  ---@cast cmp_results blink.cmp.CompleteFuncWords
 
   local range = {
     ['start'] = {
