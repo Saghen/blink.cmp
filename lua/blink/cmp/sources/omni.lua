@@ -5,8 +5,6 @@
 ---@field opts blink.cmp.OmniOpts
 local omni = {}
 
----@class blink.cmp.OmniOpts
-
 ---@class blink.cmp.CompleteFuncItem
 ---@field word string
 ---@field abbr string?
@@ -113,7 +111,7 @@ function omni:get_completions(context, resolve)
 
   local items = {} ---@type blink.cmp.CompletionItem[]
   for _, cmp in ipairs(cmp_results) do
-    -- TODO: does this need a blink specfic kind?
+    -- TODO: does this need a blink specific kind?
     if type(cmp) == 'string' then
       table.insert(items, {
         label = cmp,
