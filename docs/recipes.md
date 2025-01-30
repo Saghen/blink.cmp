@@ -233,7 +233,7 @@ sources = {
 
 ### Path completion from `cwd` instead of current buffer's directory
 
-It's common to run code from the root of your repository, in which case relative paths will start from that directory. In that case, you may want path completions to be relative to your current working directory rather than the default, which is the current buffer's directory.
+It's common to run code from the root of your repository, in which case relative paths will start from that directory. In that case, you may want path completions to be relative to your current working directory rather than the default, which is the current buffer's parent directory.
 
 ```lua
 sources = {
