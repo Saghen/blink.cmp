@@ -199,4 +199,28 @@ function text_edits.clamp_range_to_bounds(range)
   return range
 end
 
+--- The TextEdit.range.start/end indicate the range of text that will be replaced.
+--- This means that the end position will be the range *before* applying the edit.
+--- This function gets the end position of the range *after* applying the edit.
+--- This may be used for placing the cursor after applying the edit.
+---
+--- TODO: handle multiple text edits since they can edit the text that comes
+--- before the current edit
+---
+--- @param text_edit lsp.TextEdit
+--- @return number[] (1, 0) indexed line and column
+function text_edits.get_apply_end_position(text_edit)
+  local lines = vim.split(text_edit.newText, '\n')
+  local last_line_len = #lines[#lines]
+  local line_count = #lines
+
+  local end_line = text_edit.range['end'].line + line_count - 1
+
+  local end_col = last_line_len
+  if line_count == 1 then end_col = end_col + text_edit.range['end'].character end
+
+  -- Convert from 0-indexed to (1, 0)-indexed to match nvim cursor api
+  return { end_line + 1, end_col }
+end
+
 return text_edits

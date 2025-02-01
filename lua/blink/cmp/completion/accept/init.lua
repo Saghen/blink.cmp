@@ -85,8 +85,10 @@ local function accept(ctx, item, callback)
       else
         table.insert(all_text_edits, item.textEdit)
         text_edits_lib.apply(all_text_edits)
-        -- TODO: should move the cursor only by the offset since text edit handles everything else?
-        ctx.set_cursor({ ctx.get_cursor()[1], item.textEdit.range.start.character + #item.textEdit.newText + offset })
+
+        local new_cursor = text_edits_lib.get_apply_end_position(item.textEdit)
+        new_cursor[2] = new_cursor[2] + offset
+        ctx.set_cursor(new_cursor)
       end
 
       -- Let the source execute the item itself
