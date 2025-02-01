@@ -151,6 +151,13 @@ function omni:get_completions(context, resolve)
       else
         item.labelDetails.detail = cmp.kind
       end
+
+      if cmp.info ~= nil and #cmp.info > 0 then
+        item.documentation = {
+          value = cmp.info,
+          kind = 'plaintext',
+        }
+      end
     end
 
     table.insert(items, item)
