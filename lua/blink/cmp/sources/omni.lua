@@ -1,7 +1,9 @@
+local Kind = require('blink.cmp.types').CompletionItemKind
+
 ---@class blink.cmp.OmniOpts
 ---@field disable_omnifuncs string[]
 
----@class blink.cmp.Source
+---@class blink.cmp.OmniSource : blink.cmp.Source
 ---@field opts blink.cmp.OmniOpts
 local omni = {}
 
@@ -68,6 +70,15 @@ local function invoke_omnifunc(func, findstart, base)
   return result
 end
 
+-- Map the defined `complete-items` 'kind's to blink kinds
+local OMNI_TO_BLINK_KIND = {
+  v = Kind.Variable, -- variable
+  f = Kind.Function, -- function/method
+  m = Kind.Field, -- struct/class member
+  t = Kind.TypeParameter, -- typedef
+  d = Kind.Constant, -- #define/macro
+}
+
 ---@param context blink.cmp.Context
 ---@param resolve fun(response?: blink.cmp.CompletionResponse)
 ---@return nil
@@ -111,28 +122,38 @@ function omni:get_completions(context, resolve)
 
   local items = {} ---@type blink.cmp.CompletionItem[]
   for _, cmp in ipairs(cmp_results) do
-    -- TODO: does this need a blink specific kind?
+    local item ---@type blink.cmp.CompletionItem
+
     if type(cmp) == 'string' then
-      table.insert(items, {
+      item = {
         label = cmp,
         textEdit = {
           range = range,
           newText = cmp,
         },
-      })
+      }
     else
-      table.insert(items, {
+      item = {
         label = cmp.abbr or cmp.word,
         textEdit = {
           range = range,
           newText = cmp.word,
         },
         labelDetails = {
-          detail = cmp.kind,
           description = cmp.menu,
         },
-      })
+      }
+
+      -- if possible, prefer blink's 'kind' to remove redundancy
+      local blink_kind = OMNI_TO_BLINK_KIND[cmp.kind]
+      if blink_kind ~= nil then
+        item.kind = blink_kind
+      else
+        item.labelDetails.detail = cmp.kind
+      end
     end
+
+    table.insert(items, item)
   end
 
   resolve({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
