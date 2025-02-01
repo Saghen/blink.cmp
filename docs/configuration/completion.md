@@ -176,7 +176,7 @@ completion.documentation = {
 }
 ```
 
-If you're noticing high CPU usage or stuttering when opening the documentation, you may try setting `completion.documentation.treesitter_highlighting = false`.
+If you're noticing high CPU usage or stuttering when opening the documentation, you may try setting `completion.documentation.treesitter_highlighting = false`. You may completely override the drawing of the window via `completion.documentation.draw`.
 
 ## Ghost Text <Badge type="info"><a href="./reference#completion-ghost-text">Go to default configuration</a></Badge>
 

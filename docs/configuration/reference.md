@@ -267,6 +267,8 @@ completion.documentation = {
   update_delay_ms = 50,
   -- Whether to use treesitter highlighting, disable if you run into performance issues
   treesitter_highlighting = true,
+  -- Draws the item in the documentation window, by default using an internal treessitter based implementation
+  draw = function(opts) opts.default_implementation() end,
   window = {
     min_width = 10,
     max_width = 80,
