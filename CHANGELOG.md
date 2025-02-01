@@ -1,5 +1,10 @@
 ## [0.11.0](https://github.com/Saghen/blink.cmp/compare/v0.10.0...v0.11.0) (2025-01-24)
 
+> [!IMPORTANT]
+> Blink.cmp now fetches the completion items immediately upon entering insert mode by default. More ideas for prefetching are being explored! https://github.com/Saghen/blink.cmp/issues/706
+> 
+> The fuzzy matcher now explicitly understands typos which should result in more predictable fuzziness on longer strings
+
 ### BREAKING CHANGES
 
 * set prefetch on insert to true by default
