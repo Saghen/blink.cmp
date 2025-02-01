@@ -8,6 +8,12 @@ lazy_static! {
 
 /// Given a line and cursor position, returns the start and end indices of the keyword
 pub fn get_keyword_range(line: &str, col: usize, match_suffix: bool) -> (usize, usize) {
+    let col = line
+        .char_indices()
+        .find(|(idx, _)| *idx >= col)
+        .map(|(idx, _)| idx)
+        .unwrap_or(line.len());
+
     let before_match_start = BACKWARD_REGEX
         .find(&line[0..col.min(line.len())])
         .map(|m| m.start());
