@@ -204,12 +204,13 @@ end
 --- This function gets the end position of the range *after* applying the edit.
 --- This may be used for placing the cursor after applying the edit.
 ---
---- TODO: handle multiple text edits since they can edit the text that comes
---- before the current edit
+--- TODO: write tests cases, there are many uncommon cases it doesn't handle
 ---
 --- @param text_edit lsp.TextEdit
+--- @param additional_text_edits lsp.TextEdit[]
 --- @return number[] (1, 0) indexed line and column
-function text_edits.get_apply_end_position(text_edit)
+function text_edits.get_apply_end_position(text_edit, additional_text_edits)
+  -- Calculate the end position of the range, ignoring the additional text edits
   local lines = vim.split(text_edit.newText, '\n')
   local last_line_len = #lines[#lines]
   local line_count = #lines
@@ -217,7 +218,47 @@ function text_edits.get_apply_end_position(text_edit)
   local end_line = text_edit.range['end'].line + line_count - 1
 
   local end_col = last_line_len
-  if line_count == 1 then end_col = end_col + text_edit.range['end'].character end
+  if line_count == 1 then end_col = end_col + text_edit.range.start.character end
+
+  -- Adjust the end position based on the additional text edits
+  local text_edits_before = vim.tbl_filter(
+    function(edit)
+      return edit.range.start.line < text_edit.range.start.line
+        or edit.range.start.line == text_edit.range.start.line
+          and edit.range.start.character <= text_edit.range.start.character
+    end,
+    additional_text_edits
+  )
+  -- Sort first to last
+  table.sort(text_edits_before, function(a, b)
+    if a.range.start.line ~= b.range.start.line then return a.range.start.line < b.range.start.line end
+    return a.range.start.character < b.range.start.character
+  end)
+
+  local line_offset = 0
+  local col_offset = 0
+  for _, edit in ipairs(text_edits_before) do
+    local lines_replaced = edit.range['end'].line - edit.range.start.line
+    local edit_lines = vim.split(edit.newText, '\n')
+    local lines_added = #edit_lines - 1
+    line_offset = line_offset - lines_replaced + lines_added
+
+    -- Same line as the current text edit, offset the column
+    if edit.range.start.line == text_edit.range.start.line then
+      if #edit_lines == 1 then
+        local chars_replaced = edit.range['end'].character - edit.range.start.character
+        local chars_added = #edit_lines[#edit_lines]
+        col_offset = col_offset + chars_added - chars_replaced
+      else
+        -- TODO: if it doesn't replace the entire line, we need to offset by the remaining characters
+        col_offset = col_offset + #edit_lines[#edit_lines]
+      end
+    end
+
+    -- TODO: what if the end line of this edit is the same as the start line of our current edit?
+  end
+  end_line = end_line + line_offset
+  end_col = end_col + col_offset
 
   -- Convert from 0-indexed to (1, 0)-indexed to match nvim cursor api
   return { end_line + 1, end_col }

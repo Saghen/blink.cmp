@@ -83,11 +83,12 @@ local function accept(ctx, item, callback)
 
       -- OR Normal: Apply the text edit and move the cursor
       else
+        local new_cursor = text_edits_lib.get_apply_end_position(item.textEdit, all_text_edits)
+        new_cursor[2] = new_cursor[2] + offset
+
         table.insert(all_text_edits, item.textEdit)
         text_edits_lib.apply(all_text_edits)
 
-        local new_cursor = text_edits_lib.get_apply_end_position(item.textEdit)
-        new_cursor[2] = new_cursor[2] + offset
         ctx.set_cursor(new_cursor)
       end
 
