@@ -4,7 +4,7 @@
 --- @field status blink.cmp.TaskStatus
 --- @field result any | nil
 --- @field error any | nil
---- @field new fun(fn: fun(resolve: fun(result: any), reject: fun(err: any))): blink.cmp.Task
+--- @field new fun(fn: fun(resolve: fun(result: any), reject: fun(err: any)): fun()?): blink.cmp.Task
 ---
 --- @field cancel fun(self: blink.cmp.Task)
 --- @field map fun(self: blink.cmp.Task, fn: fun(result: any): blink.cmp.Task | any): blink.cmp.Task
