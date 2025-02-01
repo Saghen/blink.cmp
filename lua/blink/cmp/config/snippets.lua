@@ -25,6 +25,8 @@ local snippets = {
         if not _G.MiniSnippets then error('mini.snippets has not been setup') end
         local insert = MiniSnippets.config.expand.insert or MiniSnippets.default_insert
         insert({ body = snippet })
+        -- HACK: mini.snippets may edit the buffer during TextChangedI, so we need to ensure
+        -- we run after it completes it callback. We do this by resubscribing to TextChangedI
         require('blink.cmp').resubscribe()
       end,
     }),

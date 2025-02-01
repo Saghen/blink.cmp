@@ -12,7 +12,7 @@
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
 ---
 --- @field activate fun()
---- @field resubscribe fun()
+--- @field resubscribe fun() Effectively ensures that our autocmd listeners run last, after other registered listeners
 --- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })

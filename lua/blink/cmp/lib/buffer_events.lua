@@ -12,7 +12,7 @@
 ---
 --- @field new fun(opts: blink.cmp.BufferEventsOptions): blink.cmp.BufferEvents
 --- @field listen fun(self: blink.cmp.BufferEvents, opts: blink.cmp.BufferEventsListener)
---- @field resubscribe fun(self: blink.cmp.BufferEvents, opts: blink.cmp.BufferEventsListener)
+--- @field resubscribe fun(self: blink.cmp.BufferEvents, opts: blink.cmp.BufferEventsListener) Effectively ensures that our autocmd listeners run last, after other registered listeners
 --- @field suppress_events_for_callback fun(self: blink.cmp.BufferEvents, cb: fun())
 
 --- @class blink.cmp.BufferEventsOptions
@@ -135,6 +135,8 @@ function buffer_events:listen(opts)
   end)
 end
 
+--- Effectively ensures that our autocmd listeners run last, after other registered listeners
+--- HACK: Ideally, we would have some way to ensure that we always run after other listeners
 function buffer_events:resubscribe(opts)
   if self.textchangedi_id == -1 then return end
 
