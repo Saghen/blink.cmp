@@ -48,6 +48,20 @@ function system.get_target_triple()
   return vim.fn.split(stdout, '-')
 end
 
+--- Synchronously determine the system's libc target (on linux)
+--- I.e. `'musl'`, `'gnu'`
+--- @return string
+function system.get_linux_libc()
+  local target_triple = system.get_target_triple()
+  if target_triple and target_triple[3] then
+    return target_triple[3]
+  end
+
+  -- Fall back to checking for alpine
+  local success, is_alpine = pcall(vim.uv.fs_stat, '/etc/alpine-release')
+  return (success and is_alpine) and 'musl' or 'gnu'
+end
+
 --- Gets the system triple for the current system
 --- I.e. `x86_64-unknown-linux-gnu` or `aarch64-apple-darwin`
 --- @return blink.cmp.Task
@@ -61,18 +75,9 @@ function system.get_triple()
     if os == 'linux' then
       if vim.fn.has('android') == 1 then return resolve(triples.android) end
 
-      local target_triple = system.get_target_triple()
-      if target_triple then
-        local libc = target_triple[3]
-        local triple = triples[arch]
-        return resolve(triple and type(triple) == 'function' and triple(libc) or triple)
-      end
-
-      vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
-        local libc = (not err and is_alpine) and 'musl' or 'gnu'
-        local triple = triples[arch]
-        return resolve(triple and type(triple) == 'function' and triple(libc) or triple)
-      end)
+      local libc = system.get_linux_libc()
+      local triple = triples[arch]
+      return resolve(triple and type(triple) == 'function' and triple(libc) or triple)
     else
       return resolve(triples[arch])
     end
@@ -91,8 +96,7 @@ function system.get_triple_sync()
   if os == 'linux' then
     if vim.fn.has('android') == 1 then return triples.android end
 
-    local success, is_alpine = pcall(vim.uv.fs_stat, '/etc/alpine-release')
-    local libc = (success and is_alpine) and 'musl' or 'gnu'
+    local libc = system.get_linux_libc()
     local triple = triples[arch]
     return triple and type(triple) == 'function' and triple(libc) or triple
   else
