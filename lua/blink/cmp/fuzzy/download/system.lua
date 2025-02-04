@@ -26,6 +26,28 @@ function system.get_info()
   return os, arch
 end
 
+--- Synchronously gets the system target triple from `cc -dumpmachine`
+--- I.e. { 'x86_64', 'pc', 'linux', 'gnu' }
+--- @return string[] | nil
+function system.get_target_triple()
+  local success, process = pcall(function()
+    return vim.system({'cc', '-dumpmachine'}, { text = true }):wait()
+  end)
+  if not success or process.code ~= 0 then
+    vim.notify(
+      "Failed to determine system target triple using `cc -dumpmachine`. " ..
+      "Try setting `fuzzy.prebuilt_binaries.force_system_triple`",
+      vim.log.levels.ERROR,
+      { title = 'blink.cmp' }
+    )
+    return nil
+  end
+
+  -- strip whitespace
+  local stdout = process.stdout:gsub('%s+', '')
+  return vim.fn.split(stdout, '-')
+end
+
 --- Gets the system triple for the current system
 --- I.e. `x86_64-unknown-linux-gnu` or `aarch64-apple-darwin`
 --- @return blink.cmp.Task
@@ -38,6 +60,13 @@ function system.get_triple()
 
     if os == 'linux' then
       if vim.fn.has('android') == 1 then return resolve(triples.android) end
+
+      local target_triple = system.get_target_triple()
+      if target_triple then
+        local libc = target_triple[3]
+        local triple = triples[arch]
+        return resolve(triple and type(triple) == 'function' and triple(libc) or triple)
+      end
 
       vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
         local libc = (not err and is_alpine) and 'musl' or 'gnu'
