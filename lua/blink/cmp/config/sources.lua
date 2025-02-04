@@ -17,6 +17,7 @@
 --- @field default string[] | fun(): string[]
 --- @field per_filetype table<string, string[] | fun(): string[]>
 --- @field cmdline string[] | fun(): string[]
+--- @field term string[] | fun(): string[]
 ---
 --- @field transform_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
 --- @field min_keyword_length number | fun(ctx: blink.cmp.Context): number Minimum number of characters in the keyword to trigger
@@ -53,6 +54,7 @@ local sources = {
       if type == ':' or type == '@' then return { 'cmdline' } end
       return {}
     end,
+    term = {},
 
     transform_items = function(_, items) return items end,
     min_keyword_length = 0,
@@ -101,6 +103,13 @@ local sources = {
         name = 'Omni',
         module = 'blink.cmp.sources.omni',
       },
+      -- NOTE: in future we may want a built-in terminal source. For now
+      -- the infrastructure exists, e.g. so community terminal sources can be
+      -- added, but this functionality is not baked into blink.cmp.
+      -- term = {
+      --   name = 'term',
+      --   module = 'blink.cmp.sources.term',
+      -- },
     },
   },
 }
@@ -115,6 +124,7 @@ function sources.validate(config)
     default = { config.default, { 'function', 'table' } },
     per_filetype = { config.per_filetype, 'table' },
     cmdline = { config.cmdline, { 'function', 'table' } },
+    term = { config.term, { 'function', 'table' } },
 
     transform_items = { config.transform_items, 'function' },
     min_keyword_length = { config.min_keyword_length, { 'number', 'function' } },

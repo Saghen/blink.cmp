@@ -89,7 +89,7 @@ local function accept(ctx, item, callback)
         table.insert(all_text_edits, item.textEdit)
         text_edits_lib.apply(all_text_edits)
 
-        ctx.set_cursor(new_cursor)
+        if ctx.get_mode() ~= 'term' then ctx.set_cursor(new_cursor) end
       end
 
       -- Let the source execute the item itself

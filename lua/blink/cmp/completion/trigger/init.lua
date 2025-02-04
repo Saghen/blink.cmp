@@ -6,6 +6,7 @@
 --- @class blink.cmp.CompletionTrigger
 --- @field buffer_events blink.cmp.BufferEvents
 --- @field cmdline_events blink.cmp.CmdlineEvents
+--- @field term_events blink.cmp.TermEvents
 --- @field current_context_id number
 --- @field context? blink.cmp.Context
 --- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.Context }>
@@ -48,22 +49,24 @@ local function on_char_added(char, is_ignored)
   if is_ignored then
     if trigger.context ~= nil then trigger.show({ send_upstream = false, trigger_kind = 'keyword' }) end
 
-    -- character forces a trigger according to the sources, create a fresh context
+  -- character forces a trigger according to the sources, create a fresh context
   elseif trigger.is_trigger_character(char) and (config.show_on_trigger_character or trigger.context ~= nil) then
     trigger.context = nil
     trigger.show({ trigger_kind = 'trigger_character', trigger_character = char })
 
-    -- character is part of a keyword
+  -- character is part of a keyword
   elseif fuzzy.is_keyword_character(char) and (config.show_on_keyword or trigger.context ~= nil) then
     trigger.show({ trigger_kind = 'keyword' })
 
-    -- nothing matches so hide
+  -- nothing matches so hide
   else
     trigger.hide()
   end
 end
 
 local function on_cursor_moved(event, is_ignored)
+  local is_enter_event = event == 'InsertEnter' or event == 'TermEnter'
+
   local cursor = context.get_cursor()
   local cursor_col = cursor[2]
 
@@ -91,15 +94,15 @@ local function on_cursor_moved(event, is_ignored)
   -- Reproducible with `example.|a` and pressing `a`, should not show the menu
   local insert_enter_on_trigger_character = config.show_on_trigger_character
     and config.show_on_insert_on_trigger_character
-    and event == 'InsertEnter'
+    and is_enter_event
     and trigger.is_trigger_character(char_under_cursor, true)
 
   -- check if we're still within the bounds of the query used for the context
   if trigger.context ~= nil and trigger.context:within_query_bounds(cursor) then
     trigger.show({ trigger_kind = 'keyword' })
 
-    -- check if we've entered insert mode on a trigger character
-    -- or if we've moved onto a trigger character while open
+  -- check if we've entered insert mode on a trigger character
+  -- or if we've moved onto a trigger character while open
   elseif
     insert_enter_on_trigger_character
     or (is_on_trigger_for_show and trigger.context ~= nil and trigger.context.trigger.kind ~= 'prefetch')
@@ -107,16 +110,16 @@ local function on_cursor_moved(event, is_ignored)
     trigger.context = nil
     trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
 
-    -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
+  -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
   elseif is_keyword and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
     trigger.context = nil
     trigger.show({ trigger_kind = 'keyword' })
 
-    -- prefetch completions without opening window on InsertEnter
-  elseif event == 'InsertEnter' and config.prefetch_on_insert then
+  -- prefetch completions without opening window on InsertEnter
+  elseif is_enter_event and config.prefetch_on_insert then
     trigger.show({ trigger_kind = 'prefetch' })
 
-    -- otherwise hide
+  -- otherwise hide
   else
     trigger.hide()
   end
@@ -128,6 +131,7 @@ function trigger.activate()
     has_context = function() return trigger.context ~= nil end,
     show_in_snippet = config.show_in_snippet,
   })
+
   trigger.buffer_events:listen({
     on_char_added = on_char_added,
     on_cursor_moved = on_cursor_moved,
@@ -139,6 +143,14 @@ function trigger.activate()
     on_char_added = on_char_added,
     on_cursor_moved = on_cursor_moved,
     on_leave = function() trigger.hide() end,
+  })
+
+  trigger.term_events = require('blink.cmp.lib.term_events').new({
+    has_context = function() return trigger.context ~= nil end,
+  })
+  trigger.term_events:listen({
+    on_char_added = on_char_added,
+    on_term_leave = function() trigger.hide() end,
   })
 end
 
@@ -168,9 +180,13 @@ end
 
 --- Suppresses on_hide and on_show events for the duration of the callback
 function trigger.suppress_events_for_callback(cb)
-  local mode = vim.api.nvim_get_mode().mode == 'c' and 'cmdline' or 'default'
+  local mode = vim.api.nvim_get_mode().mode
+  mode = (vim.api.nvim_get_mode().mode == 'c' and 'cmdline') or (mode == 't' and 'term') or 'default'
 
-  local events = mode == 'default' and trigger.buffer_events or trigger.cmdline_events
+  local events = (mode == 'default' and trigger.buffer_events)
+    or (mode == 'term' and trigger.term_events)
+    or trigger.cmdline_events
+
   if not events then return cb() end
 
   events:suppress_events_for_callback(cb)

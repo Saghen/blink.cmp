@@ -1,4 +1,4 @@
---- @alias blink.cmp.Mode 'cmdline' | 'default'
+--- @alias blink.cmp.Mode 'cmdline' | 'term' | 'default'
 
 --- @class blink.cmp.CompletionItem : lsp.CompletionItem
 --- @field documentation? string | { kind: lsp.MarkupKind, value: string, draw?: fun(opts?: blink.cmp.CompletionDocumentationDrawOpts) }
