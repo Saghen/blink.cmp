@@ -63,7 +63,7 @@ keymap = {
 - `snippet_backward`: Jumps to the previous snippet placeholder
 - `fallback`: Runs the next non-blink keymap, or runs the built-in neovim binding
 
-## Cmdline
+## Cmdline and Terminal
 
 You may set a separate keymap for cmdline by defining `keymap.cmdline`, with an identical structure to `keymap`.
 
@@ -73,6 +73,10 @@ keymap = {
   ...
   cmdline = {
     preset = 'enter',
+    ...
+  },
+  term = {
+    preset = 'super-tab',
     ...
   }
 }
