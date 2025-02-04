@@ -18,7 +18,7 @@
 - Auto-bracket support based on semantic tokens
 - Signature help (experimental, opt-in)
 - Command line completion
-- Terminal completion (although no source for shell completions exists yet, contributions welcome!)
+- Terminal completion (Nightly only! No source for shell completions exists yet, contributions welcome!)
 - [Comparison with nvim-cmp](https://cmp.saghen.dev/#compared-to-nvim-cmp)
 
 ## Special Thanks

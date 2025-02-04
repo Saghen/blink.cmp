@@ -405,6 +405,7 @@ sources = {
   end,
 
   -- By default, we don't enable any terminal sources, but you may try `path` or others
+  -- NOTE: Nightly only! Known bugs in v0.10
   term = {},
 
   -- Function to use when transforming the items before they're returned for all providers
