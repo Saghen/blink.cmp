@@ -35,6 +35,7 @@
 - [@scottmckendry](https://github.com/scottmckendry) CI and prebuilt binaries
 - [@balssh](https://github.com/Balssh) + [@konradmalik](https://github.com/konradmalik) Nix flake, nixpkg and nixvim
 - [@abeldekat](https://github.com/abeldekat) mini.snippets source
+- [@wurli](https://github.com/wurli) Terminal completions
 
 ## Compared to nvim-cmp
 
