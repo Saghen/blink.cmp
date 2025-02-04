@@ -26,6 +26,42 @@ function system.get_info()
   return os, arch
 end
 
+--- Synchronously gets the system target triple from `cc -dumpmachine`
+--- I.e. { 'x86_64', 'pc', 'linux', 'gnu' }
+--- @return string[] | nil
+function system.get_target_triple()
+  local success, process = pcall(function()
+    return vim.system({'cc', '-dumpmachine'}, { text = true }):wait()
+  end)
+  if not success or process.code ~= 0 then
+    vim.notify(
+      "Failed to determine system target triple using `cc -dumpmachine`. " ..
+      "Try setting `fuzzy.prebuilt_binaries.force_system_triple`",
+      vim.log.levels.ERROR,
+      { title = 'blink.cmp' }
+    )
+    return nil
+  end
+
+  -- strip whitespace
+  local stdout = process.stdout:gsub('%s+', '')
+  return vim.fn.split(stdout, '-')
+end
+
+--- Synchronously determine the system's libc target (on linux)
+--- I.e. `'musl'`, `'gnu'`
+--- @return string
+function system.get_linux_libc()
+  local target_triple = system.get_target_triple()
+  if target_triple and target_triple[3] then
+    return target_triple[3]
+  end
+
+  -- Fall back to checking for alpine
+  local success, is_alpine = pcall(vim.uv.fs_stat, '/etc/alpine-release')
+  return (success and is_alpine) and 'musl' or 'gnu'
+end
+
 --- Gets the system triple for the current system
 --- I.e. `x86_64-unknown-linux-gnu` or `aarch64-apple-darwin`
 --- @return blink.cmp.Task
@@ -39,11 +75,9 @@ function system.get_triple()
     if os == 'linux' then
       if vim.fn.has('android') == 1 then return resolve(triples.android) end
 
-      vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
-        local libc = (not err and is_alpine) and 'musl' or 'gnu'
-        local triple = triples[arch]
-        return resolve(triple and type(triple) == 'function' and triple(libc) or triple)
-      end)
+      local libc = system.get_linux_libc()
+      local triple = triples[arch]
+      return resolve(triple and type(triple) == 'function' and triple(libc) or triple)
     else
       return resolve(triples[arch])
     end
@@ -62,8 +96,7 @@ function system.get_triple_sync()
   if os == 'linux' then
     if vim.fn.has('android') == 1 then return triples.android end
 
-    local success, is_alpine = pcall(vim.uv.fs_stat, '/etc/alpine-release')
-    local libc = (success and is_alpine) and 'musl' or 'gnu'
+    local libc = system.get_linux_libc()
     local triple = triples[arch]
     return triple and type(triple) == 'function' and triple(libc) or triple
   else
