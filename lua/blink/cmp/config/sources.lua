@@ -54,7 +54,7 @@ local sources = {
       if type == ':' or type == '@' then return { 'cmdline' } end
       return {}
     end,
-    term = { 'buffer', 'path' },
+    term = {},
 
     transform_items = function(_, items) return items end,
     min_keyword_length = 0,
