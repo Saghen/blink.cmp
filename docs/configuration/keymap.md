@@ -31,8 +31,9 @@ keymap = {
     'select_next'
   },
 
-  -- optionally, separate cmdline keymaps
+  -- optionally, separate cmdline and terminal keymaps
   -- cmdline = {}
+  -- term = {}
 }
 ```
 

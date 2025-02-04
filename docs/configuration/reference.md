@@ -404,6 +404,9 @@ sources = {
     return {}
   end,
 
+  -- By default, we don't enable any terminal sources, but you may try `path` or others
+  term = {},
+
   -- Function to use when transforming the items before they're returned for all providers
   -- The default will lower the score for snippets to sort them lower in the list
   transform_items = function(_, items) return items end,
