@@ -149,10 +149,13 @@ end
 
 --- Execute ---
 
-function lsp:execute(_, item)
+function lsp:execute(_, item, callback)
   local client = vim.lsp.get_client_by_id(item.client_id)
-  if client and item.command then client.request('workspace/executeCommand', item.command) end
-  return function() end
+  if client and item.command then
+    client.request('workspace/executeCommand', item.command, function() callback() end)
+  else
+    callback()
+  end
 end
 
 return lsp
