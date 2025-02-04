@@ -158,7 +158,7 @@ function source:execute(context, item)
   if self.module.execute == nil then
     return async.task.new(function(resolve) resolve() end)
   end
-  return async.task.new(function(resolve) self.module:execute(context, item, resolve) end)
+  return async.task.new(function(resolve) return self.module:execute(context, item, resolve) end)
 end
 
 --- Signature help ---
