@@ -1,5 +1,4 @@
 --- @alias blink.cmp.KeymapCommand
-
 --- | 'fallback' Fallback to the built-in behavior
 --- | 'show' Show the completion window
 --- | 'show_and_insert' Show the completion window and select the first item
