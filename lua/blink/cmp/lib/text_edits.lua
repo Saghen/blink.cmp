@@ -142,6 +142,18 @@ function text_edits.get_from_item(item)
   local offset_encoding = text_edits.offset_encoding_from_item(item)
   text_edit = text_edits.to_utf_8(text_edit, offset_encoding)
 
+  local mode = context.get_mode()
+  if mode == 'cmdline' then
+    local line = context.get_line()
+    -- Detect range markers '<,'>' or numeric ranges '3,5'
+    local prefix = line:match("^%s*['<,>%d]+%s*")
+    if prefix then
+      local offset = #prefix
+      text_edit.range.start.character = text_edit.range.start.character + offset
+      text_edit.range['end'].character = text_edit.range['end'].character + offset
+    end
+  end
+
   text_edit.range = text_edits.clamp_range_to_bounds(text_edit.range)
 
   return text_edit
