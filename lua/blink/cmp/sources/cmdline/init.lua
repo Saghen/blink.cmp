@@ -76,6 +76,17 @@ function cmdline:get_completions(context, callback)
     :schedule()
     :map(function(completions)
       local items = {}
+
+      -- Helper function: find the longest match for a given set of patterns
+      local function longest_match(str, patterns)
+        local best = ''
+        for _, pat in ipairs(patterns) do
+          local m = str:match(pat)
+          if m and #m > #best then best = m end
+        end
+        return best
+      end
+
       for _, completion in ipairs(completions) do
         local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
 
@@ -90,20 +101,29 @@ function cmdline:get_completions(context, callback)
         local new_text = completion
         if not has_prefix and cmd == 'lua' then new_text = current_arg_prefix .. completion end
 
+        local prefix = longest_match(current_arg, {
+          "^%s*'<%s*,%s*'>%s*", -- Visual range, e.g., '<,>'
+          '^%s*%d+%s*,%s*%d+%s*', -- Numeric range, e.g., 3,5
+          '^%s*[%p]+%s*', -- One or more punctuation characters
+        })
+
+        local prefix_length = #prefix
+        local start_pos = #text_before_argument + prefix_length
+        local cmdpos = vim.fn.getcmdpos() - 1
+
         table.insert(items, {
           label = label,
           filterText = filter_text,
-          -- move items starting with special characters to the end of the list
           sortText = label:lower():gsub('^([!-@\\[-`])', '~%1'),
           textEdit = {
-            newText = new_text,
+            newText = (current_arg:sub(1, prefix_length) == prefix) and new_text or (prefix .. new_text),
             insert = {
-              start = { line = 0, character = #text_before_argument },
-              ['end'] = { line = 0, character = math.min(#text_before_argument + #current_arg, vim.fn.getcmdpos() - 1) },
+              start = { line = 0, character = start_pos },
+              ['end'] = { line = 0, character = cmdpos },
             },
             replace = {
-              start = { line = 0, character = #text_before_argument },
-              ['end'] = { line = 0, character = #text_before_argument + #current_arg },
+              start = { line = 0, character = start_pos },
+              ['end'] = { line = 0, character = start_pos + #current_arg },
             },
           },
           kind = require('blink.cmp.types').CompletionItemKind.Property,
