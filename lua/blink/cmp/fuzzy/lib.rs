@@ -13,7 +13,8 @@ mod fuzzy;
 mod keyword;
 mod lsp_item;
 
-static REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\p{L}_[\p{L}0-9_\\-]{2,}").unwrap());
+static REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"[\p{L}_][\p{L}0-9_\\-]{2,}").unwrap());
 static FRECENCY: LazyLock<RwLock<Option<FrecencyTracker>>> = LazyLock::new(|| RwLock::new(None));
 static HAYSTACKS_BY_PROVIDER: LazyLock<RwLock<HashMap<String, Vec<LspItem>>>> =
     LazyLock::new(|| RwLock::new(HashMap::new()));
