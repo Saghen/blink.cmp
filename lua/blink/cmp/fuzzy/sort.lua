@@ -1,7 +1,7 @@
 local sort = {}
 
 --- @param list blink.cmp.CompletionItem[]
---- @param funcs ("label" | "sort_text" | "kind" | "score" | blink.cmp.SortFunction)[]
+--- @param funcs ("label" | "sort_text" | "kind" | "score" | "exact" | blink.cmp.SortFunction)[]
 --- @return blink.cmp.CompletionItem[]
 function sort.sort(list, funcs)
   local sorting_funcs = vim.tbl_map(
@@ -15,6 +15,10 @@ function sort.sort(list, funcs)
     end
   end)
   return list
+end
+
+function sort.exact(a, b)
+  if a.exact ~= b.exact then return a.exact end
 end
 
 function sort.score(a, b)
