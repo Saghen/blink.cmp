@@ -14,6 +14,23 @@ enabled = function()
 end,
 ```
 
+### Disable completion in *only* shell command mode
+
+Some pc's, especially windows running git bash, hang with cmp in shell commands. This disables blink cmp only when running shell commands ( i.e. [ ':!' , ':%!' ] ), but still allows completion in other command modes ( i.e. [ ':' , ':help', '/' , '?' ] etc ).
+```lua
+    enabled = function()
+      -- check if command mode is a shell cmd (i.e. [ ":!" , ":%!" ]) to disable cmp for proformance
+      local function not_shellcmd()
+        if vim.fn.getcmdtype() ~= ':' then -- speed optimization for searches
+          return true
+        else
+          return not vim.fn.getcmdline():match("^[%%0-9,'<>%-]*!")
+          end
+      end
+      return not_shellcmd()
+    end,
+```
+
 ### Border
 
 ```lua
