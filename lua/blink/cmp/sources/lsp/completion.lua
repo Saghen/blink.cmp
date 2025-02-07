@@ -31,6 +31,7 @@ function completion.get_completion_for_client(context, client)
       local default_edit_range = result.itemDefaults and result.itemDefaults.editRange
       for _, item in ipairs(items) do
         item.client_id = client.id
+        item.client_name = client.name
 
         -- score offset for deprecated items
         -- todo: make configurable
