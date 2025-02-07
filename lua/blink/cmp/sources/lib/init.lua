@@ -118,8 +118,7 @@ function sources.request_completions(context)
   -- create a new context if the id changed or if we haven't created one yet
   if sources.completions_queue == nil or context.id ~= sources.completions_queue.id then
     if sources.completions_queue ~= nil then sources.completions_queue:destroy() end
-    sources.completions_queue =
-      require('blink.cmp.sources.lib.queue').new(context, sources.get_all_providers(), sources.emit_completions)
+    sources.completions_queue = require('blink.cmp.sources.lib.queue').new(context, sources.emit_completions)
   -- send cached completions if they exist to immediately trigger updates
   elseif sources.completions_queue:get_cached_completions() ~= nil then
     sources.emit_completions(

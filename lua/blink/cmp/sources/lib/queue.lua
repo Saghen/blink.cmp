@@ -8,7 +8,7 @@ local async = require('blink.cmp.lib.async')
 --- @field cached_items_by_provider table<string, blink.cmp.CompletionResponse> | nil
 --- @field on_completions_callback fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)
 ---
---- @field new fun(context: blink.cmp.Context, providers: table<string, blink.cmp.SourceProvider>, on_completions_callback: fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)): blink.cmp.SourcesQueue
+--- @field new fun(context: blink.cmp.Context, on_completions_callback: fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)): blink.cmp.SourcesQueue
 --- @field get_cached_completions fun(self: blink.cmp.SourcesQueue): table<string, blink.cmp.CompletionResponse> | nil
 --- @field get_completions fun(self: blink.cmp.SourcesQueue, context: blink.cmp.Context)
 --- @field destroy fun(self: blink.cmp.SourcesQueue)
@@ -17,10 +17,9 @@ local async = require('blink.cmp.lib.async')
 --- @diagnostic disable-next-line: missing-fields
 local queue = {}
 
-function queue.new(context, providers, on_completions_callback)
+function queue.new(context, on_completions_callback)
   local self = setmetatable({}, { __index = queue })
   self.id = context.id
-  self.providers = providers
 
   self.request = nil
   self.queued_request_context = nil
@@ -45,7 +44,7 @@ function queue:get_completions(context)
 
   -- Create a task to get the completions, send responses upstream
   -- and run the queued request, if it exists
-  local tree = require('blink.cmp.sources.lib.tree').new(context, vim.tbl_values(self.providers))
+  local tree = require('blink.cmp.sources.lib.tree').new(context)
   self.request = tree:get_completions(context, function(items_by_provider)
     self.cached_items_by_provider = items_by_provider
     self.on_completions_callback(context, items_by_provider)
