@@ -75,26 +75,38 @@ function cmdline:get_completions(context, callback)
     end)
     :schedule()
     :map(function(completions)
+      -- The getcompletion() api is inconsistent in whether it returns the prefix or not.
+      --
+      -- I.e. :set shiftwidth=| will return '2'
+      -- I.e. :Neogit kind=| will return 'kind=commit'
+      --
+      -- For simplicity, we always replace the entire command argument, so we want to ensure
+      -- the prefix is always in the new_text.
+      --
+      -- In the case of file/buffer completion, we can be sure that the prefix is included
+      -- In all other cases, we want to check for the prefix and remove it from the filter text
+      -- and add it to the newText
+
+      local completion_type = vim.fn.getcmdcompltype()
+      local is_file_completion = completion_type == 'file' or completion_type == 'buffer'
+
       local items = {}
       for _, completion in ipairs(completions) do
         local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
 
         -- remove prefix from the filter text
         local filter_text = completion
-        if has_prefix and cmd == 'lua' then filter_text = completion:sub(#current_arg_prefix + 1) end
-
-        -- for lua, use the filter text as the label since it doesn't include the prefix
-        local label = cmd == 'lua' and filter_text or completion
+        if has_prefix and not is_file_completion then filter_text = completion:sub(#current_arg_prefix + 1) end
 
         -- add prefix to the newText
         local new_text = completion
-        if not has_prefix and cmd == 'lua' then new_text = current_arg_prefix .. completion end
+        if not has_prefix and not is_file_completion then new_text = current_arg_prefix .. completion end
 
         table.insert(items, {
-          label = label,
+          label = filter_text,
           filterText = filter_text,
           -- move items starting with special characters to the end of the list
-          sortText = label:lower():gsub('^([!-@\\[-`])', '~%1'),
+          sortText = filter_text:lower():gsub('^([!-@\\[-`])', '~%1'),
           textEdit = {
             newText = new_text,
             insert = {
@@ -103,7 +115,13 @@ function cmdline:get_completions(context, callback)
             },
             replace = {
               start = { line = 0, character = #text_before_argument },
-              ['end'] = { line = 0, character = #text_before_argument + #current_arg },
+              ['end'] = {
+                line = 0,
+                character = math.min(
+                  #text_before_argument + #current_arg,
+                  context.bounds.start_col + context.bounds.length - 1
+                ),
+              },
             },
           },
           kind = require('blink.cmp.types').CompletionItemKind.Property,
