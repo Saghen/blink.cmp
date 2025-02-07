@@ -125,6 +125,23 @@ sources.providers.lsp.override.get_trigger_characters = function(self)
 end
 ```
 
+### Deprioritize specific LSP
+
+You may use a custom sort function to deprioritize LSPs such as Emmet Language Server (`emmet_ls`)
+
+```lua
+fuzzy = {
+  sorts = {
+    function(a, b)
+      if a.client_name == nil or b.client_name == nil then return end
+      return b.client_name == 'emmet_ls'
+    end,
+    -- default sorts
+    'score',
+    'sort_text',
+}
+```
+
 ## Completion menu drawing
 
 ### `mini.icons`
