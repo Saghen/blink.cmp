@@ -69,12 +69,12 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
   local keyword_start_col, keyword_end_col =
     require('blink.cmp.fuzzy').get_keyword_range(line, cursor_col, config.completion.keyword.range)
   local keyword_length = keyword_end_col - keyword_start_col
-  local keyword = line:sub(keyword_start_col, keyword_end_col - 1)
+  local keyword = line:sub(keyword_start_col, keyword_end_col)
 
   local filtered_items = {}
   for provider_id, haystack in pairs(haystacks_by_provider) do
     -- perform fuzzy search
-    local scores, matched_indices = fuzzy.rust.fuzzy(line, cursor_col, provider_id, {
+    local scores, matched_indices, exacts = fuzzy.rust.fuzzy(line, cursor_col, provider_id, {
       -- TODO: make this configurable
       max_typos = config.fuzzy.max_typos(keyword),
       use_frecency = config.fuzzy.use_frecency and keyword_length > 0,
@@ -86,7 +86,9 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
 
     for idx, item_index in ipairs(matched_indices) do
       local item = haystack[item_index + 1]
+      --TODO: maybe we should declare these fields in `blink.cmp.CompletionItem`?
       item.score = scores[idx]
+      item.exact = exacts[idx]
       table.insert(filtered_items, item)
     end
   end

@@ -3,7 +3,7 @@
 --- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item
 --- @field use_proximity boolean Boosts the score of items matching nearby words
 --- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux)
---- @field sorts ("label" | "sort_text" | "kind" | "score" | blink.cmp.SortFunction)[] Controls which sorts to use and in which order, these three are currently the only allowed options
+--- @field sorts ("label" | "sort_text" | "kind" | "score" | "exact" | blink.cmp.SortFunction)[] Controls which sorts to use and in which order, these three are currently the only allowed options
 --- @field prebuilt_binaries blink.cmp.PrebuiltBinariesConfig
 
 --- @class (exact) blink.cmp.PrebuiltBinariesConfig
@@ -28,7 +28,7 @@ local fuzzy = {
     use_frecency = true,
     use_proximity = true,
     use_unsafe_no_lock = false,
-    sorts = { 'score', 'sort_text' },
+    sorts = { 'exact', 'score', 'sort_text' },
     prebuilt_binaries = {
       download = true,
       ignore_version_mismatch = false,
@@ -53,13 +53,16 @@ function fuzzy.validate(config)
       config.sorts,
       function(sorts)
         for _, sort in ipairs(sorts) do
-          if not vim.tbl_contains({ 'label', 'sort_text', 'kind', 'score' }, sort) and type(sort) ~= 'function' then
+          if
+            not vim.tbl_contains({ 'label', 'sort_text', 'kind', 'score', 'exact' }, sort)
+            and type(sort) ~= 'function'
+          then
             return false
           end
         end
         return true
       end,
-      'one of: "label", "sort_text", "kind", "score" or a function',
+      'one of: "label", "sort_text", "kind", "score", "exact" or a function',
     },
     prebuilt_binaries = { config.prebuilt_binaries, 'table' },
   }, config)
