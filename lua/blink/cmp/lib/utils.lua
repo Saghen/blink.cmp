@@ -137,4 +137,16 @@ function utils.get_char_at_cursor()
   return line:sub(start_col, end_col)
 end
 
+--- Reverses an array
+--- @generic T
+--- @param arr T[]
+--- @return T[]
+function utils.reverse(arr)
+  local reversed = {}
+  for i = #arr, 1, -1 do
+    reversed[#reversed + 1] = arr[i]
+  end
+  return reversed
+end
+
 return utils

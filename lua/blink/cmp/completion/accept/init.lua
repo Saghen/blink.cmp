@@ -75,8 +75,7 @@ local function accept(ctx, item, callback)
         -- so we empty the newText and apply
         local temp_text_edit = vim.deepcopy(item.textEdit)
         temp_text_edit.newText = ''
-        table.insert(all_text_edits, temp_text_edit)
-        text_edits_lib.apply(all_text_edits)
+        text_edits_lib.apply(temp_text_edit, all_text_edits)
 
         -- Expand the snippet
         require('blink.cmp.config').snippets.expand(item.textEdit.newText)
@@ -86,12 +85,14 @@ local function accept(ctx, item, callback)
         local new_cursor = text_edits_lib.get_apply_end_position(item.textEdit, all_text_edits)
         new_cursor[2] = new_cursor[2] + offset
 
-        table.insert(all_text_edits, item.textEdit)
-        text_edits_lib.apply(all_text_edits)
+        text_edits_lib.apply(item.textEdit, all_text_edits)
 
         if ctx.get_mode() ~= 'term' then ctx.set_cursor(new_cursor) end
       end
 
+      return brackets_status
+    end)
+    :map(function(brackets_status)
       -- Let the source execute the item itself
       sources.execute(ctx, item):map(function()
         -- Check semantic tokens for brackets, if needed, and apply additional text edits

@@ -89,7 +89,8 @@ local function make_insert_leave(self, on_insert_leave)
     -- so we schedule to ignore the intermediary modes
     -- TODO: deduplicate requests
     vim.schedule(function()
-      if not vim.tbl_contains({ 'i', 's' }, vim.api.nvim_get_mode().mode) then on_insert_leave() end
+      local mode = vim.api.nvim_get_mode().mode
+      if not mode:match('i') and not mode:match('s') then on_insert_leave() end
     end)
   end
 end
@@ -159,9 +160,9 @@ function buffer_events:suppress_events_for_callback(cb)
   local cursor_after = vim.api.nvim_win_get_cursor(0)
   local changed_tick_after = vim.api.nvim_buf_get_changedtick(0)
 
-  local is_insert_mode = vim.api.nvim_get_mode().mode == 'i'
+  local is_insert_mode = vim.api.nvim_get_mode().mode:sub(1, 1) == 'i'
 
-  self.ignore_next_text_changed = changed_tick_after ~= changed_tick_before and is_insert_mode
+  self.ignore_next_text_changed = changed_tick_before ~= changed_tick_after and is_insert_mode
 
   -- HACK: the cursor may move from position (1, 1) to (1, 0) and back to (1, 1) during the callback
   -- This will trigger a CursorMovedI event, but we can't detect it simply by checking the cursor position
