@@ -43,14 +43,6 @@ function fuzzy.fuzzy_matched_indices(line, cursor_col, haystack, range)
   return fuzzy.rust.fuzzy_matched_indices(line, cursor_col, haystack, range == 'full')
 end
 
----@param keyword string
----@param item blink.cmp.CompletionItem
----@return boolean
-local function is_exact_match(keyword, item)
-  local keyword_trimmed, _ = keyword:gsub('^%s+', '')
-  return keyword_trimmed == item.sortText
-end
-
 --- @param line string
 --- @param cursor_col number
 --- @param haystacks_by_provider table<string, blink.cmp.CompletionItem[]>
