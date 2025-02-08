@@ -70,7 +70,6 @@ function keymap.setup()
     require('blink.cmp.keymap.apply').cmdline_keymaps(cmdline_mappings)
   end
 
-
   -- Apply term keymaps
   local term_sources = require('blink.cmp.config').sources.term
   if type(term_sources) ~= 'table' or #term_sources > 0 then

@@ -17,8 +17,8 @@ function text_edits.apply(edits)
     local edit = edits[1]
     local line = context.get_line()
     local edited_line = line:sub(1, edit.range.start.character)
-    .. edit.newText
-    .. line:sub(edit.range['end'].character + 1)
+      .. edit.newText
+      .. line:sub(edit.range['end'].character + 1)
     -- FIXME: for some reason, we have to set the cursor here, instead of later,
     -- because this will override the cursor position set later
     vim.fn.setcmdline(edited_line, edit.range.start.character + #edit.newText + 1)
@@ -33,10 +33,7 @@ function text_edits.apply(edits)
       local n_replaced = cur_col - edit.range.start.character
       local backspace_keycode = '\8'
 
-      vim.fn.chansend(
-        vim.bo.channel,
-        backspace_keycode:rep(n_replaced) .. edit.newText
-      )
+      vim.fn.chansend(vim.bo.channel, backspace_keycode:rep(n_replaced) .. edit.newText)
     end
   end
 end

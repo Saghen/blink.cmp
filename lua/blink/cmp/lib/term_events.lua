@@ -36,13 +36,13 @@ function term_events:listen(opts)
   vim.api.nvim_create_autocmd('TermEnter', {
     callback = function()
       vim.on_key(function(k) last_char = k end, term_on_key_ns)
-    end
+    end,
   })
   vim.api.nvim_create_autocmd('TermLeave', {
     callback = function()
       vim.on_key(nil, term_on_key_ns)
       last_char = ''
-    end
+    end,
   })
 
   vim.api.nvim_create_autocmd('TextChangedT', {
@@ -86,7 +86,7 @@ function term_events:suppress_events_for_callback(cb)
   self.ignore_next_text_changed = changed_tick_after ~= changed_tick_before and is_term_mode
   -- TODO: does this guarantee that the CursorMovedI event will fire?
   self.ignore_next_cursor_moved = (cursor_after[1] ~= cursor_before[1] or cursor_after[2] ~= cursor_before[2])
-  and is_term_mode
+    and is_term_mode
 end
 
 return term_events
