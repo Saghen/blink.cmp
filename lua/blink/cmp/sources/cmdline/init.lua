@@ -80,27 +80,52 @@ function cmdline:get_completions(context, callback)
       -- I.e. :set shiftwidth=| will return '2'
       -- I.e. :Neogit kind=| will return 'kind=commit'
       --
-      -- For simplicity, we always replace the entire command argument, so we want to ensure
-      -- the prefix is always in the new_text.
+      -- For simplicity, excluding the first argument, we always replace the entire command argument,
+      -- so we want to ensure the prefix is always in the new_text.
       --
       -- In the case of file/buffer completion, we can be sure that the prefix is included
       -- In all other cases, we want to check for the prefix and remove it from the filter text
       -- and add it to the newText
 
+      -- Helper function: find the longest match for a given set of patterns
+      local function longest_match(str, patterns)
+        local best = ''
+        for _, pat in ipairs(patterns) do
+          local m = str:match(pat)
+          if m and #m > #best then best = m end
+        end
+        return best
+      end
+
       local completion_type = vim.fn.getcmdcompltype()
       local is_file_completion = completion_type == 'file' or completion_type == 'buffer'
+      local is_first_arg = arg_number == 1
 
       local items = {}
       for _, completion in ipairs(completions) do
         local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
 
-        -- remove prefix from the filter text
         local filter_text = completion
-        if has_prefix and not is_file_completion then filter_text = completion:sub(#current_arg_prefix + 1) end
-
-        -- add prefix to the newText
         local new_text = completion
-        if not has_prefix and not is_file_completion then new_text = current_arg_prefix .. completion end
+        if not is_first_arg and not is_file_completion then
+          -- remove prefix from the filter text
+          if has_prefix then filter_text = completion:sub(#current_arg_prefix + 1) end
+
+          -- add prefix to the newText
+          if not has_prefix then new_text = current_arg_prefix .. completion end
+        end
+
+        local start_pos = #text_before_argument
+
+        -- exclude range on the first argument
+        if is_first_arg then
+          local prefix = longest_match(current_arg, {
+            "^%s*'<%s*,%s*'>%s*", -- Visual range, e.g., '<,>'
+            '^%s*%d+%s*,%s*%d+%s*', -- Numeric range, e.g., 3,5
+            '^%s*[%p]+%s*', -- One or more punctuation characters
+          })
+          start_pos = start_pos + #prefix
+        end
 
         table.insert(items, {
           label = filter_text,
@@ -110,17 +135,14 @@ function cmdline:get_completions(context, callback)
           textEdit = {
             newText = new_text,
             insert = {
-              start = { line = 0, character = #text_before_argument },
-              ['end'] = { line = 0, character = math.min(#text_before_argument + #current_arg, vim.fn.getcmdpos() - 1) },
+              start = { line = 0, character = start_pos },
+              ['end'] = { line = 0, character = vim.fn.getcmdpos() - 1 },
             },
             replace = {
-              start = { line = 0, character = #text_before_argument },
+              start = { line = 0, character = start_pos },
               ['end'] = {
                 line = 0,
-                character = math.min(
-                  #text_before_argument + #current_arg,
-                  context.bounds.start_col + context.bounds.length - 1
-                ),
+                character = math.min(start_pos + #current_arg, context.bounds.start_col + context.bounds.length - 1),
               },
             },
           },
