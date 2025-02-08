@@ -1,12 +1,13 @@
 --- @class blink.cmp.DrawColumn
+--- @field component_names string[]
 --- @field components blink.cmp.DrawComponent[]
 --- @field gap number
 --- @field lines string[][]
 --- @field width number
 --- @field ctxs blink.cmp.DrawItemContext[]
 ---
---- @field new fun(components: blink.cmp.DrawComponent[], gap: number): blink.cmp.DrawColumn
---- @field render fun(self: blink.cmp.DrawColumn, ctxs: blink.cmp.DrawItemContext[])
+--- @field new fun(component_names: string[], components: blink.cmp.DrawComponent[], gap: number): blink.cmp.DrawColumn
+--- @field render fun(self: blink.cmp.DrawColumn,context: blink.cmp.Context, ctxs: blink.cmp.DrawItemContext[])
 --- @field get_line_text fun(self: blink.cmp.DrawColumn, line_idx: number): string
 --- @field get_line_highlights fun(self: blink.cmp.DrawColumn, line_idx: number): blink.cmp.DrawHighlight[]
 
@@ -16,8 +17,9 @@ local text_lib = require('blink.cmp.completion.windows.render.text')
 --- @diagnostic disable-next-line: missing-fields
 local column = {}
 
-function column.new(components, gap)
+function column.new(component_names, components, gap)
   local self = setmetatable({}, { __index = column })
+  self.component_names = component_names
   self.components = components
   self.gap = gap
   self.lines = {}
@@ -26,7 +28,7 @@ function column.new(components, gap)
   return self
 end
 
-function column:render(ctxs)
+function column:render(context, ctxs)
   --- render text and get the max widths of each component
   --- @type string[][]
   local lines = {}
@@ -35,7 +37,7 @@ function column:render(ctxs)
     --- @type string[]
     local line = {}
     for component_idx, component in ipairs(self.components) do
-      local text = text_lib.apply_component_width(component.text(ctx) or '', component)
+      local text = text_lib.apply_component_width(context, component.text(ctx) or '', component)
       table.insert(line, text)
       max_component_widths[component_idx] =
         math.max(max_component_widths[component_idx] or 0, vim.api.nvim_strwidth(text))

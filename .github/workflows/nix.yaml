@@ -15,12 +15,12 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: DeterminateSystems/nix-installer-action@main
         with:
           extra-conf: |
             accept-flake-config = true
-
-      - uses: DeterminateSystems/magic-nix-cache-action@main
 
       - name: Check the flake
         run: nix flake check

@@ -2,14 +2,17 @@ local config = require('blink.cmp.config')
 local text_lib = {}
 
 --- Applies the component width settings to the text
+--- @param context blink.cmp.Context
 --- @param text string
 --- @param component blink.cmp.DrawComponent
 --- @return string text
-function text_lib.apply_component_width(text, component)
+function text_lib.apply_component_width(context, text, component)
   local width = component.width or {}
   if width.fixed ~= nil then return text_lib.set_width(text, width.fixed, component) end
   if width.min ~= nil then text = text_lib.pad(text, width.min) end
-  if width.max ~= nil then text = text_lib.truncate(text, width.max, component.ellipsis) end
+  local max_width = width.max
+  if type(width.max) == 'function' then max_width = width.max(context) end
+  if max_width ~= nil then text = text_lib.truncate(text, max_width, component.ellipsis) end
   return text
 end
 

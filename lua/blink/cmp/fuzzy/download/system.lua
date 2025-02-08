@@ -26,11 +26,56 @@ function system.get_info()
   return os, arch
 end
 
+--- Gets the system target triple from `cc -dumpmachine`
+--- I.e. 'gnu' | 'musl'
+--- @return blink.cmp.Task
+function system.get_linux_libc()
+  return async
+    .task
+    -- Check for system libc via `cc -dumpmachine` by default
+    -- NOTE: adds 1ms to startup time
+    .new(function(resolve) vim.system({ 'cc', '-dumpmachine' }, { text = true }, resolve) end)
+    :schedule()
+    :map(function(process)
+      --- @cast process vim.SystemCompleted
+      if process.code ~= 0 then return nil end
+
+      -- strip whitespace
+      local stdout = process.stdout:gsub('%s+', '')
+      return vim.fn.split(stdout, '-')[4]
+    end)
+    -- Fall back to checking for alpine
+    :map(function(libc)
+      if libc ~= nil then return libc end
+
+      return async.task.new(function(resolve, reject)
+        vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
+          if err then return reject(err) end
+          resolve(is_alpine ~= nil and 'musl' or 'gnu')
+        end)
+      end)
+    end)
+end
+
+function system.get_linux_libc_sync()
+  local _, process = pcall(function() return vim.system({ 'cc', '-dumpmachine' }, { text = true }):wait() end)
+  if process and process.code == 0 then
+    -- strip whitespace
+    local stdout = process.stdout:gsub('%s+', '')
+    local triple_parts = vim.fn.split(stdout, '-')
+    if triple_parts[4] ~= nil then return triple_parts[4] end
+  end
+
+  local _, is_alpine = pcall(function() return vim.uv.fs_stat('/etc/alpine-release') end)
+  if is_alpine then return 'musl' end
+  return 'gnu'
+end
+
 --- Gets the system triple for the current system
 --- I.e. `x86_64-unknown-linux-gnu` or `aarch64-apple-darwin`
 --- @return blink.cmp.Task
 function system.get_triple()
-  return async.task.new(function(resolve)
+  return async.task.new(function(resolve, reject)
     if download_config.force_system_triple then return resolve(download_config.force_system_triple) end
 
     local os, arch = system.get_info()
@@ -39,11 +84,10 @@ function system.get_triple()
     if os == 'linux' then
       if vim.fn.has('android') == 1 then return resolve(triples.android) end
 
-      vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
-        local libc = (not err and is_alpine) and 'musl' or 'gnu'
-        local triple = triples[arch]
-        return resolve(triple and type(triple) == 'function' and triple(libc) or triple)
-      end)
+      local triple = triples[arch]
+      if type(triple) ~= 'function' then return resolve(triple) end
+
+      system.get_linux_libc():map(function(libc) return triple(libc) end):map(resolve):catch(reject)
     else
       return resolve(triples[arch])
     end
@@ -62,10 +106,9 @@ function system.get_triple_sync()
   if os == 'linux' then
     if vim.fn.has('android') == 1 then return triples.android end
 
-    local success, is_alpine = pcall(vim.uv.fs_stat, '/etc/alpine-release')
-    local libc = (success and is_alpine) and 'musl' or 'gnu'
     local triple = triples[arch]
-    return triple and type(triple) == 'function' and triple(libc) or triple
+    if type(triple) ~= 'function' then return triple end
+    return triple(system.get_linux_libc_sync())
   else
     return triples[arch]
   end

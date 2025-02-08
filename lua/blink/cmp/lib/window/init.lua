@@ -31,6 +31,7 @@
 --- @field update_size fun(self: blink.cmp.Window)
 --- @field get_content_height fun(self: blink.cmp.Window): number
 --- @field get_border_size fun(self: blink.cmp.Window, border?: 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | string[]): { vertical: number, horizontal: number, left: number, right: number, top: number, bottom: number }
+--- @field expand_border_chars fun(border: string[]): string[]
 --- @field get_height fun(self: blink.cmp.Window): number
 --- @field get_content_width fun(self: blink.cmp.Window): number
 --- @field get_width fun(self: blink.cmp.Window): number
@@ -69,9 +70,15 @@ function win.new(config)
   self.redraw_queued = false
 
   if self.config.scrollbar then
-    self.scrollbar = require('blink.cmp.lib.window.scrollbar').new({
-      enable_gutter = self.config.border == 'none' or self.config.border == 'padded',
-    })
+    -- Enable the gutter if there's no border, or the border is a space
+    local enable_gutter = self.config.border == 'padded' or self.config.border == 'none'
+    local border = self.config.border
+    if type(border) == 'table' then
+      local resolved_border = self.expand_border_chars(border)
+      enable_gutter = resolved_border[4] == '' or resolved_border[4] == ' '
+    end
+
+    self.scrollbar = require('blink.cmp.lib.window.scrollbar').new({ enable_gutter = enable_gutter })
   end
 
   return self
@@ -105,7 +112,6 @@ function win:open()
     height = self.config.max_height,
     row = 1,
     col = 1,
-    focusable = false,
     zindex = 1001,
     border = self.config.border == 'padded' and { ' ', '', '', ' ', '', '', ' ', ' ' } or self.config.border,
   })
@@ -187,29 +193,35 @@ function win:get_border_size()
     top = 1
     bottom = 1
   elseif type(border) == 'table' then
-    -- borders can be a table of strings and act differently with different # of chars
-    -- so we normalize it: https://neovim.io/doc/user/api.html#nvim_open_win()
-    -- based on nvim-cmp
-    -- TODO: doesn't handle scrollbar
-    local resolved_border = {}
-    while #resolved_border <= 8 do
-      for _, b in ipairs(border) do
-        table.insert(resolved_border, type(b) == 'string' and b or b[1])
-      end
-    end
+    local resolved_border = self.expand_border_chars(border)
 
-    top = resolved_border[2] == '' and 0 or 1
-    bottom = resolved_border[6] == '' and 0 or 1
+    -- TODO: shouldn't this be the length of the string?
     left = resolved_border[8] == '' and 0 or 1
     right = resolved_border[4] == '' and 0 or 1
+    top = resolved_border[2] == '' and 0 or 1
+    bottom = resolved_border[6] == '' and 0 or 1
   end
 
-  if self.scrollbar and self.scrollbar:is_visible() then
-    local offset = (border == 'none' or border == 'padded') and 1 or 0
-    right = right + offset
-  end
+  -- If there's a scrollbar, the border on the right must be atleast 1
+  if self.scrollbar and self.scrollbar:is_visible() then right = math.max(1, right) end
 
   return { vertical = top + bottom, horizontal = left + right, left = left, right = right, top = top, bottom = bottom }
+end
+
+--- Gets the characters used for the border, if defined
+function win.expand_border_chars(border)
+  assert(type(border) == 'table', 'Border must be a table')
+
+  -- borders can be a table of strings and act differently with different # of chars
+  -- so we normalize it: https://neovim.io/doc/user/api.html#nvim_open_win()
+  -- based on nvim-cmp
+  local resolved_border = {}
+  while #resolved_border <= 8 do
+    for _, b in ipairs(border) do
+      table.insert(resolved_border, type(b) == 'string' and b or b[1])
+    end
+  end
+  return resolved_border
 end
 
 --- Gets the height of the window, taking into account the border

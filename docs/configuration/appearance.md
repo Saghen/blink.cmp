@@ -1,3 +1,6 @@
+---
+title: Appearance
+---
 # Appearance <Badge type="info"><a href="./reference#appearance">Go to default configuration</a></Badge>
 
 If you're looking for how to change the appearance of the completion menu, check out the [menu draw configuration](./completion#completion-menu-draw).

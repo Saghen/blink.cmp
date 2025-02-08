@@ -5,7 +5,8 @@
 --- @field config blink.cmp.SourceProviderConfigWrapper
 --- @field module blink.cmp.Source
 --- @field list blink.cmp.SourceProviderList | nil
---- @field resolve_tasks table<blink.cmp.CompletionItem, blink.cmp.Task>
+--- @field resolve_cache_context_id number | nil
+--- @field resolve_cache table<blink.cmp.CompletionItem, blink.cmp.Task>
 ---
 --- @field new fun(id: string, config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProvider
 --- @field enabled fun(self: blink.cmp.SourceProvider): boolean
@@ -38,7 +39,7 @@ function source.new(id, config)
   )
   self.config = require('blink.cmp.sources.lib.provider.config').new(config)
   self.list = nil
-  self.resolve_tasks = {}
+  self.resolve_cache = {}
 
   return self
 end
@@ -112,6 +113,10 @@ function source:should_show_items(context, items)
   local current_keyword_length = context.bounds.length
   if current_keyword_length < min_keyword_length then return false end
 
+  -- check if the source wants to show items
+  if self.module.should_show_items ~= nil and not self.module:should_show_items(context, items) then return false end
+
+  -- check if the user wants to show items
   if self.config.should_show_items == nil then return true end
   return self.config.should_show_items(context, items)
 end
@@ -125,9 +130,15 @@ end
 --- Resolve ---
 
 function source:resolve(context, item)
-  local tasks = self.resolve_tasks
-  if tasks[item] == nil or tasks[item].status == async.STATUS.CANCELLED then
-    tasks[item] = async.task.new(function(resolve)
+  -- reset the cache when the context changes
+  if self.resolve_cache_context_id ~= context.id then
+    self.resolve_cache_context_id = context.id
+    self.resolve_cache = {}
+  end
+
+  local cached_task = self.resolve_cache[item]
+  if cached_task == nil or cached_task.status == async.STATUS.CANCELLED then
+    self.resolve_cache[item] = async.task.new(function(resolve)
       if self.module.resolve == nil then return resolve(item) end
 
       return self.module:resolve(item, function(resolved_item)
@@ -138,7 +149,7 @@ function source:resolve(context, item)
       end)
     end)
   end
-  return tasks[item]
+  return self.resolve_cache[item]
 end
 
 --- Execute ---
@@ -147,7 +158,7 @@ function source:execute(context, item)
   if self.module.execute == nil then
     return async.task.new(function(resolve) resolve() end)
   end
-  return async.task.new(function(resolve) self.module:execute(context, item, resolve) end)
+  return async.task.new(function(resolve) return self.module:execute(context, item, resolve) end)
 end
 
 --- Signature help ---

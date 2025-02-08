@@ -65,5 +65,5 @@
 - [x] `textEditText`
 - [x] `additionalTextEdits` <- known issue where applying the main text edit will cause this to be wrong if the additional text edit comes after since the indices will be offset
 - [ ] `commitCharacters`
-- [ ] `command`
+- [x] `command`
 - [x] `data` <- Don't think there's anything special to do here

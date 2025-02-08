@@ -69,6 +69,13 @@ function keymap.setup()
     local cmdline_mappings = keymap.get_mappings(config.keymap.cmdline or config.keymap)
     require('blink.cmp.keymap.apply').cmdline_keymaps(cmdline_mappings)
   end
+
+  -- Apply term keymaps
+  local term_sources = require('blink.cmp.config').sources.term
+  if type(term_sources) ~= 'table' or #term_sources > 0 then
+    local term_mappings = keymap.get_mappings(config.keymap.term or config.keymap)
+    require('blink.cmp.keymap.apply').term_keymaps(term_mappings)
+  end
 end
 
 return keymap

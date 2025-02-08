@@ -1,10 +1,13 @@
+---
+title: Snippets
+---
 # Snippets <Badge type="info"><a href="./reference#snippets">Go to default configuration</a></Badge>
 
 Blink uses the `vim.snippet` API by default for expanding and navigating snippets. The built-in `snippets` source will load [friendly-snippets](https://github.com/rafamadriz/friendly-snippets), if available, and load any snippets found at `~/.config/nvim/snippets/`. For use with Luasnip, see the [Luasnip section](#luasnip).
 
 ## Custom snippets
 
-By default, the `snippets` source will check `~/.config/nvim/snippets` for your custom snippets, but you may add additional folders via `sources.providers.snippets.opts.search_paths`. Currently, only VSCode style snippets are supported, but you may look into [Luasnip](https://github.com/L3MON4D3/LuaSnip) if you'd like more advanced functionality.
+By default, the `snippets` source will check `~/.config/nvim/snippets` for your custom snippets, but you may add additional folders via `sources.providers.snippets.opts.search_paths`. Currently, only VSCode style snippets are supported, but you may look into [Luasnip](https://github.com/L3MON4D3/LuaSnip) if you'd like more advanced functionality. If you're coming from snipmate snippets, [nadiamoe](https://github.com/nadiamoe) wrote [a small tool for converting them to JSON](https://github.com/nadiamoe/snipmate-to-json) (here be dragons! [original discussion](https://github.com/Saghen/blink.cmp/discussions/654#discussioncomment-12083447))
 
 [Chris Grieser](https://github.com/chrisgrieser) has made a great introduction to writing custom snippets [in the nvim-scissors repo](https://github.com/chrisgrieser/nvim-scissors?tab=readme-ov-file#cookbook--faq). Here's an example, using the linux/mac path for the neovim configuration:
 

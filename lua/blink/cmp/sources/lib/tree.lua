@@ -6,12 +6,13 @@
 
 --- @class blink.cmp.SourceTree
 --- @field nodes blink.cmp.SourceTreeNode[]
---- @field new fun(context: blink.cmp.Context, all_sources: blink.cmp.SourceProvider[]): blink.cmp.SourceTree
+--- @field new fun(context: blink.cmp.Context): blink.cmp.SourceTree
 --- @field get_completions fun(self: blink.cmp.SourceTree, context: blink.cmp.Context, on_items_by_provider: fun(items_by_provider: table<string, blink.cmp.CompletionItem[]>)): blink.cmp.Task
 --- @field emit_completions fun(self: blink.cmp.SourceTree, items_by_provider: table<string, blink.cmp.CompletionItem[]>, on_items_by_provider: fun(items_by_provider: table<string, blink.cmp.CompletionItem[]>)): nil
 --- @field get_top_level_nodes fun(self: blink.cmp.SourceTree): blink.cmp.SourceTreeNode[]
 --- @field detect_cycle fun(node: blink.cmp.SourceTreeNode, visited?: table<string, boolean>, path?: table<string, boolean>): boolean
 
+local sources_lib = require('blink.cmp.sources.lib')
 local utils = require('blink.cmp.lib.utils')
 local async = require('blink.cmp.lib.async')
 
@@ -20,13 +21,13 @@ local async = require('blink.cmp.lib.async')
 local tree = {}
 
 --- @param context blink.cmp.Context
---- @param all_sources blink.cmp.SourceProvider[]
-function tree.new(context, all_sources)
+function tree.new(context)
   -- only include enabled sources for the given context
-  local sources = vim.tbl_filter(
-    function(source) return vim.tbl_contains(context.providers, source.id) and source:enabled(context) end,
-    all_sources
-  )
+  local sources = {}
+  for _, provider_id in ipairs(context.providers) do
+    local provider = sources_lib.get_provider_by_id(provider_id)
+    if provider:enabled() then table.insert(sources, provider) end
+  end
   local source_ids = vim.tbl_map(function(source) return source.id end, sources)
 
   -- create a node for each source

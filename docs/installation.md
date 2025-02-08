@@ -58,7 +58,8 @@
 ```
 
 > [!IMPORTANT]
-> On Neovim 0.11+ and Blink.cmp 0.10+, you may skip this step
+> On Neovim 0.11+ and Blink.cmp 0.10+ with `vim.lsp.config`, you may skip this step.
+> This is still required when using `nvim-lspconfig` until [this issue is completed](https://github.com/neovim/nvim-lspconfig/issues/3494)
 
 Setting capabilities for `nvim-lspconfig`:
 
@@ -95,7 +96,7 @@ Setting capabilities for `nvim-lspconfig`:
     local capabilities = require('blink.cmp').get_lsp_capabilities()
     local lspconfig = require('lspconfig')
 
-    lspconfig['lua-ls'].setup({ capabilities = capabilities })
+    lspconfig['lua_ls'].setup({ capabilities = capabilities })
   end
 }
 ```

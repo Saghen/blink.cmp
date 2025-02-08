@@ -49,10 +49,9 @@ export default defineConfig({
     ],
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/saghen/blink.cmp' }],
+    editLink: { pattern: 'https://github.com/saghen/blink.cmp/edit/main/docs/:path' },
 
-    search: {
-      provider: 'local',
-    },
+    search: { provider: 'local' },
   },
 
   markdown: {
@@ -63,6 +62,16 @@ export default defineConfig({
     config(md) {
       md.use(tabsMarkdownPlugin)
       md.use(taskLists)
+    },
+    anchor: {
+      getTokensText(tokens) {
+        let text = ''
+        for (const t of tokens) {
+          if (t.type === 'text' || t.type === 'code_inline') text += t.content
+          if (t.type === 'html_inline' && /<badge/i.test(t.content)) return text
+        }
+        return text
+      },
     },
   },
 })

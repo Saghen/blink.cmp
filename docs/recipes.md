@@ -14,6 +14,23 @@ enabled = function()
 end,
 ```
 
+### Disable completion in *only* shell command mode
+
+Windows when inside of git bash or WSL may cause a hang with shell commands. This disables cmdline completions only when running shell commands ( i.e. [ ':!' , ':%!' ] ), but still allows completion in other command modes ( i.e. [ ':' , ':help', '/' , '?' ] etc ).
+
+```lua
+sources = {
+  providers = {
+    cmdline = {
+      -- ignores cmdline completions when executing shell commands
+      enabled = function()
+        return vim.fn.getcmdtype() ~= ':' or not vim.fn.getcmdline():match("^[%%0-9,'<>%-]*!")
+      end
+    }
+  }
+}
+```
+
 ### Border
 
 ```lua
@@ -90,6 +107,60 @@ completion = {
 }
 ```
 
+### Hide Copilot on suggestion
+
+```lua
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'BlinkCmpMenuOpen',
+  callback = function()
+    require("copilot.suggestion").dismiss()
+    vim.b.copilot_suggestion_hidden = true
+  end,
+})
+
+vim.api.nvim_create_autocmd('User', {
+  pattern = 'BlinkCmpMenuClose',
+  callback = function()
+    vim.b.copilot_suggestion_hidden = false
+  end,
+})
+```
+
+### Show on newline, tab and space
+
+Note that you may want to add the override to other sources as well, since if the LSP doesnt return any items, we won't show the menu if it was triggered by any of these three characters.
+
+```lua
+-- by default, blink.cmp will block newline, tab and space trigger characters, disable that behavior
+completion.trigger.show_on_blocked_trigger_characters = {}
+
+-- add newline, tab and space to LSP source trigger characters
+sources.providers.lsp.override.get_trigger_characters = function(self)
+  local trigger_characters = self:get_trigger_characters()
+  vim.list_extend(trigger_characters, { '\n', '\t', ' ' })
+  return trigger_characters
+end
+```
+
+### Deprioritize specific LSP
+
+You may use a custom sort function to deprioritize LSPs such as Emmet Language Server (`emmet_ls`)
+
+```lua
+fuzzy = {
+  sorts = {
+    function(a, b)
+      if a.client_name == nil or b.client_name == nil then return end
+      return b.client_name == 'emmet_ls'
+    end,
+    -- default sorts
+    'score',
+    'sort_text',
+}
+```
+
+## Completion menu drawing
+
 ### `mini.icons`
 
 [Original discussion](https://github.com/Saghen/blink.cmp/discussions/458)
@@ -117,42 +188,79 @@ completion = {
 }
 ```
 
-### Hide Copilot on suggestion
+### `nvim-web-devicons` + `lspkind`
+
+[Original discussion](https://github.com/Saghen/blink.cmp/discussions/1146)
 
 ```lua
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'BlinkCmpMenuOpen',
-  callback = function()
-    require("copilot.suggestion").dismiss()
-    vim.b.copilot_suggestion_hidden = true
-  end,
-})
+completion = {
+  menu = {
+    draw = {
+      components = {
+        kind_icon = {
+          ellipsis = false,
+          text = function(ctx)
+            local lspkind = require("lspkind")
+            local icon = ctx.kind_icon
+            if vim.tbl_contains({ "Path" }, ctx.source_name) then
+                local dev_icon, _ = require("nvim-web-devicons").get_icon(ctx.label)
+                if dev_icon then
+                    icon = dev_icon
+                end
+            else
+                icon = require("lspkind").symbolic(ctx.kind, {
+                    mode = "symbol",
+                })
+            end
 
-vim.api.nvim_create_autocmd('User', {
-  pattern = 'BlinkCmpMenuClose',
-  callback = function()
-    vim.b.copilot_suggestion_hidden = false
-  end,
-})
-```
+            return icon .. ctx.icon_gap
+          end,
 
-### Show on newline, tab and space
-
-Note that you may want to add the override to other sources as well, since if the LSP doesnt return any items, we won't show the menu if it was triggered by any of these three characters.
-
-```lua
--- by default, blink.cmp will block newline, tab and space trigger characters, disable that behavior
-completion.trigger.blocked_trigger_characters = {}
-
--- add newline, tab and space to LSP source trigger characters
-sources.providers.lsp.override.get_trigger_characters = function(self)
-  local trigger_characters = self:get_trigger_characters()
-  vim.list_extend(trigger_characters, { '\n', '\t', ' ' })
-  return trigger_characters
-end
+          -- Optionally, use the highlight groups from nvim-web-devicons
+          -- You can also add the same function for `kind.highlight` if you want to
+          -- keep the highlight groups in sync with the icons.
+          highlight = function(ctx)
+            local hl = "BlinkCmpKind" .. ctx.kind
+              or require("blink.cmp.completion.windows.render.tailwind").get_hl(ctx)
+            if vim.tbl_contains({ "Path" }, ctx.source_name) then
+              local dev_icon, dev_hl = require("nvim-web-devicons").get_icon(ctx.label)
+              if dev_icon then
+                hl = dev_hl
+              end
+            end
+            return hl
+          end,
+        }
+      }
+    }
+  }
+}
 ```
 
 ## Sources
+
+### Buffer completion from all open buffers
+
+The default behavior is to only show completions from **visible** "normal" buffers (i.e. it woudldn't include neo-tree). This will instead show completions from all buffers, even if they're not visible on screen. Note that the performance impact of this has not been tested. 
+
+```lua
+sources = {
+  providers = {
+    buffer = {
+      opts = {
+        -- get all buffers, even ones like neo-tree
+        get_bufnrs = vim.api.nvim_list_bufs
+        -- or (recommended) filter to only "normal" buffers
+        get_bufnrs = function()
+          return vim.tbl_filter(function(bufnr)
+            return vim.bo[bufnr].buftype == ''
+          end, vim.api.nvim_list_bufs())
+        end
+      }
+    }
+  }
+}
+```
 
 ### Dynamically picking providers by treesitter node/filetype
 
@@ -193,6 +301,40 @@ sources.min_keyword_length = function()
   return vim.bo.filetype == 'markdown' and 2 or 0
 end
 ```
+
+### Set minimum keyword length for command only in cmdline
+
+If you'd prefer the menu doesn't popup when typing abbreviations like `wq`, you may set the minimum keyword length to 2 when typing the command.
+
+```lua
+sources = {
+  min_keyword_length = function(ctx)
+    -- only applies when typing a command, doesn't apply to arguments
+    if ctx.mode == 'cmdline' and string.find(ctx.line, ' ') == nil then return 2 end
+    return 0
+  end
+}
+```
+
+### Path completion from `cwd` instead of current buffer's directory
+
+It's common to run code from the root of your repository, in which case relative paths will start from that directory. In that case, you may want path completions to be relative to your current working directory rather than the default, which is the current buffer's parent directory.
+
+```lua
+sources = {
+  providers = {
+    path = {
+      opts = {
+        get_cwd = function(_)
+          return vim.fn.getcwd()
+        end,
+      },
+    },
+  },
+},
+```
+
+This also makes it easy to `:cwd` to the desired base directory for path completion.
 
 ## For writers
 

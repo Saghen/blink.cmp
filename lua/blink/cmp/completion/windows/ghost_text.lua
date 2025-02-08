@@ -9,7 +9,7 @@ local snippets_utils = require('blink.cmp.sources.snippets.utils')
 --- @field extmark_id integer?
 ---
 --- @field is_open fun(): boolean
---- @field show_preview fun(item: blink.cmp.CompletionItem)
+--- @field show_preview fun(items: blink.cmp.CompletionItem[], idx: number)
 --- @field clear_preview fun()
 --- @field draw_preview fun(bufnr: number)
 
@@ -36,8 +36,19 @@ vim.api.nvim_create_autocmd({ 'CursorMovedI', 'TextChangedI' }, {
 
 function ghost_text.is_open() return ghost_text.extmark_id ~= nil end
 
---- @param selected_item? blink.cmp.CompletionItem
-function ghost_text.show_preview(selected_item)
+function ghost_text.show_preview(items, selection_idx)
+  -- check if we're supposed to show
+  if not config.show_with_selection and selection_idx ~= nil then
+    ghost_text.clear_preview()
+    return
+  end
+  if not config.show_without_selection and selection_idx == nil then
+    ghost_text.clear_preview()
+    return
+  end
+
+  local selected_item = items[selection_idx or 1]
+
   -- nothing to show, clear the preview
   if not selected_item then
     ghost_text.clear_preview()

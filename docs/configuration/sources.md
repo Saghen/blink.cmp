@@ -1,9 +1,12 @@
+---
+title: Sources
+---
 # Sources <Badge type="info"><a href="./reference#sources">Go to default configuration</a></Badge>
 
 > [!NOTE]
 > Check out the [recipes](../recipes.md) for some common configurations
 
-Blink provides a sources interface, modelled after LSPs, for getting completion items, trigger characters, documentation and signature help. The `lsp`, `path`, `snippets`, `luasnip` and `buffer` sources are built-in. You may add additional [community sources](#community-sources) as well. Check out [writing sources](../development/writing-sources.md) to learn how to write your own!
+Blink provides a sources interface, modelled after LSPs, for getting completion items, trigger characters, documentation and signature help. The `lsp`, `path`, `snippets`, `luasnip`, `buffer`, and `omni` sources are built-in. You may add additional [community sources](#community-sources) as well. Check out [writing sources](../development/writing-sources.md) to learn how to write your own!
 
 ## Providers
 
@@ -48,9 +51,20 @@ sources.providers.lsp = {
 }
 ```
 
+## Terminal and Cmdline Sources
+
+> [!NOTE]
+> Terminal completions are nightly only! Known bugs in v0.10. Cmdline completions are supported on all versions
+
+You may use `cmdline` and `term` sources via the `sources.cmdline` and `sources.term` tables. You may see the defaults in the [reference](./reference.md#sources). There's no source for shell completions at the moment, [contributions welcome](https://github.com/Saghen/blink.cmp/issues/1149)! 
+
 ## Using `nvim-cmp` sources
 
 Blink can use `nvim-cmp` sources through a compatibility layer developed by [stefanboca](https://github.com/stefanboca): [blink.compat](https://github.com/Saghen/blink.compat). Please open any issues with `blink.compat` in that repo
+
+## Checking status of sources providers
+
+The command `:BlinkCmp status` can be used to view which sources providers are enabled or not enabled.
 
 ## Community sources
 
@@ -59,7 +73,13 @@ Blink can use `nvim-cmp` sources through a compatibility layer developed by [ste
 - [blink-ripgrep](https://github.com/mikavilpas/blink-ripgrep.nvim)
 - [blink-cmp-ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 - [blink-cmp-ctags](https://github.com/netmute/blink-cmp-ctags)
+- [blink-copilot](https://github.com/fang2hou/blink-copilot)
 - [blink-cmp-copilot](https://github.com/giuxtaposition/blink-cmp-copilot)
 - [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim)
 - [blink-emoji.nvim](https://github.com/moyiz/blink-emoji.nvim)
+- [blink-nerdfont.nvim](https://github.com/MahanRahmati/blink-nerdfont.nvim)
 - [blink-cmp-dictionary](https://github.com/Kaiser-Yang/blink-cmp-dictionary)
+- [blink-cmp-git](https://github.com/Kaiser-Yang/blink-cmp-git)
+- [blink-cmp-spell](https://github.com/ribru17/blink-cmp-spell.git)
+- [css-vars.nvim](https://github.com/jdrupal-dev/css-vars.nvim)
+- [blink-cmp-env](https://github.com/bydlw98/blink-cmp-env)

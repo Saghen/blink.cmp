@@ -4,11 +4,12 @@ local utils = require('blink.cmp.completion.brackets.utils')
 local semantic = {}
 
 --- Asynchronously use semantic tokens to determine if brackets should be added
+--- @param ctx blink.cmp.Context
 --- @param filetype string
 --- @param item blink.cmp.CompletionItem
 --- @param callback fun()
-function semantic.add_brackets_via_semantic_token(filetype, item, callback)
-  if not utils.should_run_resolution(filetype, 'semantic_token') then return callback() end
+function semantic.add_brackets_via_semantic_token(ctx, filetype, item, callback)
+  if not utils.should_run_resolution(ctx, filetype, 'semantic_token') then return callback() end
 
   local text_edit = item.textEdit
   assert(text_edit ~= nil, 'Got nil text edit while adding brackets via semantic tokens')

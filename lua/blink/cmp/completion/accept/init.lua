@@ -1,3 +1,4 @@
+local config = require('blink.cmp.config').completion.accept
 local text_edits_lib = require('blink.cmp.lib.text_edits')
 local brackets_lib = require('blink.cmp.completion.brackets')
 
@@ -14,6 +15,10 @@ local function accept(ctx, item, callback)
   -- without i.e. auto-imports
   sources
     .resolve(ctx, item)
+    -- Some LSPs may take a long time to resolve the item, so we timeout
+    :timeout(config.resolve_timeout_ms)
+    -- and use the item as-is
+    :catch(function() return item end)
     :map(function(item)
       item = vim.deepcopy(item)
 
@@ -54,6 +59,7 @@ local function accept(ctx, item, callback)
           and parsed_snippet.data.children[1].type == vim.lsp._snippet_grammar.NodeType.Text
         then
           item.insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText
+          item.textEdit.newText = tostring(parsed_snippet)
         end
       end
 
@@ -77,10 +83,13 @@ local function accept(ctx, item, callback)
 
       -- OR Normal: Apply the text edit and move the cursor
       else
+        local new_cursor = text_edits_lib.get_apply_end_position(item.textEdit, all_text_edits)
+        new_cursor[2] = new_cursor[2] + offset
+
         table.insert(all_text_edits, item.textEdit)
         text_edits_lib.apply(all_text_edits)
-        -- TODO: should move the cursor only by the offset since text edit handles everything else?
-        ctx.set_cursor({ ctx.get_cursor()[1], item.textEdit.range.start.character + #item.textEdit.newText + offset })
+
+        if ctx.get_mode() ~= 'term' then ctx.set_cursor(new_cursor) end
       end
 
       -- Let the source execute the item itself
@@ -89,7 +98,7 @@ local function accept(ctx, item, callback)
         if brackets_status == 'check_semantic_token' then
           -- TODO: since we apply the additional text edits after, auto imported functions will not
           -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
-          brackets_lib.add_brackets_via_semantic_token(vim.bo.filetype, item, function()
+          brackets_lib.add_brackets_via_semantic_token(ctx, vim.bo.filetype, item, function()
             require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
             require('blink.cmp.signature.trigger').show_if_on_trigger_character()
             callback()

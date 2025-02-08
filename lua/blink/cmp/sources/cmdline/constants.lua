@@ -1,3 +1,4 @@
+-- spellchecker:off
 return {
   help_commands = {
     'help',
@@ -38,3 +39,4 @@ return {
     'make',
   },
 }
+-- spellchecker:on

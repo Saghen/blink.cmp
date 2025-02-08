@@ -9,8 +9,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 regex = "1.11.1"
-lazy_static = "1.5.0"
 frizbee = { git = "https://github.com/saghen/frizbee" }
 serde = { version = "1.0.216", features = ["derive"] }
 heed = "0.21.0"
 mlua = { version = "0.10.2", features = ["module", "luajit"] }
+thiserror = "2.0.10"

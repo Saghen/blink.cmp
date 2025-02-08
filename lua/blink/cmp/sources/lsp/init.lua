@@ -60,7 +60,26 @@ function lsp:resolve(item, callback)
   item = require('blink.cmp.sources.lib.utils').blink_item_to_lsp_item(item)
 
   local success, request_id = client.request('completionItem/resolve', item, function(error, resolved_item)
-    if error or resolved_item == nil then callback(item) end
+    if error or resolved_item == nil then
+      callback(item)
+      return
+    end
+
+    -- Snippet with no detail, fill in the detail with the snippet
+    if resolved_item.detail == nil and resolved_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
+      local parsed_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(item.insertText)
+      local snippet = parsed_snippet and tostring(parsed_snippet) or item.insertText
+      resolved_item.detail = snippet
+    end
+
+    -- Lua LSP returns the detail like `table` while the documentation contains the signature
+    -- We extract this into the detail instead
+    if client.name == 'lua_ls' and resolved_item.documentation ~= nil and resolved_item.detail ~= nil then
+      local docs = require('blink.cmp.sources.lsp.hacks.docs')
+      resolved_item.detail, resolved_item.documentation.value =
+        docs.extract_detail_from_doc(resolved_item.detail, resolved_item.documentation.value)
+    end
+
     callback(resolved_item)
   end)
   if not success then callback(item) end
@@ -123,9 +142,23 @@ function lsp:get_signature_help(context, callback)
         table.insert(signature_helps, signature_help)
       end
     end
-    -- todo: pick intelligently
+    -- TODO: pick intelligently
     callback(signature_helps[1])
   end)
+end
+
+--- Execute ---
+
+function lsp:execute(_, item, callback)
+  local client = vim.lsp.get_client_by_id(item.client_id)
+  if client and item.command then
+    local success, request_id = client.request('workspace/executeCommand', item.command, function() callback() end)
+    if success and request_id ~= nil then
+      return function() client.cancel_request(request_id) end
+    end
+  else
+    callback()
+  end
 end
 
 return lsp

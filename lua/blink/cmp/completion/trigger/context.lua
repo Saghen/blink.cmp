@@ -1,4 +1,4 @@
--- TODO: remove the end_col field from ContextBounds
+-- TODO: move the get_line, get_cursor, etc.. to a separate lib
 
 --- @class blink.cmp.ContextBounds
 --- @field line string
@@ -15,6 +15,7 @@
 --- @field bounds blink.cmp.ContextBounds
 --- @field trigger blink.cmp.ContextTrigger
 --- @field providers string[]
+--- @field initial_selected_item_idx? number
 ---
 --- @field new fun(opts: blink.cmp.ContextOpts): blink.cmp.Context
 --- @field get_keyword fun(): string
@@ -39,6 +40,7 @@
 --- @field initial_trigger_character? string
 --- @field trigger_kind blink.cmp.CompletionTriggerKind
 --- @field trigger_character? string
+--- @field initial_selected_item_idx? number
 
 --- @type blink.cmp.Context
 --- @diagnostic disable-next-line: missing-fields
@@ -62,6 +64,7 @@ function context.new(opts)
       character = opts.trigger_character,
     },
     providers = opts.providers,
+    initial_selected_item_idx = opts.initial_selected_item_idx,
   }, { __index = context })
 end
 
@@ -79,7 +82,10 @@ function context:within_query_bounds(cursor)
   return row == bounds.line_number and col >= bounds.start_col and col < (bounds.start_col + bounds.length)
 end
 
-function context.get_mode() return vim.api.nvim_get_mode().mode == 'c' and 'cmdline' or 'default' end
+function context.get_mode()
+  local mode = vim.api.nvim_get_mode().mode
+  return (mode == 'c' and 'cmdline') or (mode == 't' and 'term') or 'default'
+end
 
 function context.get_cursor()
   return context.get_mode() == 'cmdline' and { 1, vim.fn.getcmdpos() - 1 } or vim.api.nvim_win_get_cursor(0)
@@ -103,6 +109,7 @@ function context.get_line(num)
     return vim.fn.getcmdline()
   end
 
+  -- This method works for normal buffers and the terminal prompt
   if num == nil then num = context.get_cursor()[1] - 1 end
   return vim.api.nvim_buf_get_lines(0, num, num + 1, false)[1]
 end

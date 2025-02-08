@@ -1,5 +1,6 @@
 --- @class (exact) blink.cmp.CompletionAcceptConfig
 --- @field create_undo_point boolean Create an undo point when accepting a completion item
+--- @field resolve_timeout_ms number How long to wait for the LSP to resolve the item with additional information before continuing as-is
 --- @field auto_brackets blink.cmp.AutoBracketsConfig
 
 --- @class (exact) blink.cmp.AutoBracketsConfig
@@ -25,6 +26,7 @@ local accept = {
   --- @type blink.cmp.CompletionAcceptConfig
   default = {
     create_undo_point = true,
+    resolve_timeout_ms = 100,
     auto_brackets = {
       enabled = true,
       default_brackets = { '(', ')' },
@@ -47,6 +49,7 @@ local accept = {
 function accept.validate(config)
   validate('completion.accept', {
     create_undo_point = { config.create_undo_point, 'boolean' },
+    resolve_timeout_ms = { config.resolve_timeout_ms, 'number' },
     auto_brackets = { config.auto_brackets, 'table' },
   }, config)
   validate('completion.accept.auto_brackets', {

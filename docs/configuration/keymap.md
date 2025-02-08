@@ -31,12 +31,13 @@ keymap = {
     'select_next'
   },
 
-  -- optionally, separate cmdline keymaps
+  -- optionally, separate cmdline and terminal keymaps
   cmdline = {
     -- sets <CR> to accept the item and run the command immediately
     -- use `select_accept_and_enter` to accept the item or the first item if none are selected
     ['<CR>'] = { 'accept_and_enter', 'fallback' },
   }
+  -- term = {}
 }
 ```
 
@@ -64,11 +65,13 @@ keymap = {
   - Optionally use `function(cmp) cmp.scroll_documentation_up(4) end` to scroll by a specific number of lines
 - `scroll_documentation_down`: Scrolls the documentation down by 4 lines
   - Optionally use `function(cmp) cmp.scroll_documentation_down(4) end` to scroll by a specific number of lines
+- `show_signature`: Shows the signature help window
+- `hide_signature`: Hides the signature help window
 - `snippet_forward`: Jumps to the next snippet placeholder
 - `snippet_backward`: Jumps to the previous snippet placeholder
 - `fallback`: Runs the next non-blink keymap, or runs the built-in neovim binding
 
-## Cmdline
+## Cmdline and Terminal
 
 You may set a separate keymap for cmdline by defining `keymap.cmdline`, with an identical structure to `keymap`.
 
@@ -83,6 +86,10 @@ keymap = {
     -- use `select_accept_and_enter` to accept the item or the first item if none are selected
     ['<CR>'] = { 'accept_and_enter', 'fallback' },
 
+    ...
+  },
+  term = {
+    preset = 'super-tab',
     ...
   }
 }
@@ -99,6 +106,8 @@ Set the preset to `none` to disable the presets
 ['<C-e>'] = { 'hide' },
 ['<C-y>'] = { 'select_and_accept' },
 
+['<Up>'] = { 'select_prev', 'fallback' },
+['<Down>'] = { 'select_next', 'fallback' },
 ['<C-p>'] = { 'select_prev', 'fallback' },
 ['<C-n>'] = { 'select_next', 'fallback' },
 
@@ -107,6 +116,8 @@ Set the preset to `none` to disable the presets
 
 ['<Tab>'] = { 'snippet_forward', 'fallback' },
 ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+
+['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 ```
 
 ### `super-tab`
@@ -134,6 +145,8 @@ You may want to set `completion.trigger.show_in_snippet = false` or use `complet
 
 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+
+['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 ```
 
 ### `enter`
@@ -155,4 +168,6 @@ You may want to set `completion.list.selection.preselect = false`. See more info
 
 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+
+['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 ```

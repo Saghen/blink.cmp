@@ -99,7 +99,7 @@ local window = {
               table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
             end
 
-            if vim.list_contains(ctx.self.treesitter, ctx.source_id) then
+            if vim.list_contains(ctx.self.treesitter, ctx.source_id) and not ctx.deprecated then
               -- add treesitter highlights
               vim.list_extend(highlights, require('blink.cmp.completion.windows.render.treesitter').highlight(ctx))
             end
@@ -164,6 +164,7 @@ function window.validate(config)
     align_to = {
       config.draw.align_to,
       function(align)
+        if type(config.draw.columns) == 'function' then return true end
         if align == 'none' or align == 'cursor' then return true end
         for _, column in ipairs(config.draw.columns) do
           for _, component in ipairs(column) do
@@ -193,7 +194,7 @@ function window.validate(config)
       config.draw.columns,
       function(columns)
         local available_components = vim.tbl_keys(config.draw.components)
-
+        if type(columns) == 'function' then return true end
         if type(columns) ~= 'table' or #columns == 0 then return false end
         for _, column in ipairs(columns) do
           if #column == 0 then return false end

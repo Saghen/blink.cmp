@@ -5,7 +5,6 @@ function highlights.setup()
 
   --- @param hl_group string Highlight group name, e.g. 'ErrorMsg'
   --- @param opts vim.api.keyset.highlight Highlight definition map
-  --- @return nil
   local set_hl = function(hl_group, opts)
     opts.default = true -- Prevents overriding existing definitions
     vim.api.nvim_set_hl(0, hl_group, opts)
@@ -19,7 +18,7 @@ function highlights.setup()
   set_hl('BlinkCmpLabelDeprecated', { link = use_nvim_cmp and 'CmpItemAbbrDeprecated' or 'NonText' })
   set_hl('BlinkCmpLabelDetail', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
   set_hl('BlinkCmpLabelDescription', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
-  set_hl('BlinkCmpKind', { link = use_nvim_cmp and 'CmpItemKind' or 'Special' })
+  set_hl('BlinkCmpKind', { link = use_nvim_cmp and 'CmpItemKind' or 'PmenuKind' })
   set_hl('BlinkCmpSource', { link = use_nvim_cmp and 'CmpItemMenu' or 'NonText' })
   for _, kind in ipairs(require('blink.cmp.types').CompletionItemKind) do
     set_hl('BlinkCmpKind' .. kind, { link = use_nvim_cmp and 'CmpItemKind' .. kind or 'BlinkCmpKind' })

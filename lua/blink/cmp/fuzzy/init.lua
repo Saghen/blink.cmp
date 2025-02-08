@@ -69,18 +69,14 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
   local keyword_start_col, keyword_end_col =
     require('blink.cmp.fuzzy').get_keyword_range(line, cursor_col, config.completion.keyword.range)
   local keyword_length = keyword_end_col - keyword_start_col
+  local keyword = line:sub(keyword_start_col, keyword_end_col - 1)
 
   local filtered_items = {}
   for provider_id, haystack in pairs(haystacks_by_provider) do
     -- perform fuzzy search
     local scores, matched_indices = fuzzy.rust.fuzzy(line, cursor_col, provider_id, {
-      -- each matching char is worth 7 points (+ 1 for matching capitalization)
-      -- and it receives a bonus for capitalization, delimiter and prefix
-      -- so this should generally be good
       -- TODO: make this configurable
-      -- TODO: instead of a min score, set X number of allowed typos
-      min_score = config.fuzzy.use_typo_resistance and (6 * keyword_length) or 0,
-      use_typo_resistance = config.fuzzy.use_typo_resistance,
+      max_typos = config.fuzzy.max_typos(keyword),
       use_frecency = config.fuzzy.use_frecency and keyword_length > 0,
       use_proximity = config.fuzzy.use_proximity and keyword_length > 0,
       sorts = config.fuzzy.sorts,
@@ -104,6 +100,14 @@ end
 --- @return number, number
 function fuzzy.get_keyword_range(line, col, range)
   return require('blink.cmp.fuzzy.rust').get_keyword_range(line, col, range == 'full')
+end
+
+function fuzzy.is_keyword_character(char)
+  -- special case for hyphen, since we don't consider a lone hyphen to be a keyword
+  if char == '-' then return true end
+
+  local keyword_start_col, keyword_end_col = fuzzy.get_keyword_range(char, #char, 'prefix')
+  return keyword_start_col ~= keyword_end_col
 end
 
 --- @param item blink.cmp.CompletionItem

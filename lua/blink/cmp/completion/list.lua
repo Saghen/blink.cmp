@@ -9,7 +9,7 @@
 --- @field context? blink.cmp.Context
 --- @field items blink.cmp.CompletionItem[]
 --- @field selected_item_idx? number
---- @field preview_undo? { text_edit: lsp.TextEdit, cursor: integer[]?}
+--- @field preview_undo? { text_edit: lsp.TextEdit, cursor_before?: integer[], cursor_after: integer[] }
 ---
 --- @field show fun(context: blink.cmp.Context, items: table<string, blink.cmp.CompletionItem[]>)
 --- @field fuzzy fun(context: blink.cmp.Context, items: table<string, blink.cmp.CompletionItem[]>): blink.cmp.CompletionItem[]
@@ -51,6 +51,8 @@
 --- @class blink.cmp.CompletionListAcceptEvent
 --- @field item blink.cmp.CompletionItem
 --- @field context blink.cmp.Context
+
+local context = require('blink.cmp.completion.trigger.context')
 
 --- @type blink.cmp.CompletionList
 --- @diagnostic disable-next-line: missing-fields
@@ -98,11 +100,13 @@ function list.show(context, items_by_source)
   local previous_item_idx = list.get_item_idx_in_list(previous_selected_item)
   if list.is_explicitly_selected and previous_item_idx ~= nil and previous_item_idx <= 10 then
     list.select(previous_item_idx, { auto_insert = false, undo_preview = false })
-
+  -- respect the context's initial selected item idx
+  elseif context.initial_selected_item_idx ~= nil then
+    list.select(context.initial_selected_item_idx, { undo_preview = false, is_explicit_selection = true })
   -- otherwise, use the default selection
   else
     list.select(
-      list.get_selection_mode(list.context).preselect and 1 or nil,
+      list.get_selection_mode(context).preselect and 1 or nil,
       { auto_insert = false, undo_preview = false, is_explicit_selection = false }
     )
   end
@@ -216,19 +220,34 @@ end
 function list.undo_preview()
   if list.preview_undo == nil then return end
 
-  require('blink.cmp.lib.text_edits').apply({ list.preview_undo.text_edit })
-  if list.preview_undo.cursor then
-    require('blink.cmp.completion.trigger.context').set_cursor(list.preview_undo.cursor)
+  local text_edits_lib = require('blink.cmp.lib.text_edits')
+  local text_edit = list.preview_undo.text_edit
+
+  -- The text edit may be out of date due to the user typing more characters
+  -- so we adjust the range to compensate
+  local old_cursor_col = list.preview_undo.cursor_after[2]
+  local new_cursor_col = context.get_cursor()[2]
+  text_edit = text_edits_lib.compensate_for_cursor_movement(text_edit, old_cursor_col, new_cursor_col)
+
+  require('blink.cmp.lib.text_edits').apply({ text_edit })
+  if list.preview_undo.cursor_before ~= nil then
+    require('blink.cmp.completion.trigger.context').set_cursor(list.preview_undo.cursor_before)
   end
+
   list.preview_undo = nil
 end
 
 function list.apply_preview(item)
   -- undo the previous preview if it exists
   list.undo_preview()
+
   -- apply the new preview
   local undo_text_edit, undo_cursor = require('blink.cmp.completion.accept.preview')(item)
-  list.preview_undo = { text_edit = undo_text_edit, cursor = undo_cursor }
+  list.preview_undo = {
+    text_edit = undo_text_edit,
+    cursor_before = undo_cursor,
+    cursor_after = context.get_cursor(),
+  }
 end
 
 ---------- Accept ----------

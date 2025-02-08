@@ -26,17 +26,25 @@ function utils.get_for_filetype(filetype, item)
   return per_filetype or default
 end
 
+--- @param ctx blink.cmp.Context
 --- @param filetype string
 --- @param resolution_method 'kind' | 'semantic_token'
 --- @return boolean
-function utils.should_run_resolution(filetype, resolution_method)
+function utils.should_run_resolution(ctx, filetype, resolution_method)
   -- resolution method specific
   if not config[resolution_method .. '_resolution'].enabled then return false end
   local resolution_blocked_filetypes = config[resolution_method .. '_resolution'].blocked_filetypes
   if vim.tbl_contains(resolution_blocked_filetypes, filetype) then return false end
 
+  -- filetype specific exceptions
+  local exceptions = require('blink.cmp.completion.brackets.config').exceptions
+  if exceptions.by_filetype[filetype] ~= nil then
+    if not exceptions.by_filetype[filetype](ctx) then return false end
+  end
+
   -- global
   if not config.enabled then return false end
+
   if vim.tbl_contains(config.force_allow_filetypes, filetype) then return true end
   return not vim.tbl_contains(config.blocked_filetypes, filetype)
     and not vim.tbl_contains(brackets.blocked_filetypes, filetype)

@@ -66,6 +66,8 @@ completion.list.selection = { preselect = true, auto_insert = true }
 ```
 Selects the first item automatically, and inserts a preview of the item on selection. The `cancel` keymap (default `<C-e>`) will close the menu and undo the preview.
 
+You may use the `show_and_insert` keymap to show the completion menu and select the first item, with `auto_insert`. The default keymap (`<C-space>`) uses the `show` command, which will have the first item selected, but will not `auto_insert`.
+
 <video src="https://github.com/user-attachments/assets/ef295526-8332-4ad0-9a2a-e2f6484081b2" muted autoplay loop />
 
 == Preselect
@@ -82,6 +84,8 @@ completion.list.selection = { preselect = false, auto_insert = false }
 
 No item will be selected by default. You may use the `select_and_accept` keymap command to select the first item and accept it when there's no selection. The `accept` keymap command, on the other hand, will only trigger if an item is selected.
 
+You may use the `show_and_insert` keymap to show the completion menu and select the first item. The default keymap (`<C-space>`) uses the `show` command, which will not select the first item.
+
 <video src="https://github.com/user-attachments/assets/09cd9b4b-18b3-456b-bb0a-074ae54e9d77" muted autoplay loop />
 == Manual, Auto Insert
 ```lua
@@ -89,6 +93,8 @@ completion.list.selection = { preselect = false, auto_insert = true }
 ```
 
 Selecting an item will insert a "preview" of the item automatically. You may use the `select_and_accept` keymap command to select the first item and accept it when there's no selection. The `accept` keymap command will only trigger if an item is selected. The `cancel` keymap (default `<C-e>`) will close the menu and undo the preview.
+
+You may use the `show_and_insert` keymap to show the completion menu and select the first item, with `auto_insert`. The default keymap (`<C-space>`) uses the `show` command, which will not select the first item.
 
 <video src="https://github.com/user-attachments/assets/4658b61d-1b95-404a-b6b5-3a4afbfb8112" muted autoplay loop />
 :::
@@ -128,7 +134,7 @@ Manages the appearance of the completion menu. You may prevent the menu from aut
 
 ### Menu Draw <Badge type="info"><a href="./reference#completion-menu-draw">Go to default configuration</a></Badge>
 
-blink.cmp uses a grid-based layout to render the completion menu. The components, defined in `draw.components[string]`, define `text` and `highlight` functions which are called for each completion item. The `highlight` function will be called only when the item appears on screen, so expensive operations such as Treesitter highlighting may be performed (contributions welcome!, [for example](https://www.reddit.com/r/neovim/comments/1ca4gm2/colorful_cmp_menu_powered_by_treesitter/)). The components may define their min and max width, where `ellipsis = true` (enabled by default), will draw the `…` character when the text is truncated. Setting `width.fill = true` will fill the remaining space, effectively making subsequent components right aligned, with respect to their column.
+blink.cmp uses a grid-based layout to render the completion menu. The components, defined in `draw.components[string]`, define `text` and `highlight` functions which are called for each completion item. The `highlight` function will be called only when the item appears on screen, so expensive operations such as Treesitter highlighting may be performed. The components may define their min and max width, where `ellipsis = true` (enabled by default), will draw the `…` character when the text is truncated. Setting `width.fill = true` will fill the remaining space, effectively making subsequent components right aligned, with respect to their column.
 
 Columns effectively allow you to vertically align a set of components. Each column, defined as an array in `draw.columns`, will be rendered for all of the completion items, where the longest rendered row will determine the width of the column. You may define `gap = number` in your column to insert a gap between components.
 
@@ -138,13 +144,26 @@ For a setup similar to nvim-cmp, use the following config:
 completion.menu.draw.columns = { { "label", "label_description", gap = 1 }, { "kind_icon", "kind" } },
 ```
 
+#### Available components
+
+- `kind_icon`: Shows the icon for the kind of the item
+- `kind`: Shows the kind of the item as text (e.g. `Function`)
+- `label`: Shows the label of the item as well as the `label_detail` (e.g. `into(as Into)` where `into` is the label and `(as Into)` is the label detail)
+  - If the `label_detail` is missing from your items, ensure you've [setup LSP capabilities](../installation) and that your LSP supports the feature
+- `label_description`: Shows the label description of the item (e.g. `date-fns/formatDistance`, the module that the item will be auto-imported from)
+  - If the `label_description` is missing from your items, ensure you've [setup LSP capabilities](../installation) and that your LSP supports the feature
+- `source_name`: Shows the name of the source that provided the item, from the `sources.providers.*.name` (e.g. `LSP`)
+- `source_id`: Shows the id of the source that provided the item, from the `sources.providers[id]` (e.g. `lsp`)
+
 ### Treesitter
 
-You may use treesitter to highlight the label text for the given list of sources. This feature is experimental, contributions welcome!
+You may use treesitter to highlight the label text for the given list of sources. This feature is barebones, as it highlights the item as-is.
 
 ```lua
 completion.menu.draw.treesitter = { 'lsp' }
 ```
+
+The wonderful [colorful-menu.nvim](https://github.com/xzbdmw/colorful-menu.nvim) takes this a step further by including context around the item before highlighting.
 
 ## Documentation <Badge type="info"><a href="./reference#completion-documentation">Go to default configuration</a></Badge>
 
@@ -157,7 +176,7 @@ completion.documentation = {
 }
 ```
 
-If you're noticing high CPU usage or stuttering when opening the documentation, you may try setting `completion.documentation.treesitter_highlighting = false`.
+If you're noticing high CPU usage or stuttering when opening the documentation, you may try setting `completion.documentation.treesitter_highlighting = false`. You may completely override the drawing of the window via `completion.documentation.draw`.
 
 ## Ghost Text <Badge type="info"><a href="./reference#completion-ghost-text">Go to default configuration</a></Badge>
 

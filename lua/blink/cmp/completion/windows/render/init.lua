@@ -5,9 +5,10 @@
 --- @field columns blink.cmp.DrawColumn[]
 ---
 --- @field new fun(draw: blink.cmp.Draw): blink.cmp.Renderer
---- @field draw fun(self: blink.cmp.Renderer, context: blink.cmp.Context, bufnr: number, items: blink.cmp.CompletionItem[])
---- @field get_component_column_location fun(self: blink.cmp.Renderer, component_name: string): { column_idx: number, component_idx: number }
---- @field get_component_start_col fun(self: blink.cmp.Renderer, component_name: string): number
+--- @field draw fun(self: blink.cmp.Renderer, context: blink.cmp.Context, bufnr: number, items: blink.cmp.CompletionItem[], draw: blink.cmp.Draw): blink.cmp.DrawColumn[]
+--- @field get_columns fun(self: blink.cmp.Renderer, context: blink.cmp.Context, draw: blink.cmp.Draw): blink.cmp.DrawColumn[]
+--- @field get_component_column_location fun(self: blink.cmp.Renderer, columns: blink.cmp.DrawColumn[], component_name: string): { column_idx: number, component_idx: number }
+--- @field get_component_start_col fun(self: blink.cmp.Renderer, columns: blink.cmp.DrawColumn[], component_name: string): number
 --- @field get_alignment_start_col fun(self: blink.cmp.Renderer): number
 
 local ns = vim.api.nvim_create_namespace('blink_cmp_renderer')
@@ -17,7 +18,21 @@ local ns = vim.api.nvim_create_namespace('blink_cmp_renderer')
 local renderer = {}
 
 function renderer.new(draw)
-  --- Convert the component names in the columns to the component definitions
+  local padding = type(draw.padding) == 'number' and { draw.padding, draw.padding } or draw.padding
+  --- @cast padding number[]
+
+  local self = setmetatable({}, { __index = renderer })
+  self.padding = padding
+  self.gap = draw.gap
+  self.def = draw
+  return self
+end
+
+function renderer:get_columns(context, draw)
+  local columns = draw.columns
+  if type(columns) == 'function' then columns = columns(context) end
+  --- @cast columns blink.cmp.DrawColumnDefinition[]
+
   --- @type blink.cmp.DrawComponent[][]
   local columns_definitions = vim.tbl_map(function(column)
     local components = {}
@@ -26,39 +41,32 @@ function renderer.new(draw)
       assert(component ~= nil, 'No component definition found for component: "' .. component_name .. '"')
       table.insert(components, draw.components[component_name])
     end
-
     return {
+      component_names = column,
       components = components,
       gap = column.gap or 0,
     }
-  end, draw.columns)
+  end, columns)
 
-  local padding = type(draw.padding) == 'number' and { draw.padding, draw.padding } or draw.padding
-  --- @cast padding number[]
-
-  local self = setmetatable({}, { __index = renderer })
-  self.padding = padding
-  self.gap = draw.gap
-  self.def = draw
-  self.columns = vim.tbl_map(
+  return vim.tbl_map(
     function(column_definition)
       return require('blink.cmp.completion.windows.render.column').new(
+        column_definition.component_names,
         column_definition.components,
         column_definition.gap
       )
     end,
     columns_definitions
   )
-  return self
 end
 
 function renderer:draw(context, bufnr, items)
-  -- gather contexts
+  local columns = self:get_columns(context, self.def)
   local draw_contexts = require('blink.cmp.completion.windows.render.context').get_from_items(context, self.def, items)
 
   -- render the columns
-  for _, column in ipairs(self.columns) do
-    column:render(draw_contexts)
+  for _, column in ipairs(columns) do
+    column:render(context, draw_contexts)
   end
 
   -- apply to the buffer
@@ -67,7 +75,7 @@ function renderer:draw(context, bufnr, items)
     local line = ''
     if self.padding[1] > 0 then line = string.rep(' ', self.padding[1]) end
 
-    for _, column in ipairs(self.columns) do
+    for _, column in ipairs(columns) do
       local text = column:get_line_text(idx)
       if #text > 0 then line = line .. text .. string.rep(' ', self.gap) end
     end
@@ -87,7 +95,7 @@ function renderer:draw(context, bufnr, items)
     on_win = function(_, _, win_bufnr) return bufnr == win_bufnr end,
     on_line = function(_, _, _, line)
       local offset = self.padding[1]
-      for _, column in ipairs(self.columns) do
+      for _, column in ipairs(columns) do
         local text = column:get_line_text(line + 1)
         if #text > 0 then
           local highlights = column:get_line_highlights(line + 1)
@@ -107,28 +115,30 @@ function renderer:draw(context, bufnr, items)
       end
     end,
   })
+
+  self.columns = columns
 end
 
-function renderer:get_component_column_location(component_name)
-  for column_idx, column in ipairs(self.def.columns) do
-    for component_idx, other_component_name in ipairs(column) do
+function renderer:get_component_column_location(columns, component_name)
+  for column_idx, column in ipairs(columns) do
+    for component_idx, other_component_name in ipairs(column.component_names) do
       if other_component_name == component_name then return { column_idx, component_idx } end
     end
   end
   error('No component found with name: ' .. component_name)
 end
 
-function renderer:get_component_start_col(component_name)
-  local column_idx, component_idx = unpack(self:get_component_column_location(component_name))
+function renderer:get_component_start_col(columns, component_name)
+  local column_idx, component_idx = unpack(self:get_component_column_location(columns, component_name))
 
   -- add previous columns
   local start_col = self.padding[1]
   for i = 1, column_idx - 1 do
-    start_col = start_col + self.columns[i].width + self.gap
+    start_col = start_col + columns[i].width + self.gap
   end
 
   -- add previous components
-  local line = self.columns[column_idx].lines[1]
+  local line = columns[column_idx].lines[1]
   if not line then return start_col end
   for i = 1, component_idx - 1 do
     start_col = start_col + #line[i]
@@ -140,7 +150,9 @@ end
 function renderer:get_alignment_start_col()
   local component_name = self.def.align_to
   if component_name == nil or component_name == 'none' or component_name == 'cursor' then return 0 end
-  return self:get_component_start_col(component_name)
+
+  assert(self.columns ~= nil, 'Attempted to get alignment start col before drawing')
+  return self:get_component_start_col(self.columns, component_name)
 end
 
 return renderer

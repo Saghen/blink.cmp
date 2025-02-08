@@ -22,25 +22,35 @@ function cmp.setup(opts)
   require('blink.cmp.fuzzy.download').ensure_downloaded(function(err)
     if err then vim.notify(err, vim.log.levels.ERROR) end
 
-    -- setup highlights, keymap, completion and signature help
+    -- setup highlights, keymap, completion, commands and signature help
     require('blink.cmp.highlights').setup()
     require('blink.cmp.keymap').setup()
     require('blink.cmp.completion').setup()
+    require('blink.cmp.commands').setup()
     if config.signature.enabled then require('blink.cmp.signature').setup() end
   end)
 end
 
 ------- Public API -------
 
---- Checks if the completion menu is currently visible
+--- Checks if the completion menu or ghost text is visible
 --- @return boolean
-function cmp.is_visible()
-  return require('blink.cmp.completion.windows.menu').win:is_open()
-    or require('blink.cmp.completion.windows.ghost_text').is_open()
-end
+function cmp.is_visible() return cmp.is_menu_visible() or cmp.is_ghost_text_visible() end
+
+--- Checks if the completion menu is visible
+--- @return boolean
+function cmp.is_menu_visible() return require('blink.cmp.completion.windows.menu').win:is_open() end
+
+--- Checks if the ghost text is visible
+--- @return boolean
+function cmp.is_ghost_text_visible() return require('blink.cmp.completion.windows.ghost_text').is_open() end
+
+--- Checks if the documentation window is visible
+--- @return boolean
+function cmp.is_documentation_visible() return require('blink.cmp.completion.windows.documentation').win:is_open() end
 
 --- Show the completion window
---- @params opts? { providers?: string[], callback?: fun() }
+--- @param opts? { providers?: string[], initial_selected_item_idx?: number, callback?: fun() }
 function cmp.show(opts)
   opts = opts or {}
 
@@ -69,13 +79,22 @@ function cmp.show(opts)
       force = true,
       providers = opts and opts.providers,
       trigger_kind = 'manual',
+      initial_selected_item_idx = opts.initial_selected_item_idx,
     })
   end)
   return true
 end
 
+-- Show the completion window and select the first item
+--- @params opts? { providers?: string[], callback?: fun() }
+function cmp.show_and_insert(opts)
+  opts = opts or {}
+  opts.initial_selected_item_idx = 1
+  return cmp.show(opts)
+end
+
 --- Hide the completion window
---- @params opts? { callback?: fun() }
+--- @param opts? { callback?: fun() }
 function cmp.hide(opts)
   if not cmp.is_visible() then return end
 
@@ -87,7 +106,7 @@ function cmp.hide(opts)
 end
 
 --- Cancel the current completion, undoing the preview from auto_insert
---- @params opts? { callback?: fun() }
+--- @param opts? { callback?: fun() }
 function cmp.cancel(opts)
   if not cmp.is_visible() then return end
   vim.schedule(function()
@@ -213,6 +232,26 @@ function cmp.scroll_documentation_down(count)
   return true
 end
 
+--- Check if the signature help window is visible
+--- @return boolean
+function cmp.is_signature_visible() return require('blink.cmp.signature.window').win:is_open() end
+
+--- Show the signature help window
+function cmp.show_signature()
+  local config = require('blink.cmp.config').signature
+  if not config.enabled or cmp.is_signature_visible() then return end
+  vim.schedule(function() require('blink.cmp.signature.trigger').show() end)
+  return true
+end
+
+--- Hide the signature help window
+function cmp.hide_signature()
+  local config = require('blink.cmp.config').signature
+  if not config.enabled or not cmp.is_signature_visible() then return end
+  vim.schedule(function() require('blink.cmp.signature.trigger').hide() end)
+  return true
+end
+
 --- Check if a snippet is active, optionally filtering by direction
 --- @param filter? { direction?: number }
 function cmp.snippet_active(filter) return require('blink.cmp.config').snippets.active(filter) end
@@ -233,6 +272,12 @@ function cmp.snippet_backward()
   return true
 end
 
+--- Ensures that blink.cmp will be notified last when a user adds a character
+function cmp.resubscribe()
+  local trigger = require('blink.cmp.completion.trigger')
+  trigger.resubscribe()
+end
+
 --- Tells the sources to reload a specific provider or all providers (when nil)
 --- @param provider? string
 function cmp.reload(provider) require('blink.cmp.sources.lib').reload(provider) end
@@ -245,13 +290,30 @@ function cmp.get_lsp_capabilities(override, include_nvim_defaults)
 end
 
 --- Add a new source provider at runtime
---- @param id string
---- @param provider_config blink.cmp.SourceProviderConfig
-function cmp.add_provider(id, provider_config)
+--- @param source_id string
+--- @param source_config blink.cmp.SourceProviderConfig
+function cmp.add_provider(source_id, source_config)
   local config = require('blink.cmp.config')
-  assert(config.sources.providers[id] == nil, 'Provider with id ' .. id .. ' already exists')
-  require('blink.cmp.config.sources').validate_provider(id, provider_config)
-  config.sources.providers[id] = provider_config
+  assert(config.sources.providers[source_id] == nil, 'Provider with id ' .. source_id .. ' already exists')
+  require('blink.cmp.config.sources').validate_provider(source_id, source_config)
+  config.sources.providers[source_id] = source_config
+end
+
+--- Adds a source to the list of enable sources for a given filetype
+--- @param filetype string
+--- @param source string
+function cmp.add_filetype_source(filetype, source)
+  local config = require('blink.cmp.config')
+
+  assert(
+    type(config.sources.per_filetype[filetype]) ~= 'function',
+    'Sources for filetype "' .. filetype .. '" has been set to a function, so we cannot add a source to it'
+  )
+  if config.sources.per_filetype[filetype] == nil then config.sources.per_filetype[filetype] = {} end
+
+  local sources = config.sources.per_filetype[filetype]
+  --- @cast sources string[]
+  table.insert(sources, source)
 end
 
 return cmp

@@ -1,6 +1,7 @@
 --- @alias blink.cmp.KeymapCommand
 --- | 'fallback' Fallback to the built-in behavior
 --- | 'show' Show the completion window
+--- | 'show_and_insert' Show the completion window and select the first item
 --- | 'hide' Hide the completion window
 --- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
@@ -13,6 +14,8 @@
 --- | 'hide_documentation' Hide the documentation window
 --- | 'scroll_documentation_up' Scroll the documentation window up
 --- | 'scroll_documentation_down' Scroll the documentation window down
+--- | 'show_signature' Show the signature help window
+--- | 'hide_signature' Hide the signature help window
 --- | 'snippet_forward' Move the cursor forward to the next snippet placeholder
 --- | 'snippet_backward' Move the cursor backward to the previous snippet placeholder
 --- | (fun(cmp: blink.cmp.API): boolean?) Custom function where returning true will prevent the next command from running
@@ -26,6 +29,8 @@
 ---   ['<C-e>'] = { 'cancel', 'fallback' },
 ---   ['<C-y>'] = { 'select_and_accept' },
 ---
+---   ['<Up>'] = { 'select_prev', 'fallback' },
+---   ['<Down>'] = { 'select_next', 'fallback' },
 ---   ['<C-p>'] = { 'select_prev', 'fallback' },
 ---   ['<C-n>'] = { 'select_next', 'fallback' },
 ---
@@ -34,6 +39,8 @@
 ---
 ---   ['<Tab>'] = { 'snippet_forward', 'fallback' },
 ---   ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+---
+---   ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 --- }
 --- ```
 --- | 'default'
@@ -104,6 +111,11 @@
 ---   cmdline = {
 ---     preset = 'cmdline',
 ---   }
+---
+---   -- optionally, define different keymaps for Neovim's built-in terminal
+---   term = {
+---     preset = 'term',
+---   }
 --- }
 --- ```
 ---
@@ -114,6 +126,7 @@
 
 --- @class (exact) blink.cmp.KeymapConfig : blink.cmp.BaseKeymapConfig
 --- @field cmdline? blink.cmp.BaseKeymapConfig Optionally, define a separate keymap for cmdline
+--- @field term? blink.cmp.BaseKeymapConfig Optionally, define a separate keymap for cmdline
 
 local keymap = {
   --- @type blink.cmp.KeymapConfig
@@ -127,6 +140,7 @@ function keymap.validate(config)
   local commands = {
     'fallback',
     'show',
+    'show_and_insert',
     'hide',
     'cancel',
     'accept',
@@ -139,6 +153,8 @@ function keymap.validate(config)
     'hide_documentation',
     'scroll_documentation_up',
     'scroll_documentation_down',
+    'show_signature',
+    'hide_signature',
     'snippet_forward',
     'snippet_backward',
   }
@@ -146,8 +162,8 @@ function keymap.validate(config)
 
   local validation_schema = {}
   for key, value in pairs(config) do
-    -- nested cmdline keymap
-    if key == 'cmdline' then
+    -- nested cmdline/term keymap
+    if key == 'cmdline' or key == 'term' then
       keymap.validate(value)
 
     -- preset

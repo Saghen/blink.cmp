@@ -76,19 +76,21 @@ function docs.show_item(context, item)
           max_width = docs.win.config.max_width,
           use_treesitter_highlighting = config and config.treesitter_highlighting,
         }
-        local render = require('blink.cmp.lib.window.docs').render_detail_and_documentation
-
-        if item.documentation and item.documentation.render ~= nil then
-          -- let the provider render the documentation and optionally override
-          -- the default rendering
-          item.documentation.render({
-            item = item,
-            window = docs.win,
-            default_implementation = function(opts) render(vim.tbl_extend('force', default_render_opts, opts)) end,
-          })
-        else
-          render(default_render_opts)
+        local default_impl = function(opts)
+          require('blink.cmp.lib.window.docs').render_detail_and_documentation(
+            vim.tbl_extend('force', default_render_opts, opts or {})
+          )
         end
+
+        -- allow the provider to override the drawing optionally
+        -- TODO: should the default_implementation be the configured draw function instead of the built-in?
+        local draw = item.documentation and (item.documentation.draw or item.documentation.render) or config.draw
+        draw({
+          item = item,
+          window = docs.win,
+          config = config,
+          default_implementation = default_impl,
+        })
       end
       docs.shown_item = item
 
