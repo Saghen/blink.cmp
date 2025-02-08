@@ -14,6 +14,23 @@ enabled = function()
 end,
 ```
 
+### Disable completion in *only* shell command mode
+
+Windows when inside of git bash or WSL may cause a hang with shell commands. This disables cmdline completions only when running shell commands ( i.e. [ ':!' , ':%!' ] ), but still allows completion in other command modes ( i.e. [ ':' , ':help', '/' , '?' ] etc ).
+
+```lua
+sources = {
+  providers = {
+    cmdline = {
+      -- ignores cmdline completions when executing shell commands
+      enabled = function()
+        return vim.fn.getcmdtype() ~= ':' or not vim.fn.getcmdline():match("^[%%0-9,'<>%-]*!")
+      end
+    }
+  }
+}
+```
+
 ### Border
 
 ```lua
