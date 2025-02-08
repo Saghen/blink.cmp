@@ -5,7 +5,7 @@
 --- | 'hide' Hide the completion window
 --- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
---- | 'accept_and_enter' Accept the curreent completion item and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
+--- | 'accept_and_enter' Accept the current completion item and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_and_accept' Select the first completion item, if there's no selection, and accept
 --- | 'select_accept_and_enter' Select the first completion item, if there's no selection, accept and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_prev' Select the previous completion item
