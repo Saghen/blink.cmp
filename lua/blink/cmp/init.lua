@@ -148,6 +148,28 @@ function cmp.select_and_accept(opts)
   return true
 end
 
+--- Select the first completion item, if there's no selection, and enter
+--- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
+function cmp.accept_and_enter(opts)
+  return cmp.accept({
+    callback = function()
+      if opts and opts.callback then opts.callback() end
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<CR>', true, false, true), 'n', false)
+    end,
+  })
+end
+
+--- Select the first completion item, if there's no selection, and enter
+--- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
+function cmp.select_accept_and_enter(opts)
+  return cmp.select_and_accept({
+    callback = function()
+      if opts and opts.callback then opts.callback() end
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<CR>', true, false, true), 'n', false)
+    end,
+  })
+end
+
 --- Select the previous completion item
 --- @param opts? blink.cmp.CompletionListSelectOpts
 function cmp.select_prev(opts)
