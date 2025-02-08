@@ -59,7 +59,7 @@ pub fn set_provider_items(
 pub fn fuzzy(
     _lua: &Lua,
     (line, cursor_col, provider_id, opts): (mlua::String, usize, String, FuzzyOptions),
-) -> LuaResult<(Vec<i32>, Vec<u32>)> {
+) -> LuaResult<(Vec<i32>, Vec<u32>, Vec<bool>)> {
     let frecency = FRECENCY.read().map_err(|_| Error::AcquireFrecencyLock)?;
     let frecency = frecency.as_ref().ok_or(Error::UseFrecencyBeforeInit)?;
 

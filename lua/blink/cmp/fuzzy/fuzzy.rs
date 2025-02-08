@@ -65,7 +65,7 @@ pub fn fuzzy(
     haystack: &[LspItem],
     frecency: &FrecencyTracker,
     opts: FuzzyOptions,
-) -> (Vec<i32>, Vec<u32>) {
+) -> (Vec<i32>, Vec<u32>, Vec<bool>) {
     let haystack_labels = haystack
         .iter()
         .map(|s| s.filter_text.clone().unwrap_or(s.label.clone()))
@@ -128,6 +128,7 @@ pub fn fuzzy(
             .iter()
             .map(|mtch| mtch.index_in_haystack as u32)
             .collect::<Vec<_>>(),
+        matches.iter().map(|mtch| mtch.exact).collect::<Vec<_>>(),
     )
 }
 
