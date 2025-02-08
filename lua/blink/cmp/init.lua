@@ -131,20 +131,24 @@ end
 
 --- Select the first completion item, if there's no selection, and enter
 --- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
-function cmp.select_and_enter(opts)
-  if not cmp.is_visible() then return end
+function cmp.accept_and_enter(opts)
+  return cmp.accept({
+    callback = function()
+      if opts and opts.callback then opts.callback() end
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<CR>', true, false, true), 'n', false)
+    end,
+  })
+end
 
-  local completion_list = require('blink.cmp.completion.list')
-  vim.schedule(function()
-    completion_list.accept({
-      index = completion_list.selected_item_idx or 1,
-      callback = function()
-        if opts and opts.callback then opts.callback() end
-        vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<CR>', true, false, true), 'n', false)
-      end,
-    })
-  end)
-  return true
+--- Select the first completion item, if there's no selection, and enter
+--- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
+function cmp.select_accept_and_enter(opts)
+  return cmp.select_and_accept({
+    callback = function()
+      if opts and opts.callback then opts.callback() end
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<CR>', true, false, true), 'n', false)
+    end,
+  })
 end
 
 --- Select the previous completion item

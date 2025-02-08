@@ -4,8 +4,9 @@
 --- | 'hide' Hide the completion window
 --- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
+--- | 'accept_and_enter' Accept the curreent completion item and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_and_accept' Select the first completion item, if there's no selection, and accept
---- | 'select_and_enter' Select the first completion item, if there's no selection, and enter
+--- | 'select_accept_and_enter' Select the first completion item, if there's no selection, accept and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_prev' Select the previous completion item
 --- | 'select_next' Select the next completion item
 --- | 'show_documentation' Show the documentation window
@@ -129,8 +130,9 @@ function keymap.validate(config)
     'hide',
     'cancel',
     'accept',
+    'accept_and_enter',
     'select_and_accept',
-    'select_and_enter',
+    'select_accept_and_enter',
     'select_prev',
     'select_next',
     'show_documentation',
