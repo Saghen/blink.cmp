@@ -14,7 +14,7 @@
 --- @field get_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, callback: fun(response?: blink.cmp.CompletionResponse)): (fun(): nil) | nil
 --- @field should_show_items? fun(self: blink.cmp.Source, context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
 --- @field resolve? fun(self: blink.cmp.Source, item: blink.cmp.CompletionItem, callback: fun(resolved_item?: lsp.CompletionItem)): ((fun(): nil) | nil)
---- @field execute? fun(self: blink.cmp.Source, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): (fun(): nil) | nil
+--- @field execute? fun(self: blink.cmp.Source, context: blink.cmp.Context, item: blink.cmp.CompletionItem, callback: fun()): ((fun(): nil) | nil)
 --- @field get_signature_help_trigger_characters? fun(self: blink.cmp.Source): string[]
 --- @field get_signature_help? fun(self: blink.cmp.Source, context: blink.cmp.SignatureHelpContext, callback: fun(signature_help: lsp.SignatureHelp | nil)): (fun(): nil) | nil
 --- @field reload? fun(self: blink.cmp.Source): nil
