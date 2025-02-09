@@ -53,6 +53,8 @@ function trigger.activate()
       -- ignore if disabled
       if not require('blink.cmp.config').enabled() then
         return trigger.hide()
+      elseif not config.enabled and trigger.context == nil then
+        return
       elseif config.show_on_keyword and fuzzy.is_keyword_character(char_under_cursor) then
         return trigger.show({ trigger_character = char_under_cursor })
       -- character forces a trigger according to the sources, refresh the existing context if it exists
@@ -67,7 +69,9 @@ function trigger.activate()
       local char_under_cursor = utils.get_char_at_cursor()
       local is_on_trigger = trigger.is_trigger_character(char_under_cursor)
 
-      if config.show_on_insert_on_trigger_character and is_on_trigger and event == 'InsertEnter' then
+      if not config.enabled and trigger.context == nil then
+        return
+      elseif config.show_on_insert_on_trigger_character and is_on_trigger and event == 'InsertEnter' then
         trigger.show({ trigger_character = char_under_cursor })
       elseif event == 'CursorMoved' and trigger.context ~= nil then
         trigger.show()
@@ -95,6 +99,7 @@ end
 
 function trigger.show_if_on_trigger_character()
   if require('blink.cmp.completion.trigger.context').get_mode() ~= 'default' then return end
+  if not config.enabled and trigger.context == nil then return end
 
   local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
   local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
