@@ -105,7 +105,7 @@ function task:map(fn)
     end)
     self:on_failure(reject)
     self:on_cancel(function() chained_task:cancel() end)
-    return function() chained_task:cancel() end
+    return function() self:cancel() end
   end)
   return chained_task
 end
@@ -222,6 +222,12 @@ function task.await_all(tasks)
           all_task:cancel()
         end
       end)
+    end
+
+    return function()
+      for _, task in ipairs(tasks) do
+        task:cancel()
+      end
     end
   end)
   return all_task
