@@ -28,6 +28,7 @@ function docs.render_detail_and_documentation(opts)
 
   local doc_lines = {}
   if opts.documentation ~= nil then
+    if opts.documentation.kind == nil or opts.documentation.value == nil then return end
     local doc = type(opts.documentation) == 'string' and opts.documentation or opts.documentation.value
     doc_lines = docs.split_lines(doc)
   end
