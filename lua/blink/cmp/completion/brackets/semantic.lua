@@ -23,6 +23,7 @@ vim.api.nvim_create_autocmd({ 'LspTokenUpdate' }, {
 })
 
 function semantic.finish_request()
+  if semantic.request == nil then return end
   semantic.request.callback()
   semantic.request = nil
   semantic.timer:stop()
