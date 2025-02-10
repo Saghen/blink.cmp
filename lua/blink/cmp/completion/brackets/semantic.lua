@@ -2,7 +2,6 @@ local config = require('blink.cmp.config').completion.accept.auto_brackets
 local utils = require('blink.cmp.completion.brackets.utils')
 
 --- @class blink.cmp.SemanticRequest
---- @field start_time number
 --- @field cursor integer[]
 --- @field item blink.cmp.CompletionItem
 --- @field filetype string
@@ -80,7 +79,6 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item, callback)
   end
 
   semantic.request = {
-    start_time = vim.uv.hrtime(),
     cursor = vim.api.nvim_win_get_cursor(0),
     filetype = filetype,
     item = item,
