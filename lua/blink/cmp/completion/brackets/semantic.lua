@@ -89,10 +89,15 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item, callback)
   -- semantic tokens are only requested on InsertLeave and on_refresh, so manually force a refresh
   vim.lsp.semantic_tokens.force_refresh(ctx.bufnr)
 
+  -- first check if a semantic token already exists at the current cursor position
   local tokens = vim.lsp.semantic_tokens.get_at_pos()
   if tokens ~= nil then semantic.process_request(tokens) end
-  if semantic.request == nil then return end
+  if semantic.request == nil then
+    -- a matching token exists, and brackets were added
+    return
+  end
 
+  -- listen for LspTokenUpdate events until timeout
   semantic.timer:start(config.semantic_token_resolution.timeout_ms, 0, semantic.finish_request)
 end
 
