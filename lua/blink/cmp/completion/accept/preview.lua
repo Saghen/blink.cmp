@@ -28,7 +28,7 @@ local function preview(item)
     cursor_moved = true
   end
 
-  return { text_edit = undo_text_edit, cursor = cursor_moved and original_cursor or nil }
+  return undo_text_edit, cursor_moved and original_cursor or nil
 end
 
 return preview

@@ -149,4 +149,18 @@ function utils.reverse(arr)
   return reversed
 end
 
+--- Disables all autocmds for the duration of the callback
+--- @param cb fun()
+function utils.with_no_autocmds(cb)
+  local original_eventignore = vim.opt.eventignore
+  vim.opt.eventignore = 'all'
+
+  local success, result_or_err = pcall(cb)
+
+  vim.opt.eventignore = original_eventignore
+
+  if not success then error(result_or_err) end
+  return result_or_err
+end
+
 return utils

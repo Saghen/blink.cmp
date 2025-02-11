@@ -8,13 +8,15 @@ local text_edits = {}
 --- @param text_edit lsp.TextEdit # the main text edit (at the cursor). Can be repeated.
 --- @param additional_text_edits? lsp.TextEdit[] # additional text edits that can e.g. add import statements.
 function text_edits.apply(text_edit, additional_text_edits)
+  additional_text_edits = additional_text_edits or {}
+
   local mode = context.get_mode()
   assert(mode == 'default' or mode == 'cmdline' or mode == 'term', 'Unsupported mode for text edits: ' .. mode)
 
   if mode == 'default' then
     text_edits.write_to_dot_repeat(text_edit)
 
-    local all_edits = utils.shallow_copy(additional_text_edits or {})
+    local all_edits = utils.shallow_copy(additional_text_edits)
     table.insert(all_edits, 1, text_edit)
     vim.lsp.util.apply_text_edits(all_edits, vim.api.nvim_get_current_buf(), 'utf-8')
   end
@@ -289,30 +291,43 @@ end
 
 ----- Dot repeat -----
 
+--- Fill the `.` register so that dot-repeat works. This also changes the
+--- text in the buffer - currently there is no way to do this in Neovim
+--- (only adding new text is supported, but we also want to replace the
+--- current word). See the tracking issue for this feature at
+--- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
 --- @param text_edit lsp.TextEdit
 function text_edits.write_to_dot_repeat(text_edit)
-  -- Fill the `.` register so that dot-repeat works. This also changes the
-  -- text in the buffer - currently there is no way to do this in Neovim
-  -- (only adding new text is supported, but we also want to replace the
-  -- current word). See the tracking issue for this feature at
-  -- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
-  local row = vim.api.nvim_win_get_cursor(0)[1]
-  local old_line = vim.api.nvim_get_current_line()
+  assert(
+    text_edit.range.start.line == text_edit.range['end'].line,
+    'Dot repeat only supports one line for now. Contributions welcome!'
+  )
+  local chars_to_delete = text_edit.range['end'].character - text_edit.range.start.character
+  local chars_to_insert = text_edit.newText
 
-  -- emulate builtin completion (dot repeat)
-  local saved_completeopt = vim.opt.completeopt
-  local saved_shortmess = vim.o.shortmess
-  vim.opt.completeopt = ''
-  if not vim.o.shortmess:match('c') then vim.o.shortmess = vim.o.shortmess .. 'c' end
-  vim.fn.complete(text_edit.range.start.character + 1, { text_edit.newText })
-  vim.opt.completeopt = saved_completeopt
-  vim.o.shortmess = saved_shortmess
+  utils.with_no_autocmds(function()
+    -- create temporary buffer for writing
+    local curr_buf = vim.api.nvim_get_current_buf()
+    local buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_win_set_buf(0, buf)
+    vim.api.nvim_buf_set_text(0, 0, 0, 0, 0, { '_' .. string.rep('a', chars_to_delete) })
+    vim.api.nvim_win_set_cursor(0, { 1, chars_to_delete + 1 })
 
-  -- exit completion mode
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false)
+    -- emulate builtin completion (dot repeat)
+    local saved_completeopt = vim.opt.completeopt
+    local saved_shortmess = vim.o.shortmess
+    vim.opt.completeopt = ''
+    if not vim.o.shortmess:match('c') then vim.o.shortmess = vim.o.shortmess .. 'c' end
+    vim.fn.complete(1, { '_' .. chars_to_insert })
+    vim.opt.completeopt = saved_completeopt
+    vim.o.shortmess = saved_shortmess
 
-  -- restore old content
-  vim.api.nvim_buf_set_lines(0, row - 1, row, false, { old_line })
+    -- exit completion mode
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false)
+
+    -- restore old buffer
+    vim.api.nvim_win_set_buf(0, curr_buf)
+  end)
 end
 
 return text_edits

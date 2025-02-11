@@ -62,7 +62,8 @@ function term_events:listen(opts)
   })
 
   -- definitely leaving the context
-  vim.api.nvim_create_autocmd({ 'ModeChanged', 'TermLeave' }, {
+  -- HACK: we don't handle mode changed here because the buffer events handles it
+  vim.api.nvim_create_autocmd('TermLeave', {
     callback = function()
       last_char = ''
       vim.schedule(function() opts.on_term_leave() end)
