@@ -32,6 +32,9 @@ Shows after typing a trigger character, defined by the sources. For example for 
 
 ```lua
 completion.trigger.show_on_trigger_character = true
+-- Optionally, set a list of characters that will not trigger the completion window,
+-- even when sources request it. The following are the defaults:
+completion.trigger.show_on_blocked_trigger_characters = { ' ', '\n', '\t' }
 ```
 
 <video src="https://github.com/user-attachments/assets/b4ee0069-2de8-44e7-b3ca-51b10bc4cb4a" muted autoplay loop />
@@ -41,6 +44,9 @@ Shows after entering insert mode on top of a trigger character.
 
 ```lua
 completion.trigger.show_on_insert_on_trigger_character = true
+-- Optionally, set a list of characters that will not trigger the completion window,
+-- even when sources request it. The following are the defaults:
+completion.trigger.show_on_x_blocked_trigger_characters = { "'", '"', '(', '{', '[' }
 ```
 
 <video src="https://github.com/user-attachments/assets/9e7aa3c2-4756-4a5e-a0e8-303d3ae0fda9" muted autoplay loop />
@@ -50,6 +56,9 @@ Shows after accepting a completion item, where the cursor ends up on top of a tr
 
 ```lua
 completion.trigger.show_on_accept_on_trigger_character = true
+-- Optionally, set a list of characters that will not trigger the completion window,
+-- even when sources request it. The following are the defaults:
+completion.trigger.show_on_x_blocked_trigger_characters = { "'", '"', '(', '{', '[' }
 ```
 
 TODO: Find a case where this actually fires : )

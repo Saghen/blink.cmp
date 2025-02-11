@@ -16,10 +16,7 @@ local trigger = {
     show_in_snippet = true,
     show_on_keyword = true,
     show_on_trigger_character = true,
-    show_on_blocked_trigger_characters = function()
-      if vim.api.nvim_get_mode().mode == 'c' then return {} end
-      return { ' ', '\n', '\t' }
-    end,
+    show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
     show_on_accept_on_trigger_character = true,
     show_on_insert_on_trigger_character = true,
     show_on_x_blocked_trigger_characters = { "'", '"', '(', '{', '[' },

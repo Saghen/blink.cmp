@@ -16,8 +16,6 @@
 --- ```
 --- @field default string[] | fun(): string[]
 --- @field per_filetype table<string, string[] | fun(): string[]>
---- @field cmdline string[] | fun(): string[]
---- @field term string[] | fun(): string[]
 ---
 --- @field transform_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
 --- @field min_keyword_length number | fun(ctx: blink.cmp.Context): number Minimum number of characters in the keyword to trigger
@@ -46,15 +44,6 @@ local sources = {
   default = {
     default = { 'lsp', 'path', 'snippets', 'buffer' },
     per_filetype = {},
-    cmdline = function()
-      local type = vim.fn.getcmdtype()
-      -- Search forward and backward
-      if type == '/' or type == '?' then return { 'buffer' } end
-      -- Commands
-      if type == ':' or type == '@' then return { 'cmdline' } end
-      return {}
-    end,
-    term = {},
 
     transform_items = function(_, items) return items end,
     min_keyword_length = 0,
@@ -123,8 +112,6 @@ function sources.validate(config)
   validate('sources', {
     default = { config.default, { 'function', 'table' } },
     per_filetype = { config.per_filetype, 'table' },
-    cmdline = { config.cmdline, { 'function', 'table' } },
-    term = { config.term, { 'function', 'table' } },
 
     transform_items = { config.transform_items, 'function' },
     min_keyword_length = { config.min_keyword_length, { 'number', 'function' } },

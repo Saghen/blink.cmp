@@ -3,7 +3,7 @@
 --- @field auto_show_delay_ms number Delay before showing the documentation window
 --- @field update_delay_ms number Delay before updating the documentation window when selecting a new item, while an existing item is still visible
 --- @field treesitter_highlighting boolean Whether to use treesitter highlighting, disable if you run into performance issues
---- @field draw fun(opts: blink.cmp.CompletionDocumentationDrawOpts): nil Renders the item in the documentation window, by default using an internal treessitter based implementation
+--- @field draw fun(opts: blink.cmp.CompletionDocumentationDrawOpts): nil Renders the item in the documentation window, by default using an internal treesitter based implementation
 --- @field window blink.cmp.CompletionDocumentationWindowConfig
 
 --- @class (exact) blink.cmp.CompletionDocumentationWindowConfig

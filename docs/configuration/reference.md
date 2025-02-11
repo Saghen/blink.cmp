@@ -2,6 +2,7 @@
 
 > [!IMPORTANT]
 > Do not copy the default configuration! Only include options you want to change in your configuration
+
 ```lua
 -- Enables keymaps, completions and signature help when true
 enabled = function() return vim.bo.buftype ~= "prompt" and vim.b.completion ~= false end,
@@ -55,16 +56,7 @@ completion.trigger = {
   -- LSPs can indicate when to show the completion window via trigger characters
   -- however, some LSPs (i.e. tsserver) return characters that would essentially
   -- always show the window. We block these by default.
-  show_on_blocked_trigger_characters = function()
-    if vim.api.nvim_get_mode().mode == 'c' then return {} end
-
-    -- you can also block per filetype, for example:
-    -- if vim.bo.filetype == 'markdown' then
-    --   return { ' ', '\n', '\t', '.', '/', '(', '[' }
-    -- end
-
-    return { ' ', '\n', '\t' }
-  end,
+  show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
 
   -- When both this and show_on_trigger_character are true, will show the completion window
   -- when the cursor comes after a trigger character after accepting an item
@@ -385,6 +377,8 @@ fuzzy = {
 
 ## Sources
 
+See the [mode specific configurations](#mode-specific) for setting sources for `cmdline` and `term`.
+
 ```lua
 sources = {
   -- Static list of providers to enable, or a function to dynamically enable/disable providers based on the context
@@ -394,21 +388,6 @@ sources = {
   per_filetype = {
     -- lua = { 'lsp', 'path' },
   },
-
-  -- By default, we choose providers for the cmdline based on the current cmdtype
-  -- You may disable cmdline completions by replacing this with an empty table
-  cmdline = function()
-    local type = vim.fn.getcmdtype()
-    -- Search forward and backward
-    if type == '/' or type == '?' then return { 'buffer' } end
-    -- Commands
-    if type == ':' or type == '@' then return { 'cmdline' } end
-    return {}
-  end,
-
-  -- By default, we don't enable any terminal sources, but you may try `path` or others
-  -- NOTE: Nightly only! Known bugs in v0.10
-  term = {},
 
   -- Function to use when transforming the items before they're returned for all providers
   -- The default will lower the score for snippets to sort them lower in the list
@@ -568,3 +547,62 @@ appearance = {
   },
 }
 ```
+
+## Mode specific
+
+You may set configurations which will override the default configuration, specifically for that mode. Only properties in the top level config that support `fun()` may be overridden, as well as `sources` and `keymap`.
+
+### Cmdline
+
+```lua
+cmdline = {
+  enabled = true,
+  keymap = nil, -- Inherits from top level `keymap` config when not set
+  sources = {
+    per_cmdtype = {
+      ['/'] = { 'buffer' },
+      ['?'] = { 'buffer' },
+      [':'] = { 'cmdline' },
+      ['@'] = { 'cmdline' },
+    },
+  },
+  completion = {
+    trigger = {
+      show_on_blocked_trigger_characters = {},
+      show_on_x_blocked_trigger_characters = nil, -- Inherits from top level `completion.trigger.show_on_blocked_trigger_characters` config when not set
+    },
+    menu = {
+      auto_show = nil, -- Inherits from top level `completion.menu.auto_show` config when not set
+      draw = {
+        columns = { { 'label', 'label_description', gap = 1 } },
+      },
+    }
+  }
+}
+```
+
+### Terminal
+
+> [!NOTE]
+> Terminal completions are nightly only! Known bugs in v0.10
+
+```lua
+term = {
+  enabled = false,
+  keymap = nil, -- Inherits from top level `keymap` config when not set
+  sources = {
+    default = {},
+  },
+  completion = {
+    trigger = {
+      show_on_blocked_trigger_characters = {},
+      show_on_x_blocked_trigger_characters = nil, -- Inherits from top level `completion.trigger.show_on_blocked_trigger_characters` config when not set
+    },
+    menu = {
+      auto_show = nil, -- Inherits from top level `completion.menu.auto_show` config when not set
+      draw = {
+        columns = { { 'label', 'label_description', gap = 1 } },
+      },
+    }
+  }
+}
