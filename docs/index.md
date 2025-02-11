@@ -36,7 +36,7 @@
 - [@balssh](https://github.com/Balssh) + [@konradmalik](https://github.com/konradmalik) Nix flake, nixpkg and nixvim
 - [@abeldekat](https://github.com/abeldekat) mini.snippets source
 - [@wurli](https://github.com/wurli) Terminal completions
-- [@mikavilpas](https://github.com/mikavilpas) Dot-repeat (`.`)
+- [@mikavilpas](https://github.com/mikavilpas) + [@xzbdmw](https://github.com/xzbdmw) Dot-repeat (`.`)
 
 ## Compared to nvim-cmp
 
