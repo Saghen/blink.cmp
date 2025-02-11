@@ -1,6 +1,5 @@
 --- @param item blink.cmp.CompletionItem
---- @return lsp.TextEdit undo_text_edit, integer[]? undo_cursor_pos The text edit to apply and the original cursor
---- position to move to when undoing the preview,
+--- @return { text_edit: lsp.TextEdit, cursor?: integer[] } undo_text_edit, integer[]? undo_cursor_pos The text edit to apply and the original cursor
 local function preview(item)
   local text_edits_lib = require('blink.cmp.lib.text_edits')
   local text_edit = text_edits_lib.get_from_item(item)
@@ -19,7 +18,7 @@ local function preview(item)
   }
 
   local undo_text_edit = text_edits_lib.get_undo_text_edit(text_edit)
-  text_edits_lib.apply({ text_edit })
+  text_edits_lib.apply(text_edit)
 
   local cursor_moved = false
 

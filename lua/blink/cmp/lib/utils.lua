@@ -137,4 +137,30 @@ function utils.get_char_at_cursor()
   return line:sub(start_col, end_col)
 end
 
+--- Reverses an array
+--- @generic T
+--- @param arr T[]
+--- @return T[]
+function utils.reverse(arr)
+  local reversed = {}
+  for i = #arr, 1, -1 do
+    reversed[#reversed + 1] = arr[i]
+  end
+  return reversed
+end
+
+--- Disables all autocmds for the duration of the callback
+--- @param cb fun()
+function utils.with_no_autocmds(cb)
+  local original_eventignore = vim.opt.eventignore
+  vim.opt.eventignore = 'all'
+
+  local success, result_or_err = pcall(cb)
+
+  vim.opt.eventignore = original_eventignore
+
+  if not success then error(result_or_err) end
+  return result_or_err
+end
+
 return utils

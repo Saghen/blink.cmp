@@ -116,6 +116,8 @@ completion.list = {
 
 ```lua
 completion.accept = {
+  -- Write completions to the `.` register
+  dot_repeat = true,
   -- Create an undo point when accepting a completion item
   create_undo_point = true,
   -- How long to wait for the LSP to resolve the item with additional information before continuing as-is

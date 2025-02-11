@@ -229,7 +229,7 @@ function list.undo_preview()
   local new_cursor_col = context.get_cursor()[2]
   text_edit = text_edits_lib.compensate_for_cursor_movement(text_edit, old_cursor_col, new_cursor_col)
 
-  require('blink.cmp.lib.text_edits').apply({ text_edit })
+  require('blink.cmp.lib.text_edits').apply(text_edit)
   if list.preview_undo.cursor_before ~= nil then
     require('blink.cmp.completion.trigger.context').set_cursor(list.preview_undo.cursor_before)
   end
@@ -258,8 +258,7 @@ function list.accept(opts)
   if item == nil then return false end
 
   list.undo_preview()
-  local accept = require('blink.cmp.completion.accept')
-  accept(list.context, item, function()
+  require('blink.cmp.completion.accept')(list.context, item, function()
     list.accept_emitter:emit({ item = item, context = list.context })
     if opts.callback then opts.callback() end
   end)

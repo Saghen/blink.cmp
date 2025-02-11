@@ -1,39 +1,48 @@
 local config = require('blink.cmp.config')
+local utils = require('blink.cmp.lib.utils')
 local context = require('blink.cmp.completion.trigger.context')
 
 local text_edits = {}
 
 --- Applies one or more text edits to the current buffer, assuming utf-8 encoding
---- @param edits lsp.TextEdit[]
-function text_edits.apply(edits)
+--- @param text_edit lsp.TextEdit # the main text edit (at the cursor). Can be repeated.
+--- @param additional_text_edits? lsp.TextEdit[] # additional text edits that can e.g. add import statements.
+function text_edits.apply(text_edit, additional_text_edits)
+  additional_text_edits = additional_text_edits or {}
+
   local mode = context.get_mode()
-  if mode == 'default' then return vim.lsp.util.apply_text_edits(edits, vim.api.nvim_get_current_buf(), 'utf-8') end
+  assert(mode == 'default' or mode == 'cmdline' or mode == 'term', 'Unsupported mode for text edits: ' .. mode)
 
-  assert(mode == 'cmdline' or mode == 'term', 'Unsupported mode for text edits: ' .. mode)
+  if mode == 'default' then
+    if config.completion.accept.dot_repeat then text_edits.write_to_dot_repeat(text_edit) end
 
-  if mode == 'cmdline' then
-    assert(#edits == 1, 'Cmdline mode only supports one text edit. Contributions welcome!')
-
-    local edit = edits[1]
-    local line = context.get_line()
-    local edited_line = line:sub(1, edit.range.start.character)
-      .. edit.newText
-      .. line:sub(edit.range['end'].character + 1)
-    -- FIXME: for some reason, we have to set the cursor here, instead of later,
-    -- because this will override the cursor position set later
-    vim.fn.setcmdline(edited_line, edit.range.start.character + #edit.newText + 1)
+    local all_edits = utils.shallow_copy(additional_text_edits)
+    table.insert(all_edits, 1, text_edit)
+    vim.lsp.util.apply_text_edits(all_edits, vim.api.nvim_get_current_buf(), 'utf-8')
   end
 
+  if mode == 'cmdline' then
+    assert(#additional_text_edits == 0, 'Cmdline mode only supports one text edit. Contributions welcome!')
+
+    local line = context.get_line()
+    local edited_line = line:sub(1, text_edit.range.start.character)
+      .. text_edit.newText
+      .. line:sub(text_edit.range['end'].character + 1)
+    -- FIXME: for some reason, we have to set the cursor here, instead of later,
+    -- because this will override the cursor position set later
+    vim.fn.setcmdline(edited_line, text_edit.range.start.character + #text_edit.newText + 1)
+  end
+
+  -- TODO: apply dot repeat
   if mode == 'term' then
-    assert(#edits == 1, 'Terminal mode only supports one text edit. Contributions welcome!')
+    assert(#additional_text_edits == 0, 'Terminal mode only supports one text edit. Contributions welcome!')
 
     if vim.bo.channel and vim.bo.channel ~= 0 then
-      local edit = edits[1]
       local cur_col = vim.api.nvim_win_get_cursor(0)[2]
-      local n_replaced = cur_col - edit.range.start.character
+      local n_replaced = cur_col - text_edit.range.start.character
       local backspace_keycode = '\8'
 
-      vim.fn.chansend(vim.bo.channel, backspace_keycode:rep(n_replaced) .. edit.newText)
+      vim.fn.chansend(vim.bo.channel, backspace_keycode:rep(n_replaced) .. text_edit.newText)
     end
   end
 end
@@ -278,6 +287,47 @@ function text_edits.get_apply_end_position(text_edit, additional_text_edits)
 
   -- Convert from 0-indexed to (1, 0)-indexed to match nvim cursor api
   return { end_line + 1, end_col }
+end
+
+----- Dot repeat -----
+
+--- Fill the `.` register so that dot-repeat works. This also changes the
+--- text in the buffer - currently there is no way to do this in Neovim
+--- (only adding new text is supported, but we also want to replace the
+--- current word). See the tracking issue for this feature at
+--- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
+--- @param text_edit lsp.TextEdit
+function text_edits.write_to_dot_repeat(text_edit)
+  assert(
+    text_edit.range.start.line == text_edit.range['end'].line,
+    'Dot repeat only supports one line for now. Contributions welcome!'
+  )
+  local chars_to_delete = text_edit.range['end'].character - text_edit.range.start.character
+  local chars_to_insert = text_edit.newText
+
+  utils.with_no_autocmds(function()
+    -- create temporary buffer for writing
+    local curr_buf = vim.api.nvim_get_current_buf()
+    local buf = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_win_set_buf(0, buf)
+    vim.api.nvim_buf_set_text(0, 0, 0, 0, 0, { '_' .. string.rep('a', chars_to_delete) })
+    vim.api.nvim_win_set_cursor(0, { 1, chars_to_delete + 1 })
+
+    -- emulate builtin completion (dot repeat)
+    local saved_completeopt = vim.opt.completeopt
+    local saved_shortmess = vim.o.shortmess
+    vim.opt.completeopt = ''
+    if not vim.o.shortmess:match('c') then vim.o.shortmess = vim.o.shortmess .. 'c' end
+    vim.fn.complete(1, { '_' .. chars_to_insert })
+    vim.opt.completeopt = saved_completeopt
+    vim.o.shortmess = saved_shortmess
+
+    -- exit completion mode
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false)
+
+    -- restore old buffer
+    vim.api.nvim_win_set_buf(0, curr_buf)
+  end)
 end
 
 return text_edits
