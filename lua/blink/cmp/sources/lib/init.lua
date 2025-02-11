@@ -274,6 +274,8 @@ function sources.get_lsp_capabilities(override, include_nvim_defaults)
               'documentation',
               'detail',
               'additionalTextEdits',
+              'command',
+              'data',
               -- todo: support more properties? should test if it improves latency
             },
           },
