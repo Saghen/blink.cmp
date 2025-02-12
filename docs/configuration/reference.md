@@ -57,6 +57,11 @@ completion.trigger = {
   -- however, some LSPs (i.e. tsserver) return characters that would essentially
   -- always show the window. We block these by default.
   show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
+  -- You can also block per filetype with a function:
+  -- show_on_blocked_trigger_characters = function(ctx)
+  --   if vim.bo.filetype == 'markdown' then return { ' ', '\n', '\t', '.', '/', '(', '[' } end
+  --   return { ' ', '\n', '\t' }
+  -- end,
 
   -- When both this and show_on_trigger_character are true, will show the completion window
   -- when the cursor comes after a trigger character after accepting an item
