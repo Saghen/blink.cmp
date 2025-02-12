@@ -25,7 +25,7 @@ For more common configurations, see the [recipes](../recipes.md).
     -- NOTE: some LSPs may add auto brackets themselves anyway
     accept = { auto_brackets = { enabled = false }, },
 
-    -- Don't select by default, auto insert on selection    
+    -- Don't select by default, auto insert on selection
     list = { selection = { preselect = false, auto_insert = true } },
     -- or set either per mode via a function
     list = { selection = { preselect = function(ctx) return ctx.mode ~= 'cmdline' end } },
