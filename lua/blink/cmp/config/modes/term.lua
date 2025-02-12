@@ -1,15 +1,12 @@
 --- @class blink.cmp.TermConfig : blink.cmp.ModeConfig
---- @field sources blink.cmp.TermSourceConfig
-
---- @class blink.cmp.TermSourceConfig
---- @field default table<string, string[] | fun(): string[]>
+--- @field sources string[] | fun(): string[]
 
 local validate = require('blink.cmp.config.utils').validate
 local term = {
   --- @type blink.cmp.TermConfig
   default = {
     enabled = false,
-    sources = { default = {} },
+    sources = {},
     completion = {
       trigger = {
         show_on_blocked_trigger_characters = {},
@@ -28,17 +25,11 @@ function term.validate(config)
   validate('term', {
     enabled = { config.enabled, 'boolean' },
     keymap = { config.keymap, 'table', true },
-    sources = { config.sources, 'table' },
+    sources = { config.sources, { 'function', 'table' } },
     completion = { config.completion, 'table', true },
   }, config)
 
   if config.keymap ~= nil then require('blink.cmp.config.keymap').validate(config.keymap) end
-
-  if config.sources ~= nil then
-    validate('term.sources', {
-      default = { config.sources.default, 'table' },
-    }, config.sources)
-  end
 
   if config.completion ~= nil then
     validate('term.completion', {

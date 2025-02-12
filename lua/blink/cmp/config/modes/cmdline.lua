@@ -1,22 +1,19 @@
 --- @class blink.cmp.CmdlineConfig : blink.cmp.ModeConfig
---- @field sources blink.cmp.CmdlineSourceConfig
-
---- @class blink.cmp.CmdlineSourceConfig
---- @field per_cmdtype table<string, string[] | fun(): string[]>
+--- @field sources string[] | fun(): string[]
 
 local validate = require('blink.cmp.config.utils').validate
 local cmdline = {
   --- @type blink.cmp.CmdlineConfig
   default = {
     enabled = true,
-    sources = {
-      per_cmdtype = {
-        ['/'] = { 'buffer' },
-        ['?'] = { 'buffer' },
-        [':'] = { 'cmdline' },
-        ['@'] = { 'cmdline' },
-      },
-    },
+    sources = function()
+      local type = vim.fn.getcmdtype()
+      -- Search forward and backward
+      if type == '/' or type == '?' then return { 'buffer' } end
+      -- Commands
+      if type == ':' or type == '@' then return { 'cmdline' } end
+      return {}
+    end,
     completion = {
       trigger = {
         show_on_blocked_trigger_characters = {},
@@ -35,17 +32,11 @@ function cmdline.validate(config)
   validate('cmdline', {
     enabled = { config.enabled, 'boolean' },
     keymap = { config.keymap, 'table', true },
-    sources = { config.sources, 'table' },
+    sources = { config.sources, { 'function', 'table' } },
     completion = { config.completion, 'table', true },
   }, config)
 
   if config.keymap ~= nil then require('blink.cmp.config.keymap').validate(config.keymap) end
-
-  if config.sources ~= nil then
-    validate('cmdline.sources', {
-      per_cmdtype = { config.sources.per_cmdtype, 'table' },
-    }, config.sources)
-  end
 
   if config.completion ~= nil then
     validate('cmdline.completion', {
