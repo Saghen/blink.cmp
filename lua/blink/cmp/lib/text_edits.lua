@@ -310,11 +310,17 @@ function text_edits.write_to_dot_repeat(text_edit)
 
     -- create temporary floating window and buffer for writing
     local buf = vim.api.nvim_create_buf(false, true)
-    local win = vim.api.nvim_open_win(
-      buf,
-      true,
-      { relative = 'win', win = vim.api.nvim_get_current_win(), width = 1, height = 1, row = 0, col = 0 }
-    )
+    vim.bo[buf].bufhidden = 'wipe'
+    vim.bo[buf].buftype = 'nofile'
+    local win = vim.api.nvim_open_win(buf, true, {
+      relative = 'win',
+      win = vim.api.nvim_get_current_win(),
+      width = 1,
+      height = 1,
+      row = 0,
+      col = 0,
+      noautocmd = true,
+    })
     vim.api.nvim_buf_set_text(0, 0, 0, 0, 0, { '_' .. string.rep('a', chars_to_delete) })
     vim.api.nvim_win_set_cursor(0, { 1, chars_to_delete + 1 })
 
@@ -332,7 +338,7 @@ function text_edits.write_to_dot_repeat(text_edit)
     vim.api.nvim_set_current_win(curr_win)
 
     -- exit completion mode (if still open)
-    if vim.fn.pumvisible() == 1 then
+    if vim.api.nvim_get_mode().mode:match('i') then
       vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false)
     end
   end)
