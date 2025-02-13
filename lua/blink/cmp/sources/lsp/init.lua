@@ -26,15 +26,29 @@ end
 
 function lsp:get_completions(context, callback)
   local completion_lib = require('blink.cmp.sources.lsp.completion')
+  local inlinecompletion_lib = require('blink.cmp.sources.lsp.inlinecompletion')
   local clients = vim.tbl_filter(
     function(client) return client.server_capabilities and client.server_capabilities.completionProvider end,
     vim.lsp.get_clients({ bufnr = 0, method = 'textDocument/completion' })
   )
 
+  local inline_clients = vim.tbl_filter(
+    function(client) return client.server_capabilities and client.server_capabilities.inlineCompletionProvider end,
+    vim.lsp.get_clients({ bufnr = 0, method = 'textDocument/inlineCompletion' })
+  )
+
   -- TODO: implement a timeout before returning the menu as-is. In the future, it would be neat
   -- to detect slow LSPs and consistently run them async
   local task = async.task
-    .await_all(vim.tbl_map(function(client) return completion_lib.get_completion_for_client(context, client) end, clients))
+    .await_all(
+      vim.list_extend(
+        vim.tbl_map(function(client) return completion_lib.get_completion_for_client(context, client) end, clients),
+        vim.tbl_map(
+          function(client) return inlinecompletion_lib.get_inlinecompletion_for_client(context, client) end,
+          inline_clients
+        )
+      )
+    )
     :map(function(responses)
       local final = { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
       for _, response in ipairs(responses) do
@@ -58,7 +72,9 @@ end
 
 function lsp:resolve(item, callback)
   local client = vim.lsp.get_client_by_id(item.client_id)
-  if client == nil or not client.server_capabilities.completionProvider.resolveProvider then
+  local resolveProvider = client.server_capabilities.completionProvider
+    and client.server_capabilities.completionProvider.resolveProvider
+  if client == nil or not resolveProvider or item.inline then
     callback(item)
     return
   end
