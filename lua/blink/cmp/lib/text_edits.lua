@@ -299,11 +299,17 @@ end
 --- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
 --- @param text_edit lsp.TextEdit
 function text_edits.write_to_dot_repeat(text_edit, exit_completion_mode)
-  assert(
-    text_edit.range.start.line == text_edit.range['end'].line,
-    'Dot repeat only supports one line for now. Contributions welcome!'
+  local chars_to_delete = #table.concat(
+    vim.api.nvim_buf_get_text(
+      0,
+      text_edit.range.start.line,
+      text_edit.range.start.character,
+      text_edit.range['end'].line,
+      text_edit.range['end'].character,
+      {}
+    ),
+    '\n'
   )
-  local chars_to_delete = text_edit.range['end'].character - text_edit.range.start.character
   local chars_to_insert = text_edit.newText
 
   utils.with_no_autocmds(function()
