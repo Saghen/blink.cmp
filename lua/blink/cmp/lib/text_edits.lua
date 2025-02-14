@@ -294,9 +294,10 @@ end
 local dot_repeat_time_hack = 0
 local has_setup_dot_repeat_hack_mappings = false
 --- HACK: other plugins may use feedkeys to switch modes, with `i` set. This would
---- cause neovim to run those feedkeys first, causing our <C-x><C-z> to run in the wrong mode.
---- In normal and visual mode, these keys cause neovim to go to the background.
---- So we remap `<C-x><C-z>` to do nothing if we've recently run the dot repeat.
+--- cause neovim to run those feedkeys first, potentially causing our <C-x><C-z> to run
+--- in the wrong mode. I.e. if the plugin runs `<Esc>v` (luasnip)
+--- In normal and visual mode, these keys cause neovim to go to the background
+--- so we remap `<C-x><C-z>` to do nothing if we've recently run the dot repeat.
 --- TODO: fallbacks
 function text_edits.ensure_mappings_hack_for_dot_repeat()
   dot_repeat_time_hack = vim.uv.hrtime()
