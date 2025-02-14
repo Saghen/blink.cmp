@@ -159,29 +159,6 @@ fuzzy = {
 }
 ```
 
-### Use `<Tab>` key for both accept suggestions and jump to next snippet placeholder
-
-You may want to use `<Tab>` key for both accept suggestions and jump to next snippet placeholder. And use `<S-Tab>` to jump to previous snippet placeholder. This is similar to the vscode's completion behavior.
-
-```lua
-keymap = {
-  -- Use <Tab> to accept if there are suggestions, or jump to next placeholder if already in an expanded snippet.
-  ["<Tab>"] = {
-    function(cmp)
-      if cmp.snippet_active() then
-        return cmp.accept()
-      else
-        return cmp.select_and_accept()
-      end
-    end,
-    "snippet_forward",
-    "fallback",
-  },
-  -- Use <S-Tab> to jump to previous placeholder if already in an expanded snippet.
-  ["<S-Tab>"] = { "snippet_backward", "fallback" },
-}
-```
-
 ### Don't accept suggestion if cursor previous char is whitespace
 
 When using `<Tab>` key for both accept suggestions and navigate to next snippet placeholder, you may want to only accept when cursor's previous char (on the left side) is a non-whitespace character, and fallback to a `tab` character if previous char is whtiespace.
