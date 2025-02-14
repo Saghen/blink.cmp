@@ -5,16 +5,17 @@ local context = require('blink.cmp.completion.trigger.context')
 local text_edits = {}
 
 --- Applies one or more text edits to the current buffer, assuming utf-8 encoding
---- @param text_edit lsp.TextEdit # the main text edit (at the cursor). Can be repeated.
---- @param additional_text_edits? lsp.TextEdit[] # additional text edits that can e.g. add import statements.
-function text_edits.apply(text_edit, additional_text_edits)
+--- @param text_edit lsp.TextEdit The main text edit (at the cursor). Can be dot repeated.
+--- @param additional_text_edits? lsp.TextEdit[] Additional text edits that can e.g. add import statements.
+--- @param exit_completion_mode? boolean Whether to exit completion mode after applying the text edit. Defaults to true. Disable if expanding a snippet immediately after.
+function text_edits.apply(text_edit, additional_text_edits, exit_completion_mode)
   additional_text_edits = additional_text_edits or {}
 
   local mode = context.get_mode()
   assert(mode == 'default' or mode == 'cmdline' or mode == 'term', 'Unsupported mode for text edits: ' .. mode)
 
   if mode == 'default' then
-    if config.completion.accept.dot_repeat then text_edits.write_to_dot_repeat(text_edit) end
+    if config.completion.accept.dot_repeat then text_edits.write_to_dot_repeat(text_edit, exit_completion_mode) end
 
     local all_edits = utils.shallow_copy(additional_text_edits)
     table.insert(all_edits, 1, text_edit)
@@ -297,7 +298,7 @@ end
 --- current word). See the tracking issue for this feature at
 --- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
 --- @param text_edit lsp.TextEdit
-function text_edits.write_to_dot_repeat(text_edit)
+function text_edits.write_to_dot_repeat(text_edit, exit_completion_mode)
   assert(
     text_edit.range.start.line == text_edit.range['end'].line,
     'Dot repeat only supports one line for now. Contributions welcome!'
@@ -338,10 +339,12 @@ function text_edits.write_to_dot_repeat(text_edit)
     vim.api.nvim_set_current_win(curr_win)
 
     -- exit completion mode (if still open)
-    if vim.api.nvim_get_mode().mode:match('i') then
-      vim.schedule(
-        function() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false) end
-      )
+    -- HACK: when expanding a snippet immediately after, since feedkeys applies after the lua main loop,
+    -- we may not be in insert mode anymore. Thus, this key combination may cause neovim to be sent to
+    -- the background. So we provide an opt-out. This is unfortunately quite hacky and there's likely
+    -- more edge cases.
+    if exit_completion_mode ~= false then
+      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false)
     end
   end)
 end

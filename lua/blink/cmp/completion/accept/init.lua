@@ -75,7 +75,7 @@ local function accept(ctx, item, callback)
         -- so we empty the newText and apply
         local temp_text_edit = vim.deepcopy(item.textEdit)
         temp_text_edit.newText = ''
-        text_edits_lib.apply(temp_text_edit, all_text_edits)
+        text_edits_lib.apply(temp_text_edit, all_text_edits, false)
 
         -- Expand the snippet
         require('blink.cmp.config').snippets.expand(item.textEdit.newText)
