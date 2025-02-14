@@ -7,15 +7,14 @@ local text_edits = {}
 --- Applies one or more text edits to the current buffer, assuming utf-8 encoding
 --- @param text_edit lsp.TextEdit The main text edit (at the cursor). Can be dot repeated.
 --- @param additional_text_edits? lsp.TextEdit[] Additional text edits that can e.g. add import statements.
---- @param exit_completion_mode? boolean Whether to exit completion mode after applying the text edit. Defaults to true. Disable if expanding a snippet immediately after.
-function text_edits.apply(text_edit, additional_text_edits, exit_completion_mode)
+function text_edits.apply(text_edit, additional_text_edits)
   additional_text_edits = additional_text_edits or {}
 
   local mode = context.get_mode()
   assert(mode == 'default' or mode == 'cmdline' or mode == 'term', 'Unsupported mode for text edits: ' .. mode)
 
   if mode == 'default' then
-    if config.completion.accept.dot_repeat then text_edits.write_to_dot_repeat(text_edit, exit_completion_mode) end
+    if config.completion.accept.dot_repeat then text_edits.write_to_dot_repeat(text_edit) end
 
     local all_edits = utils.shallow_copy(additional_text_edits)
     table.insert(all_edits, 1, text_edit)
@@ -292,13 +291,40 @@ end
 
 ----- Dot repeat -----
 
+local dot_repeat_time_hack = 0
+local has_setup_dot_repeat_hack_mappings = false
+--- HACK: other plugins may use feedkeys to switch modes, with `i` set. This would
+--- cause neovim to run those feedkeys first, causing our <C-x><C-z> to run in the wrong mode.
+--- In normal and visual mode, these keys cause neovim to go to the background.
+--- So we remap `<C-x><C-z>` to do nothing if we've recently run the dot repeat.
+--- TODO: fallbacks
+function text_edits.ensure_mappings_hack_for_dot_repeat()
+  dot_repeat_time_hack = vim.uv.hrtime()
+
+  if has_setup_dot_repeat_hack_mappings then return end
+  has_setup_dot_repeat_hack_mappings = true
+
+  local opts = {
+    callback = function()
+      if (vim.uv.hrtime() - dot_repeat_time_hack) > 200e6 then return '<C-x><C-z>' end
+      return ''
+    end,
+    silent = true,
+    replace_keycodes = true,
+    expr = true,
+  }
+  vim.api.nvim_set_keymap('n', '<C-x><C-z>', '', opts)
+  vim.api.nvim_set_keymap('v', '<C-x><C-z>', '', opts)
+  vim.api.nvim_set_keymap('s', '<C-x><C-z>', '', opts)
+end
+
 --- Fill the `.` register so that dot-repeat works. This also changes the
 --- text in the buffer - currently there is no way to do this in Neovim
 --- (only adding new text is supported, but we also want to replace the
 --- current word). See the tracking issue for this feature at
 --- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
 --- @param text_edit lsp.TextEdit
-function text_edits.write_to_dot_repeat(text_edit, exit_completion_mode)
+function text_edits.write_to_dot_repeat(text_edit)
   local chars_to_delete = #table.concat(
     vim.api.nvim_buf_get_text(
       0,
@@ -345,13 +371,9 @@ function text_edits.write_to_dot_repeat(text_edit, exit_completion_mode)
     vim.api.nvim_set_current_win(curr_win)
 
     -- exit completion mode (if still open)
-    -- HACK: when expanding a snippet immediately after, since feedkeys applies after the lua main loop,
-    -- we may not be in insert mode anymore. Thus, this key combination may cause neovim to be sent to
-    -- the background. So we provide an opt-out. This is unfortunately quite hacky and there's likely
-    -- more edge cases.
-    if exit_completion_mode ~= false then
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false)
-    end
+    text_edits.ensure_mappings_hack_for_dot_repeat()
+    -- we use `m` so that we trigger our hack to avoid going to background
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'im', false)
   end)
 end
 
