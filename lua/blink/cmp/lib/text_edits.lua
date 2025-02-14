@@ -291,33 +291,27 @@ end
 
 ----- Dot repeat -----
 
-local dot_repeat_time_hack = 0
-local has_setup_dot_repeat_hack_mappings = false
---- HACK: other plugins may use feedkeys to switch modes, with `i` set. This would
+--- Other plugins may use feedkeys to switch modes, with `i` set. This would
 --- cause neovim to run those feedkeys first, potentially causing our <C-x><C-z> to run
 --- in the wrong mode. I.e. if the plugin runs `<Esc>v` (luasnip)
+---
 --- In normal and visual mode, these keys cause neovim to go to the background
---- so we remap `<C-x><C-z>` to do nothing if we've recently run the dot repeat.
---- TODO: fallbacks
-function text_edits.ensure_mappings_hack_for_dot_repeat()
-  dot_repeat_time_hack = vim.uv.hrtime()
-
-  if has_setup_dot_repeat_hack_mappings then return end
-  has_setup_dot_repeat_hack_mappings = true
-
-  local opts = {
-    callback = function()
-      if (vim.uv.hrtime() - dot_repeat_time_hack) > 200e6 then return '<C-x><C-z>' end
-      return ''
-    end,
-    silent = true,
-    replace_keycodes = true,
-    expr = true,
-  }
-  vim.api.nvim_set_keymap('n', '<C-x><C-z>', '', opts)
-  vim.api.nvim_set_keymap('v', '<C-x><C-z>', '', opts)
-  vim.api.nvim_set_keymap('s', '<C-x><C-z>', '', opts)
-end
+--- so we create our own mapping that only runs `<C-x><C-z>` if we're in insert mode
+local dot_repeat_hack_name = '<Plug>BlinkCmpDotRepeatHack'
+local opts = {
+  callback = function()
+    if vim.api.nvim_get_mode().mode:match('i') then return '<C-x><C-z>' end
+    return ''
+  end,
+  silent = true,
+  replace_keycodes = true,
+  expr = true,
+}
+vim.api.nvim_set_keymap('i', dot_repeat_hack_name, '', opts)
+vim.api.nvim_set_keymap('n', dot_repeat_hack_name, '', opts)
+vim.api.nvim_set_keymap('s', dot_repeat_hack_name, '', opts)
+vim.api.nvim_set_keymap('v', dot_repeat_hack_name, '', opts)
+vim.api.nvim_set_keymap('c', dot_repeat_hack_name, '', opts)
 
 --- Fill the `.` register so that dot-repeat works. This also changes the
 --- text in the buffer - currently there is no way to do this in Neovim
@@ -371,10 +365,8 @@ function text_edits.write_to_dot_repeat(text_edit)
     vim.api.nvim_win_close(win, true)
     vim.api.nvim_set_current_win(curr_win)
 
-    -- exit completion mode (if still open)
-    text_edits.ensure_mappings_hack_for_dot_repeat()
-    -- we use `m` so that we trigger our hack to avoid going to background
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'im', false)
+    -- exit completion mode
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Plug>BlinkCmpDotRepeatHack', true, true, true), 'in', false)
   end)
 end
 
