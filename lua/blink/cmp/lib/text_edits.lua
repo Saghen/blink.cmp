@@ -339,7 +339,9 @@ function text_edits.write_to_dot_repeat(text_edit)
 
     -- exit completion mode (if still open)
     if vim.api.nvim_get_mode().mode:match('i') then
-      vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false)
+      vim.schedule(
+        function() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<C-x><C-z>', true, true, true), 'in', false) end
+      )
     end
   end)
 end
