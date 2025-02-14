@@ -14,7 +14,7 @@ enabled = function()
 end,
 ```
 
-### Disable completion in *only* shell command mode
+### Disable completion in _only_ shell command mode
 
 Windows when inside of git bash or WSL may cause a hang with shell commands. This disables cmdline completions only when running shell commands ( i.e. [ ':!' , ':%!' ] ), but still allows completion in other command modes ( i.e. [ ':' , ':help', '/' , '?' ] etc ).
 
@@ -44,8 +44,8 @@ signature = { window = { border = 'single' } },
 ### Change selection type per mode
 
 ```lua
-completion = { 
-  list = { 
+completion = {
+  list = {
     selection = {
       preselect = function(ctx) return ctx.mode ~= 'cmdline' end,
       auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end
@@ -57,7 +57,7 @@ completion = {
 ### Don't show completion menu automatically in cmdline mode
 
 ```lua
-completion = { 
+completion = {
   menu = { auto_show = function(ctx) return ctx.mode ~= 'cmdline' end }
 }
 ```
@@ -159,6 +159,54 @@ fuzzy = {
 }
 ```
 
+### Don't accept suggestion if cursor previous char is whitespace (similar to coc.nvim)
+
+When using `<Tab>` key for both accept suggestions and navigate to next snippet placeholder, you may want to only accept when cursor's previous char (on the left side) is a non-whitespace character, and fallback to a `tab` character if previous char is whtiespace.
+
+> Note: This is similar to the behavior in [coc.nvim](https://github.com/neoclide/coc.nvim?#example-vim-configuration) example configuration, implemented by the `CheckBackspace` function:
+>
+> ```vim
+> function! CheckBackspace() abort
+>   let col = col('.') - 1
+>   return !col || getline('.')[col - 1]  =~# '\s'
+> endfunction
+> ```
+
+```lua
+keymap = {
+  -- Use <Tab> to accept if there are suggestions, or jump to next placeholder if already in an expanded snippet.
+  ["<Tab>"] = {
+    function(cmp)
+      if cmp.snippet_active() then
+        return cmp.accept()
+      else
+        -- Previous char index before cursor, start from 1.
+        local col = vim.fn.col(".") - 1
+
+        -- If previous char is not the beginning of the line.
+        if col > 0 then
+          local line = vim.fn.getline(".")
+          if string.len(line) >= col then
+            local ch = string.sub(line, col, col)
+
+            -- If previous char is not whitespace, then accept the suggestion.
+            if type(ch) == "string" and string.match(ch, "%s") == nil then
+              return cmp.select_and_accept()
+            end
+          end
+        end
+
+        -- Otherwise don't accept the suggestion, since user wants to input the <tab> character.
+      end
+    end,
+    "snippet_forward",
+    "fallback",
+  },
+  -- Use <S-Tab> to jump to previous placeholder if already in an expanded snippet.
+  ["<S-Tab>"] = { "snippet_backward", "fallback" },
+}
+```
+
 ## Completion menu drawing
 
 ### `mini.icons`
@@ -241,7 +289,7 @@ completion = {
 
 ### Buffer completion from all open buffers
 
-The default behavior is to only show completions from **visible** "normal" buffers (i.e. it woudldn't include neo-tree). This will instead show completions from all buffers, even if they're not visible on screen. Note that the performance impact of this has not been tested. 
+The default behavior is to only show completions from **visible** "normal" buffers (i.e. it woudldn't include neo-tree). This will instead show completions from all buffers, even if they're not visible on screen. Note that the performance impact of this has not been tested.
 
 ```lua
 sources = {
