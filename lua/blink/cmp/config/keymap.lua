@@ -133,6 +133,9 @@ local keymap = {
 
 --- @param config blink.cmp.KeymapConfig
 function keymap.validate(config)
+  assert(config.cmdline == nil, '`keymap.cmdline` has been replaced with `cmdline.keymap`')
+  assert(config.term == nil, '`keymap.term` has been replaced with `term.keymap`')
+
   local commands = {
     'fallback',
     'show',
