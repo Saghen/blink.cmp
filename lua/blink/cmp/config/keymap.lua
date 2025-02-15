@@ -120,13 +120,9 @@
 --- ```
 ---
 --- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
---- @class (exact) blink.cmp.BaseKeymapConfig
+--- @class (exact) blink.cmp.KeymapConfig
 --- @field preset? blink.cmp.KeymapPreset
 --- @field [string] blink.cmp.KeymapCommand[] Table of keys => commands[]
-
---- @class (exact) blink.cmp.KeymapConfig : blink.cmp.BaseKeymapConfig
---- @field cmdline? blink.cmp.BaseKeymapConfig Optionally, define a separate keymap for cmdline
---- @field term? blink.cmp.BaseKeymapConfig Optionally, define a separate keymap for cmdline
 
 local keymap = {
   --- @type blink.cmp.KeymapConfig
@@ -162,12 +158,8 @@ function keymap.validate(config)
 
   local validation_schema = {}
   for key, value in pairs(config) do
-    -- nested cmdline/term keymap
-    if key == 'cmdline' or key == 'term' then
-      keymap.validate(value)
-
     -- preset
-    elseif key == 'preset' then
+    if key == 'preset' then
       validation_schema[key] = {
         value,
         function(preset) return vim.tbl_contains(presets, preset) end,

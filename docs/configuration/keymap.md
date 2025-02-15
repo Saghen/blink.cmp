@@ -73,25 +73,21 @@ keymap = {
 
 ## Cmdline and Terminal
 
-You may set a separate keymap for cmdline by defining `keymap.cmdline`, with an identical structure to `keymap`.
+You may set a separate keymap for cmdline by defining `cmdline.keymap`, with an identical structure to `keymap`. The same applies for terminal keymaps, under `term.keymap`.
 
 ```lua
-keymap = {
-  preset = 'default',
+cmdline.keymap = {
+  preset = 'enter',
+
+  -- OPTIONAL: sets <CR> to accept the item and run the command immediately
+  -- use `select_accept_and_enter` to accept the item or the first item if none are selected
+  ['<CR>'] = { 'accept_and_enter', 'fallback' },
+
   ...
-  cmdline = {
-    preset = 'enter',
-
-    -- OPTIONAL: sets <CR> to accept the item and run the command immediately
-    -- use `select_accept_and_enter` to accept the item or the first item if none are selected
-    ['<CR>'] = { 'accept_and_enter', 'fallback' },
-
-    ...
-  },
-  term = {
-    preset = 'super-tab',
-    ...
-  }
+},
+term.keymap = {
+  preset = 'super-tab',
+  ...
 }
 ```
 

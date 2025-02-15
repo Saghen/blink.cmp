@@ -50,9 +50,11 @@ function sources.get_all_providers()
 end
 
 function sources.get_enabled_provider_ids(mode)
-  local enabled_providers = mode ~= 'default' and config.sources[mode]
+  local enabled_providers = mode == 'cmdline' and config.cmdline.sources
+    or mode == 'term' and config.term.sources
     or config.sources.per_filetype[vim.bo.filetype]
     or config.sources.default
+
   if type(enabled_providers) == 'function' then return enabled_providers() end
   --- @cast enabled_providers string[]
   return enabled_providers

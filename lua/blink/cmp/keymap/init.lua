@@ -26,7 +26,7 @@ function keymap.merge_mappings(existing_mappings, new_mappings)
   return merged_mappings
 end
 
----@param keymap_config blink.cmp.BaseKeymapConfig
+---@param keymap_config blink.cmp.KeymapConfig
 function keymap.get_mappings(keymap_config)
   local mappings = vim.deepcopy(keymap_config)
 
@@ -63,17 +63,15 @@ function keymap.setup()
     require('blink.cmp.keymap.apply').keymap_to_current_buffer(mappings)
   end
 
-  -- Apply cmdline keymaps since they're global, if any sources are defined
-  local cmdline_sources = require('blink.cmp.config').sources.cmdline
-  if type(cmdline_sources) ~= 'table' or #cmdline_sources > 0 then
-    local cmdline_mappings = keymap.get_mappings(config.keymap.cmdline or config.keymap)
+  -- Apply cmdline keymaps
+  if config.cmdline.enabled then
+    local cmdline_mappings = keymap.get_mappings(config.cmdline.keymap or config.keymap)
     require('blink.cmp.keymap.apply').cmdline_keymaps(cmdline_mappings)
   end
 
   -- Apply term keymaps
-  local term_sources = require('blink.cmp.config').sources.term
-  if type(term_sources) ~= 'table' or #term_sources > 0 then
-    local term_mappings = keymap.get_mappings(config.keymap.term or config.keymap)
+  if config.term.enabled then
+    local term_mappings = keymap.get_mappings(config.term.keymap or config.keymap)
     require('blink.cmp.keymap.apply').term_keymaps(term_mappings)
   end
 end
