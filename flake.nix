@@ -38,7 +38,7 @@
           # nvim source files
           # all that are not nix, nor rust, nor other ignored files
           nvimFs =
-            fs.difference ./. (fs.unions [ nixFs rustFs ./docs ./repro.lua ]);
+            fs.difference ./. (fs.unions [ nixFs rustFs ./doc ./repro.lua ]);
           version = "0.11.0";
         in {
           blink-fuzzy-lib = let

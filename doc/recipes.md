@@ -279,9 +279,6 @@ end
 
 ### Hide snippets after trigger character
 
-> [!NOTE]
-> Untested, might not work well, please open a PR if you find a better solution!
-
 Trigger characters are defined by the sources. For example, for Lua, the trigger characters are `.`, `"`, `'`.
 
 ```lua

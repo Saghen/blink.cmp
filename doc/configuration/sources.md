@@ -1,10 +1,10 @@
 ---
 title: Sources
 ---
-# Sources <Badge type="info"><a href="./reference#sources">Go to default configuration</a></Badge>
-
-> [!NOTE]
-> Check out the [recipes](../recipes.md) for some common configurations
+# Sources<!-- panvimdoc-ignore-start --> <Badge type="info"><a href="./reference#sources">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
+::: info
+Check out the [recipes](../recipes.md) for some common configurations
+:::
 
 Blink provides a sources interface, modelled after LSPs, for getting completion items, trigger characters, documentation and signature help. The `lsp`, `path`, `snippets`, `luasnip`, `buffer`, and `omni` sources are built-in. You may add additional [community sources](#community-sources) as well. Check out [writing sources](../development/writing-sources.md) to learn how to write your own!
 
@@ -53,8 +53,9 @@ sources.providers.lsp = {
 
 ## Terminal and Cmdline Sources
 
-> [!NOTE]
-> Terminal completions are nightly only! Known bugs in v0.10. Cmdline completions are supported on all versions
+::: info
+Terminal completions are nightly only! Known bugs in v0.10. Cmdline completions are supported on all versions
+:::
 
 You may use `cmdline` and `term` sources via the `cmdline.sources` and `term.sources` tables. You may see the defaults in the [reference](./reference.md#mode-specific). There's no source for shell completions at the moment, [contributions welcome](https://github.com/Saghen/blink.cmp/issues/1149)! 
 

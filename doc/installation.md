@@ -1,8 +1,9 @@
 # Installation
 
-> [!IMPORTANT]
-> Blink uses a prebuilt binary for the fuzzy matcher which will be downloaded automatically when on a tag.
-> You may build from source with rust nightly. See the [fuzzy documentation](./configuration/fuzzy.md) for more information.
+::: warning
+Blink uses a prebuilt binary for the fuzzy matcher which will be downloaded automatically when on a tag.
+You may build from source with rust nightly. See the [fuzzy documentation](./configuration/fuzzy.md) for more information.
+:::
 
 ## Requirements
 
@@ -57,9 +58,10 @@
 }
 ```
 
-> [!IMPORTANT]
-> On Neovim 0.11+ and Blink.cmp 0.10+ with `vim.lsp.config`, you may skip this step.
-> This is still required when using `nvim-lspconfig` until [this issue is completed](https://github.com/neovim/nvim-lspconfig/issues/3494)
+::: warning
+On Neovim 0.11+ and Blink.cmp 0.10+ with `vim.lsp.config`, you may skip this step.
+This is still required when using `nvim-lspconfig` until [this issue is completed](https://github.com/neovim/nvim-lspconfig/issues/3494)
+:::
 
 Setting capabilities for `nvim-lspconfig`:
 

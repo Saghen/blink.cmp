@@ -4,7 +4,9 @@ Blink cmp has *a lot* of configuration options, the following code block highlig
 
 For more common configurations, see the [recipes](../recipes.md).
 
-> [!IMPORTANT] Do not copy this entire configuration! It contains only non-default options
+::: warning
+**Do not copy this entire configuration! It contains only non-default options**
+:::
 
 ```lua
 {

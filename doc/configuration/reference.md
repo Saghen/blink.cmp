@@ -1,7 +1,8 @@
 # Reference
 
-> [!IMPORTANT]
-> Do not copy the default configuration! Only include options you want to change in your configuration
+::: warning
+Do not copy the default configuration! Only include options you want to change in your configuration
+:::
 
 ```lua
 -- Enables keymaps, completions and signature help when true
@@ -583,8 +584,9 @@ cmdline = {
 
 ### Terminal
 
-> [!NOTE]
-> Terminal completions are nightly only! Known bugs in v0.10
+::: warning
+Terminal completions are nightly only! Known bugs in v0.10
+:::
 
 ```lua
 term = {

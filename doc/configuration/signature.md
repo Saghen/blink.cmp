@@ -1,10 +1,11 @@
 ---
 title: Signature
 ---
-# Signature <Badge type="info"><a href="./reference#signature">Go to default configuration</a></Badge>
+# Signature<!-- panvimdoc-ignore-start --> <Badge type="info"><a href="./reference#signature">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
 
-> [!IMPORTANT]
-> This feature is *experimental*, contributions welcome!
+::: info
+This feature is *experimental*, [contributions welcome](https://github.com/Saghen/blink.cmp/issues/1071)!
+:::
 
 Blink supports signature help, automatically triggered when typing trigger characters, defined by the LSP, such as `(` for `lua`. The menu will be updated when pressing a retrigger character, such as `,`. Due to it being experimental, this feature is opt-in.
 
