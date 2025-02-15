@@ -90,9 +90,6 @@ local function accept(ctx, item, callback)
         if ctx.get_mode() ~= 'term' then ctx.set_cursor(new_cursor) end
       end
 
-      return brackets_status
-    end)
-    :map(function(brackets_status)
       -- Let the source execute the item itself
       sources.execute(ctx, item):map(function()
         -- Check semantic tokens for brackets, if needed, and apply additional text edits
