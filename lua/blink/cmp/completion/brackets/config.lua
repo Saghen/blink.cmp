@@ -2,7 +2,8 @@ return {
   -- stylua: ignore
   blocked_filetypes = {
     'sql', 'ruby', 'perl', 'lisp', 'scheme', 'clojure',
-    'prolog', 'vb', 'elixir', 'smalltalk', 'applescript'
+    'prolog', 'vb', 'elixir', 'smalltalk', 'applescript',
+    'elm'
   },
   per_filetype = {
     -- languages with a space
