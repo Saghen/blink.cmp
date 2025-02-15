@@ -22,7 +22,7 @@ jobs:
 
       - name: Build
         run: npm ci && npm run build
-        working-directory: docs
+        working-directory: doc
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
