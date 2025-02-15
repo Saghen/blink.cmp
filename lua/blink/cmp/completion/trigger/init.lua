@@ -139,8 +139,8 @@ function trigger.activate()
     on_insert_leave = function() trigger.hide() end,
   })
 
+  trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
   if root_config.cmdline.enabled then
-    trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
     trigger.cmdline_events:listen({
       on_char_added = on_char_added,
       on_cursor_moved = on_cursor_moved,
@@ -148,10 +148,10 @@ function trigger.activate()
     })
   end
 
+  trigger.term_events = require('blink.cmp.lib.term_events').new({
+    has_context = function() return trigger.context ~= nil end,
+  })
   if root_config.term.enabled then
-    trigger.term_events = require('blink.cmp.lib.term_events').new({
-      has_context = function() return trigger.context ~= nil end,
-    })
     trigger.term_events:listen({
       on_char_added = on_char_added,
       on_term_leave = function() trigger.hide() end,
