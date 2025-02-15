@@ -1,3 +1,18 @@
+## [0.12.1](https://github.com/Saghen/blink.cmp/compare/v0.12.0...v0.12.1) (2025-02-15)
+
+### Bug Fixes
+
+* always create event listeners for cmdline/term ([8a2356a](https://github.com/Saghen/blink.cmp/commit/8a2356a1084e8ec8f6e0707df248b2ce0553a940))
+* check `cmdline/term.enabled` before listening to events ([d24d446](https://github.com/Saghen/blink.cmp/commit/d24d4463595ab040dd3cf3f12a9589b00185b7d5))
+* check if mode-specific configs are enabled before adding sources ([#1231](https://github.com/Saghen/blink.cmp/issues/1231)) ([19f60a6](https://github.com/Saghen/blink.cmp/commit/19f60a675eaaf4b160bd6458bfd72fc005da5b3f))
+
+## [0.12.1](https://github.com/Saghen/blink.cmp/compare/v0.12.0...v0.12.1) (2025-02-15)
+
+### Bug Fixes
+
+* always create event listeners for cmdline/term ([8a2356a](https://github.com/Saghen/blink.cmp/commit/8a2356a1084e8ec8f6e0707df248b2ce0553a940))
+* check `cmdline/term.enabled` before listening to events ([d24d446](https://github.com/Saghen/blink.cmp/commit/d24d4463595ab040dd3cf3f12a9589b00185b7d5))
+* check if mode-specific configs are enabled before adding sources ([#1231](https://github.com/Saghen/blink.cmp/issues/1231)) ([19f60a6](https://github.com/Saghen/blink.cmp/commit/19f60a675eaaf4b160bd6458bfd72fc005da5b3f))
 ## [0.12.0](https://github.com/Saghen/blink.cmp/compare/v0.11.0...v0.12.0) (2025-02-15)
 
 ### Highlights
