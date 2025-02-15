@@ -30,7 +30,8 @@
 --- @field providers? string[]
 --- @field initial_selected_item_idx? number
 
-local config = require('blink.cmp.config').completion.trigger
+local root_config = require('blink.cmp.config')
+local config = root_config.completion.trigger
 local context = require('blink.cmp.completion.trigger.context')
 local utils = require('blink.cmp.lib.utils')
 local fuzzy = require('blink.cmp.fuzzy')
@@ -138,20 +139,24 @@ function trigger.activate()
     on_insert_leave = function() trigger.hide() end,
   })
 
-  trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
-  trigger.cmdline_events:listen({
-    on_char_added = on_char_added,
-    on_cursor_moved = on_cursor_moved,
-    on_leave = function() trigger.hide() end,
-  })
+  if root_config.cmdline.enabled then
+    trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
+    trigger.cmdline_events:listen({
+      on_char_added = on_char_added,
+      on_cursor_moved = on_cursor_moved,
+      on_leave = function() trigger.hide() end,
+    })
+  end
 
-  trigger.term_events = require('blink.cmp.lib.term_events').new({
-    has_context = function() return trigger.context ~= nil end,
-  })
-  trigger.term_events:listen({
-    on_char_added = on_char_added,
-    on_term_leave = function() trigger.hide() end,
-  })
+  if root_config.term.enabled then
+    trigger.term_events = require('blink.cmp.lib.term_events').new({
+      has_context = function() return trigger.context ~= nil end,
+    })
+    trigger.term_events:listen({
+      on_char_added = on_char_added,
+      on_term_leave = function() trigger.hide() end,
+    })
+  end
 end
 
 function trigger.resubscribe()
