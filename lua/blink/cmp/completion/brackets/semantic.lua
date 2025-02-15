@@ -1,3 +1,4 @@
+local async = require('blink.cmp.lib.async')
 local config = require('blink.cmp.config').completion.accept.auto_brackets
 local utils = require('blink.cmp.completion.brackets.utils')
 
@@ -8,16 +9,15 @@ local utils = require('blink.cmp.completion.brackets.utils')
 --- @field callback fun()
 
 local semantic = {
-  --- @type uv.uv_timer_t
-  timer = assert(vim.uv.new_timer()),
+  --- @type uv_timer_t
+  timer = assert(vim.uv.new_timer(), 'Failed to create timer for semantic token resolution'),
   --- @type blink.cmp.SemanticRequest | nil
   request = nil,
 }
 
-vim.api.nvim_create_autocmd({ 'LspTokenUpdate' }, {
+vim.api.nvim_create_autocmd('LspTokenUpdate', {
   callback = function(args)
-    local token = args.data.token
-    semantic.process_request({ token })
+    vim.schedule(function() semantic.process_request({ args.data.token }) end)
   end,
 })
 
@@ -30,24 +30,24 @@ end
 
 --- @param tokens STTokenRange[]
 function semantic.process_request(tokens)
-  if semantic.request == nil then return end
+  local request = semantic.request
+  if request == nil then return end
 
   local cursor = vim.api.nvim_win_get_cursor(0)
-  -- cancel if the cursor moved
-  if semantic.request.cursor[1] ~= cursor[1] or semantic.request.cursor[2] ~= cursor[2] then
-    return semantic.finish_request()
-  end
+  -- cancel if the cursor moved, or if it's been too long
+  if request.cursor[1] ~= cursor[1] or request.cursor[2] ~= cursor[2] then return semantic.finish_request() end
 
+  -- vim.print(tokens)
   for _, token in ipairs(tokens) do
     if
       (token.type == 'function' or token.type == 'method')
-      and cursor[1] == token.line
+      and cursor[1] - 1 == token.line
       and cursor[2] >= token.start_col
-      and cursor[2] < token.end_col
+      and cursor[2] <= token.end_col
     then
       -- add the brackets
-      local text_edit = assert(semantic.request.item.textEdit)
-      local brackets_for_filetype = utils.get_for_filetype(semantic.request.filetype, semantic.request.item)
+      local text_edit = assert(request.item.textEdit)
+      local brackets_for_filetype = utils.get_for_filetype(request.filetype, request.item)
       local line = vim.api.nvim_get_current_line()
       local start_col = text_edit.range.start.character + #text_edit.newText
       local new_line = line:sub(1, start_col)
@@ -65,39 +65,42 @@ end
 --- @param ctx blink.cmp.Context
 --- @param filetype string
 --- @param item blink.cmp.CompletionItem
---- @param callback fun()
-function semantic.add_brackets_via_semantic_token(ctx, filetype, item, callback)
-  if not utils.should_run_resolution(ctx, filetype, 'semantic_token') then return callback() end
+--- @return blink.cmp.Task
+function semantic.add_brackets_via_semantic_token(ctx, filetype, item)
+  return async.task.new(function(resolve)
+    if not utils.should_run_resolution(ctx, filetype, 'semantic_token') then return resolve() end
 
-  assert(item.textEdit ~= nil, 'Got nil text edit while adding brackets via semantic tokens')
-  local client = vim.lsp.get_client_by_id(item.client_id)
-  if client == nil then return callback() end
+    assert(item.textEdit ~= nil, 'Got nil text edit while adding brackets via semantic tokens')
+    local client = vim.lsp.get_client_by_id(item.client_id)
+    if client == nil then return resolve() end
 
-  local capabilities = client.server_capabilities.semanticTokensProvider
-  if not capabilities or not capabilities.legend or (not capabilities.range and not capabilities.full) then
-    return callback()
-  end
+    local capabilities = client.server_capabilities.semanticTokensProvider
+    if not capabilities or not capabilities.legend or (not capabilities.range and not capabilities.full) then
+      return resolve()
+    end
 
-  semantic.request = {
-    cursor = vim.api.nvim_win_get_cursor(0),
-    filetype = filetype,
-    item = item,
-    callback = callback,
-  }
+    semantic.timer:stop()
+    semantic.request = {
+      cursor = vim.api.nvim_win_get_cursor(0),
+      filetype = filetype,
+      item = item,
+      callback = resolve,
+    }
 
-  -- semantic tokens are only requested on InsertLeave and on_refresh, so manually force a refresh
-  vim.lsp.semantic_tokens.force_refresh(ctx.bufnr)
+    -- semantic tokens are only requested on InsertLeave and on_refresh, so manually force a refresh
+    vim.lsp.semantic_tokens.force_refresh(ctx.bufnr)
 
-  -- first check if a semantic token already exists at the current cursor position
-  local tokens = vim.lsp.semantic_tokens.get_at_pos()
-  if tokens ~= nil then semantic.process_request(tokens) end
-  if semantic.request == nil then
-    -- a matching token exists, and brackets were added
-    return
-  end
+    -- first check if a semantic token already exists at the current cursor position
+    local tokens = vim.lsp.semantic_tokens.get_at_pos()
+    if tokens ~= nil then semantic.process_request(tokens) end
+    if semantic.request == nil then
+      -- a matching token exists, and brackets were added
+      return resolve()
+    end
 
-  -- listen for LspTokenUpdate events until timeout
-  semantic.timer:start(config.semantic_token_resolution.timeout_ms, 0, semantic.finish_request)
+    -- listen for LspTokenUpdate events until timeout
+    semantic.timer:start(config.semantic_token_resolution.timeout_ms, 0, semantic.finish_request)
+  end)
 end
 
 return semantic.add_brackets_via_semantic_token
