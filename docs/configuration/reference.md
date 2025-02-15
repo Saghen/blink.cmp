@@ -431,18 +431,13 @@ sources.providers = {
     fallbacks = { 'buffer' },
     -- Filter text items from the LSP provider, since we have the buffer provider for that
     transform_items = function(_, items)
-      for _, item in ipairs(items) do
-        if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
-          item.score_offset = item.score_offset - 3
-        end
-      end
-
       return vim.tbl_filter(
         function(item) return item.kind ~= require('blink.cmp.types').CompletionItemKind.Text end,
         items
       )
     end,
 
+    --- These properties apply to *ALL sources*
     --- NOTE: All of these options may be functions to get dynamic behavior
     --- See the type definitions for more information
     enabled = true, -- Whether or not to enable the provider

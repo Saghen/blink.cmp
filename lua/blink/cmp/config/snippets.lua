@@ -3,6 +3,7 @@
 --- @field expand fun(snippet: string) Function to use when expanding LSP provided snippets
 --- @field active fun(filter?: { direction?: number }): boolean Function to use when checking if a snippet is active
 --- @field jump fun(direction: number) Function to use when jumping between tab stops in a snippet, where direction can be negative or positive
+--- @field score_offset number Offset to the score of all snipppet items
 
 --- @param handlers table<'default' | 'luasnip' | 'mini_snippets', fun(...): any>
 local function by_preset(handlers)
@@ -49,6 +50,7 @@ local snippets = {
         MiniSnippets.session.jump(direction == -1 and 'prev' or 'next')
       end,
     }),
+    score_offset = -3,
   },
 }
 
@@ -62,6 +64,7 @@ function snippets.validate(config)
     expand = { config.expand, 'function' },
     active = { config.active, 'function' },
     jump = { config.jump, 'function' },
+    score_offset = { config.score_offset, 'number' },
   }, config)
 end
 

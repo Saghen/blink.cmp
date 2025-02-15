@@ -65,13 +65,6 @@ local sources = {
         module = 'blink.cmp.sources.lsp',
         fallbacks = { 'buffer' },
         transform_items = function(_, items)
-          -- demote snippets
-          for _, item in ipairs(items) do
-            if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
-              item.score_offset = item.score_offset - 3
-            end
-          end
-
           -- filter out text items, since we have the buffer source
           return vim.tbl_filter(
             function(item) return item.kind ~= require('blink.cmp.types').CompletionItemKind.Text end,

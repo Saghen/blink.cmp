@@ -16,6 +16,7 @@ pub struct FuzzyOptions {
     use_frecency: bool,
     use_proximity: bool,
     nearby_words: Option<Vec<String>>,
+    snippet_score_offset: i32,
 }
 
 impl FromLua for FuzzyOptions {
@@ -26,6 +27,7 @@ impl FromLua for FuzzyOptions {
             let use_frecency: bool = tab.get("use_frecency").unwrap_or_default();
             let use_proximity: bool = tab.get("use_proximity").unwrap_or_default();
             let nearby_words: Option<Vec<String>> = tab.get("nearby_words").ok();
+            let snippet_score_offset: i32 = tab.get("snippet_score_offset").unwrap_or_default();
 
             Ok(FuzzyOptions {
                 match_suffix,
@@ -33,6 +35,7 @@ impl FromLua for FuzzyOptions {
                 use_frecency,
                 use_proximity,
                 nearby_words,
+                snippet_score_offset,
             })
         } else {
             Err(mlua::Error::FromLuaConversionError {
@@ -115,7 +118,12 @@ pub fn fuzzy(
             } else {
                 0
             };
-            let score_offset = haystack[mtch.index_in_haystack].score_offset;
+            let mut score_offset = haystack[mtch.index_in_haystack].score_offset;
+            // 15 = snippet
+            // TODO: use an enum for the kind
+            if haystack[mtch.index_in_haystack].kind == 15 {
+                score_offset += opts.snippet_score_offset;
+            }
 
             (mtch.score as i32) + frecency_score + nearby_words_score + score_offset
         })

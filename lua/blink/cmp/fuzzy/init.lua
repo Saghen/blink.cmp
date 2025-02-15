@@ -82,6 +82,7 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
       sorts = config.fuzzy.sorts,
       nearby_words = nearby_words,
       match_suffix = range == 'full',
+      snippet_score_offset = config.snippets.score_offset,
     })
 
     for idx, item_index in ipairs(matched_indices) do
