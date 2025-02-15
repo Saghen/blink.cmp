@@ -160,7 +160,7 @@ Setting capabilities for `nvim-lspconfig`:
 >lua
     -- LSP servers and clients communicate which features they support through "capabilities".
     --  By default, Neovim supports a subset of the LSP specification.
-    --  With blink.cmp, Neovim has *more* capabilities which are communicated to the LSP servers.
+    --  With blink.cmp, Neovim has _more_ capabilities which are communicated to the LSP servers.
     --  Explanation from TJ: https://youtu.be/m8C0Cq9Uv9o?t=1275
     --
     -- This can vary by config, but in general for nvim-lspconfig:
@@ -683,7 +683,7 @@ For more common configurations, see the recipes <../recipes.md>.
     
       completion = {
         -- 'prefix' will fuzzy match on the text before the cursor
-        -- 'full' will fuzzy match on the text before *and* after the cursor
+        -- 'full' will fuzzy match on the text before _and_ after the cursor
         -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
         keyword = { range = 'full' },
     
@@ -819,7 +819,7 @@ before the cursor.
 
 >lua
     -- 'prefix' will fuzzy match on the text before the cursor
-    -- 'full' will fuzzy match on the text before *and* after the cursor
+    -- 'full' will fuzzy match on the text before _and_ after the cursor
     -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
     completion.keyword.range = 'prefix' | 'full'
 <
@@ -1632,7 +1632,7 @@ COMPLETION KEYWORD
 >lua
     completion.keyword = {
       -- 'prefix' will fuzzy match on the text before the cursor
-      -- 'full' will fuzzy match on the text before *and* after the cursor
+      -- 'full' will fuzzy match on the text before _and_ after the cursor
       -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
       range = 'prefix',
     }
@@ -1702,11 +1702,11 @@ COMPLETION LIST
       },
     
       cycle = {
-        -- When `true`, calling `select_next` at the *bottom* of the completion list
-        -- will select the *first* completion item.
+        -- When `true`, calling `select_next` at the _bottom_ of the completion list
+        -- will select the _first_ completion item.
         from_bottom = true,
-        -- When `true`, calling `select_prev` at the *top* of the completion list
-        -- will select the *last* completion item.
+        -- When `true`, calling `select_prev` at the _top_ of the completion list
+        -- will select the _last_ completion item.
         from_top = true,
       },
     },
@@ -2034,7 +2034,7 @@ PROVIDERS
           )
         end,
     
-        --- These properties apply to *ALL sources*
+        --- These properties apply to !!ALL sources!!
         --- NOTE: All of these options may be functions to get dynamic behavior
         --- See the type definitions for more information
         enabled = true, -- Whether or not to enable the provider
