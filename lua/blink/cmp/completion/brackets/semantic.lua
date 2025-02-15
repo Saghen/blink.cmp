@@ -43,6 +43,7 @@ function semantic.process_request(tokens)
       (token.type == 'function' or token.type == 'method')
       and cursor[1] - 1 == token.line
       and cursor[2] >= token.start_col
+      -- we do <= to check 1 character before the cursor (`bar|` would check `r`)
       and cursor[2] <= token.end_col
     then
       -- add the brackets
@@ -79,7 +80,11 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item)
       return resolve()
     end
 
+    local highlighter = vim.lsp.semantic_tokens.__STHighlighter.active[ctx.bufnr]
+    if highlighter == nil then return resolve() end
+
     semantic.timer:stop()
+    local cursor = vim.api.nvim_win_get_cursor(0)
     semantic.request = {
       cursor = vim.api.nvim_win_get_cursor(0),
       filetype = filetype,
@@ -88,10 +93,11 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item)
     }
 
     -- semantic tokens are only requested on InsertLeave and on_refresh, so manually force a refresh
-    vim.lsp.semantic_tokens.force_refresh(ctx.bufnr)
+    highlighter:send_request()
 
     -- first check if a semantic token already exists at the current cursor position
-    local tokens = vim.lsp.semantic_tokens.get_at_pos()
+    -- we get the token 1 character before the cursor (`bar|` would check `r`)
+    local tokens = vim.lsp.semantic_tokens.get_at_pos(0, cursor[1] - 1, cursor[2] - 1)
     if tokens ~= nil then semantic.process_request(tokens) end
     if semantic.request == nil then
       -- a matching token exists, and brackets were added
