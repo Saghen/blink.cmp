@@ -499,6 +499,14 @@ sources.providers = {
       end,
     }
   },
+
+  omni = {
+    name = 'Omni',
+    module = 'blink.cmp.sources.omni',
+    opts = {
+      disable_omnifuncs = { 'v:lua.vim.lsp.omnifunc' },
+    },
+  },
 }
 ```
 
