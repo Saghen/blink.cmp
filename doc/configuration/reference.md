@@ -32,7 +32,7 @@ snippets = {
 ```lua
 completion.keyword = {
   -- 'prefix' will fuzzy match on the text before the cursor
-  -- 'full' will fuzzy match on the text before *and* after the cursor
+  -- 'full' will fuzzy match on the text before _and_ after the cursor
   -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
   range = 'prefix',
 }
@@ -100,11 +100,11 @@ completion.list = {
   },
 
   cycle = {
-    -- When `true`, calling `select_next` at the *bottom* of the completion list
-    -- will select the *first* completion item.
+    -- When `true`, calling `select_next` at the _bottom_ of the completion list
+    -- will select the _first_ completion item.
     from_bottom = true,
-    -- When `true`, calling `select_prev` at the *top* of the completion list
-    -- will select the *last* completion item.
+    -- When `true`, calling `select_prev` at the _top_ of the completion list
+    -- will select the _last_ completion item.
     from_top = true,
   },
 },
@@ -422,7 +422,7 @@ sources.providers = {
       )
     end,
 
-    --- These properties apply to *ALL sources*
+    --- These properties apply to !!ALL sources!!
     --- NOTE: All of these options may be functions to get dynamic behavior
     --- See the type definitions for more information
     enabled = true, -- Whether or not to enable the provider

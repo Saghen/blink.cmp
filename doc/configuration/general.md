@@ -19,7 +19,7 @@ For more common configurations, see the [recipes](../recipes.md).
 
   completion = {
     -- 'prefix' will fuzzy match on the text before the cursor
-    -- 'full' will fuzzy match on the text before *and* after the cursor
+    -- 'full' will fuzzy match on the text before _and_ after the cursor
     -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
     keyword = { range = 'full' },
 

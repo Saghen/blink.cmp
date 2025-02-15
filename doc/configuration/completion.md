@@ -18,7 +18,7 @@ Controls what the plugin considers to be a keyword, used for fuzzy matching and 
 <!-- panvimdoc-include-comment
 ```lua
 -- 'prefix' will fuzzy match on the text before the cursor
--- 'full' will fuzzy match on the text before *and* after the cursor
+-- 'full' will fuzzy match on the text before _and_ after the cursor
 -- example: 'foo_|_bar' will match 'foo_' for 'prefix' and 'foo__bar' for 'full'
 completion.keyword.range = 'prefix' | 'full'
 ```

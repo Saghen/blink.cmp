@@ -225,8 +225,8 @@ function text_edits.clamp_range_to_bounds(range)
 end
 
 --- The TextEdit.range.start/end indicate the range of text that will be replaced.
---- This means that the end position will be the range *before* applying the edit.
---- This function gets the end position of the range *after* applying the edit.
+--- This means that the end position will be the range _before_ applying the edit.
+--- This function gets the end position of the range _after_ applying the edit.
 --- This may be used for placing the cursor after applying the edit.
 ---
 --- TODO: write tests cases, there are many uncommon cases it doesn't handle
