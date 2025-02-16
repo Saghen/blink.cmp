@@ -58,6 +58,7 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item, callback)
           and (token.type == 'function' or token.type == 'method')
         then
           -- add the brackets
+          -- TODO: make dot repeatable
           local brackets_for_filetype = utils.get_for_filetype(filetype, item)
           local line = vim.api.nvim_get_current_line()
           local start_col = text_edit.range.start.character + #text_edit.newText
