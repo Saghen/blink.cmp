@@ -306,6 +306,7 @@ local opts = {
   silent = true,
   replace_keycodes = true,
   expr = true,
+  noremap = true,
 }
 vim.api.nvim_set_keymap('i', dot_repeat_hack_name, '', opts)
 vim.api.nvim_set_keymap('n', dot_repeat_hack_name, '', opts)
