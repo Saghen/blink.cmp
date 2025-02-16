@@ -83,11 +83,12 @@ local function accept(ctx, item, callback)
       -- OR Normal: Apply the text edit and move the cursor
       else
         local new_cursor = text_edits_lib.get_apply_end_position(item.textEdit, all_text_edits)
-        new_cursor[2] = new_cursor[2] + offset
+        new_cursor[2] = new_cursor[2]
 
         text_edits_lib.apply(item.textEdit, all_text_edits)
 
         if ctx.get_mode() ~= 'term' then ctx.set_cursor(new_cursor) end
+        text_edits_lib.move_cursor_in_dot_repeat(offset)
       end
 
       -- Let the source execute the item itself
