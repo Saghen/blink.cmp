@@ -1,3 +1,10 @@
+## [0.12.4](https://github.com/Saghen/blink.cmp/compare/v0.12.3...v0.12.4) (2025-02-16)
+
+### Bug Fixes
+
+* add noremap to dot repeat hack ([93052a8](https://github.com/Saghen/blink.cmp/commit/93052a80660d741a051d43dc487c8bf7a2530b11)), closes [#1239](https://github.com/Saghen/blink.cmp/issues/1239)
+* deduplicate enabled providers ([505257b](https://github.com/Saghen/blink.cmp/commit/505257b223e855876a056eae968bb3a8d9692693)), closes [#1241](https://github.com/Saghen/blink.cmp/issues/1241)
+
 ## [0.12.3](https://github.com/Saghen/blink.cmp/compare/v0.12.2...v0.12.3) (2025-02-16)
 
 ### Bug Fixes
