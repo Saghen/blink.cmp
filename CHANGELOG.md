@@ -1,9 +1,15 @@
-## [](https://github.com/Saghen/blink.cmp/compare/v0.12.2...v) (2025-02-15)
+## [0.12.3](https://github.com/Saghen/blink.cmp/compare/v0.12.2...v0.12.3) (2025-02-16)
+
+### Bug Fixes
+
+* move cursor for auto brackets in dot repeat ([5007e54](https://github.com/Saghen/blink.cmp/commit/5007e544362da031909ae718cf86e9bace964711)), closes [#1233](https://github.com/Saghen/blink.cmp/issues/1233)
+
 ## [0.12.2](https://github.com/Saghen/blink.cmp/compare/v0.12.1...v0.12.2) (2025-02-15)
 
 ### Bug Fixes
 
 * use gnu when alpine-release does not exist ([1952303](https://github.com/Saghen/blink.cmp/commit/1952303de90fb8b05dec6c0a73299467e6edbdb3))
+
 ## [0.12.1](https://github.com/Saghen/blink.cmp/compare/v0.12.0...v0.12.1) (2025-02-15)
 
 ### Bug Fixes
@@ -11,9 +17,23 @@
 * always create event listeners for cmdline/term ([8a2356a](https://github.com/Saghen/blink.cmp/commit/8a2356a1084e8ec8f6e0707df248b2ce0553a940))
 * check `cmdline/term.enabled` before listening to events ([d24d446](https://github.com/Saghen/blink.cmp/commit/d24d4463595ab040dd3cf3f12a9589b00185b7d5))
 * check if mode-specific configs are enabled before adding sources ([#1231](https://github.com/Saghen/blink.cmp/issues/1231)) ([19f60a6](https://github.com/Saghen/blink.cmp/commit/19f60a675eaaf4b160bd6458bfd72fc005da5b3f))
+
 ## [0.12.0](https://github.com/Saghen/blink.cmp/compare/v0.11.0...v0.12.0) (2025-02-15)
 
-### ⚠ BREAKING CHANGES
+### Highlights
+
+* Dot repeat (`.`) has been added! Special thanks to @mikavilpas and @xzbdmw
+  * You may disable it with `completion.accept.dot_repeat = false` if you run into issues
+  * [Implementation for those curious](https://github.com/Saghen/blink.cmp/blob/afb7955f9d5af82af1f1ee8e676136417f13ee9f/lua/blink/cmp/lib/text_edits.lua#L292-L371)
+* Terminal completion (`term`) has been added but there's no sources taking advantage of it at the moment. [Contributions welcome!](https://github.com/Saghen/blink.cmp/issues/1149) Thanks @wurli!
+* Mode specific configuration (`cmdline` and `term`) have been moved to their own top-level tables. The most notable moves are:
+  * `keymap.cmdline` -> `cmdline.keymap`
+  * `sources.cmdline` -> `cmdline.sources`
+* During scoring, items with exact matches receive a bonus of 4, however if you always want exact matches at the top, you may use the new `exact` sorter: `fuzzy.sorts = { 'exact', 'score', 'sort_text' }`
+* LSP commands are now supported
+* Vim documentation has been added via panvimdoc, [see limitations](https://github.com/Saghen/blink.cmp/blob/be76c456417d6fe3163f0490f309f92a2c99771e/.github/workflows/panvimdoc.yaml#L1-L2)
+
+### BREAKING CHANGES
 
 * mode-specific config (#1203)
 * explicit `snippets.score_offset` option
@@ -76,9 +96,15 @@
 * support additional text edits when calculating cursor position ([cc34be8](https://github.com/Saghen/blink.cmp/commit/cc34be8ff1145264811e59b017f59676ad81000e)), closes [#223](https://github.com/Saghen/blink.cmp/issues/223) [#975](https://github.com/Saghen/blink.cmp/issues/975)
 * use nearest char index for keyword range ([e3330cd](https://github.com/Saghen/blink.cmp/commit/e3330cdd6054b45af8467f62544bc0de6b89f408)), closes [#1131](https://github.com/Saghen/blink.cmp/issues/1131)
 * use temporary floating window for dot repeat ([754a684](https://github.com/Saghen/blink.cmp/commit/754a684f5aa31126dfd537ab4888abe8c441fd3e))
-## [0.11.0](https://github.com/Saghen/blink.cmp/compare/v0.10.0...v0.11.0) (2025-01-25)
 
-### ⚠ BREAKING CHANGES
+## [0.11.0](https://github.com/Saghen/blink.cmp/compare/v0.10.0...v0.11.0) (2025-01-24)
+
+> [!IMPORTANT]
+> Blink.cmp now fetches the completion items immediately upon entering insert mode by default. More ideas for prefetching are being explored! https://github.com/Saghen/blink.cmp/issues/706
+> 
+> The fuzzy matcher now explicitly understands typos which should result in more predictable fuzziness on longer strings
+
+### BREAKING CHANGES
 
 * set prefetch on insert to true by default
 * **keymap:** add Up/Down keymaps to default preset (#1031)
@@ -134,9 +160,10 @@
 * separate insert/replace ranges for cmdline ([a38c6d8](https://github.com/Saghen/blink.cmp/commit/a38c6d81f21a77d7c5d6204db20b2e38bf5b2af8)), closes [#994](https://github.com/Saghen/blink.cmp/issues/994)
 * shallow copy luasnip items ([712af9f](https://github.com/Saghen/blink.cmp/commit/712af9f50bbba4313b6247dedd5a1333391127df)), closes [#1006](https://github.com/Saghen/blink.cmp/issues/1006)
 * stringify parsed snippet when ignoring snippet format ([80945db](https://github.com/Saghen/blink.cmp/commit/80945db7a988f8eb5233bb1e4b409bb20177c7ac)), closes [#944](https://github.com/Saghen/blink.cmp/issues/944)
+
 ## [0.10.0](https://github.com/Saghen/blink.cmp/compare/v0.9.3...v0.10.0) (2025-01-08)
 
-### ⚠ BREAKING CHANGES
+### BREAKING CHANGES
 
 * mini.snippets and snippets presets (#877)
 * support `preselect` with `auto_insert`, set as default
@@ -157,6 +184,7 @@
 * clear context on ignored cursor moved when not on keyword ([0f8de3a](https://github.com/Saghen/blink.cmp/commit/0f8de3abd560f38415d71fc6ee9885c2bf53b814)), closes [#937](https://github.com/Saghen/blink.cmp/issues/937)
 * ignore cursor moved when cursor equal before vs after ([17eea33](https://github.com/Saghen/blink.cmp/commit/17eea330a5d111f3cd67f59bb3832cc78f55db14))
 * **signature:** use `char_under_cursor` in `on_char_added` handler ([#935](https://github.com/Saghen/blink.cmp/issues/935)) ([275d407](https://github.com/Saghen/blink.cmp/commit/275d40713191e6c0012783ecf762a4faa138098b)), closes [#909](https://github.com/Saghen/blink.cmp/issues/909)
+
 ## [0.9.3](https://github.com/Saghen/blink.cmp/compare/v0.9.2...v0.9.3) (2025-01-06)
 
 ### Features
@@ -172,11 +200,13 @@
 * ignore non-key char in cmdline completion ([cc0e632](https://github.com/Saghen/blink.cmp/commit/cc0e6329e7603b5749c7fe98a76e39ed17bab860)), closes [#893](https://github.com/Saghen/blink.cmp/issues/893)
 * **nix:** use native gcc on macos ([3ab6832](https://github.com/Saghen/blink.cmp/commit/3ab6832b2fc3e49aad9c984089cfc0c5ec788531)), closes [#652](https://github.com/Saghen/blink.cmp/issues/652)
 * **nix:** use nix gcc and provide libiconv ([#916](https://github.com/Saghen/blink.cmp/issues/916)) ([5d2d601](https://github.com/Saghen/blink.cmp/commit/5d2d6010d9a5376f9073c1182887e547e3c0ec17))
+
 ## [0.9.2](https://github.com/Saghen/blink.cmp/compare/v0.9.1...v0.9.2) (2025-01-03)
 
 ### Bug Fixes
 
 * unicode range when checking if char is keyword ([100d3c8](https://github.com/Saghen/blink.cmp/commit/100d3c8bfc8059c2fd2347d00ab70ee91c7ff3ca)), closes [#878](https://github.com/Saghen/blink.cmp/issues/878)
+
 ## [0.9.1](https://github.com/Saghen/blink.cmp/compare/v0.9.0...v0.9.1) (2025-01-03)
 
 ### Features
@@ -203,9 +233,10 @@
 ### Performance Improvements
 
 * use faster 0.11 vim.validate ([#868](https://github.com/Saghen/blink.cmp/issues/868)) ([a8957ba](https://github.com/Saghen/blink.cmp/commit/a8957bab8faad4436e7ad62244c39335b95450a4))
-## [0.9.0](https://github.com/Saghen/blink.cmp/compare/v0.8.2...v0.9.0) (2025-01-01)
 
-### ⚠ BREAKING CHANGES
+## [0.9.0](https://github.com/Saghen/blink.cmp/compare/v0.8.2...v0.9.0) (2024-12-31)
+
+### BREAKING CHANGES
 
 * rename `BlinkCmpCompletionMenu*` autocmds to `BlinkCmpMenu*`
 * set default documentation max_width to 80
@@ -252,6 +283,7 @@
 * use correct regex for filenames ([8df826f](https://github.com/Saghen/blink.cmp/commit/8df826f168f102d0fbea92cbd85995ce66a821c7)), closes [#761](https://github.com/Saghen/blink.cmp/issues/761)
 * use existing arg prefix for help filtering in cmdline ([c593e83](https://github.com/Saghen/blink.cmp/commit/c593e8385d9f8f82a6e108fbabcd1f64fce72684))
 * wait for all LSPs to respond before showing ([86a13ae](https://github.com/Saghen/blink.cmp/commit/86a13aeb104d6ea782557518ee1a350712df7bd7)), closes [#691](https://github.com/Saghen/blink.cmp/issues/691)
+
 ## [0.8.2](https://github.com/Saghen/blink.cmp/compare/v0.8.1...v0.8.2) (2024-12-23)
 
 ### Features
@@ -272,6 +304,7 @@
 * inherit package.cpath in worker thread ([#726](https://github.com/Saghen/blink.cmp/issues/726)) ([b6c7762](https://github.com/Saghen/blink.cmp/commit/b6c7762407b6c4521b46244f35fab05cfd1c6863)), closes [#725](https://github.com/Saghen/blink.cmp/issues/725)
 * **notifications:** add title to notifications ([#722](https://github.com/Saghen/blink.cmp/issues/722)) ([f93af0f](https://github.com/Saghen/blink.cmp/commit/f93af0f486ada13e8c34f42c911788b9232b811f))
 * prebuilt binary error message always firing ([cab0e8e](https://github.com/Saghen/blink.cmp/commit/cab0e8e169a2c595018f9fdb981e056094bd5aeb))
+
 ## [0.8.1](https://github.com/Saghen/blink.cmp/compare/v0.8.0...v0.8.1) (2024-12-21)
 
 ### Features
@@ -288,7 +321,17 @@
 * type signature for enabled indicating ctx could be passed ([3cb7208](https://github.com/Saghen/blink.cmp/commit/3cb7208546b4e1f0c5e492cbcfccd083a1c89351)), closes [#695](https://github.com/Saghen/blink.cmp/issues/695)
 * use context.get_line() when getting preview undo text edit ([0f92fb8](https://github.com/Saghen/blink.cmp/commit/0f92fb8dcff634e880a60e266f041dfe175b82bf)), closes [#702](https://github.com/Saghen/blink.cmp/issues/702)
 * wrong key upstreamed by cmdline_events ([4757317](https://github.com/Saghen/blink.cmp/commit/475731741bbd8266767d48ad46b63f715577ac8e)), closes [#700](https://github.com/Saghen/blink.cmp/issues/700)
+
 ## [0.8.0](https://github.com/Saghen/blink.cmp/compare/v0.7.6...v0.8.0) (2024-12-20)
+
+> [!IMPORTANT]
+> `sources.completion.enabled_providers` has been moved to `sources.default`
+
+### Highlights
+
+* Cmdline completions! ([#323](https://github.com/Saghen/blink.cmp/issues/323))
+* Sorting now respects LSP hints more directly and doesn't sort alphabetically or by kind by default 
+* Sources v2 ([#465](https://github.com/Saghen/blink.cmp/issues/465)), adds support for async sources, timeouts, smarter fallbacks, adding sources at runtime and more!
 
 ### Features
 
@@ -384,14 +427,6 @@
 * use luasnip get_snippet_filetypes, remove global_snippets option ([c0b5ae9](https://github.com/Saghen/blink.cmp/commit/c0b5ae940d7516eb07ca499f5a46445f216c46d3)), closes [#603](https://github.com/Saghen/blink.cmp/issues/603)
 * use transform_items on resolve ([85176f7](https://github.com/Saghen/blink.cmp/commit/85176f7e3264b8ac3b571db12191416a4dce0303)), closes [#614](https://github.com/Saghen/blink.cmp/issues/614)
 
-### Reverts
-
-* set cursor position for additional text edits ([ab75cad](https://github.com/Saghen/blink.cmp/commit/ab75cad73f0e58d23dc9e97d8ca6f727741b92f5)), closes [#513](https://github.com/Saghen/blink.cmp/issues/513)
-## [0.7.6](https://github.com/Saghen/blink.cmp/compare/v0.7.5...v0.7.6) (2024-12-11)
-
-### Bug Fixes
-
-* fallback not working for built-in mappings ([ae5a4ce](https://github.com/Saghen/blink.cmp/commit/ae5a4ce8f7e519e49de7ae6fcadd74547f820a52)), closes [#489](https://github.com/Saghen/blink.cmp/issues/489)
 ## [0.7.5](https://github.com/Saghen/blink.cmp/compare/v0.7.4...v0.7.5) (2024-12-10)
 
 ### Features
@@ -401,6 +436,7 @@
 ### Bug Fixes
 
 * **fallback:** make fallback work with buffer-local mappings ([#483](https://github.com/Saghen/blink.cmp/issues/483)) ([8b553f6](https://github.com/Saghen/blink.cmp/commit/8b553f65419d051fe84eeeda3e2071e104c4f272))
+
 ## [0.7.4](https://github.com/Saghen/blink.cmp/compare/v0.7.3...v0.7.4) (2024-12-09)
 
 ### Features
@@ -418,12 +454,17 @@
 * make buffer events options required ([d0b0e16](https://github.com/Saghen/blink.cmp/commit/d0b0e16671733432986953bf4ddff268eb5b2d7c))
 * **render:** not render two separator for doc window ([#451](https://github.com/Saghen/blink.cmp/issues/451)) ([fc12fa9](https://github.com/Saghen/blink.cmp/commit/fc12fa99d4e1274d331c2004e777981193f7d6f8))
 * revert luasnip source to use current cursor position ([5cfff34](https://github.com/Saghen/blink.cmp/commit/5cfff3433a2afc3f4e29eb4e3caa8f80953f0cfb))
+
 ## [0.7.3](https://github.com/Saghen/blink.cmp/compare/v0.7.2...v0.7.3) (2024-12-03)
 
 ### Bug Fixes
 
 * revert to original logic for updating menu position ([99129b6](https://github.com/Saghen/blink.cmp/commit/99129b67759c1b78198e527eae9cc91121cded29)), closes [#436](https://github.com/Saghen/blink.cmp/issues/436)
+
 ## [0.7.2](https://github.com/Saghen/blink.cmp/compare/v0.7.1...v0.7.2) (2024-12-03)
+
+> [!IMPORTANT]
+> A native `luasnip` source has been added, please see the [README](https://github.com/Saghen/blink.cmp#luasnip) for the configuration
 
 ### Features
 
@@ -437,22 +478,30 @@
 * avoid removing words for current line on out of focus buffers ([2cbb02d](https://github.com/Saghen/blink.cmp/commit/2cbb02da58ab40f2bfd3dd85f80cba76d6279987)), closes [#433](https://github.com/Saghen/blink.cmp/issues/433)
 * documentation not updating after manually opened ([8c1fdc9](https://github.com/Saghen/blink.cmp/commit/8c1fdc901cfead1cd88ed3e652d45ca7d75a3d3f)), closes [#430](https://github.com/Saghen/blink.cmp/issues/430)
 * handle nil line ([#429](https://github.com/Saghen/blink.cmp/issues/429)) ([38b3ad6](https://github.com/Saghen/blink.cmp/commit/38b3ad6d4af9d392d3e5e0dabcb14e7d8e348314))
+
 ## [0.7.1](https://github.com/Saghen/blink.cmp/compare/v0.7.0...v0.7.1) (2024-12-02)
 
 ### Bug Fixes
 
 * arguments on curl ([f992b72](https://github.com/Saghen/blink.cmp/commit/f992b72017cac77d4f4e22dc05016e5d79adff68))
 * drop retry from curl ([6e9fb62](https://github.com/Saghen/blink.cmp/commit/6e9fb6254bb49eaf014a48049ff511bbfd6a66a3)), closes [#425](https://github.com/Saghen/blink.cmp/issues/425)
+
 ## [0.7.0](https://github.com/Saghen/blink.cmp/compare/v0.6.2...v0.7.0) (2024-12-02)
 
-### ⚠ BREAKING CHANGES
+> [!IMPORTANT]
+> Most of the configuration has been reworked, please see the README for the new schema
 
-* add note about reworked config
+* Includes an enormous refactor in preparation for sources v2, commandline completions, and the v1 release [#389](https://github.com/Saghen/blink.cmp/issues/389)
+* Enable experimental Treesitter highlighting on the labels via `completion.menu.draw.treesitter = true`
+
+### BREAKING CHANGES
+
+* nuke the debt ([#389](https://github.com/Saghen/blink.cmp/issues/389)) ([1187172](https://github.com/Saghen/blink.cmp/commit/11871727278381febd05d1ee1a17f98fb2e32b26)), closes [#323](https://github.com/Saghen/blink.cmp/issues/323)
 
 ### Features
 
 * add show_on_keyword and show_on_trigger_character trigger options ([69a69dd](https://github.com/Saghen/blink.cmp/commit/69a69dd7c66f2290dea849846402266b2303782c)), closes [#402](https://github.com/Saghen/blink.cmp/issues/402)
-* allow completing buffer words with unicode ([#392](https://github.com/Saghen/blink.cmp/issues/392)) ([e1d3e9d](https://github.com/Saghen/blink.cmp/commit/e1d3e9d4a64466b521940b3ccb67c6fd534b0032)), closes [1#L72](https://github.com/Saghen/1/issues/L72)
+* allow completing buffer words with unicode ([#392](https://github.com/Saghen/blink.cmp/issues/392)) ([e1d3e9d](https://github.com/Saghen/blink.cmp/commit/e1d3e9d4a64466b521940b3ccb67c6fd534b0032))
 * call execute after accepting, but before applying semantic brackets ([073449a](https://github.com/Saghen/blink.cmp/commit/073449a872d49d0c61cb1cf020232d609b2b3d8c))
 * default to empty table for setup ([#412](https://github.com/Saghen/blink.cmp/issues/412)) ([4559ec5](https://github.com/Saghen/blink.cmp/commit/4559ec5cfb91ed8080e2f8df7d4784e12aa27f18))
 * error on download failure ([6054da2](https://github.com/Saghen/blink.cmp/commit/6054da23af87117afd1de59bb77df90037e84675))
@@ -492,6 +541,7 @@
 ### Documentation
 
 * add note about reworked config ([180be7b](https://github.com/Saghen/blink.cmp/commit/180be7ba574033baa30fa8af0db4f59db7353584))
+
 ## [0.6.2](https://github.com/Saghen/blink.cmp/compare/v0.6.1...v0.6.2) (2024-11-26)
 
 ### Features
@@ -504,14 +554,16 @@
 * mark all config properties as optional ([e328bde](https://github.com/Saghen/blink.cmp/commit/e328bdedc4d12d01ff5c68bee8ea6ae6f33f42f7)), closes [#370](https://github.com/Saghen/blink.cmp/issues/370)
 * path source not handling hidden files correctly ([22c5c0d](https://github.com/Saghen/blink.cmp/commit/22c5c0d2c96d5ab86cd23f8df76f005505138a5d)), closes [#369](https://github.com/Saghen/blink.cmp/issues/369)
 * use offset encoding of first client ([0a2abab](https://github.com/Saghen/blink.cmp/commit/0a2ababaa450f50afeb4653c3d40b34344aa80d6)), closes [#380](https://github.com/Saghen/blink.cmp/issues/380)
+
 ## [0.6.1](https://github.com/Saghen/blink.cmp/compare/v0.6.0...v0.6.1) (2024-11-24)
 
 ### Features
 
 * add prebuilt binaries for android ([#362](https://github.com/Saghen/blink.cmp/issues/362)) ([11a50fe](https://github.com/Saghen/blink.cmp/commit/11a50fe006a4482ab5acb5bcd77efa4fb9f944f8))
+
 ## [0.6.0](https://github.com/Saghen/blink.cmp/compare/v0.5.1...v0.6.0) (2024-11-24)
 
-### ⚠ BREAKING CHANGES
+### BREAKING CHANGES
 
 * matched character highlighting, draw rework (#245)
 * set default nerd_font_variant to mono
@@ -572,9 +624,10 @@
 * tailwind colors ([#306](https://github.com/Saghen/blink.cmp/issues/306)) ([8e3af0e](https://github.com/Saghen/blink.cmp/commit/8e3af0ec0079b599fb57f97653b2f20f98e2a5bb))
 * **types:** allow resolving empty response from blink.cmd.Source ([#254](https://github.com/Saghen/blink.cmp/issues/254)) ([46a5f0b](https://github.com/Saghen/blink.cmp/commit/46a5f0b9fd8e6753d118853d384ae85bfdb70c30))
 * use pmenu scrollbar highlights ([5632376](https://github.com/Saghen/blink.cmp/commit/5632376d4f51d777013d5f48414a15f02be854af))
+
 ## [0.5.1](https://github.com/Saghen/blink.cmp/compare/v0.5.0...v0.5.1) (2024-11-03)
 
-### ⚠ BREAKING CHANGES
+### BREAKING CHANGES
 
 * set max_width to 80 for documentation
 
@@ -605,9 +658,15 @@
 * make all of source provider config optional ([055b943](https://github.com/Saghen/blink.cmp/commit/055b9435358f68ae26de75d9294749bd69c22ccc))
 * only check enabled fallback sources ([#232](https://github.com/Saghen/blink.cmp/issues/232)) ([ecb3520](https://github.com/Saghen/blink.cmp/commit/ecb3520c899eee9dbe738620f3c327b8089fe1f8))
 * window direction and autocomplete closing on position update ([4b3fd8f](https://github.com/Saghen/blink.cmp/commit/4b3fd8f5ce6ece4f84d6c6ddfd0a42f43b889574)), closes [#240](https://github.com/Saghen/blink.cmp/issues/240)
+
 ## [0.5.0](https://github.com/Saghen/blink.cmp/compare/v0.4.1...v0.5.0) (2024-10-30)
 
-### ⚠ BREAKING CHANGES
+> [!IMPORTANT]  
+> The **keymap** configuration has been reworked, please see the README for the new schema
+
+You may now use `nvim-cmp` sources within `blink.cmp` using @stefanboca's compatibility layer: https://github.com/Saghen/blink.compat
+
+### BREAKING CHANGES
 
 * rework keymap config
 
@@ -645,15 +704,20 @@
 * set default keymap to use accept ([7d265b4](https://github.com/Saghen/blink.cmp/commit/7d265b4a19f2c198eda06baf031cb0e41cc3095c))
 * snippet reload function ([407f2d5](https://github.com/Saghen/blink.cmp/commit/407f2d526fd07b651a8a7330df2c4fd05b32a014))
 * snippet resolve ([5d9fa1c](https://github.com/Saghen/blink.cmp/commit/5d9fa1c36cc9e43a9d7cd65ddcc417128a9d41c3))
+
 ## [0.4.1](https://github.com/Saghen/blink.cmp/compare/v0.4.0...v0.4.1) (2024-10-24)
 
 ### Bug Fixes
 
 * check semantic token type ([0b493ff](https://github.com/Saghen/blink.cmp/commit/0b493ff3ce7fd8d318e7e1024fbadfe2ec3a624a))
 * exclude prefix including one char ([70438ac](https://github.com/Saghen/blink.cmp/commit/70438ac5016d3ab609f422d1ef084870cb9ceb29))
+
 ## [0.4.0](https://github.com/Saghen/blink.cmp/compare/v0.3.1...v0.4.0) (2024-10-24)
 
-### ⚠ BREAKING CHANGES
+> [!IMPORTANT]  
+> The sources configuration has been reworked, please see the README for the new schema
+
+### BREAKING CHANGES
 
 * rework sources config structure and available options
 * rework sources system and configuration
@@ -695,7 +759,7 @@
 * add missing select_and_accept keymap to config ([d2140dc](https://github.com/Saghen/blink.cmp/commit/d2140dc7615991ea88fa1fd75dd4fccb53a73e25))
 * always hide window on accept ([7f5a3d9](https://github.com/Saghen/blink.cmp/commit/7f5a3d9a820125e7da0a1816efaddb84d47a7f18))
 * auto insert breaking on single line text edit ([78ac56e](https://github.com/Saghen/blink.cmp/commit/78ac56e96144ed7475bb6d11981d3c8154bfd366)), closes [#169](https://github.com/Saghen/blink.cmp/issues/169)
-* check if item contains brackets before defering to semantic token ([e5f543d](https://github.com/Saghen/blink.cmp/commit/e5f543da2a0ce91c8720b67f0ea6cfa941dc26d6))
+* check if item contains brackets before deferring to semantic token ([e5f543d](https://github.com/Saghen/blink.cmp/commit/e5f543da2a0ce91c8720b67f0ea6cfa941dc26d6))
 * **config:** set correct type def for blink.cmp.WindowBorderChar ([516190b](https://github.com/Saghen/blink.cmp/commit/516190bcdafa387d417cfb235cbcd7385e902089))
 * don't show completions when trigger context is nil ([5b39d83](https://github.com/Saghen/blink.cmp/commit/5b39d83ac4fed46c57d8db987ea56cb1c0e68b0e))
 * drop prints ([89259f9](https://github.com/Saghen/blink.cmp/commit/89259f936e413e0a324b2ea369eb8ccefc05a14f)), closes [#179](https://github.com/Saghen/blink.cmp/issues/179)
@@ -718,14 +782,16 @@
 * typo in signature.win ([#125](https://github.com/Saghen/blink.cmp/issues/125)) ([69ad25f](https://github.com/Saghen/blink.cmp/commit/69ad25f38e1eb833b7aa5a0efb2d6c485e191149))
 * use treesitter.language.get_lang when choosing parser ([213fd94](https://github.com/Saghen/blink.cmp/commit/213fd94de2ab83ff409e1fd240625959bf61624e)), closes [#133](https://github.com/Saghen/blink.cmp/issues/133)
 * window positioning with folds ([819b978](https://github.com/Saghen/blink.cmp/commit/819b978328b244fc124cfcd74661b2a7f4259f4f)), closes [#95](https://github.com/Saghen/blink.cmp/issues/95)
+
 ## [0.3.1](https://github.com/Saghen/blink.cmp/compare/v0.3.0...v0.3.1) (2024-10-14)
 
 ### Bug Fixes
 
 * **ci:** use correct file ext for windows ([af68874](https://github.com/Saghen/blink.cmp/commit/af68874f1b2e628e0c72ec27f5225d0c6b2d6820))
+
 ## [0.3.0](https://github.com/Saghen/blink.cmp/compare/v0.2.1...v0.3.0) (2024-10-14)
 
-### ⚠ BREAKING CHANGES
+### BREAKING CHANGES
 
 * implement auto-insert option (#65)
 * autocompletion window components alignment (#51)
@@ -789,6 +855,7 @@
 * use correct prev/next keymap ([#53](https://github.com/Saghen/blink.cmp/issues/53)) ([f456c2a](https://github.com/Saghen/blink.cmp/commit/f456c2aa0994f709f9aec991ed2b4b705f787e48)), closes [/github.com/Saghen/blink.cmp/pull/23#issuecomment-2399876619](https://github.com/Saghen//github.com/Saghen/blink.cmp/pull/23/issues/issuecomment-2399876619)
 * use empty separator for joining snippet description ([28f3a31](https://github.com/Saghen/blink.cmp/commit/28f3a316de01fc4a14c67689b0547428499e933d))
 * use internal CompletionItemKind table ([4daf96d](https://github.com/Saghen/blink.cmp/commit/4daf96d76e06d6c248587f860ddb5717ced9bbd3)), closes [#17](https://github.com/Saghen/blink.cmp/issues/17)
+
 ## [0.2.1](https://github.com/Saghen/blink.cmp/compare/v0.2.0...v0.2.1) (2024-10-08)
 
 ### Features
@@ -803,6 +870,7 @@
 * keymaps replacing buffer local bindings ([506ea74](https://github.com/Saghen/blink.cmp/commit/506ea74e53a825cc6efd40a46c4129576409e440)), closes [#39](https://github.com/Saghen/blink.cmp/issues/39)
 * use buffer-local keymaps ([ecb3510](https://github.com/Saghen/blink.cmp/commit/ecb3510ef2132956fb2df3dcc927e0f84d1a1c1d)), closes [#20](https://github.com/Saghen/blink.cmp/issues/20)
 * use correct prev/next keymap for k and j ([#23](https://github.com/Saghen/blink.cmp/issues/23)) ([43e7532](https://github.com/Saghen/blink.cmp/commit/43e753228fe4a722e29d4953cad74a61728183cb))
+
 ## [0.2.0](https://github.com/Saghen/blink.cmp/compare/v0.1.0...v0.2.0) (2024-10-07)
 
 ### Features
@@ -824,6 +892,7 @@
 * signature trigger config ([cf9e4aa](https://github.com/Saghen/blink.cmp/commit/cf9e4aaf778f56d2dda8f43c30cb68762aecc425))
 * signature window showing up after context deleted ([857b336](https://github.com/Saghen/blink.cmp/commit/857b336ccdc5a389564e6e2b58571bc07c5cce32))
 * window placement with border ([d6a81d3](https://github.com/Saghen/blink.cmp/commit/d6a81d320f8880e219a3f937ecea1f78aca680e3))
+
 ## [0.1.0](https://github.com/Saghen/blink.cmp/compare/1b282880e699be37c3719308d6660a68d9081b14...v0.1.0) (2024-10-05)
 
 ### Features
