@@ -156,12 +156,14 @@ end
 
 --- Execute ---
 
-function lsp:execute(_, item, callback)
+function lsp:execute(source, item, callback)
   local client = vim.lsp.get_client_by_id(item.client_id)
   if client and item.command then
-    local success, request_id = client.request('workspace/executeCommand', item.command, function() callback() end)
-    if success and request_id ~= nil then
-      return function() client.cancel_request(request_id) end
+    if vim.fn.has('nvim-0.11') == 1 then
+      client:exec_cmd(item.command, { bufnr = source.bufnr }, function() callback() end)
+    else
+      -- TODO: remove this once 0.11 is the minimum version
+      client:_exec_cmd(item.command, { bufnr = source.bufnr }, function() callback() end)
     end
   else
     callback()
