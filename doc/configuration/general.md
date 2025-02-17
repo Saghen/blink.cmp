@@ -17,6 +17,11 @@ For more common configurations, see the [recipes](../recipes.md).
       and vim.b.completion ~= false
   end,
 
+  -- Disable cmdline
+  cmdline = {
+    enabled = false
+  },
+
   completion = {
     -- 'prefix' will fuzzy match on the text before the cursor
     -- 'full' will fuzzy match on the text before _and_ after the cursor
@@ -55,8 +60,6 @@ For more common configurations, see the [recipes](../recipes.md).
   sources = {
     -- Remove 'buffer' if you don't want text completions, by default it's only enabled when LSP returns no items
     default = { 'lsp', 'path', 'snippets', 'buffer' },
-    -- Disable cmdline completions
-    cmdline = {},
   },
 
   -- Use a preset for snippets, check the snippets documentation for more information
