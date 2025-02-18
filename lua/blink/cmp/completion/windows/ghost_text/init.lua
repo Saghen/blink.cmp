@@ -31,6 +31,11 @@ menu.close_emitter:on(function()
   ghost_text.draw_preview()
 end)
 
+function ghost_text.enabled()
+  if type(config.enabled) == 'function' then return config.enabled() end
+  return config.enabled
+end
+
 function ghost_text.is_open() return ghost_text.extmark_id ~= nil end
 
 --- Shows the ghost text preview and sets up the state to automatically
@@ -76,7 +81,7 @@ function ghost_text.draw_preview()
   -- check if we should be showing
   local menu_open = require('blink.cmp.completion.windows.menu').win:is_open()
   if
-    not config.enabled
+    not ghost_text.enabled()
     or (not config.show_with_menu and menu_open)
     or (not config.show_without_menu and not menu_open)
   then
