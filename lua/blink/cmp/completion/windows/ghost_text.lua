@@ -2,6 +2,7 @@ local config = require('blink.cmp.config').completion.ghost_text
 local highlight_ns = require('blink.cmp.config').appearance.highlight_ns
 local text_edits_lib = require('blink.cmp.lib.text_edits')
 local snippets_utils = require('blink.cmp.sources.snippets.utils')
+local menu = require('blink.cmp.completion.windows.menu')
 
 --- @class blink.cmp.windows.GhostText
 --- @field win integer?
@@ -11,7 +12,7 @@ local snippets_utils = require('blink.cmp.sources.snippets.utils')
 --- @field is_open fun(): boolean
 --- @field show_preview fun(items: blink.cmp.CompletionItem[], idx: number)
 --- @field clear_preview fun()
---- @field draw_preview fun(bufnr: number)
+--- @field draw_preview fun()
 
 --- @type blink.cmp.windows.GhostText
 --- @diagnostic disable-next-line: missing-fields
@@ -29,10 +30,16 @@ end
 
 -- immediately re-draw the preview when the cursor moves/text changes
 vim.api.nvim_create_autocmd({ 'CursorMovedI', 'TextChangedI' }, {
-  callback = function()
-    if config.enabled and ghost_text.win then ghost_text.draw_preview(vim.api.nvim_win_get_buf(ghost_text.win)) end
-  end,
+  callback = function() ghost_text.draw_preview() end,
 })
+menu.open_emitter:on(function()
+  if ghost_text.is_open() and config.show_with_menu then return end
+  ghost_text.draw_preview()
+end)
+menu.close_emitter:on(function()
+  if ghost_text.is_open() and config.show_without_menu then return end
+  ghost_text.draw_preview()
+end)
 
 function ghost_text.is_open() return ghost_text.extmark_id ~= nil end
 
@@ -63,7 +70,7 @@ function ghost_text.show_preview(items, selection_idx)
   local changed = ghost_text.selected_item ~= selected_item
   ghost_text.selected_item = selected_item
   ghost_text.win = vim.api.nvim_get_current_win()
-  if changed then ghost_text.draw_preview(vim.api.nvim_win_get_buf(ghost_text.win)) end
+  if changed then ghost_text.draw_preview() end
 end
 
 function ghost_text.clear_preview()
@@ -75,9 +82,26 @@ function ghost_text.clear_preview()
   end
 end
 
-function ghost_text.draw_preview(bufnr)
-  if not ghost_text.selected_item then return end
+function ghost_text.draw_preview()
+  -- check if we should be showing
+  local menu_open = require('blink.cmp.completion.windows.menu').win:is_open()
+  if
+    not config.enabled
+    or (not config.show_with_menu and menu_open)
+    or (not config.show_without_menu and not menu_open)
+  then
+    ghost_text.clear_preview()
+    return
+  end
 
+  -- check if the state is valid
+  if not ghost_text.selected_item then return end
+  if not vim.api.nvim_win_is_valid(ghost_text.win) then return end
+
+  local bufnr = vim.api.nvim_win_get_buf(ghost_text.win)
+  if not vim.api.nvim_buf_is_valid(bufnr) then return end
+
+  -- get the text to draw
   local text_edit = text_edits_lib.get_from_item(ghost_text.selected_item)
 
   if ghost_text.selected_item.insertTextFormat == vim.lsp.protocol.InsertTextFormat.Snippet then
@@ -87,19 +111,16 @@ function ghost_text.draw_preview(bufnr)
   end
 
   local display_lines = vim.split(get_still_untyped_text(text_edit), '\n', { plain = true }) or {}
-
   local virt_lines = {}
-  if #display_lines > 1 then
-    for i = 2, #display_lines do
-      virt_lines[i - 1] = { { display_lines[i], 'BlinkCmpGhostText' } }
-    end
+  for i = 2, #display_lines do
+    virt_lines[i - 1] = { { display_lines[i], 'BlinkCmpGhostText' } }
   end
 
+  -- draw
   local cursor_pos = {
     text_edit.range.start.line,
     text_edit.range['end'].character,
   }
-
   ghost_text.extmark_id = vim.api.nvim_buf_set_extmark(bufnr, highlight_ns, cursor_pos[1], cursor_pos[2], {
     id = ghost_text.extmark_id,
     virt_text_pos = 'inline',

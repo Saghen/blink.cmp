@@ -299,6 +299,10 @@ completion.ghost_text = {
   show_with_selection = true,
   -- Show the ghost text when no item has been selected, defaulting to the first item
   show_without_selection = false,
+  -- Show the ghost text when the menu is open
+  show_with_menu = true,
+  -- Show the ghost text when the menu is closed
+  show_without_menu = true,
 },
 ```
 
