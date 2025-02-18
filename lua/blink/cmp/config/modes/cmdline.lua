@@ -18,11 +18,6 @@ local cmdline = {
       trigger = {
         show_on_blocked_trigger_characters = {},
       },
-      menu = {
-        draw = {
-          columns = { { 'label', 'label_description', gap = 1 } },
-        },
-      },
     },
   },
 }
