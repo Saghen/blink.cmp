@@ -778,10 +778,10 @@ HIGHLIGHT GROUPS ~
   BlinkCmpLabelDescription               NonText                       Label description of the
                                                                        completion item
 
-  BlinkCmpKind                           Special                       Kind icon/text of the completion
+  BlinkCmpKind                           PmenuKind                     Kind icon/text of the completion
                                                                        item
 
-  BlinkCmpKind<kind>                     Special                       Kind icon/text of the completion
+  BlinkCmpKind<kind>                     PmenuKind                     Kind icon/text of the completion
                                                                        item
 
   BlinkCmpSource                         NonText                       Source of the completion item
