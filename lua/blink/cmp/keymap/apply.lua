@@ -70,6 +70,13 @@ function apply.keymap_to_current_buffer(keys_to_commands)
   end
 end
 
+function apply.has_insert_command(commands)
+  for _, command in ipairs(commands) do
+    if not vim.tbl_contains(snippet_commands, command) and command ~= 'fallback' then return true end
+  end
+  return false
+end
+
 function apply.term_keymaps(keys_to_commands)
   -- skip if we've already applied the keymaps
   for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(0, 't')) do
@@ -78,7 +85,7 @@ function apply.term_keymaps(keys_to_commands)
 
   -- terminal mode: uses insert commands only
   for key, commands in pairs(keys_to_commands) do
-    if #commands == 0 then goto continue end
+    if not apply.has_insert_command(commands) or #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('i', key)
     apply.set('t', key, function()
@@ -105,11 +112,7 @@ end
 function apply.cmdline_keymaps(keys_to_commands)
   -- cmdline mode: uses only insert commands
   for key, commands in pairs(keys_to_commands) do
-    local has_insert_command = false
-    for _, command in ipairs(commands) do
-      has_insert_command = has_insert_command or not vim.tbl_contains(snippet_commands, command)
-    end
-    if not has_insert_command or #commands == 0 then goto continue end
+    if not apply.has_insert_command(commands) or #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('c', key)
     apply.set('c', key, function()
