@@ -32,9 +32,15 @@ You may build from source with rust nightly. See the [fuzzy documentation](./con
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
-    -- 'default' for mappings similar to built-in completion
-    -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys to navigate)
+    -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept, C-n/C-p for up/down)
+    -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys for up/down)
     -- 'enter' for mappings similar to 'super-tab' but with 'enter' to accept
+    --
+    -- All presets have the following mappings:
+    -- C-space: Open menu or open docs if already open
+    -- C-e: Hide menu
+    -- C-k: Toggle signature help
+    --
     -- See the full "keymap" documentation for information on defining your own keymap.
     keymap = { preset = 'default' },
 
