@@ -589,7 +589,8 @@ cmdline = {
       draw = {
         columns = { { 'label', 'label_description', gap = 1 } },
       },
-    }
+    },
+    ghost_text = { enabled = nil }
   }
 }
 ```
@@ -615,6 +616,7 @@ term = {
       draw = {
         columns = { { 'label', 'label_description', gap = 1 } },
       },
-    }
+    },
+    ghost_text = { enabled = nil }
   }
 }

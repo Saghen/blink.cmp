@@ -6,6 +6,7 @@
 --- @class blink.cmp.ModeCompletionConfig
 --- @field trigger? blink.cmp.ModeCompletionTriggerConfig
 --- @field menu? blink.cmp.ModeCompletionMenuConfig
+--- @field ghost_text? blink.cmp.ModeCompletionGhostTextConfig
 
 --- @class blink.cmp.ModeCompletionTriggerConfig
 --- @field show_on_blocked_trigger_characters? string[] | (fun(): string[]) LSPs can indicate when to show the completion window via trigger characters. However, some LSPs (i.e. tsserver) return characters that would essentially always show the window. We block these by default.
@@ -17,3 +18,6 @@
 
 --- @class blink.cmp.ModeDraw
 --- @field columns? blink.cmp.DrawColumnDefinition[] | fun(context: blink.cmp.Context): blink.cmp.DrawColumnDefinition[] Components to render, grouped by column
+
+--- @class blink.cmp.ModeCompletionGhostTextConfig
+--- @field enabled? boolean | fun(): boolean
