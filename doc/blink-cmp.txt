@@ -1,4 +1,4 @@
-*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 15
+*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 18
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
