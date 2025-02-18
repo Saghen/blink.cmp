@@ -281,7 +281,7 @@ function win:set_cursor(cursor)
   local winnr = self:get_win()
   assert(winnr ~= nil, 'Window must be open to set cursor')
 
-  vim.api.nvim_win_set_cursor(winnr, cursor)
+  pcall(vim.api.nvim_win_set_cursor, winnr, cursor)
 
   if self.scrollbar then self.scrollbar:update(winnr) end
   self:redraw_if_needed()
@@ -291,7 +291,7 @@ function win:set_height(height)
   local winnr = self:get_win()
   assert(winnr ~= nil, 'Window must be open to set height')
 
-  vim.api.nvim_win_set_height(winnr, height)
+  pcall(vim.api.nvim_win_set_height, winnr, height)
 
   if self.scrollbar then self.scrollbar:update(winnr) end
   self:redraw_if_needed()
@@ -301,7 +301,7 @@ function win:set_width(width)
   local winnr = self:get_win()
   assert(winnr ~= nil, 'Window must be open to set width')
 
-  vim.api.nvim_win_set_width(winnr, width)
+  pcall(vim.api.nvim_win_set_width, winnr, width)
 
   if self.scrollbar then self.scrollbar:update(winnr) end
   self:redraw_if_needed()
@@ -311,7 +311,7 @@ function win:set_win_config(config)
   local winnr = self:get_win()
   assert(winnr ~= nil, 'Window must be open to set window config')
 
-  vim.api.nvim_win_set_config(winnr, config)
+  pcall(vim.api.nvim_win_set_config, winnr, config)
 
   if self.scrollbar then self.scrollbar:update(winnr) end
   self:redraw_if_needed()
