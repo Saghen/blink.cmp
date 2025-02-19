@@ -74,7 +74,7 @@ function source:get_completions(ctx, callback)
     table.insert(items, item)
   end
 
-  -- The callback *MUST* be called at least once. The first time it's called,
+  -- The callback _MUST_ be called at least once. The first time it's called,
   -- blink.cmp will show the results in the completion menu. Subsequent calls
   -- will append the results to the menu to support streaming results.
   callback({
@@ -126,7 +126,7 @@ function source:execute(ctx, item, callback)
   -- Note that the properties on `ctx` will be out of date by this point,
   -- so you may want to call the `ctx.get_*()` functions to get up-to-date values
 
-  -- The callback *MUST* be called once
+  -- The callback _MUST_ be called once
   callback()
 end
 
