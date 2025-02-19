@@ -20,7 +20,7 @@ local ghost_text = {
 
 function ghost_text.validate(config)
   validate('completion.ghost_text', {
-    enabled = { config.enabled, 'boolean' },
+    enabled = { config.enabled, { 'boolean', 'function' } },
     show_with_selection = { config.show_with_selection, 'boolean' },
     show_without_selection = { config.show_without_selection, 'boolean' },
     show_without_menu = { config.show_without_menu, 'boolean' },

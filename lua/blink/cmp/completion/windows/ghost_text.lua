@@ -84,9 +84,15 @@ end
 
 function ghost_text.draw_preview()
   -- check if we should be showing
+  local enabled
+  if type(config.enabled) == "function" then
+    enabled = config.enabled("foo")
+  else
+    enabled = config.enabled
+  end
   local menu_open = require('blink.cmp.completion.windows.menu').win:is_open()
   if
-    not config.enabled
+    not enabled
     or (not config.show_with_menu and menu_open)
     or (not config.show_without_menu and not menu_open)
   then
