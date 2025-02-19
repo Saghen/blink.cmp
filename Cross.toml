@@ -1,0 +1,7 @@
+# Picked glibc 2.27 to support Ubuntu 18.04+
+
+[target.x86_64-unknown-linux-gnu]
+zig = "2.27"
+
+[target.aarch64-unknown-linux-gnu.zig]
+zig = "2.27"
