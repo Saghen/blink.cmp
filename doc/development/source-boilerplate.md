@@ -1,9 +1,15 @@
 # Source Boilerplate
 
+If you're missing autocomplete, ensure you have [lazydev.nvim](https://github.com/folke/lazydev.nvim) installed. When publishing your source, please use the format `blink-cmp-your-source` and submit a PR adding it to the [community sources](../configuration/sources#community-sources) so that others may find it easily. You may also add the `blink-cmp` tag.
+
 ```lua
+--- @module 'blink.cmp'
 --- @class blink.cmp.Source
 local source = {}
 
+-- `opts` table comes from `sources.providers.your_provider.opts`
+-- You may also accept a second argument `config`, to get the full
+-- `sources.providers.your_provider` table
 function source.new(opts)
   vim.validate('your_source.opts.some_option', opts.some_option, { 'string' })
   vim.validate('your_source.opts.optional_option', opts.optional_option, { 'string' }, true)
@@ -57,6 +63,7 @@ function source:get_completions(ctx, callback)
       -- when inserting *exclusively* alphanumeric characters. Any symbols will
       -- trigger complicated guessing logic in blink.cmp that may not give the
       -- result you're expecting
+      -- Note that blink.cmp will use `label` when omitting both `insertText` and `textEdit`
       insertText = 'foo',
       -- May be Snippet or PlainText
       insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
