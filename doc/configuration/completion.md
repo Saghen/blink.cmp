@@ -299,6 +299,10 @@ Ghost text shows a preview of the currently selected item as virtual text inline
 
 ```lua
 completion.ghost_text.enabled = true
+
+-- you may want to set the following options
+completion.menu.auto_show = false -- only show menu on manual <C-space>
+completion.ghost_text.show_with_menu = false -- only show when menu is closed
 ```
 
 <img src="https://github.com/user-attachments/assets/1d30ef90-3ba4-43ca-a1a6-faa70f830e17" />
