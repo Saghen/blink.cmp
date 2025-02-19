@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           ## Linux builds
-          # Glibc 2.27
+          # Glibc 2.21
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact_name: target/x86_64-unknown-linux-gnu/release/libblink_cmp_fuzzy.so
