@@ -53,8 +53,10 @@ function source:get_completions(ctx, callback)
           ['end'] = { line = 0, character = 0 },
         },
       },
-      -- Or get blink.cmp to guess the range to replace for you, which may lead
-      -- to unexpected behavior in some cases
+      -- Or get blink.cmp to guess the range to replace for you. Use this only
+      -- when inserting *exclusively* alphanumeric characters. Any symbols will
+      -- trigger complicated guessing logic in blink.cmp that may not give the
+      -- result you're expecting
       insertText = 'foo',
       -- May be Snippet or PlainText
       insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
@@ -73,12 +75,12 @@ function source:get_completions(ctx, callback)
     -- Whether blink.cmp should request items when deleting characters
     -- from the keyword (i.e. "foo|" -> "fo|")
     -- Note that any non-alphanumeric characters will always request
-    -- new items
+    -- new items (excluding `-` and `_`)
     is_incomplete_backward = false,
     -- Whether blink.cmp should request items when adding characters
     -- to the keyword (i.e. "fo|" -> "foo|")
     -- Note that any non-alphanumeric characters will always request
-    -- new items
+    -- new items (excluding `-` and `_`)
     is_incomplete_forward = false,
   })
 
@@ -88,14 +90,17 @@ function source:get_completions(ctx, callback)
 end
 
 -- (Optional) Before accepting the item or showing documentation, blink.cmp will call this function
--- so you may save expensive operations for only when they're actually needed
+-- so you may avoid calculating expensive fields (i.e. documentation) for only when they're actually needed
 function source:resolve(item, callback)
   item = vim.deepcopy(item)
 
+  -- Shown in the documentation window (<C-space> when menu open by default)
   item.documentation = {
     kind = 'markdown',
     value = '# Foo\n\nBar',
   }
+
+  -- Additional edits to make to the document, such as for auto-imports
   item.additionalTextEdits = {
     {
       newText = 'foo',
@@ -114,6 +119,7 @@ function source:execute(ctx, item, callback)
   -- Note that the properties on `ctx` will be out of date by this point,
   -- so you may want to call the `ctx.get_*()` functions to get up-to-date values
 
+  -- The callback *MUST* be called once
   callback()
 end
 
