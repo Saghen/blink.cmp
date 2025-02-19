@@ -1100,6 +1100,10 @@ enabling ghost text, or you may use both in parallel.
 
 >lua
     completion.ghost_text.enabled = true
+    
+    -- you may want to set the following options
+    completion.menu.auto_show = false -- only show menu on manual <C-space>
+    completion.ghost_text.show_with_menu = false -- only show when menu is closed
 <
 
 
@@ -1512,24 +1516,33 @@ SOURCES                                             *blink-cmp-config-sources*
 Blink provides a sources interface, modelled after LSPs, for getting completion
 items, trigger characters, documentation and signature help. The `lsp`, `path`,
 `snippets`, `luasnip`, `buffer`, and `omni` sources are built-in. You may add
-additional |blink-cmp-community-sources| as well. Check out writing sources
-<../development/writing-sources.md> to learn how to write your own!
+additional |blink-cmp-community-sources| as well. Check out the source
+boilerplate <../development/source-boilerplate.md> to learn how to write your
+own!
 
 
 PROVIDERS ~
 
 Sources are configured via the `sources.providers` table, where each `id`
 (`key`) must have a `name` and `module` field. The `id` (`key`) may be used in
-the `sources.default/per_filetype/cmdline` to enable the source.
+the `sources.default/per_filetype`, `cmdline.sources`, and `term.sources` to
+enable the source.
+
+See the reference <./reference.md#sources> for the default configuration
+options.
 
 >lua
     sources = {
-      default = { 'lsp' },
+      -- `lsp`, `buffer`, `snippets`, `path` and `omni` are built-in
+      -- so you don't need to define them in `sources.providers`
+      default = { 'lsp', 'buffer', 'snippets', 'path' },
+    
+      per_filetype = { sql = { 'dadbod' } }
       providers = {
-        lsp = {
-          name = 'LSP',
-          module = 'blink.cmp.sources.lsp',
-        }
+        dadbod = {
+          name = "Dadbod",
+          module = "vim_dadbod_completion.blink",
+        },
       }
     }
 <
