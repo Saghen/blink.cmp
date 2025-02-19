@@ -86,7 +86,7 @@ function ghost_text.draw_preview()
   -- check if we should be showing
   local enabled
   if type(config.enabled) == "function" then
-    enabled = config.enabled("foo")
+    enabled = config.enabled()
   else
     enabled = config.enabled
   end
