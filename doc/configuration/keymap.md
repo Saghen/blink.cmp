@@ -73,7 +73,7 @@ keymap = {
 
 ## Cmdline and Terminal
 
-You may set a separate keymap for cmdline by defining `cmdline.keymap`, with an identical structure to `keymap`. The same applies for terminal keymaps, under `term.keymap`.
+You may set a separate keymap for cmdline and terminal by defining `cmdline.keymap` and `term.keymap`, with an identical structure to `keymap`. When using `accept_and_enter`, you may want to use [to disable completions for the first couple characters](../recipes.md#set-minimum-keyword-length-for-command-only-in-cmdline), to avoid accepting a completion on abbreviations like `:wq`.
 
 ```lua
 cmdline.keymap = {
