@@ -90,3 +90,4 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-cmp-spell](https://github.com/ribru17/blink-cmp-spell.git)
 - [css-vars.nvim](https://github.com/jdrupal-dev/css-vars.nvim)
 - [blink-cmp-env](https://github.com/bydlw98/blink-cmp-env)
+- [blink-cmp-conventional-commits](https://github.com/disrupted/blink-cmp-conventional-commits)
