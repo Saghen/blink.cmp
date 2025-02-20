@@ -21,5 +21,5 @@ doc/configuration/reference.md
 ```{.include shift-heading-level-by=1}
 doc/development/architecture.md
 doc/development/lsp-tracker.md
-doc/development/writing-sources.md
+doc/development/source-boilerplate.md
 ```

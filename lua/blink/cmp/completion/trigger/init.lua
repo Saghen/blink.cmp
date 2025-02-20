@@ -168,6 +168,9 @@ function trigger.is_trigger_character(char, is_show_on_x)
   local sources = require('blink.cmp.sources.lib')
   local is_trigger = vim.tbl_contains(sources.get_trigger_characters(context.get_mode()), char)
 
+  -- ignore a-z and A-Z characters
+  if char:match('%a') then return false end
+
   local show_on_blocked_trigger_characters = type(config.show_on_blocked_trigger_characters) == 'function'
       and config.show_on_blocked_trigger_characters()
     or config.show_on_blocked_trigger_characters

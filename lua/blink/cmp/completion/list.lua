@@ -150,7 +150,10 @@ end
 
 function list.get_item_idx_in_list(item)
   if item == nil then return end
-  return require('blink.cmp.lib.utils').find_idx(list.items, function(i) return i.label == item.label end)
+  return require('blink.cmp.lib.utils').find_idx(
+    list.items,
+    function(i) return i.label == item.label and item.source_id == i.source_id end
+  )
 end
 
 function list.select(idx, opts)

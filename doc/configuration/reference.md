@@ -9,7 +9,7 @@ Do not copy the default configuration! Only include options you want to change i
 enabled = function() return vim.bo.buftype ~= "prompt" and vim.b.completion ~= false end,
 
 -- See the "keymap" page for more information
-keymap = 'default',
+keymap = { preset = 'default' },
 ```
 
 ## Snippets
@@ -299,6 +299,10 @@ completion.ghost_text = {
   show_with_selection = true,
   -- Show the ghost text when no item has been selected, defaulting to the first item
   show_without_selection = false,
+  -- Show the ghost text when the menu is open
+  show_with_menu = true,
+  -- Show the ghost text when the menu is closed
+  show_without_menu = true,
 },
 ```
 
@@ -585,7 +589,8 @@ cmdline = {
       draw = {
         columns = { { 'label', 'label_description', gap = 1 } },
       },
-    }
+    },
+    ghost_text = { enabled = nil }
   }
 }
 ```
@@ -611,6 +616,7 @@ term = {
       draw = {
         columns = { { 'label', 'label_description', gap = 1 } },
       },
-    }
+    },
+    ghost_text = { enabled = nil }
   }
 }

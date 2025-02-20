@@ -14,10 +14,12 @@ function text_edits.apply(text_edit, additional_text_edits)
   assert(mode == 'default' or mode == 'cmdline' or mode == 'term', 'Unsupported mode for text edits: ' .. mode)
 
   if mode == 'default' then
-    if config.completion.accept.dot_repeat then text_edits.write_to_dot_repeat(text_edit) end
+    -- writing to dot repeat may fail in cases like `q:`, which aren't easy to detect
+    -- so we ignore the error
+    if config.completion.accept.dot_repeat then pcall(text_edits.write_to_dot_repeat, text_edit) end
 
     local all_edits = utils.shallow_copy(additional_text_edits)
-    table.insert(all_edits, 1, text_edit)
+    table.insert(all_edits, text_edit)
     vim.lsp.util.apply_text_edits(all_edits, vim.api.nvim_get_current_buf(), 'utf-8')
   end
 
@@ -314,10 +316,20 @@ vim.api.nvim_set_keymap('s', dot_repeat_hack_name, '', opts)
 vim.api.nvim_set_keymap('v', dot_repeat_hack_name, '', opts)
 vim.api.nvim_set_keymap('c', dot_repeat_hack_name, '', opts)
 
---- Fill the `.` register so that dot-repeat works. This also changes the
---- text in the buffer - currently there is no way to do this in Neovim
---- (only adding new text is supported, but we also want to replace the
---- current word). See the tracking issue for this feature at
+local dot_repeat_buffer = nil
+local function get_dot_repeat_buffer()
+  if dot_repeat_buffer == nil or not vim.api.nvim_buf_is_valid(dot_repeat_buffer) then
+    dot_repeat_buffer = vim.api.nvim_create_buf(false, true)
+    vim.bo[dot_repeat_buffer].buftype = 'nofile'
+  end
+  return dot_repeat_buffer
+end
+
+--- Write to the `.` register so that dot-repeat works. This works by creating a
+--- temporary floating window and buffer, using `vim.fn.complete` to delete and
+--- add text, and then closing the window.
+---
+--- See the tracking issue for directly writing to `.` register:
 --- https://github.com/neovim/neovim/issues/19806#issuecomment-2365146298
 --- @param text_edit lsp.TextEdit
 function text_edits.write_to_dot_repeat(text_edit)
@@ -338,9 +350,7 @@ function text_edits.write_to_dot_repeat(text_edit)
     local curr_win = vim.api.nvim_get_current_win()
 
     -- create temporary floating window and buffer for writing
-    local buf = vim.api.nvim_create_buf(false, true)
-    vim.bo[buf].bufhidden = 'wipe'
-    vim.bo[buf].buftype = 'nofile'
+    local buf = get_dot_repeat_buffer()
     local win = vim.api.nvim_open_win(buf, true, {
       relative = 'win',
       win = vim.api.nvim_get_current_win(),

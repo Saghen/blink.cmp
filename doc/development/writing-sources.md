@@ -1,3 +1,0 @@
-# Writing Sources
-
-TODO

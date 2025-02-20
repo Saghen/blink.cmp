@@ -237,4 +237,8 @@ function task.empty()
   return task.new(function(resolve) resolve() end)
 end
 
+function task.identity(x)
+  return task.new(function(resolve) resolve(x) end)
+end
+
 return { task = task, STATUS = STATUS }

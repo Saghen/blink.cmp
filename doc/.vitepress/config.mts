@@ -49,7 +49,7 @@ export default defineConfig({
     ],
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/saghen/blink.cmp' }],
-    editLink: { pattern: 'https://github.com/saghen/blink.cmp/edit/main/docs/:path' },
+    editLink: { pattern: 'https://github.com/saghen/blink.cmp/edit/main/doc/:path' },
 
     search: { provider: 'local' },
   },

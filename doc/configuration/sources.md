@@ -3,23 +3,29 @@ title: Sources
 ---
 # Sources<!-- panvimdoc-ignore-start --> <Badge type="info"><a href="./reference#sources">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
 ::: info
-Check out the [recipes](../recipes.md) for some common configurations
+Check out the [recipes](../recipes.md#sources) for some common configurations
 :::
 
-Blink provides a sources interface, modelled after LSPs, for getting completion items, trigger characters, documentation and signature help. The `lsp`, `path`, `snippets`, `luasnip`, `buffer`, and `omni` sources are built-in. You may add additional [community sources](#community-sources) as well. Check out [writing sources](../development/writing-sources.md) to learn how to write your own!
+Blink provides a sources interface, modelled after LSPs, for getting completion items, trigger characters, documentation and signature help. The `lsp`, `path`, `snippets`, `luasnip`, `buffer`, and `omni` sources are built-in. You may add additional [community sources](#community-sources) as well. Check out the [source boilerplate](../development/source-boilerplate.md) to learn how to write your own!
 
 ## Providers
 
-Sources are configured via the `sources.providers` table, where each `id` (`key`) must have a `name` and `module` field. The `id` (`key`) may be used in the `sources.default/per_filetype/cmdline` to enable the source.
+Sources are configured via the `sources.providers` table, where each `id` (`key`) must have a `name` and `module` field. The `id` (`key`) may be used in the `sources.default/per_filetype`, `cmdline.sources`, and `term.sources` to enable the source.
+
+See the [reference](./reference.md#sources) for the default configuration options.
 
 ```lua
 sources = {
-  default = { 'lsp' },
+  -- `lsp`, `buffer`, `snippets`, `path` and `omni` are built-in
+  -- so you don't need to define them in `sources.providers`
+  default = { 'lsp', 'buffer', 'snippets', 'path' },
+
+  per_filetype = { sql = { 'dadbod' } }
   providers = {
-    lsp = {
-      name = 'LSP',
-      module = 'blink.cmp.sources.lsp',
-    }
+    dadbod = {
+      name = "Dadbod",
+      module = "vim_dadbod_completion.blink",
+    },
   }
 }
 ```
@@ -57,7 +63,7 @@ sources.providers.lsp = {
 Terminal completions are nightly only! Known bugs in v0.10. Cmdline completions are supported on all versions
 :::
 
-You may use `cmdline` and `term` sources via the `cmdline.sources` and `term.sources` tables. You may see the defaults in the [reference](./reference.md#mode-specific). There's no source for shell completions at the moment, [contributions welcome](https://github.com/Saghen/blink.cmp/issues/1149)! 
+You may use `cmdline` and `term` sources via the `cmdline.sources` and `term.sources` tables. You may see the defaults in the [reference](./reference.md#mode-specific). There's no source for shell completions at the moment, [contributions welcome](https://github.com/Saghen/blink.cmp/issues/1149)!
 
 ## Using `nvim-cmp` sources
 
@@ -85,3 +91,4 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [css-vars.nvim](https://github.com/jdrupal-dev/css-vars.nvim)
 - [blink-cmp-env](https://github.com/bydlw98/blink-cmp-env)
 - [blink-cmp-avante](https://github.com/Kaiser-Yang/blink-cmp-avante)
+- [blink-cmp-conventional-commits](https://github.com/disrupted/blink-cmp-conventional-commits)
