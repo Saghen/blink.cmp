@@ -1613,6 +1613,7 @@ COMMUNITY SOURCES ~
 - blink-cmp-spell <https://github.com/ribru17/blink-cmp-spell.git>
 - css-vars.nvim <https://github.com/jdrupal-dev/css-vars.nvim>
 - blink-cmp-env <https://github.com/bydlw98/blink-cmp-env>
+- blink-cmp-avante <https://github.com/Kaiser-Yang/blink-cmp-avante>
 - blink-cmp-conventional-commits <https://github.com/disrupted/blink-cmp-conventional-commits>
 
 
