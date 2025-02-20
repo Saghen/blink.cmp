@@ -19,7 +19,7 @@ function text_edits.apply(text_edit, additional_text_edits)
     if config.completion.accept.dot_repeat then pcall(text_edits.write_to_dot_repeat, text_edit) end
 
     local all_edits = utils.shallow_copy(additional_text_edits)
-    table.insert(all_edits, 1, text_edit)
+    table.insert(all_edits, text_edit)
     vim.lsp.util.apply_text_edits(all_edits, vim.api.nvim_get_current_buf(), 'utf-8')
   end
 
