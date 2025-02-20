@@ -131,7 +131,7 @@ dependencies = [
 [[package]]
 name = "frizbee"
 version = "0.1.0"
-source = "git+https://github.com/saghen/frizbee#75c9dc534f459580dba8a45847bfae2e384f1a54"
+source = "git+https://github.com/saghen/frizbee#a9d07fe50e2f495e9957c3a593c57ba16e562f63"
 dependencies = [
  "memchr",
 ]
