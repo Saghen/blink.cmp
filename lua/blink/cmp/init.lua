@@ -187,7 +187,16 @@ function cmp.select_next(opts)
 end
 
 --- Gets the currently selected completion item
+--- @return blink.cmp.CompletionItem?
 function cmp.get_selected_item() return require('blink.cmp.completion.list').get_selected_item() end
+
+--- Gets the currently selected completion item index
+--- @return number?
+function cmp.get_selected_item_idx() return require('blink.cmp.completion.list').selected_item_idx end
+
+--- Gets the sorted list of completion items
+--- @return blink.cmp.CompletionItem[]
+function cmp.get_items() return require('blink.cmp.completion.list').items end
 
 --- Show the documentation window
 function cmp.show_documentation()
