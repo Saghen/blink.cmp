@@ -37,6 +37,7 @@ function cmdline.validate(config)
     validate('cmdline.completion', {
       trigger = { config.completion.trigger, 'table', true },
       menu = { config.completion.menu, 'table', true },
+      ghost_text = { config.completion.ghost_text, 'table', true },
     }, config.completion)
 
     if config.completion.trigger ~= nil then
@@ -65,6 +66,12 @@ function cmdline.validate(config)
           columns = { config.completion.menu.draw.columns, { 'function', 'table' }, true },
         }, config.completion.menu.draw)
       end
+    end
+
+    if config.completion.ghost_text ~= nil then
+      validate('cmdline.completion.ghost_text', {
+        enabled = { config.completion.ghost_text.enabled, { 'boolean', 'function' }, true },
+      }, config.completion.ghost_text)
     end
   end
 end
