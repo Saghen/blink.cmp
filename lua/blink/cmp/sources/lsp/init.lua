@@ -41,13 +41,7 @@ function lsp:get_completions(context, callback)
         final.is_incomplete_forward = final.is_incomplete_forward or response.is_incomplete_forward
         final.is_incomplete_backward = final.is_incomplete_backward or response.is_incomplete_backward
 
-        -- for performance, we append the shorter list to the longer one
-        if #final.items > #response.items then
-          vim.list_extend(final.items, response.items)
-        else
-          vim.list_extend(response.items, final.items)
-          final.items = response.items
-        end
+        vim.list_extend(final.items, response.items)
       end
       callback(final)
     end)
