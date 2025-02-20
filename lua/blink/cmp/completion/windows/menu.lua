@@ -128,7 +128,7 @@ function menu.update_position()
   win:update_size()
 
   local border_size = win:get_border_size()
-  local pos = win:get_vertical_direction_and_height(config.direction_priority)
+  local pos = win:get_vertical_direction_and_height(config.direction_priority, config.max_height)
 
   -- couldn't find anywhere to place the window
   if not pos then
