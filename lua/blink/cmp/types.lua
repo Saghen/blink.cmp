@@ -8,6 +8,8 @@
 --- @field cursor_column number
 --- @field client_id? number
 --- @field client_name? string
+--- @field kind_name? string
+--- @field kind_icon? string
 
 return {
   -- some plugins mutate the vim.lsp.protocol.CompletionItemKind table

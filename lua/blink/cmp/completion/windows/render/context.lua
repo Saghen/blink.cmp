@@ -43,10 +43,12 @@ local kinds = require('blink.cmp.types').CompletionItemKind
 --- @param matched_indices number[]
 --- @return blink.cmp.DrawItemContext
 function draw_context.new(draw, item_idx, item, matched_indices)
-  local kind = kinds[item.kind] or 'Unknown'
-  local kind_icon = require('blink.cmp.completion.windows.render.tailwind').get_kind_icon(item)
+  local kind = item.kind_name or kinds[item.kind] or 'Unknown'
+  local kind_icon = item.kind_icon
+    or require('blink.cmp.completion.windows.render.tailwind').get_kind_icon(item)
     or config.kind_icons[kind]
     or config.kind_icons.Field
+
   local icon_spacing = config.nerd_font_variant == 'mono' and '' or ' '
 
   -- Some LSPs can return labels with newlines
