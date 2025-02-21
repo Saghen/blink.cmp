@@ -12,6 +12,7 @@
 --- @field open_loading fun(context: blink.cmp.Context)
 --- @field open fun()
 --- @field close fun()
+--- @field should_auto_show fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
 --- @field set_selected_item_idx fun(idx?: number)
 --- @field update_position fun()
 --- @field redraw_if_needed fun()
@@ -55,7 +56,7 @@ function menu.open_with_items(context, items)
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
   menu.renderer:draw(context, menu.win:get_buf(), items)
 
-  if menu.should_auto_show() then
+  if menu.should_auto_show(context, items) then
     menu.open()
     menu.update_position()
   end
@@ -81,7 +82,7 @@ function menu.open_loading(context)
     },
   })
 
-  if menu.should_auto_show() then
+  if menu.should_auto_show(context, {}) then
     menu.open()
     menu.update_position()
   end
@@ -112,8 +113,8 @@ function menu.set_selected_item_idx(idx)
   if menu.win:is_open() then menu.win:set_cursor({ idx or 1, 0 }) end
 end
 
-function menu.should_auto_show()
-  if type(menu.auto_show) == 'function' then return menu.auto_show() end
+function menu.should_auto_show(context, items)
+  if type(menu.auto_show) == 'function' then return menu.auto_show(context, items) end
   return menu.auto_show
 end
 
