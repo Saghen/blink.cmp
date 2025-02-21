@@ -3,6 +3,7 @@ extend-exclude = []
 
 [default.extend-words]
 noice = "noice"
+fo = "fo"
 
 [default]
 extend-ignore-re = [
@@ -13,5 +14,5 @@ extend-ignore-re = [
   # Line block with # spellchecker:<on|off>
   "(?s)(#|--|//|)\\s*spellchecker:off.*?\\n\\s*(#|--|//)\\s*spellchecker:on",
   # Vim doc formatting
-  "vim:.+:$"
+  "vim:.+:"
 ]
