@@ -41,6 +41,8 @@ local function process_response(context, client, res)
   for _, item in ipairs(items) do
     item.client_id = client.id
     item.client_name = client.name
+    -- we must set the cursor column because this will be cached and used later
+    -- by default, blink.cmp will use the cursor column at the time of the request
     item.cursor_column = context.cursor[2]
 
     -- score offset for deprecated items
