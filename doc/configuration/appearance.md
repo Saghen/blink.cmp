@@ -15,13 +15,13 @@ If you're looking for how to change the appearance of the completion menu, check
 | `BlinkCmpScrollBarThumb` | PmenuThumb | The scrollbar thumb |
 | `BlinkCmpScrollBarGutter` | PmenuSbar | The scrollbar gutter |
 | `BlinkCmpLabel` | Pmenu | Label of the completion item |
-| `BlinkCmpLabelDeprecated` | NonText | Deprecated label of the completion item |
+| `BlinkCmpLabelDeprecated` | PmenuExtra | Deprecated label of the completion item |
 | `BlinkCmpLabelMatch` | Pmenu | (Currently unused) Label of the completion item when it matches the query |
-| `BlinkCmpLabelDetail` | NonText | Label description of the completion item |
-| `BlinkCmpLabelDescription` | NonText | Label description of the completion item |
+| `BlinkCmpLabelDetail` | PmenuExtra | Label description of the completion item |
+| `BlinkCmpLabelDescription` | PmenuExtra | Label description of the completion item |
 | `BlinkCmpKind` | PmenuKind | Kind icon/text of the completion item |
 | `BlinkCmpKind<kind>` | PmenuKind | Kind icon/text of the completion item |
-| `BlinkCmpSource` | NonText | Source of the completion item |
+| `BlinkCmpSource` | PmenuExtra | Source of the completion item |
 | `BlinkCmpGhostText` | NonText | Preview item with ghost text  |
 | `BlinkCmpDoc` | NormalFloat | The documentation window |
 | `BlinkCmpDocBorder` | NormalFloat | The documentation window border |
