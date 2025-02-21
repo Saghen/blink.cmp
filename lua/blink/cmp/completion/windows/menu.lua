@@ -113,7 +113,7 @@ function menu.set_selected_item_idx(idx)
 end
 
 function menu.should_auto_show()
-  if type(menu.auto_show) == 'function' then return menu.auto_show() end
+  if type(menu.auto_show) == 'function' then return menu.auto_show(menu.context) end
   return menu.auto_show
 end
 
