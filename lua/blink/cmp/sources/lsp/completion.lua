@@ -31,15 +31,17 @@ local known_defaults = {
   'insertTextMode',
   'data',
 }
+--- @param context blink.cmp.Context
 --- @param client vim.lsp.Client
 --- @param res lsp.CompletionList
 --- @return blink.cmp.CompletionResponse
-local function process_response(client, res)
+local function process_response(context, client, res)
   local items = res.items or res
   local default_edit_range = res.itemDefaults and res.itemDefaults.editRange
   for _, item in ipairs(items) do
     item.client_id = client.id
     item.client_name = client.name
+    item.cursor_column = context.cursor[2]
 
     -- score offset for deprecated items
     -- todo: make configurable
@@ -90,7 +92,7 @@ function completion.get_completion_for_client(context, client)
       return { is_incomplete_forward = true, is_incomplete_backward = true, items = {} }
     end
 
-    local response = process_response(client, res.result)
+    local response = process_response(context, client, res.result)
     if client.name == 'emmet_ls' then require('blink.cmp.sources.lsp.hacks.emmet').process_response(response) end
     cache.set(context, client, response)
 
