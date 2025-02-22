@@ -88,7 +88,7 @@ local function accept(ctx, item, callback)
         text_edits_lib.apply(item.textEdit, all_text_edits)
 
         if ctx.get_mode() ~= 'term' then ctx.set_cursor(new_cursor) end
-        text_edits_lib.move_cursor_in_dot_repeat(offset)
+        if config.dot_repeat then text_edits_lib.move_cursor_in_dot_repeat(offset) end
       end
 
       -- Let the source execute the item itself
