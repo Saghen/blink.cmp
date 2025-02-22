@@ -34,7 +34,10 @@ function system.get_linux_libc()
     .task
     -- Check for system libc via `cc -dumpmachine` by default
     -- NOTE: adds 1ms to startup time
-    .new(function(resolve) vim.system({ 'cc', '-dumpmachine' }, { text = true }, resolve) end)
+    .new(function(resolve)
+      local ok = pcall(vim.system, { 'cc', '-dumpmachine' }, { text = true }, resolve)
+      if not ok then resolve({}) end
+    end)
     :schedule()
     :map(function(process)
       --- @cast process vim.SystemCompleted
