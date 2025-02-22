@@ -25,6 +25,7 @@ function cmdline:get_completions(context, callback)
   local text_before_argument = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
     .. (arg_number > 1 and ' ' or '')
 
+  local is_first_arg = arg_number == 1 and not vim.startswith(context.line, '=')
   local current_arg = arguments[arg_number]
   local keyword_config = require('blink.cmp.config').completion.keyword
   local keyword = context.get_bounds(keyword_config.range)
@@ -110,7 +111,6 @@ function cmdline:get_completions(context, callback)
 
       local completion_type = vim.fn.getcmdcompltype()
       local is_file_completion = completion_type == 'file' or completion_type == 'buffer'
-      local is_first_arg = arg_number == 1
 
       local items = {}
       for _, completion in ipairs(completions) do
