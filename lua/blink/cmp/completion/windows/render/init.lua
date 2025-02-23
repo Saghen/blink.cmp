@@ -3,6 +3,7 @@
 --- @field padding number[]
 --- @field gap number
 --- @field columns blink.cmp.DrawColumn[]
+--- @field bufnr number?
 ---
 --- @field new fun(draw: blink.cmp.Draw): blink.cmp.Renderer
 --- @field draw fun(self: blink.cmp.Renderer, context: blink.cmp.Context, bufnr: number, items: blink.cmp.CompletionItem[], draw: blink.cmp.Draw): blink.cmp.DrawColumn[]
@@ -25,6 +26,35 @@ function renderer.new(draw)
   self.padding = padding
   self.gap = draw.gap
   self.def = draw
+
+  -- Setting highlights is slow and we update on every keystroke so we instead use a decoration provider
+  -- which will only render highlights of the visible lines. This also avoids having to do virtual scroll
+  -- like nvim-cmp does, which breaks on UIs like neovide
+  vim.api.nvim_set_decoration_provider(ns, {
+    on_win = function(_, _, win_bufnr) return self.bufnr == win_bufnr end,
+    on_line = function(_, _, _, line)
+      local offset = self.padding[1]
+      for _, column in ipairs(self.columns) do
+        local text = column:get_line_text(line + 1)
+        if #text > 0 then
+          local highlights = column:get_line_highlights(line + 1)
+          for _, highlight in ipairs(highlights) do
+            local col = offset + highlight[1]
+            local end_col = offset + highlight[2]
+            vim.api.nvim_buf_set_extmark(self.bufnr, ns, line, col, {
+              end_col = end_col,
+              hl_group = highlight.group,
+              hl_mode = 'combine',
+              hl_eol = true,
+              ephemeral = true,
+            })
+          end
+          offset = offset + #text + self.gap
+        end
+      end
+    end,
+  })
+
   return self
 end
 
@@ -88,35 +118,8 @@ function renderer:draw(context, bufnr, items)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
 
-  -- Setting highlights is slow and we update on every keystroke so we instead use a decoration provider
-  -- which will only render highlights of the visible lines. This also avoids having to do virtual scroll
-  -- like nvim-cmp does, which breaks on UIs like neovide
-  vim.api.nvim_set_decoration_provider(ns, {
-    on_win = function(_, _, win_bufnr) return bufnr == win_bufnr end,
-    on_line = function(_, _, _, line)
-      local offset = self.padding[1]
-      for _, column in ipairs(columns) do
-        local text = column:get_line_text(line + 1)
-        if #text > 0 then
-          local highlights = column:get_line_highlights(line + 1)
-          for _, highlight in ipairs(highlights) do
-            local col = offset + highlight[1]
-            local end_col = offset + highlight[2]
-            vim.api.nvim_buf_set_extmark(bufnr, ns, line, col, {
-              end_col = end_col,
-              hl_group = highlight.group,
-              hl_mode = 'combine',
-              hl_eol = true,
-              ephemeral = true,
-            })
-          end
-          offset = offset + #text + self.gap
-        end
-      end
-    end,
-  })
-
   self.columns = columns
+  self.bufnr = bufnr
 end
 
 function renderer:get_component_column_location(columns, component_name)
