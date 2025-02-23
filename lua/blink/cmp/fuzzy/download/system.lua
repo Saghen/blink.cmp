@@ -44,6 +44,7 @@ function system.get_linux_libc()
       local stdout = process.stdout:gsub('%s+', '')
       return vim.fn.split(stdout, '-')[4]
     end)
+    :catch(function() end)
     -- Fall back to checking for alpine
     :map(function(libc)
       if libc ~= nil then return libc end
