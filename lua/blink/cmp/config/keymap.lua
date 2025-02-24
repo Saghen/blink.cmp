@@ -93,29 +93,34 @@
 --- ```
 --- | 'enter'
 
---- When specifying 'preset' in the keymap table, the custom key mappings are merged with the preset, and any conflicting keys will overwrite the preset mappings.
---- The "fallback" command will run the next non blink keymap.
+--- Your custom key mappings are merged with a `preset` and any conflicting keys will overwrite the preset mappings. The `fallback` command will run the next non blink keymap.
+---
+--- Each keymap may be a list of commands and/or functions, where commands map directly to `require('blink.cmp')[command]()`. If the command/function returns `false` or `nil`, the next command/function will be run.
 ---
 --- Example:
 ---
 --- ```lua
 --- keymap = {
+---   -- set to 'none' to disable the 'default' preset
 ---   preset = 'default',
+---
 ---   ['<Up>'] = { 'select_prev', 'fallback' },
 ---   ['<Down>'] = { 'select_next', 'fallback' },
 ---
 ---   -- disable a keymap from the preset
 ---   ['<C-e>'] = {},
 ---
----   -- optionally, define different keymaps for cmdline
----   cmdline = {
----     preset = 'cmdline',
----   }
+---   -- show with a list of providers
+---   ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },
 ---
----   -- optionally, define different keymaps for Neovim's built-in terminal
----   term = {
----     preset = 'term',
----   }
+---   -- control whether the next command will be run when using a function
+---   ['<C-n>'] = {
+---     function(cmp)
+---       if some_condition then return end -- runs the next command
+---       return true -- doesn't run the next command
+---     end,
+---     'select_next'
+---   },
 --- }
 --- ```
 ---
