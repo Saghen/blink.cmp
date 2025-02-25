@@ -1,6 +1,6 @@
 # Command line (cmdline)
 
-By default, blink.cmp matches the behavior of the built-in `cmdline` completion:
+By default, blink.cmp enabled cmdline completions (`cmdline.enabled = true`), matchiing the behavior of the built-in `cmdline` completion:
 
 - Menu will not show automatically (`cmdline.completion.menu.auto_show = false`)
 - Pressing `<Tab>` will show the completion menu and insert the first item
@@ -34,7 +34,6 @@ Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `'none
   ['<C-e>'] = { 'cancel' },
 }
 ```
-
 
 ## Ghost text
 
@@ -82,7 +81,7 @@ cmdline = {
 
 ## Enter keymap
 
-When using `<Enter>` (`<CR>`) to accept the current item, you may want to accept the completion item and immediately execute the command. You can achieve this via the `accept_and_enter` command. However, when writing abbreviations like `:wq`, with the menu automatically showing, you may end up accidentally accepting a completion item. Thus, you may disable the completions when the keyword, for the first argument, is less than 2 characters.
+When using `<Enter>` (`<CR>`) to accept the current item, you may want to accept the completion item and immediately execute the command. You can achieve this via the `accept_and_enter` command. However, when writing abbreviations like `:wq`, with the menu automatically showing, you may end up accidentally accepting a completion item. Thus, you may disable the completions when the keyword, for the first argument, is less than 3 characters.
 
 ```lua
 cmdline = {
