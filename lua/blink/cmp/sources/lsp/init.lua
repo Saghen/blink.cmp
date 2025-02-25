@@ -1,10 +1,27 @@
 local async = require('blink.cmp.lib.async')
 
---- @type blink.cmp.Source
+--- @class blink.cmp.LSPSourceOpts
+--- @field tailwind_color_icon? string
+
+--- @class blink.cmp.LSPSource : blink.cmp.Source
+--- @field opts blink.cmp.LSPSourceOpts
+
+--- @type blink.cmp.LSPSource
 --- @diagnostic disable-next-line: missing-fields
 local lsp = {}
 
-function lsp.new() return setmetatable({}, { __index = lsp }) end
+function lsp.new(opts)
+  opts = opts or {}
+  opts.tailwind_color_icon = opts.tailwind_color_icon or '██'
+
+  require('blink.cmp.config.utils').validate(
+    'sources.providers.lsp.opts',
+    { tailwind_color_icon = { opts.tailwind_color_icon, 'string' } },
+    opts
+  )
+
+  return setmetatable({ opts = opts }, { __index = lsp })
+end
 
 --- Completion ---
 
@@ -34,7 +51,12 @@ function lsp:get_completions(context, callback)
   -- TODO: implement a timeout before returning the menu as-is. In the future, it would be neat
   -- to detect slow LSPs and consistently run them async
   local task = async.task
-    .await_all(vim.tbl_map(function(client) return completion_lib.get_completion_for_client(context, client) end, clients))
+    .await_all(
+      vim.tbl_map(
+        function(client) return completion_lib.get_completion_for_client(context, client, self.opts) end,
+        clients
+      )
+    )
     :map(function(responses)
       local final = { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
       for _, response in ipairs(responses) do

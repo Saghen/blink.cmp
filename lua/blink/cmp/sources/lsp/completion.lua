@@ -81,8 +81,9 @@ local completion = {}
 
 --- @param context blink.cmp.Context
 --- @param client vim.lsp.Client
+--- @param opts blink.cmp.LSPSourceOpts
 --- @return blink.cmp.Task
-function completion.get_completion_for_client(context, client)
+function completion.get_completion_for_client(context, client, opts)
   -- We have multiple clients and some may return isIncomplete = false while others return isIncomplete = true
   -- If any are marked as incomplete, we must tell blink.cmp, but this will cause a fetch on every keystroke
   -- So we cache the responses and only re-request completions from isIncomplete = true clients
@@ -97,6 +98,9 @@ function completion.get_completion_for_client(context, client)
     local response = process_response(context, client, res.result)
     if client.name == 'emmet_ls' or client.name == 'emmet-language-server' then
       require('blink.cmp.sources.lsp.hacks.emmet').process_response(response)
+    end
+    if client.name == 'tailwindcss' then
+      require('blink.cmp.sources.lsp.hacks.tailwind').process_response(response, opts.tailwind_color_icon)
     end
     cache.set(context, client, response)
 

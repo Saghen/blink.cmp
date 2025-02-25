@@ -10,6 +10,7 @@
 --- @field client_name? string
 --- @field kind_name? string
 --- @field kind_icon? string
+--- @field kind_hl? string
 
 return {
   -- some plugins mutate the vim.lsp.protocol.CompletionItemKind table

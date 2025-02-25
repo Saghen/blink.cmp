@@ -104,8 +104,8 @@ function column:get_line_highlights(line_idx)
       elseif type(column_highlights) == 'table' then
         for _, highlight in ipairs(column_highlights) do
           table.insert(highlights, {
-            offset + highlight[1],
-            offset + highlight[2],
+            offset + (highlight[1] or 0),
+            offset + (highlight[2] or #text),
             group = highlight.group,
             params = highlight.params,
           })
