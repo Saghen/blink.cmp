@@ -68,7 +68,11 @@ function cmdline:get_completions(context, callback)
           local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
           -- TODO: handle `custom` type
           local type = not vim.startswith(completion_type, 'custom') and vim.fn.getcmdcompltype() or 'cmdline'
-          completions = vim.fn.getcompletion(query, type)
+          if type == '' then
+            completions = {}
+          else
+            completions = vim.fn.getcompletion(query, type)
+          end
         end
 
       -- Cmdline mode
