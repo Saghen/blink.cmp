@@ -14,7 +14,7 @@ See the [reference configuration](../configuration/reference.md#cmdline) for the
 
 ## Keymap preset
 
-Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `none` to disable the preset. See the [keymap documentation](../configuration/keymap.md) for more information on defining your own.
+Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `'none'` to disable the preset. See the [keymap documentation](../configuration/keymap.md) for more information on defining your own.
 
 ```lua
 {
@@ -82,14 +82,12 @@ cmdline = {
 
 ## Enter keymap
 
-When using `<Enter>` (`<CR>`) to accept the current item, you may want to immediately execute the command as well. However, this results in awkward behavior when running abbreviations like `:wq`. You may disable the completions when the keyword, for the argument, is less than 2 characters.
+When using `<Enter>` (`<CR>`) to accept the current item, you may want to accept the completion item and immediately execute the command. You can achieve this via the `accept_and_enter` command. However, when writing abbreviations like `:wq`, with the menu automatically showing, you may end up accidentally accepting a completion item. Thus, you may disable the completions when the keyword, for the first argument, is less than 2 characters.
 
 ```lua
 cmdline = {
   keymap = {
-    -- (optionally) disable built-in keymaps
-    -- preset = 'none',
-
+    ['<Tab>'] = { 'accept' },
     ['<CR>'] = { 'accept_and_enter', 'fallback' },
   },
   -- (optionally) automatically show the menu
@@ -99,8 +97,8 @@ sources = {
   providers = {
     cmdline = {
       min_keyword_length = function(ctx)
-        -- only apply when typing a command, don't apply to arguments
-        if ctx.mode == 'cmdline' and string.find(ctx.line, ' ') == nil then return 2 end
+        -- when typing a command, only show when the keyword is 3 characters or longer
+        if ctx.mode == 'cmdline' and string.find(ctx.line, ' ') == nil then return 3 end
         return 0
       end
     }
