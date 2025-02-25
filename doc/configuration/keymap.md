@@ -159,3 +159,7 @@ You may want to set `completion.list.selection.preselect = false`. See more info
 
 ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 ```
+
+### `cmdline`
+
+See the [cmdline documentation](../modes/cmdline.md)

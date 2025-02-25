@@ -39,6 +39,13 @@ export default defineConfig({
         ],
       },
       {
+        text: 'Modes',
+        items: [
+          { text: 'Cmdline', link: '/modes/cmdline' },
+          { text: 'Terminal', link: '/modes/term' },
+        ],
+      },
+      {
         text: 'Development',
         items: [
           { text: 'Architecture', link: '/development/architecture' },

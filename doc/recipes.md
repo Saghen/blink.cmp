@@ -299,20 +299,6 @@ sources.min_keyword_length = function()
 end
 ```
 
-### Set minimum keyword length for command only in cmdline
-
-If you'd prefer the menu doesn't popup when typing abbreviations like `wq`, you may set the minimum keyword length to 2 when typing the command.
-
-```lua
-sources = {
-  min_keyword_length = function(ctx)
-    -- only applies when typing a command, doesn't apply to arguments
-    if ctx.mode == 'cmdline' and string.find(ctx.line, ' ') == nil then return 2 end
-    return 0
-  end
-}
-```
-
 ### Path completion from `cwd` instead of current buffer's directory
 
 It's common to run code from the root of your repository, in which case relative paths will start from that directory. In that case, you may want path completions to be relative to your current working directory rather than the default, which is the current buffer's parent directory.

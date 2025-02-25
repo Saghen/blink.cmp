@@ -1,3 +1,4 @@
+--- @type table<string, table<string, blink.cmp.KeymapCommand[]>>
 local presets = {
   none = {},
 
@@ -18,6 +19,23 @@ local presets = {
     ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
 
     ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
+  },
+
+  cmdline = {
+    ['<Tab>'] = {
+      function(cmp)
+        if cmp.is_ghost_text_visible() and not cmp.is_menu_visible() then return cmp.accept() end
+      end,
+      'show_and_insert',
+      'select_next',
+    },
+    ['<S-Tab>'] = { 'show_and_insert', 'select_prev' },
+
+    ['<C-n>'] = { 'select_next' },
+    ['<C-p>'] = { 'select_prev' },
+
+    ['<C-y>'] = { 'select_and_accept' },
+    ['<C-e>'] = { 'cancel' },
   },
 
   ['super-tab'] = {
