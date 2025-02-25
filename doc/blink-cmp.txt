@@ -1,4 +1,4 @@
-*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 24
+*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 25
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -26,11 +26,14 @@ Table of Contents                                *blink-cmp-table-of-contents*
   - Snippets                                       |blink-cmp-config-snippets|
   - Sources                                         |blink-cmp-config-sources|
   - Reference                                     |blink-cmp-config-reference|
-5. Development                                         |blink-cmp-development|
+5. Modes                                                     |blink-cmp-modes|
+  - Command line (cmdline)            |blink-cmp-modes-command-line-(cmdline)|
+  - Terminal (term)                          |blink-cmp-modes-terminal-(term)|
+6. Development                                         |blink-cmp-development|
   - Architecture                          |blink-cmp-development-architecture|
   - LSP Support Tracker            |blink-cmp-development-lsp-support-tracker|
   - Source Boilerplate              |blink-cmp-development-source-boilerplate|
-6. Links                                                     |blink-cmp-links|
+7. Links                                                     |blink-cmp-links|
 
 ==============================================================================
 1. Introduction                                       *blink-cmp-introduction*
@@ -291,42 +294,6 @@ BORDER ~
 <
 
 
-CHANGE SELECTION TYPE PER MODE ~
-
->lua
-    completion = { 
-      list = { 
-        selection = {
-          preselect = function(ctx) return ctx.mode ~= 'cmdline' end,
-          auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end
-        }
-      }
-    }
-<
-
-
-DON’T SHOW COMPLETION MENU AUTOMATICALLY IN CMDLINE MODE ~
-
->lua
-    completion = { 
-      menu = { auto_show = function(ctx) return ctx.mode ~= 'cmdline' end }
-    }
-<
-
-
-DON’T SHOW COMPLETION MENU AUTOMATICALLY WHEN SEARCHING ~
-
->lua
-    completion = {
-      menu = {
-        auto_show = function(ctx)
-          return ctx.mode ~= "cmdline" or not vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype())
-        end,
-      },
-    }
-<
-
-
 SELECT NTH ITEM FROM THE LIST ~
 
 Here’s an example configuration that allows you to select the nth item from
@@ -383,6 +350,7 @@ HIDE COPILOT ON SUGGESTION ~
 
 
 SHOW ON NEWLINE, TAB AND SPACE ~
+
 
 Note that you may want to add the override to other sources as well, since if
 the LSP doesnt return any items, we won’t show the menu if it was triggered
@@ -574,22 +542,6 @@ SET MINIMUM KEYWORD LENGTH BY FILETYPE ~
 <
 
 
-SET MINIMUM KEYWORD LENGTH FOR COMMAND ONLY IN CMDLINE ~
-
-If you’d prefer the menu doesn’t popup when typing abbreviations like `wq`,
-you may set the minimum keyword length to 2 when typing the command.
-
->lua
-    sources = {
-      min_keyword_length = function(ctx)
-        -- only applies when typing a command, doesn't apply to arguments
-        if ctx.mode == 'cmdline' and string.find(ctx.line, ' ') == nil then return 2 end
-        return 0
-      end
-    }
-<
-
-
 PATH COMPLETION FROM CWD INSTEAD OF CURRENT BUFFER’S DIRECTORY ~
 
 It’s common to run code from the root of your repository, in which case
@@ -704,8 +656,8 @@ For more common configurations, see the recipes <../recipes.md>.
     
         -- Don't select by default, auto insert on selection
         list = { selection = { preselect = false, auto_insert = true } },
-        -- or set either per mode via a function
-        list = { selection = { preselect = function(ctx) return ctx.mode ~= 'cmdline' end } },
+        -- or set via a function
+        list = { selection = { preselect = function(ctx) return vim.bo.filetype ~= 'markdown' end } },
     
         menu = {
           -- Don't automatically show the completion menu
@@ -976,7 +928,7 @@ the first item, with `auto_insert`. The default keymap (`<C-space>`) uses the
 Video:
 https://github.com/user-attachments/assets/4658b61d-1b95-404a-b6b5-3a4afbfb8112
 
-To control the selection behavior per mode, pass a function to
+To control the selection behavior dynamically, pass a function to
 `selection.preselect/auto_insert`:
 
 >lua
@@ -986,9 +938,9 @@ To control the selection behavior per mode, pass a function to
     
       -- or a function
       preselect = function(ctx)
-        return ctx.mode ~= 'cmdline' and not require('blink.cmp').snippet_active({ direction = 1 })
+        return not require('blink.cmp').snippet_active({ direction = 1 })
       end,
-      -- auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end,
+      auto_insert = function(ctx) return vim.bo.filetype ~= 'markdown' end,
     }
 <
 
@@ -1127,7 +1079,7 @@ you’re not on a release tag, you may force a specific version via
 `fuzzy.prebuilt_binaries.force_version`. See the latest release
 <https://github.com/saghen/blink.cmp/releases/latest> for supported systems.
 See `prebuilt_binaries` section of the reference configuration
-<./reference.md#prebuilt-binaries> for more options.
+<./reference.md#fuzzy> for more options.
 
 You may instead install the prebuilt binaries manually by downloading the
 appropriate binary from the latest release
@@ -1155,6 +1107,8 @@ When on `main`, it’s highly recommended to build from source via `cargo build
 --release` (via `build = '...'` on `lazy.nvim` for example). This requires a
 nightly rust toolchain, which will be automatically downloaded when using
 `rustup`.
+
+You may also build with nix via `nix run .#build-plugin`.
 
 
 CONFIGURATION ~
@@ -1238,28 +1192,8 @@ COMMANDS ~
 
 CMDLINE AND TERMINAL ~
 
-You may set a separate keymap for cmdline and terminal by defining
-`cmdline.keymap` and `term.keymap`, with an identical structure to `keymap`.
-When using `accept_and_enter`, you may want to use to disable completions for
-the first couple characters
-<../recipes.md#set-minimum-keyword-length-for-command-only-in-cmdline>, to
-avoid accepting a completion on abbreviations like `:wq`.
-
->lua
-    cmdline.keymap = {
-      preset = 'enter',
-    
-      -- OPTIONAL: sets <CR> to accept the item and run the command immediately
-      -- use `select_accept_and_enter` to accept the item or the first item if none are selected
-      ['<CR>'] = { 'accept_and_enter', 'fallback' },
-    
-      ...
-    },
-    term.keymap = {
-      preset = 'super-tab',
-      ...
-    }
-<
+See the respective cmdline documentation <../modes/cmdline.md> and terminal
+documentation <../modes/term.md> for more information.
 
 
 PRESETS ~
@@ -1287,6 +1221,11 @@ DEFAULT
     
     ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 <
+
+
+CMDLINE
+
+See the cmdline documentation <../modes/cmdline.md>
 
 
 SUPER-TAB
@@ -1711,13 +1650,13 @@ COMPLETION LIST
       selection = {
         -- When `true`, will automatically select the first item in the completion list
         preselect = true,
-        -- preselect = function(ctx) return ctx.mode ~= 'cmdline' end,
+        -- preselect = function(ctx) return vim.bo.filetype ~= 'markdown' end,
     
         -- When `true`, inserts the completion item automatically when selecting it
         -- You may want to bind a key to the `cancel` command (default <C-e>) when using this option, 
         -- which will both undo the selection and hide the completion menu
         auto_insert = true,
-        -- auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end
+        -- auto_insert = function(ctx) return vim.bo.filetype ~= 'markdown' end
       },
     
       cycle = {
@@ -2206,7 +2145,7 @@ CMDLINE
 >lua
     cmdline = {
       enabled = true,
-      keymap = nil, -- Inherits from top level `keymap` config when not set
+      keymap = { preset = 'cmdline' },
       sources = function()
         local type = vim.fn.getcmdtype()
         -- Search forward and backward
@@ -2218,15 +2157,20 @@ CMDLINE
       completion = {
         trigger = {
           show_on_blocked_trigger_characters = {},
-          show_on_x_blocked_trigger_characters = nil, -- Inherits from top level `completion.trigger.show_on_blocked_trigger_characters` config when not set
+          show_on_x_blocked_trigger_characters = {},
         },
-        menu = {
-          auto_show = nil, -- Inherits from top level `completion.menu.auto_show` config when not set
-          draw = {
-            columns = { { 'label', 'label_description', gap = 1 } },
+        list = {
+          selection = {
+            -- When `true`, will automatically select the first item in the completion list
+            preselect = true,
+            -- When `true`, inserts the completion item automatically when selecting it
+            auto_insert = true,
           },
         },
-        ghost_text = { enabled = nil }
+        -- Whether to automatically show the window when new completion items are available
+        menu = { auto_show = false },
+        -- Displays a preview of the selected item on the current line
+        ghost_text = { enabled = true }
       }
     }
 <
@@ -2240,14 +2184,155 @@ level`keymap`config when not set sources = {}, completion = { trigger = {
 show_on_blocked_trigger_characters = {}, show_on_x_blocked_trigger_characters =
 nil, -- Inherits from top
 level`completion.trigger.show_on_blocked_trigger_characters`config when not set
-}, menu = { auto_show = nil, -- Inherits from top
-level`completion.menu.auto_show` config when not set draw = { columns = { {
-'label', 'label_description', gap = 1 } }, }, }, ghost_text = { enabled = nil }
-} }
+}, -- Inherits from top level config options when not set list = { selection =
+{ -- When`true`, will automatically select the first item in the completion
+list preselect = nil, -- When`true`, inserts the completion item automatically
+when selecting it auto_insert = nil, }, }, – Whether to automatically show
+the window when new completion items are available menu = { auto_show = nil },
+– Displays a preview of the selected item on the current line ghost_text = {
+enabled = nil } } }
 
 
 ==============================================================================
-5. Development                                         *blink-cmp-development*
+5. Modes                                                     *blink-cmp-modes*
+
+
+COMMAND LINE (CMDLINE)                *blink-cmp-modes-command-line-(cmdline)*
+
+By default, blink.cmp enabled cmdline completions (`cmdline.enabled = true`),
+matchiing the behavior of the built-in `cmdline` completion:
+
+- Menu will not show automatically (`cmdline.completion.menu.auto_show = false`)
+- Pressing `<Tab>` will show the completion menu and insert the first item
+    - Subsequent `<Tab>`s will select the next item, `<S-Tab>` for previous item
+- `<C-n>` for next item, `<C-p>` for previous item
+- `<C-y>` accepts the current item
+- `<C-e>` cancels the completion
+- When noice.nvim <https://github.com/folke/noice.nvim> is detected, ghost text will be shown, see the |blink-cmp-ghost-text| section below
+
+See the reference configuration <../configuration/reference.md#cmdline> for the
+complete list of options.
+
+
+KEYMAP PRESET ~
+
+Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to
+`'none'` to disable the preset. See the keymap documentation
+<../configuration/keymap.md> for more information on defining your own.
+
+>lua
+    {
+      ['<Tab>'] = {
+        function(cmp)
+          if cmp.is_ghost_text_visible() and not cmp.is_menu_visible() then return cmp.accept() end
+        end,
+        'show_and_insert',
+        'select_next',
+      },
+      ['<S-Tab>'] = { 'show_and_insert', 'select_prev' },
+    
+      ['<C-n>'] = { 'select_next' },
+      ['<C-p>'] = { 'select_prev' },
+    
+      ['<C-y>'] = { 'select_and_accept' },
+      ['<C-e>'] = { 'cancel' },
+    }
+<
+
+
+GHOST TEXT ~
+
+When noice.nvim <https://github.com/folke/noice.nvim> is detected, ghost text
+will be shown, likely similar to your terminal shell completions. Pressing
+`<Tab>` while ghost text is visible will accept the completion. When not
+visible, `<Tab>` will open the menu and insert the first item as per usual.
+
+
+
+>lua
+    cmdline = { completion = { ghost_text = { enabled = true } } }
+<
+
+
+SHOW MENU AUTOMATICALLY ~
+
+By default, the completion menu will not be shown automatically. You may set
+`cmdline.completion.menu.auto_show = true` to have it appear automatically.
+
+>lua
+    cmdline = {
+      keymap = {
+        -- recommended, as the default keymap will only show and select the next item
+        ['<Tab>'] = { 'show', 'accept' },
+      },
+      completion = { menu = { auto_show = true } },
+    }
+<
+
+However, you may want to only show the menu only when writing commands, and not
+when searching or using other input menus.
+
+>lua
+    cmdline = {
+      keymap = {
+        -- recommended, as the default keymap will only show and select the next item
+        ['<Tab>'] = { 'show', 'accept' },
+      },
+      completion = {
+        menu = {
+          auto_show = function(ctx)
+            return vim.fn.getcmdtype() == ':'
+            -- enable for inputs as well, with:
+            -- or vim.fn.getcmdtype() == '@'
+          end,
+        },
+      }
+    }
+<
+
+
+ENTER KEYMAP ~
+
+When using `<Enter>` (`<CR>`) to accept the current item, you may want to
+accept the completion item and immediately execute the command. You can achieve
+this via the `accept_and_enter` command. However, when writing abbreviations
+like `:wq`, with the menu automatically showing, you may end up accidentally
+accepting a completion item. Thus, you may disable the completions when the
+keyword, for the first argument, is less than 3 characters.
+
+>lua
+    cmdline = {
+      keymap = {
+        ['<Tab>'] = { 'accept' },
+        ['<CR>'] = { 'accept_and_enter', 'fallback' },
+      },
+      -- (optionally) automatically show the menu
+      completion = { menu = { auto_show = true } }
+    },
+    sources = {
+      providers = {
+        cmdline = {
+          min_keyword_length = function(ctx)
+            -- when typing a command, only show when the keyword is 3 characters or longer
+            if ctx.mode == 'cmdline' and string.find(ctx.line, ' ') == nil then return 3 end
+            return 0
+          end
+        }
+      }
+    }
+<
+
+
+TERMINAL (TERM)                              *blink-cmp-modes-terminal-(term)*
+
+See the reference configuration <../configuration/reference.md#term> for the
+complete list of options.
+
+TODO
+
+
+==============================================================================
+6. Development                                         *blink-cmp-development*
 
 
 ARCHITECTURE                              *blink-cmp-development-architecture*
@@ -2497,7 +2582,7 @@ may find it easily. You may also add the `blink-cmp` tag.
 <
 
 ==============================================================================
-6. Links                                                     *blink-cmp-links*
+7. Links                                                     *blink-cmp-links*
 
 1. *@hrsh7th*: 
 2. *@garymjr*: 
