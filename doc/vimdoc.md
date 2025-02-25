@@ -17,6 +17,12 @@ doc/configuration/sources.md
 doc/configuration/reference.md
 ```
 
+# Modes
+```{.include shift-heading-level-by=1}
+doc/modes/cmdline.md
+doc/modes/term.md
+```
+
 # Development
 ```{.include shift-heading-level-by=1}
 doc/development/architecture.md

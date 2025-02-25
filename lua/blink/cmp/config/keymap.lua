@@ -42,8 +42,29 @@
 ---
 ---   ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 --- }
+---
 --- ```
 --- | 'default'
+--- Mappings similar to the built-in completion in cmdline mode:
+--- ```lua
+--- {
+---   ['<Tab>'] = {
+---     function(cmp)
+---       if cmp.is_ghost_text_visible() and not cmp.is_menu_visible() then return cmp.accept() end
+---     end,
+---     'show_and_insert',
+---     'select_next',
+---   },
+---   ['<S-Tab>'] = { 'show_and_insert', 'select_prev' },
+---
+---   ['<C-n>'] = { 'select_next' },
+---   ['<C-p>'] = { 'select_prev' },
+---
+---   ['<C-y>'] = { 'select_and_accept' },
+---   ['<C-e>'] = { 'cancel' },
+--- }
+--- ```
+--- | 'cmdline'
 --- Mappings similar to VSCode.
 --- You may want to set `completion.trigger.show_in_snippet = false` or use `completion.list.selection.preselect = function(ctx) return not require('blink.cmp').snippet_active({ direction = 1 }) end` when using this mapping:
 --- ```lua
@@ -162,7 +183,7 @@ function keymap.validate(config)
     'snippet_forward',
     'snippet_backward',
   }
-  local presets = { 'default', 'super-tab', 'enter', 'none' }
+  local presets = { 'default', 'cmdline', 'super-tab', 'enter', 'none' }
 
   local validation_schema = {}
   for key, value in pairs(config) do

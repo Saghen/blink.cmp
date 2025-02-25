@@ -90,13 +90,13 @@ completion.list = {
   selection = {
     -- When `true`, will automatically select the first item in the completion list
     preselect = true,
-    -- preselect = function(ctx) return ctx.mode ~= 'cmdline' end,
+    -- preselect = function(ctx) return vim.bo.filetype ~= 'markdown' end,
 
     -- When `true`, inserts the completion item automatically when selecting it
     -- You may want to bind a key to the `cancel` command (default <C-e>) when using this option, 
     -- which will both undo the selection and hide the completion menu
     auto_insert = true,
-    -- auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end
+    -- auto_insert = function(ctx) return vim.bo.filetype ~= 'markdown' end
   },
 
   cycle = {
@@ -570,7 +570,7 @@ You may set configurations which will override the default configuration, specif
 ```lua
 cmdline = {
   enabled = true,
-  keymap = nil, -- Inherits from top level `keymap` config when not set
+  keymap = { preset = 'cmdline' },
   sources = function()
     local type = vim.fn.getcmdtype()
     -- Search forward and backward
@@ -582,15 +582,20 @@ cmdline = {
   completion = {
     trigger = {
       show_on_blocked_trigger_characters = {},
-      show_on_x_blocked_trigger_characters = nil, -- Inherits from top level `completion.trigger.show_on_blocked_trigger_characters` config when not set
+      show_on_x_blocked_trigger_characters = {},
     },
-    menu = {
-      auto_show = nil, -- Inherits from top level `completion.menu.auto_show` config when not set
-      draw = {
-        columns = { { 'label', 'label_description', gap = 1 } },
+    list = {
+      selection = {
+        -- When `true`, will automatically select the first item in the completion list
+        preselect = true,
+        -- When `true`, inserts the completion item automatically when selecting it
+        auto_insert = true,
       },
     },
-    ghost_text = { enabled = nil }
+    -- Whether to automatically show the window when new completion items are available
+    menu = { auto_show = false },
+    -- Displays a preview of the selected item on the current line
+    ghost_text = { enabled = true }
   }
 }
 ```
@@ -611,12 +616,18 @@ term = {
       show_on_blocked_trigger_characters = {},
       show_on_x_blocked_trigger_characters = nil, -- Inherits from top level `completion.trigger.show_on_blocked_trigger_characters` config when not set
     },
-    menu = {
-      auto_show = nil, -- Inherits from top level `completion.menu.auto_show` config when not set
-      draw = {
-        columns = { { 'label', 'label_description', gap = 1 } },
+    -- Inherits from top level config options when not set
+    list = {
+      selection = {
+        -- When `true`, will automatically select the first item in the completion list
+        preselect = nil,
+        -- When `true`, inserts the completion item automatically when selecting it
+        auto_insert = nil,
       },
     },
+    -- Whether to automatically show the window when new completion items are available
+    menu = { auto_show = nil },
+    -- Displays a preview of the selected item on the current line
     ghost_text = { enabled = nil }
   }
 }
