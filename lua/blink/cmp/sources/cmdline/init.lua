@@ -111,6 +111,7 @@ function cmdline:get_completions(context, callback)
       local completion_type = vim.fn.getcmdcompltype()
       local is_file_completion = completion_type == 'file' or completion_type == 'buffer'
       local is_first_arg = arg_number == 1
+      local is_lua_expr = completion_type == 'lua' and context.line:sub(1, 1) == '='
 
       local items = {}
       for _, completion in ipairs(completions) do
@@ -124,6 +125,9 @@ function cmdline:get_completions(context, callback)
 
           -- add prefix to the newText
           if not has_prefix then new_text = current_arg_prefix .. completion end
+        elseif is_lua_expr then
+          -- lua expr, e.g. `:=<expr>`
+          new_text = current_arg_prefix:sub(2, -1) .. completion
         end
 
         local start_pos = #text_before_argument
