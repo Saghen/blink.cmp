@@ -20,8 +20,8 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
       for _, command in ipairs(commands) do
         -- special case for fallback
-        if command == 'fallback' then
-          return fallback()
+        if command == 'fallback' or command == 'fallback_to_mappings' then
+          return fallback(command == 'fallback_to_mappings')
 
           -- run user defined functions
         elseif type(command) == 'function' then
@@ -51,8 +51,8 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
       for _, command in ipairs(keys_to_commands[key] or {}) do
         -- special case for fallback
-        if command == 'fallback' then
-          return fallback()
+        if command == 'fallback' or command == 'fallback_to_mappings' then
+          return fallback(command == 'fallback_to_mappings')
 
         -- run user defined functions
         elseif type(command) == 'function' then
@@ -91,8 +91,8 @@ function apply.term_keymaps(keys_to_commands)
     apply.set('t', key, function()
       for _, command in ipairs(commands) do
         -- special case for fallback
-        if command == 'fallback' then
-          return fallback()
+        if command == 'fallback' or command == 'fallback_to_mappings' then
+          return fallback(command == 'fallback_to_mappings')
 
           -- run user defined functions
         elseif type(command) == 'function' then
@@ -118,8 +118,8 @@ function apply.cmdline_keymaps(keys_to_commands)
     apply.set('c', key, function()
       for _, command in ipairs(commands) do
         -- special case for fallback
-        if command == 'fallback' then
-          return fallback()
+        if command == 'fallback' or command == 'fallback_to_mappings' then
+          return fallback(command == 'fallback_to_mappings')
 
         -- run user defined functions
         elseif type(command) == 'function' then

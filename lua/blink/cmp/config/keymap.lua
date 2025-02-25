@@ -1,5 +1,6 @@
 --- @alias blink.cmp.KeymapCommand
---- | 'fallback' Fallback to the built-in behavior
+--- | 'fallback' Fallback to mappings or the built-in behavior
+--- | 'fallback_to_mappings' Fallback to mappings only (not built-in behavior)
 --- | 'show' Show the completion window
 --- | 'show_and_insert' Show the completion window and select the first item
 --- | 'hide' Hide the completion window
@@ -31,8 +32,8 @@
 ---
 ---   ['<Up>'] = { 'select_prev', 'fallback' },
 ---   ['<Down>'] = { 'select_next', 'fallback' },
----   ['<C-p>'] = { 'select_prev', 'fallback' },
----   ['<C-n>'] = { 'select_next', 'fallback' },
+---   ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+---   ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
 ---
 ---   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ---   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
@@ -84,8 +85,8 @@
 ---
 ---   ['<Up>'] = { 'select_prev', 'fallback' },
 ---   ['<Down>'] = { 'select_next', 'fallback' },
----   ['<C-p>'] = { 'select_prev', 'fallback' },
----   ['<C-n>'] = { 'select_next', 'fallback' },
+---   ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+---   ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
 ---
 ---   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ---   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
@@ -105,8 +106,8 @@
 ---
 ---   ['<Up>'] = { 'select_prev', 'fallback' },
 ---   ['<Down>'] = { 'select_next', 'fallback' },
----   ['<C-p>'] = { 'select_prev', 'fallback' },
----   ['<C-n>'] = { 'select_next', 'fallback' },
+---   ['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+---   ['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
 ---
 ---   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ---   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
@@ -114,6 +115,7 @@
 --- ```
 --- | 'enter'
 
+--- Blink uses a special schema for defining keymaps since it needs to handle falling back to other mappings. However, there's nothing stopping you from using `require('blink.cmp')` and implementing these keymaps yourself.
 --- Your custom key mappings are merged with a `preset` and any conflicting keys will overwrite the preset mappings. The `fallback` command will run the next non blink keymap.
 ---
 --- Each keymap may be a list of commands and/or functions, where commands map directly to `require('blink.cmp')[command]()`. If the command/function returns `false` or `nil`, the next command/function will be run.
@@ -164,6 +166,7 @@ function keymap.validate(config)
 
   local commands = {
     'fallback',
+    'fallback_to_mappings',
     'show',
     'show_and_insert',
     'hide',

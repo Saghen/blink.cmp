@@ -62,6 +62,7 @@ keymap = {
 - `snippet_forward`: Jumps to the next snippet placeholder
 - `snippet_backward`: Jumps to the previous snippet placeholder
 - `fallback`: Runs the next non-blink keymap, or runs the built-in neovim binding
+- `fallback_to_mappings`: Runs the next non-blink keymap (not built-in behavior)
 
 ## Cmdline and Terminal
 
@@ -69,7 +70,7 @@ See the respective [cmdline documentation](../modes/cmdline.md) and [terminal do
 
 ## Presets
 
-Set the preset to `none` to disable the presets
+Set the preset to `'none'` to disable the presets
 
 ### `default`
 
@@ -80,8 +81,8 @@ Set the preset to `none` to disable the presets
 
 ['<Up>'] = { 'select_prev', 'fallback' },
 ['<Down>'] = { 'select_next', 'fallback' },
-['<C-p>'] = { 'select_prev', 'fallback' },
-['<C-n>'] = { 'select_next', 'fallback' },
+['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
 
 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
@@ -116,8 +117,8 @@ You may want to set `completion.trigger.show_in_snippet = false` or use `complet
 
 ['<Up>'] = { 'select_prev', 'fallback' },
 ['<Down>'] = { 'select_next', 'fallback' },
-['<C-p>'] = { 'select_prev', 'fallback' },
-['<C-n>'] = { 'select_next', 'fallback' },
+['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
 
 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
@@ -139,8 +140,8 @@ You may want to set `completion.list.selection.preselect = false`. See more info
 
 ['<Up>'] = { 'select_prev', 'fallback' },
 ['<Down>'] = { 'select_next', 'fallback' },
-['<C-p>'] = { 'select_prev', 'fallback' },
-['<C-n>'] = { 'select_next', 'fallback' },
+['<C-p>'] = { 'select_prev', 'fallback_to_mappings' },
+['<C-n>'] = { 'select_next', 'fallback_to_mappings' },
 
 ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
