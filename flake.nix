@@ -56,9 +56,7 @@
             };
             cargoLock = {
               lockFile = ./Cargo.lock;
-              allowBuiltinFetchGit = true;
             };
-
             nativeBuildInputs = with pkgs; [ git ];
           };
 
