@@ -34,8 +34,8 @@ For more common configurations, see the [recipes](../recipes.md).
 
     -- Don't select by default, auto insert on selection
     list = { selection = { preselect = false, auto_insert = true } },
-    -- or set either per mode via a function
-    list = { selection = { preselect = function(ctx) return ctx.mode ~= 'cmdline' end } },
+    -- or set via a function
+    list = { selection = { preselect = function(ctx) return vim.bo.filetype ~= 'markdown' end } },
 
     menu = {
       -- Don't automatically show the completion menu

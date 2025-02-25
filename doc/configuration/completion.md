@@ -213,7 +213,7 @@ You may use the `show_and_insert` keymap to show the completion menu and select 
 Video: https://github.com/user-attachments/assets/4658b61d-1b95-404a-b6b5-3a4afbfb8112
 -->
 
-To control the selection behavior per mode, pass a function to `selection.preselect/auto_insert`:
+To control the selection behavior dynamically, pass a function to `selection.preselect/auto_insert`:
 
 ```lua
 completion.list.selection = {
@@ -222,9 +222,9 @@ completion.list.selection = {
 
   -- or a function
   preselect = function(ctx)
-    return ctx.mode ~= 'cmdline' and not require('blink.cmp').snippet_active({ direction = 1 })
+    return not require('blink.cmp').snippet_active({ direction = 1 })
   end,
-  -- auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end,
+  auto_insert = function(ctx) return vim.bo.filetype ~= 'markdown' end,
 }
 ```
 

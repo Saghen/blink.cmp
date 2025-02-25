@@ -4,16 +4,17 @@ By default, blink.cmp matches the behavior of the built-in `cmdline` completion:
 
 - Menu will not show automatically (`cmdline.completion.menu.auto_show = false`)
 - Pressing `<Tab>` will show the completion menu and insert the first item
-  - Subsequent presses will select the next item, `<S-Tab>` for previous item.
-- `<C-n>` and `<C-p>` will select the next and previous item respectively
-- `<C-y>` accepts the current item, `<C-e>` cancels the completion
+  - Subsequent `<Tab>`s will select the next item, `<S-Tab>` for previous item
+- `<C-n>` for next item, `<C-p>` for previous item
+- `<C-y>` accepts the current item
+- `<C-e>` cancels the completion
 - When [noice.nvim](https://github.com/folke/noice.nvim) is detected, ghost text will be shown, see the [ghost text](#ghost-text) section below
 
 See the [reference configuration](../configuration/reference.md#cmdline) for the complete list of options.
 
 ## Keymap preset
 
-Set via `cmdline.keymap.preset = 'cmdline'`, which is the default.
+Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `none` to disable the preset. See the [keymap documentation](../configuration/keymap.md) for more information on defining your own.
 
 ```lua
 {

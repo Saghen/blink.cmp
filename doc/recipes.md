@@ -41,39 +41,6 @@ completion = {
 signature = { window = { border = 'single' } },
 ```
 
-### Change selection type per mode
-
-```lua
-completion = { 
-  list = { 
-    selection = {
-      preselect = function(ctx) return ctx.mode ~= 'cmdline' end,
-      auto_insert = function(ctx) return ctx.mode ~= 'cmdline' end
-    }
-  }
-}
-```
-
-### Don't show completion menu automatically in cmdline mode
-
-```lua
-completion = { 
-  menu = { auto_show = function(ctx) return ctx.mode ~= 'cmdline' end }
-}
-```
-
-### Don't show completion menu automatically when searching
-
-```lua
-completion = {
-  menu = {
-    auto_show = function(ctx)
-      return ctx.mode ~= "cmdline" or not vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype())
-    end,
-  },
-}
-```
-
 ### Select Nth item from the list
 
 Here's an example configuration that allows you to select the nth item from the list, based on [#382](https://github.com/Saghen/blink.cmp/issues/382):
@@ -127,6 +94,10 @@ vim.api.nvim_create_autocmd('User', {
 ```
 
 ### Show on newline, tab and space
+
+::: warning
+This may not be working as expected at the moment. Please see [#836](https://github.com/Saghen/blink.cmp/issues/836)
+:::
 
 Note that you may want to add the override to other sources as well, since if the LSP doesnt return any items, we won't show the menu if it was triggered by any of these three characters.
 

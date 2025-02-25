@@ -65,23 +65,7 @@ keymap = {
 
 ## Cmdline and Terminal
 
-You may set a separate keymap for cmdline and terminal by defining `cmdline.keymap` and `term.keymap`, with an identical structure to `keymap`. When using `accept_and_enter`, you may want to use [to disable completions for the first couple characters](../recipes.md#set-minimum-keyword-length-for-command-only-in-cmdline), to avoid accepting a completion on abbreviations like `:wq`.
-
-```lua
-cmdline.keymap = {
-  preset = 'enter',
-
-  -- OPTIONAL: sets <CR> to accept the item and run the command immediately
-  -- use `select_accept_and_enter` to accept the item or the first item if none are selected
-  ['<CR>'] = { 'accept_and_enter', 'fallback' },
-
-  ...
-},
-term.keymap = {
-  preset = 'super-tab',
-  ...
-}
-```
+See the respective [cmdline documentation](../modes/cmdline.md) and [terminal documentation](../modes/term.md) for more information.
 
 ## Presets
 
@@ -107,6 +91,10 @@ Set the preset to `none` to disable the presets
 
 ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 ```
+
+### `cmdline`
+
+See the [cmdline documentation](../modes/cmdline.md)
 
 ### `super-tab`
 
@@ -159,7 +147,3 @@ You may want to set `completion.list.selection.preselect = false`. See more info
 
 ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 ```
-
-### `cmdline`
-
-See the [cmdline documentation](../modes/cmdline.md)
