@@ -95,7 +95,9 @@ function completion.get_completion_for_client(context, client)
     end
 
     local response = process_response(context, client, res.result)
-    if client.name == 'emmet_ls' then require('blink.cmp.sources.lsp.hacks.emmet').process_response(response) end
+    if client.name == 'emmet_ls' or client.name == 'emmet-language-server' then
+      require('blink.cmp.sources.lsp.hacks.emmet').process_response(response)
+    end
     cache.set(context, client, response)
 
     return response
