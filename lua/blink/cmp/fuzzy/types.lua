@@ -1,4 +1,4 @@
---- @class blink.cmp.FuzzyProvider
+--- @class blink.cmp.FuzzyImplementation
 --- @field init_db fun(path: string, use_unsafe_no_lock: boolean)
 --- @field destroy_db fun()
 --- @field access fun(item: blink.cmp.CompletionItem)

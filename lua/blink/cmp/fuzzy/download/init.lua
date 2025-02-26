@@ -1,4 +1,5 @@
-local download_config = require('blink.cmp.config').fuzzy.prebuilt_binaries
+local fuzzy_config = require('blink.cmp.config').fuzzy
+local download_config = fuzzy_config.prebuilt_binaries
 local async = require('blink.cmp.lib.async')
 local git = require('blink.cmp.fuzzy.download.git')
 local files = require('blink.cmp.fuzzy.download.files')
@@ -6,11 +7,11 @@ local system = require('blink.cmp.fuzzy.download.system')
 
 local download = {}
 
---- @param callback fun(err: string | nil)
+--- @param callback fun(err: string | nil, fuzzy_implementation?: 'lua' | 'rust')
 function download.ensure_downloaded(callback)
   callback = vim.schedule_wrap(callback)
 
-  if not download_config.download then return callback() end
+  if not download_config.download or fuzzy_config.implementation == 'lua' then return callback(nil, 'lua') end
 
   async.task
     .await_all({ git.get_version(), files.get_version() })
@@ -92,8 +93,31 @@ function download.ensure_downloaded(callback)
       )
       return download.download(target_git_tag)
     end)
-    :map(function() callback() end)
-    :catch(function(err) callback(err) end)
+    :map(function() callback(nil, 'rust') end)
+    :catch(function(err)
+      -- fallback to lua implementation
+      if fuzzy_config.implementation == 'prefer_rust' then
+        callback(nil, 'lua')
+
+      -- fallback to lua implementation and emit warning
+      elseif fuzzy_config.implementation == 'prefer_rust_with_warning' then
+        vim.schedule(function()
+          vim.notify(
+            '[blink.cmp]: Falling back to Lua implementation due to error while downloading pre-built binary: ' .. err,
+            vim.log.levels.WARN,
+            { title = 'blink.cmp' }
+          )
+          vim.notify(
+            "[blink.cmp]: Set `fuzzy.implementation = 'prefer_rust' | 'lua'` to suppress this warning",
+            vim.log.levels.WARN,
+            { title = 'blink.cmp' }
+          )
+        end)
+        callback(nil, 'lua')
+      else
+        callback(err)
+      end
+    end)
 end
 
 function download.download(version)

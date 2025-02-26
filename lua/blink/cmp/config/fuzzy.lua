@@ -1,8 +1,9 @@
 --- @class (exact) blink.cmp.FuzzyConfig
---- @field max_typos fun(keyword: string): number Allows for a number of typos relative to the length of the query. Set this to 0 to match the behavior of fzf
---- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item
---- @field use_proximity boolean Boosts the score of items matching nearby words
---- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux)
+--- @field implementation blink.cmp.FuzzyImplementation Controls which implementation to use. See the docs for more information.
+--- @field max_typos fun(keyword: string): number Allows for a number of typos relative to the length of the query. Set this to 0 to match the behavior of fzf. Note, this does not apply when using the Lua implementation.
+--- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item. Note, this does not apply when using the Lua implementation.
+--- @field use_proximity boolean Boosts the score of items matching nearby words. Note, this does not apply when using the Lua implementation.
+--- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux). Note, this does not apply when using the Lua implementation.
 --- @field sorts ("label" | "sort_text" | "kind" | "score" | "exact" | blink.cmp.SortFunction)[] Controls which sorts to use and in which order, these three are currently the only allowed options
 --- @field prebuilt_binaries blink.cmp.PrebuiltBinariesConfig
 
@@ -18,12 +19,19 @@
 --- @field from_env boolean When downloading a prebuilt binary, use the HTTPS_PROXY environment variable
 --- @field url? string When downloading a prebuilt binary, use this proxy URL. This will ignore the HTTPS_PROXY environment variable
 
+--- @alias blink.cmp.FuzzyImplementation
+--- | 'prefer_rust' If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available.
+--- | 'prefer_rust_with_warning' (Recommended) If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available, emitting a warning message.
+--- | 'rust' Always use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Error if not available.
+--- | 'lua' Always use the Lua implementation
+
 --- @alias blink.cmp.SortFunction fun(a: blink.cmp.CompletionItem, b: blink.cmp.CompletionItem): boolean | nil
 
 local validate = require('blink.cmp.config.utils').validate
 local fuzzy = {
   --- @type blink.cmp.FuzzyConfig
   default = {
+    implementation = 'prefer_rust_with_warning',
     max_typos = function(keyword) return math.floor(#keyword / 4) end,
     use_frecency = true,
     use_proximity = true,
@@ -45,6 +53,13 @@ local fuzzy = {
 
 function fuzzy.validate(config)
   validate('fuzzy', {
+    implementation = {
+      config.implementation,
+      function(implementation)
+        return vim.tbl_contains({ 'prefer_rust', 'prefer_rust_with_warning', 'rust', 'lua' }, implementation)
+      end,
+      'one of: "prefer_rust", "prefer_rust_with_warning", "rust", "lua"',
+    },
     max_typos = { config.max_typos, 'function' },
     use_frecency = { config.use_frecency, 'boolean' },
     use_proximity = { config.use_proximity, 'boolean' },

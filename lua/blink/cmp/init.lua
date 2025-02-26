@@ -19,8 +19,9 @@ function cmp.setup(opts)
   local config = require('blink.cmp.config')
   config.merge_with(opts)
 
-  require('blink.cmp.fuzzy.download').ensure_downloaded(function(err)
-    if err then vim.notify(err, vim.log.levels.ERROR) end
+  require('blink.cmp.fuzzy.download').ensure_downloaded(function(err, fuzzy_implementation)
+    if err then return vim.notify(err, vim.log.levels.ERROR) end
+    require('blink.cmp.fuzzy').set_implementation(fuzzy_implementation)
 
     -- setup highlights, keymap, completion, commands and signature help
     require('blink.cmp.highlights').setup()
