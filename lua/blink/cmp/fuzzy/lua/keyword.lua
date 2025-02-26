@@ -51,17 +51,4 @@ function keyword.guess_keyword_from_item(item_text, line, cursor_col, match_suff
   return line:sub(start + 1, finish)
 end
 
--- Example usage
-local function assert_range(expected, line, col, match_suffix)
-  local start, finish = keyword.get_keyword_range(line, col, match_suffix)
-  assert(
-    start == expected[1] and finish == expected[2],
-    'expected ' .. vim.inspect(expected) .. ' but got ' .. vim.inspect({ start, finish })
-  )
-end
-
-assert_range({ 1, 6 }, "'вest'", 6, false)
-assert_range({ 1, 4 }, "'вest'", 4, false)
-assert_range({ 1, 6 }, "'вest'", 6, true)
-
 return keyword

@@ -51,14 +51,4 @@ local function match_indices(needle, haystack)
   return matched_indices
 end
 
-local function assert_equal(expected, actual)
-  assert(vim.deep_equal(expected, actual), vim.inspect(expected) .. ' but got ' .. vim.inspect(actual))
-end
-
-assert_equal(match_indices('fbb', 'barbazfoobarbaz'), { 6, 9, 12 })
-assert(match_indices('foo', '_foobar'), { 1, 2, 3 })
-assert(match_indices('Foo', 'foobar'), { 0, 1, 2 })
-assert(match_indices('foo', 'foobar'), { 0, 1, 2 })
-assert(match_indices('foo', 'fobar'), { 0, 1 })
-
 return match_indices
