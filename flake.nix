@@ -39,7 +39,7 @@
           # all that are not nix, nor rust, nor other ignored files
           nvimFs =
             fs.difference ./. (fs.unions [ nixFs rustFs ./doc ./repro.lua ]);
-          version = "0.12.4";
+          version = "0.13.0";
         in {
           blink-fuzzy-lib = let
             inherit (inputs'.fenix.packages.minimal) toolchain;
@@ -54,9 +54,7 @@
               root = ./.;
               fileset = rustFs;
             };
-            cargoLock = {
-              lockFile = ./Cargo.lock;
-            };
+            cargoLock = { lockFile = ./Cargo.lock; };
             nativeBuildInputs = with pkgs; [ git ];
           };
 
