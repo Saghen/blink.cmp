@@ -13,7 +13,6 @@ local fuzzy = {
 --- @param implementation 'lua' | 'rust'
 function fuzzy.set_implementation(implementation)
   assert(implementation == 'lua' or implementation == 'rust', 'Invalid fuzzy implementation: ' .. implementation)
-  vim.print(implementation)
   fuzzy.implementation_type = implementation
   fuzzy.implementation = require('blink.cmp.fuzzy.' .. implementation)
 end
