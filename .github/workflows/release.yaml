@@ -2,8 +2,6 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
     tags:
       - "v*"
 
@@ -87,7 +85,6 @@ jobs:
           path: ${{ matrix.target }}.*
 
   release:
-    if: ${{ github.ref != 'refs/heads/main' }}
     name: Release
     needs: build
     runs-on: ubuntu-latest
@@ -115,7 +112,6 @@ jobs:
           generate_release_notes: true
 
   deploy-docs:
-    if: ${{ github.ref != 'refs/heads/main' }}
     name: Deploy docs
     runs-on: ubuntu-latest
     permissions:
