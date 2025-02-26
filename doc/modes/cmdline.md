@@ -1,6 +1,6 @@
 # Command line (cmdline)
 
-By default, blink.cmp enabled cmdline completions (`cmdline.enabled = true`), matchiing the behavior of the built-in `cmdline` completion:
+By default, blink.cmp enabled cmdline completions (`cmdline.enabled = true`), matching the behavior of the built-in `cmdline` completion:
 
 - Menu will not show automatically (`cmdline.completion.menu.auto_show = false`)
 - Pressing `<Tab>` will show the completion menu and insert the first item
