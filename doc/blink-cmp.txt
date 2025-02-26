@@ -1,4 +1,4 @@
-*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 25
+*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 26
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1808,6 +1808,12 @@ COMPLETION MENU DRAW
         source_name = {
           width = { max = 30 },
           text = function(ctx) return ctx.source_name end,
+          highlight = 'BlinkCmpSource',
+        },
+    
+        source_id = {
+          width = { max = 30 },
+          text = function(ctx) return ctx.source_id end,
           highlight = 'BlinkCmpSource',
         },
       },
