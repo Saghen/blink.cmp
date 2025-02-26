@@ -3,7 +3,7 @@ local match_indices = require('blink.cmp.fuzzy.lua.match_indices')
 local get_keyword_range = require('blink.cmp.fuzzy.lua.keyword').get_keyword_range
 local guess_keyword_range_from_item = require('blink.cmp.fuzzy.lua.keyword').guess_keyword_range_from_item
 
---- @type blink.cmp.FuzzyProvider
+--- @type blink.cmp.FuzzyImplementation
 --- @diagnostic disable-next-line: missing-fields
 local fuzzy = {
   provider_items = {},
