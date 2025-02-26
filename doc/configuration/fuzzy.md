@@ -15,7 +15,7 @@ Prebuilt binaries are included in the releases and automatically downloaded when
 fuzzy = { implementation = "prefer_rust_with_warning" }
 ```
 
-### Advantages of Rust hmplementation
+### Advantages of Rust implementation
 
 If possible, it's highly recommended to use the Rust implementation of the fuzzy matcher!
 

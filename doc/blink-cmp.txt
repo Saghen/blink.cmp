@@ -1104,7 +1104,7 @@ implementation.
 <
 
 
-ADVANTAGES OF RUST HMPLEMENTATION
+ADVANTAGES OF RUST IMPLEMENTATION
 
 If possible, it’s highly recommended to use the Rust implementation of the
 fuzzy matcher!
