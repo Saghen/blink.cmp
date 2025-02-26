@@ -2,6 +2,29 @@
 
 Blink uses a SIMD fuzzy matcher called [frizbee](https://github.com/saghen/frizbee) which achieves ~6x the performance of fzf while ignoring typos. Check out the repo for more information!
 
+## Rust vs Lua implementation
+
+Prebuilt binaries are included in the releases and automatically downloaded when on a release tag (see below). However, for unsupported systems or when the download fails, it will automatically fallback to a Lua implementation, emitting a warning. You may suppress this warning or enforce the Lua or Rust implementation.
+
+- `prefer_rust_with_warning` If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available, emitting a warning message.
+- `prefer_rust`: If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available.
+- `rust`: Always use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Error if not available.
+- `lua`: Always use the Lua implementation
+
+```lua
+fuzzy = { implementation = "prefer_rust_with_warning" }
+```
+
+### Advantages of Rust hmplementation
+
+If possible, it's highly recommended to use the Rust implementation of the fuzzy matcher!
+
+- Always finds the best match (resulting in better sorting)
+- Performance on long lists (10k+ items)
+- Typo resistance
+- Proximity bonus
+- Frecency
+
 ## Installation
 
 ### Prebuilt binaries (default on a release tag)

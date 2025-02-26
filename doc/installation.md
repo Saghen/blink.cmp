@@ -2,7 +2,7 @@
 
 ::: warning
 Blink uses a prebuilt binary for the fuzzy matcher which will be downloaded automatically when on a tag.
-You may build from source with rust nightly. See the [fuzzy documentation](./configuration/fuzzy.md) for more information.
+You may build from source with rust nightly or use the lua implementation. See the [fuzzy documentation](./configuration/fuzzy.md) for more information.
 :::
 
 ## Requirements
@@ -13,6 +13,8 @@ You may build from source with rust nightly. See the [fuzzy documentation](./con
   - git
 - Building from source:
   - Rust nightly or [rustup](https://rustup.rs/)
+
+Note: By default, Blink will attempt to use the rust implementation of the fuzzy matcher. However, the lua implementation does not require any of these dependencies. See the [fuzzy documentation](./configuration/fuzzy.md) for more information.
 
 ## `lazy.nvim`
 
@@ -59,6 +61,13 @@ You may build from source with rust nightly. See the [fuzzy documentation](./con
     sources = {
       default = { 'lsp', 'path', 'snippets', 'buffer' },
     },
+
+    -- Blink.cmp uses a Rust fuzzy matcher by default for typo resistance and significantly better performance
+    -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
+    -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
+    --
+    -- See the fuzzy documentation for more information
+    fuzzy = { implementation = "prefer_rust_with_warning" }
   },
   opts_extend = { "sources.default" }
 }
