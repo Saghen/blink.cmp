@@ -7,7 +7,13 @@ function utils.get_still_untyped_text(text_edit)
 end
 
 function utils.is_cmdline() return vim.api.nvim_get_mode().mode == 'c' end
-function utils.is_noice() return utils.is_cmdline() and package.loaded['noice'] and vim.g.ui_cmdline_pos ~= nil end
+function utils.is_noice()
+  return utils.is_cmdline()
+    and package.loaded['noice']
+    and vim.g.ui_cmdline_pos ~= nil
+    and require('noice.ui.cmdline').position ~= nil
+    and require('noice.ui.cmdline').position.buf ~= nil
+end
 
 function utils.redraw_if_needed()
   if utils.is_cmdline() then vim.api.nvim__redraw({ buf = utils.get_buf(), flush = true }) end
