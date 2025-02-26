@@ -191,8 +191,7 @@ completion = {
           -- You can also add the same function for `kind.highlight` if you want to
           -- keep the highlight groups in sync with the icons.
           highlight = function(ctx)
-            local hl = "BlinkCmpKind" .. ctx.kind
-              or require("blink.cmp.completion.windows.render.tailwind").get_hl(ctx)
+            local hl = ctx.kind_hl
             if vim.tbl_contains({ "Path" }, ctx.source_name) then
               local dev_icon, dev_hl = require("nvim-web-devicons").get_icon(ctx.label)
               if dev_icon then
