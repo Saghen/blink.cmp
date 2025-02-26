@@ -246,6 +246,12 @@ completion.menu.draw = {
       text = function(ctx) return ctx.source_name end,
       highlight = 'BlinkCmpSource',
     },
+
+    source_id = {
+      width = { max = 30 },
+      text = function(ctx) return ctx.source_id end,
+      highlight = 'BlinkCmpSource',
+    },
   },
 },
 ```
