@@ -1,5 +1,5 @@
 --- @class (exact) blink.cmp.FuzzyConfig
---- @field implementation blink.cmp.FuzzyImplementation Controls which implementation to use. See the docs for more information.
+--- @field implementation blink.cmp.FuzzyImplementation Controls which implementation to use for the fuzzy matcher. See the documentation for the available values for more information.
 --- @field max_typos fun(keyword: string): number Allows for a number of typos relative to the length of the query. Set this to 0 to match the behavior of fzf. Note, this does not apply when using the Lua implementation.
 --- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item. Note, this does not apply when using the Lua implementation.
 --- @field use_proximity boolean Boosts the score of items matching nearby words. Note, this does not apply when using the Lua implementation.
@@ -8,7 +8,7 @@
 --- @field prebuilt_binaries blink.cmp.PrebuiltBinariesConfig
 
 --- @class (exact) blink.cmp.PrebuiltBinariesConfig
---- @field download boolean Whenther or not to automatically download a prebuilt binary from github. If this is set to `false` you will need to manually build the fuzzy binary dependencies by running `cargo build --release`
+--- @field download boolean Whenther or not to automatically download a prebuilt binary from github. If this is set to `false`, you will need to manually build the fuzzy binary dependencies by running `cargo build --release`. Disabled by default when `fuzzy.implementation = 'lua'`
 --- @field ignore_version_mismatch boolean Ignores mismatched version between the built binary and the current git sha, when building locally
 --- @field force_version? string When downloading a prebuilt binary, force the downloader to resolve this version. If this is unset then the downloader will attempt to infer the version from the checked out git tag (if any). WARN: Beware that `main` may be incompatible with the version you select
 --- @field force_system_triple? string When downloading a prebuilt binary, force the downloader to use this system triple. If this is unset then the downloader will attempt to infer the system triple from `jit.os` and `jit.arch`. Check the latest release for all available system triples. WARN: Beware that `main` may be incompatible with the version you select
@@ -20,8 +20,8 @@
 --- @field url? string When downloading a prebuilt binary, use this proxy URL. This will ignore the HTTPS_PROXY environment variable
 
 --- @alias blink.cmp.FuzzyImplementation
---- | 'prefer_rust' If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available.
 --- | 'prefer_rust_with_warning' (Recommended) If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available, emitting a warning message.
+--- | 'prefer_rust' If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available.
 --- | 'rust' Always use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Error if not available.
 --- | 'lua' Always use the Lua implementation
 
