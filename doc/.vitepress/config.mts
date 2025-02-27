@@ -49,7 +49,7 @@ export default defineConfig({
         text: 'Development',
         items: [
           { text: 'Architecture', link: '/development/architecture' },
-          { text: 'Writing Sources', link: '/development/writing-sources' },
+          { text: 'Source Boilerplate', link: '/development/source-boilerplate' },
           { text: 'LSP Tracker', link: '/development/lsp-tracker' },
         ],
       },
