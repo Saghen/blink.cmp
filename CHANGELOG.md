@@ -11,6 +11,7 @@
 * Prebuilt binaries should now work on systems as old as Ubuntu 14.04
 * Slow completions with multiple LSPs (especially `tailwind` and `emmet`) [has been resolved](https://github.com/Saghen/blink.cmp/issues/1115)
 * Sources may now define `kind_icon`, `kind_hl` and `kind_name`
+* [Guide on writing your own sources](https://cmp.saghen.dev/development/source-boilerplate.html)
 
 ### BREAKING CHANGES
 
