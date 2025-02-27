@@ -20,6 +20,7 @@ end
 function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':' } end
 
 function cmdline:get_completions(context, callback)
+  -- TODO: split doesn't handle escaped spaces
   local arguments = vim.split(context.line, ' ', { plain = true })
   local arg_number = #vim.split(context.line:sub(1, context.cursor[2]), ' ', { plain = true })
   local text_before_argument = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
