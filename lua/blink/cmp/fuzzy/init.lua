@@ -112,7 +112,7 @@ end
 --- @param range? blink.cmp.CompletionKeywordRange
 --- @return number, number
 function fuzzy.get_keyword_range(line, col, range)
-  return require('blink.cmp.fuzzy.rust').get_keyword_range(line, col, range == 'full')
+  return fuzzy.implementation.get_keyword_range(line, col, range == 'full')
 end
 
 function fuzzy.is_keyword_character(char)
@@ -129,7 +129,7 @@ end
 --- @param range blink.cmp.CompletionKeywordRange
 --- @return number, number
 function fuzzy.guess_edit_range(item, line, col, range)
-  return require('blink.cmp.fuzzy.rust').guess_edit_range(item, line, col, range == 'full')
+  return fuzzy.implementation.guess_edit_range(item, line, col, range == 'full')
 end
 
 return fuzzy

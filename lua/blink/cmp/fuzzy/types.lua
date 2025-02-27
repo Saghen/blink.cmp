@@ -4,10 +4,10 @@
 --- @field access fun(item: blink.cmp.CompletionItem)
 --- @field get_words fun(text: string): string[]
 --- @field set_provider_items fun(provider_id: string, items: blink.cmp.CompletionItem[])
---- @field fuzzy fun(line: string, cursor_col: number, provider_id: string, range: blink.cmp.CompletionKeywordRange): number[], number[], boolean[]
---- @field fuzzy_matched_indices fun(line: string, cursor_col: number, haystack: string[], range: blink.cmp.CompletionKeywordRange): number[][]
---- @field get_keyword_range fun(line: string, col: number, range: blink.cmp.CompletionKeywordRange): number, number
---- @field guess_edit_range fun(item: blink.cmp.CompletionItem, line: string, cursor_col: number, range: blink.cmp.CompletionKeywordRange): number, number
+--- @field fuzzy fun(line: string, cursor_col: number, provider_id: string, match_suffix: boolean): number[], number[], boolean[]
+--- @field fuzzy_matched_indices fun(line: string, cursor_col: number, haystack: string[], match_suffix: boolean): number[][]
+--- @field get_keyword_range fun(line: string, col: number, match_suffix: boolean): number, number
+--- @field guess_edit_range fun(item: blink.cmp.CompletionItem, line: string, cursor_col: number, match_suffix: boolean): number, number
 
 --- @class blink.cmp.FuzzyOptions
 --- @field match_suffix boolean

@@ -2,6 +2,7 @@
 -- but this is *speeeeeed* and simple. should add the better way
 -- but ensure it doesn't add too much complexity
 
+local fuzzy = require('blink.cmp.fuzzy')
 local uv = vim.uv
 
 --- @param bufnr integer
@@ -52,9 +53,9 @@ local function run_sync(buf_text, callback) callback(words_to_items(require('bli
 local function run_async(buf_text, callback)
   local worker = uv.new_work(
     -- must use ffi directly since the normal one requires the config which isnt present
-    function(items, cpath)
+    function(buf_text, cpath)
       package.cpath = cpath
-      return table.concat(require('blink.cmp.fuzzy.rust').get_words(items), '\n')
+      return table.concat(require('blink.cmp.fuzzy.rust').get_words(buf_text), '\n')
     end,
     function(words)
       local items = words_to_items(vim.split(words, '\n'))
@@ -103,7 +104,7 @@ function buffer:get_completions(_, callback)
     if #buf_text < 20000 then
       run_sync(buf_text, transformed_callback)
     -- should take less than 10ms
-    elseif #buf_text < 500000 then
+    elseif #buf_text < 500000 and fuzzy.implementation ~= 'lua' then
       run_async(buf_text, transformed_callback)
     -- too big so ignore
     else

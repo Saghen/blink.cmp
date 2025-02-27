@@ -1,5 +1,5 @@
 --- @class (exact) blink.cmp.FuzzyConfig
---- @field implementation blink.cmp.FuzzyImplementation Controls which implementation to use for the fuzzy matcher. See the documentation for the available values for more information.
+--- @field implementation blink.cmp.FuzzyImplementationType Controls which implementation to use for the fuzzy matcher. See the documentation for the available values for more information.
 --- @field max_typos fun(keyword: string): number Allows for a number of typos relative to the length of the query. Set this to 0 to match the behavior of fzf. Note, this does not apply when using the Lua implementation.
 --- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item. Note, this does not apply when using the Lua implementation.
 --- @field use_proximity boolean Boosts the score of items matching nearby words. Note, this does not apply when using the Lua implementation.
@@ -19,7 +19,7 @@
 --- @field from_env boolean When downloading a prebuilt binary, use the HTTPS_PROXY environment variable
 --- @field url? string When downloading a prebuilt binary, use this proxy URL. This will ignore the HTTPS_PROXY environment variable
 
---- @alias blink.cmp.FuzzyImplementation
+--- @alias blink.cmp.FuzzyImplementationType
 --- | 'prefer_rust_with_warning' (Recommended) If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available, emitting a warning message.
 --- | 'prefer_rust' If available, use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Fallback to the Lua implementation when not available.
 --- | 'rust' Always use the Rust implementation, automatically downloading prebuilt binaries on supported systems. Error if not available.

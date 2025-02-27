@@ -38,9 +38,9 @@ end
 
 function fuzzy.set_provider_items(provider_id, items) fuzzy.provider_items[provider_id] = items end
 
-function fuzzy.fuzzy(line, cursor_col, provider_id, range)
-  local keyword_start, keyword_end = get_keyword_range(line, cursor_col, range == 'full')
-  local keyword = line:sub(keyword_start, keyword_end)
+function fuzzy.fuzzy(line, cursor_col, provider_id, match_suffix)
+  local keyword_start, keyword_end = get_keyword_range(line, cursor_col, match_suffix)
+  local keyword = line:sub(keyword_start + 1, keyword_end)
 
   local scores = {}
   local matched_indices = {}
@@ -57,17 +57,17 @@ function fuzzy.fuzzy(line, cursor_col, provider_id, range)
   return scores, matched_indices, exacts
 end
 
-function fuzzy.fuzzy_matched_indices(line, cursor_col, haystack, range)
-  local keyword_start, keyword_end = get_keyword_range(line, cursor_col, range == 'full')
-  local keyword = line:sub(keyword_start, keyword_end)
+function fuzzy.fuzzy_matched_indices(line, cursor_col, haystack, match_suffix)
+  local keyword_start, keyword_end = get_keyword_range(line, cursor_col, match_suffix)
+  local keyword = line:sub(keyword_start + 1, keyword_end)
 
   return vim.tbl_map(function(text) return match_indices(keyword, text) end, haystack)
 end
 
-function fuzzy.get_keyword_range(line, col, range) return get_keyword_range(line, col, range == 'full') end
+function fuzzy.get_keyword_range(line, col, match_suffix) return get_keyword_range(line, col, match_suffix) end
 
-function fuzzy.guess_edit_range(item, line, col, range)
-  return guess_keyword_range_from_item(item.insertText or item.label, line, col, range == 'full')
+function fuzzy.guess_edit_range(item, line, col, match_suffix)
+  return guess_keyword_range_from_item(item.insertText or item.label, line, col, match_suffix)
 end
 
 return fuzzy
