@@ -23,13 +23,19 @@ local defaults_config = {
 
 function source.new(opts)
   local config = vim.tbl_deep_extend('keep', opts, defaults_config)
-  vim.validate(
-    'snippets.opts.use_items_cache',
-    config.use_items_cache,
-    'boolean',
-    false,
-    'use_items_cache must be a boolean when using mini__nippets preset'
-  )
+  if vim.fn.has('nvim-0.11') == 1 then
+    vim.validate(
+      'snippets.opts.use_items_cache',
+      config.use_items_cache,
+      'boolean',
+      false,
+      'use_items_cache must be a boolean when using mini_snippets preset'
+    )
+  else
+    vim.validate({
+      use_items_cache = { config.use_items_cache, 'boolean' },
+    })
+  end
 
   local self = setmetatable({}, { __index = source })
   self.config = config
