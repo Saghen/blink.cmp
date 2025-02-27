@@ -1176,6 +1176,7 @@ non blink keymap.
 
 EXAMPLE ~
 
+
 Each keymap may be a list of commands and/or functions, where commands map
 directly to `require('blink.cmp')[command]()`. If the command/function returns
 `false` or `nil`, the next command/function will be run.
