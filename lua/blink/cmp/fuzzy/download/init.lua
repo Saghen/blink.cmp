@@ -41,13 +41,15 @@ function download.ensure_downloaded(callback)
         )
 
         -- downloading enabled but not on a git tag, error
-        if download_config.download and target_git_tag == nil then
-          error(
-            "Found an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag."
-              .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config.'
-              .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config.'
-              .. '\nSee the docs for more info.'
-          )
+        if download_config.download then
+          if target_git_tag == nil then
+            error(
+              "Found an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag."
+                .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config.'
+                .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config.'
+                .. '\nSee the docs for more info.'
+            )
+          end
 
         -- downloading is disabled, error
         else
