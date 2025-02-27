@@ -11,7 +11,7 @@ local download = {}
 function download.ensure_downloaded(callback)
   callback = vim.schedule_wrap(callback)
 
-  if not download_config.download or fuzzy_config.implementation == 'lua' then return callback(nil, 'lua') end
+  if fuzzy_config.implementation == 'lua' then return callback(nil, 'lua') end
 
   async.task
     .await_all({ git.get_version(), files.get_version() })
@@ -24,53 +24,76 @@ function download.ensure_downloaded(callback)
     :map(function(version)
       local target_git_tag = download_config.force_version or version.git.tag
 
-      -- not built locally, not on a git tag, error
-      assert(
-        version.current.sha ~= nil or target_git_tag ~= nil,
-        "\nDetected an out of date or missing fuzzy matching library. Can't download from github due to not being on a git tag and no `fuzzy.prebuilt_binaries.force_version` is set."
-          .. '\nEither run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
-          .. 'See the docs for more info.'
-      )
+      -- built locally
+      if version.current.sha ~= nil then
+        -- up to date or version ignored, ignore
+        if version.current.sha == version.git.sha or download_config.ignore_version_mismatch then return end
 
-      -- built locally, ignore
-      if
-        not download_config.force_version
-        and (
-          version.current.sha == version.git.sha
-          or version.current.sha ~= nil and download_config.ignore_version_mismatch
+        -- out of date
+        vim.schedule(
+          function()
+            vim.notify(
+              '[blink.cmp]: Found an outdated version of the locally built fuzzy matching library',
+              vim.log.levels.WARN,
+              { title = 'blink.cmp' }
+            )
+          end
         )
-      then
-        return
-      end
 
-      -- built locally but outdated and not on a git tag, error
-      if
-        not download_config.force_version
-        and version.current.sha ~= nil
-        and version.current.sha ~= version.git.sha
-      then
-        assert(
-          target_git_tag or download_config.ignore_version_mismatch,
-          "\nFound an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag. "
-            .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config. '
-            .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config. '
-            .. 'See the docs for more info.'
-        )
-        if not download_config.ignore_version_mismatch then
-          vim.schedule(
-            function()
-              vim.notify(
-                '[blink.cmp]: Found an outdated version of the fuzzy matching library built locally',
-                vim.log.levels.INFO,
-                { title = 'blink.cmp' }
-              )
-            end
+        -- downloading enabled but not on a git tag, error
+        if download_config.download then
+          if target_git_tag == nil then
+            error(
+              "Found an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag."
+                .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config.'
+                .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config.'
+                .. '\nSee the docs for more info.'
+            )
+          end
+
+        -- downloading is disabled, error
+        else
+          error(
+            'Found an outdated version of the fuzzy matching library, but downloading from github is disabled.'
+              .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config.'
+              .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, or set either `fuzzy.prebuilt_binaries.download = true` or `fuzzy.prebuilt_binaries.force_version` in config.'
+              .. '\nSee the docs for more info.'
           )
         end
       end
 
+      -- downloading disabled but not built locally
+      if not download_config.download then
+        vim.schedule(
+          function()
+            vim.notify('[blink.cmp]: No fuzzy matching library found', vim.log.levels.WARN, { title = 'blink.cmp' })
+          end
+        )
+
+        error(
+          'No fuzzy matching library found, but downloading from github is disabled.'
+            .. '\nEither run `cargo build --release` via your package manager, or set `fuzzy.prebuilt_binaries.download = true` in config.'
+            .. '\nSee the docs for more info.'
+        )
+      end
+
+      -- downloading enabled but not on a git tag
+      if target_git_tag == nil then
+        vim.schedule(
+          function()
+            vim.notify('[blink.cmp]: No fuzzy matching library found', vim.log.levels.WARN, { title = 'blink.cmp' })
+          end
+        )
+
+        error(
+          "No fuzzy matching library found, but can't download from github due to not being on a git tag and no `fuzzy.prebuilt_binaries.force_version` is set."
+            .. '\nEither run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config.'
+            .. '\nSee the docs for more info.'
+        )
+      end
+
       -- already downloaded and the correct version, just verify the checksum, and re-download if checksum fails
-      if version.current.tag ~= nil and version.current.tag == target_git_tag then
+      if version.current.tag == target_git_tag then
         return files.verify_checksum():catch(function(err)
           vim.schedule(function()
             vim.notify(err, vim.log.levels.WARN, { title = 'blink.cmp' })
@@ -83,9 +106,6 @@ function download.ensure_downloaded(callback)
           return download.download(target_git_tag)
         end)
       end
-
-      -- unknown state
-      if not target_git_tag then error('Unknown error while getting pre-built binary. Consider re-installing') end
 
       -- download as per usual
       vim.schedule(
@@ -103,12 +123,12 @@ function download.ensure_downloaded(callback)
       elseif fuzzy_config.implementation == 'prefer_rust_with_warning' then
         vim.schedule(function()
           vim.notify(
-            '[blink.cmp]: Falling back to Lua implementation due to error while downloading pre-built binary: ' .. err,
+            '[blink.cmp]: Falling back to Lua implementation due to error while downloading pre-built binary:\n' .. err,
             vim.log.levels.WARN,
             { title = 'blink.cmp' }
           )
           vim.notify(
-            "[blink.cmp]: Set `fuzzy.implementation = 'prefer_rust' | 'lua'` to suppress this warning",
+            "[blink.cmp]: Set `fuzzy.implementation = 'prefer_rust' | 'lua'` to suppress this warning.",
             vim.log.levels.WARN,
             { title = 'blink.cmp' }
           )
