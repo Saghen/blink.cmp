@@ -1,3 +1,21 @@
+## [0.13.1](https://github.com/Saghen/blink.cmp/compare/v0.13.0...v0.13.1) (2025-02-27)
+
+### BREAKING CHANGES
+
+* add `<C-n>`, `<C-p>` and `<C-space>` to cmdline preset
+* fallback to next keymap when menu not shown for select_next/prev
+
+### Features
+
+* add `<C-n>`, `<C-p>` and `<C-space>` to cmdline preset ([8f7c23d](https://github.com/Saghen/blink.cmp/commit/8f7c23d6a817d6039f1a90a23cfbc0fd165a4153)), closes [#1328](https://github.com/Saghen/blink.cmp/issues/1328)
+* fallback to next keymap when menu not shown for select_next/prev ([ffebcd2](https://github.com/Saghen/blink.cmp/commit/ffebcd2ad4ae7358bcd3f67b9975bfb9dbad2659)), closes [#1336](https://github.com/Saghen/blink.cmp/issues/1336)
+
+### Bug Fixes
+
+* **download:** correctly handle `download = false` and `implementationn = "rust"` ([#1334](https://github.com/Saghen/blink.cmp/issues/1334)) ([2c8e4c7](https://github.com/Saghen/blink.cmp/commit/2c8e4c78b2ca735262be2ef201c38738db3c9674))
+* lua fuzzy implementation off by 1 and suffix matching ([2c1524f](https://github.com/Saghen/blink.cmp/commit/2c1524f369b27ec09ff7b0425188933768622918)), closes [#1335](https://github.com/Saghen/blink.cmp/issues/1335)
+* mini snippets validation ([c412578](https://github.com/Saghen/blink.cmp/commit/c412578824eb58f9f521643be16d9eb1568d068f)), closes [#1332](https://github.com/Saghen/blink.cmp/issues/1332) [#1342](https://github.com/Saghen/blink.cmp/issues/1342)
+
 ## [0.13.0](https://github.com/Saghen/blink.cmp/compare/v0.12.4...v0.13.0) (2025-02-26)
 
 ### Highlights
