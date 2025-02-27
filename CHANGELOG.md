@@ -4,10 +4,10 @@
 
 * Optional pure Lua mode! (no Rust dependency)
   * By default, if the Rust implementation is not available, Blink will emit a warning and fallback to the Lua implementation
-  * [See the documentation](https://cmp.saghen.dev/configuraiton/fuzzy.html#rust-vs-lua-implementation)
+  * [See the documentation](https://cmp.saghen.dev/configuration/fuzzy.html#rust-vs-lua-implementation)
 * Cmdline configuration matches built-in cmdline behavior by default
   * Ghost text has been enabled by default with `noice.nvim`
-  * [See the documentation](http://localhost:5173/modes/cmdline.html)
+  * [See the documentation](https://cmp.saghen.dev/modes/cmdline.html)
 * Prebuilt binaries should now work on systems as old as Ubuntu 14.04
 * Slow completions with multiple LSPs (especially `tailwind` and `emmet`) [has been resolved](https://github.com/Saghen/blink.cmp/issues/1115)
 * Sources may now define `kind_icon`, `kind_hl` and `kind_name`
