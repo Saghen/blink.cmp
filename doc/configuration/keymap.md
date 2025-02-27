@@ -6,6 +6,10 @@ Your custom key mappings are merged with a `preset` and any conflicting keys wil
 
 ## Example
 
+::: warning
+These keymaps apply to the default mode only, not cmdline or terminal modes. See the [cmdline](../modes/cmdline.md) and [term](../modes/term.md) documentation for more information.
+:::
+
 Each keymap may be a list of commands and/or functions, where commands map directly to `require('blink.cmp')[command]()`. If the command/function returns `false` or `nil`, the next command/function will be run.
 
 ```lua
