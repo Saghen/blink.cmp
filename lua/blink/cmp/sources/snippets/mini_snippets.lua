@@ -23,13 +23,13 @@ local defaults_config = {
 
 function source.new(opts)
   local config = vim.tbl_deep_extend('keep', opts, defaults_config)
-  vim.validate(
-    'snippets.opts.use_items_cache',
-    config.use_items_cache,
-    'boolean',
-    false,
-    'use_items_cache must be a boolean when using mini__nippets preset'
-  )
+  require('blink.cmp.config.utils').validate('sources.providers.snippets.opts', {
+    use_items_cache = {
+      config.use_items_cache,
+      'boolean',
+      'use_items_cache must be a boolean when using mini__snippets preset',
+    },
+  }, opts)
 
   local self = setmetatable({}, { __index = source })
   self.config = config
