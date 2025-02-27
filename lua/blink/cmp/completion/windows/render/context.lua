@@ -37,6 +37,7 @@ end
 
 local config = require('blink.cmp.config').appearance
 local kinds = require('blink.cmp.types').CompletionItemKind
+local get_provider_by_id = require('blink.cmp.sources.lib').get_provider_by_id
 
 --- @param draw blink.cmp.Draw
 --- @param item_idx number
@@ -44,8 +45,9 @@ local kinds = require('blink.cmp.types').CompletionItemKind
 --- @param matched_indices number[]
 --- @return blink.cmp.DrawItemContext
 function draw_context.new(draw, item_idx, item, matched_indices)
-  local kind = item.kind_name or kinds[item.kind] or 'Unknown'
-  local kind_icon = item.kind_icon or config.kind_icons[kind] or config.kind_icons.Field
+  local provider = get_provider_by_id(item.source_id).config
+  local kind = item.kind_name or provider.kind_name or kinds[item.kind] or 'Unknown'
+  local kind_icon = item.kind_icon or provider.kind_icon or config.kind_icons[kind] or config.kind_icons.Field
   local kind_hl = item.kind_hl or ('BlinkCmpKind' .. (kinds[item.kind] or 'Unknown'))
 
   local icon_spacing = config.nerd_font_variant == 'mono' and '' or ' '
