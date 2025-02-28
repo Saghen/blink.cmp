@@ -68,6 +68,7 @@
             preInstall = ''
               mkdir -p target/release
               ln -s ${self'.packages.blink-fuzzy-lib}/lib/libblink_cmp_fuzzy.* target/release/
+              echo "nix" > target/release/version
             '';
           };
 

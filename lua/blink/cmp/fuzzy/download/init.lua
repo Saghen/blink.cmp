@@ -22,6 +22,8 @@ function download.ensure_downloaded(callback)
       }
     end)
     :map(function(version)
+      if version.current.nix then return end
+
       local target_git_tag = download_config.force_version or version.git.tag
 
       -- built locally
