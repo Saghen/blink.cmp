@@ -1,4 +1,4 @@
-*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 27
+*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 28
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1603,6 +1603,7 @@ COMMUNITY SOURCES ~
 - blink-cmp-env <https://github.com/bydlw98/blink-cmp-env>
 - blink-cmp-avante <https://github.com/Kaiser-Yang/blink-cmp-avante>
 - blink-cmp-conventional-commits <https://github.com/disrupted/blink-cmp-conventional-commits>
+- cmp-pandoc-references <https://github.com/jmbuhr/cmp-pandoc-references>
 
 
 REFERENCE                                         *blink-cmp-config-reference*
