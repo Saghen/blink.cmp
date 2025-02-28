@@ -1,11 +1,11 @@
 local Kind = require('blink.cmp.types').CompletionItemKind
 
----@class blink.cmp.OmniOpts
----@field disable_omnifuncs string[]
+---@class blink.cmp.CompleteFuncOpts
+---@field complete_func fun(): string|nil gets provider of the complete-func, nil to disable
 
----@class blink.cmp.OmniSource : blink.cmp.Source
----@field opts blink.cmp.OmniOpts
-local omni = {}
+---@class blink.cmp.CompleteFuncSource : blink.cmp.Source
+---@field opts blink.cmp.CompleteFuncOpts
+local Source = {}
 
 ---@class blink.cmp.CompleteFuncItem
 ---@field word string
@@ -24,33 +24,25 @@ local omni = {}
 ---@param _ string
 ---@param config blink.cmp.SourceProviderConfig
 ---@return blink.cmp.Source
-function omni.new(_, config)
-  local self = setmetatable({}, { __index = omni })
+function Source.new(_, config)
+  local self = setmetatable({}, { __index = Source })
 
-  local opts = vim.tbl_deep_extend('force', {
-    disable_omnifuncs = { 'v:lua.vim.lsp.omnifunc' },
+  self.opts = vim.tbl_deep_extend('force', {
+    complete_func = function() return nil end,
   }, config.opts or {})
-
-  require('blink.cmp.config.utils').validate('sources.providers.omni', {
-    disable_omnifuncs = { opts.disable_omnifuncs, 'table' },
-  }, opts)
-
-  self.opts = opts
 
   return self
 end
 
-function omni:enabled()
-  return vim.bo.omnifunc ~= ''
-    and vim.api.nvim_get_mode().mode == 'i'
-    and not vim.tbl_contains(self.opts.disable_omnifuncs, vim.bo.omnifunc)
+function Source:enabled()
+  return not vim.tbl_contains({ nil, '' }, self.opts.complete_func()) and vim.api.nvim_get_mode().mode == 'i'
 end
 
----Invoke an omnifunc handling `v:lua.*`
+---Invoke an complete_func handling `v:lua.*`
 ---@return (table<{ words: blink.cmp.CompleteFuncWords, refresh: string }> | blink.cmp.CompleteFuncWords) | integer
 ---@overload fun(func: string, findstart: 1, base: ''): integer
 ---@overload fun(func: string, findstart: 0, base: string): table<{ words: blink.cmp.CompleteFuncWords, refresh: string }> | blink.cmp.CompleteFuncWords
-local function invoke_omnifunc(func, findstart, base)
+local function invoke_complete_func(func, findstart, base)
   local prev_pos = vim.api.nvim_win_get_cursor(0)
 
   local _, result = pcall(function()
@@ -71,7 +63,7 @@ local function invoke_omnifunc(func, findstart, base)
 end
 
 -- Map the defined `complete-items` 'kind's to blink kinds
-local OMNI_TO_BLINK_KIND = {
+local COMPLETE_ITEM_KIND_TO_BLINK_KIND = {
   v = Kind.Variable, -- variable
   f = Kind.Function, -- function/method
   m = Kind.Field, -- struct/class member
@@ -82,11 +74,12 @@ local OMNI_TO_BLINK_KIND = {
 ---@param context blink.cmp.Context
 ---@param resolve fun(response?: blink.cmp.CompletionResponse)
 ---@return nil
-function omni:get_completions(context, resolve)
-  -- for info on omnifunc see `:h 'omnifunc'`, and `:h complete-functions`
+function Source:get_completions(context, resolve)
+  -- see `:h complete-functions`
+  local complete_func = assert(self.opts.complete_func())
 
   -- get the starting column from which completion will start
-  local start_col = invoke_omnifunc(vim.bo.omnifunc, 1, '')
+  local start_col = invoke_complete_func(complete_func, 1, '')
 
   if type(start_col) ~= 'number' then
     resolve()
@@ -103,9 +96,9 @@ function omni:get_completions(context, resolve)
     start_col = cur_col
   end
 
-  -- for info on omnifunc results see `:h complete-items`
-  -- get the actual omnifunc completion results
-  local cmp_results = invoke_omnifunc(vim.bo.omnifunc, 0, string.sub(context.line, start_col + 1, cur_col))
+  -- for info on complete-func results see `:h complete-items`
+  -- get the actual complete-func completion results
+  local cmp_results = invoke_complete_func(complete_func, 0, string.sub(context.line, start_col + 1, cur_col))
   cmp_results = cmp_results['words'] or cmp_results
   ---@cast cmp_results blink.cmp.CompleteFuncWords
 
@@ -145,7 +138,7 @@ function omni:get_completions(context, resolve)
       }
 
       -- if possible, prefer blink's 'kind' to remove redundancy
-      local blink_kind = OMNI_TO_BLINK_KIND[cmp.kind]
+      local blink_kind = COMPLETE_ITEM_KIND_TO_BLINK_KIND[cmp.kind]
       if blink_kind ~= nil then
         item.kind = blink_kind
       else
@@ -168,4 +161,4 @@ function omni:get_completions(context, resolve)
   return nil
 end
 
-return omni
+return Source

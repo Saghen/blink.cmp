@@ -532,9 +532,11 @@ sources.providers = {
 
   omni = {
     name = 'Omni',
-    module = 'blink.cmp.sources.omni',
+    module = 'blink.cmp.sources.complete_func',
+    enabled = function() return vim.bo.omnifunc ~= 'v:lua.vim.lsp.omnifunc' end,
+    ---@type blink.cmp.CompleteFuncOpts
     opts = {
-      disable_omnifuncs = { 'v:lua.vim.lsp.omnifunc' },
+        complete_func = function() return vim.bo.omnifunc end,
     },
   },
 }

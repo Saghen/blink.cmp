@@ -83,7 +83,12 @@ local sources = {
       },
       omni = {
         name = 'Omni',
-        module = 'blink.cmp.sources.omni',
+        module = 'blink.cmp.sources.complete_func',
+        enabled = function() return vim.bo.omnifunc ~= 'v:lua.vim.lsp.omnifunc' end,
+        ---@type blink.cmp.CompleteFuncOpts
+        opts = {
+          complete_func = function() return vim.bo.omnifunc end,
+        },
       },
       -- NOTE: in future we may want a built-in terminal source. For now
       -- the infrastructure exists, e.g. so community terminal sources can be
@@ -103,6 +108,10 @@ function sources.validate(config)
   )
   assert(config.cmdline == nil, '`sources.cmdline` has been replaced with `cmdline.sources`')
   assert(config.term == nil, '`sources.term` has been replaced with `term.sources`')
+  assert(
+    config.providers.omni.module ~= 'blink.cmp.sources.omni',
+    '`blink.cmp.sources.omni` has been replaced with `blink.cmp.sources.complete_func`'
+  )
 
   validate('sources', {
     default = { config.default, { 'function', 'table' } },
