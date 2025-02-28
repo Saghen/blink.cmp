@@ -1,4 +1,4 @@
-*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 27
+*blink-cmp.txt*         For NVIM v0.10.0         Last change: 2025 February 28
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -2151,9 +2151,11 @@ PROVIDERS
     
       omni = {
         name = 'Omni',
-        module = 'blink.cmp.sources.omni',
+        module = 'blink.cmp.sources.complete_func',
+        enabled = function() return vim.bo.omnifunc ~= 'v:lua.vim.lsp.omnifunc' end,
+        ---@type blink.cmp.CompleteFuncOpts
         opts = {
-          disable_omnifuncs = { 'v:lua.vim.lsp.omnifunc' },
+            complete_func = function() return vim.bo.omnifunc end,
         },
       },
     }
