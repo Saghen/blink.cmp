@@ -65,20 +65,15 @@ function cmdline_events:listen(opts)
       end,
     })
 
-  -- TODO: switch to CursorMovedC when nvim 0.11 is released
+  -- TODO: remove when nvim 0.11 is the minimum version
   -- HACK: check every 16ms (60 times/second) to see if the cursor moved
   -- for neovim < 0.11
   else
     local previous_cmdline = ''
-    vim.api.nvim_create_autocmd('CmdlineEnter', {
-      callback = function() previous_cmdline = '' end,
-    })
+    local previous_cursor
 
     local timer = vim.uv.new_timer()
-    local previous_cursor
-    local callback
-    callback = vim.schedule_wrap(function()
-      timer:start(1, 0, callback)
+    local callback = vim.schedule_wrap(function()
       if vim.api.nvim_get_mode().mode ~= 'c' then return end
 
       local cmdline_equal = vim.fn.getcmdline() == previous_cmdline
@@ -95,7 +90,16 @@ function cmdline_events:listen(opts)
 
       opts.on_cursor_moved('CursorMoved', is_ignored)
     end)
-    timer:start(16, 0, callback)
+
+    vim.api.nvim_create_autocmd('CmdlineEnter', {
+      callback = function()
+        previous_cmdline = ''
+        timer:start(16, 16, callback)
+      end,
+    })
+    vim.api.nvim_create_autocmd('CmdlineLeave', {
+      callback = function() timer:stop() end,
+    })
   end
 
   vim.api.nvim_create_autocmd('CmdlineLeave', {
