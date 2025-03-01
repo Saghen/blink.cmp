@@ -34,6 +34,9 @@ end
 
 ------- Public API -------
 
+--- Checks if the completion list is active
+function cmp.is_active() return require('blink.cmp.completion.list').context ~= nil end
+
 --- Checks if the completion menu or ghost text is visible
 --- @return boolean
 function cmp.is_visible() return cmp.is_menu_visible() or cmp.is_ghost_text_visible() end
@@ -184,6 +187,22 @@ end
 function cmp.select_next(opts)
   if not cmp.is_menu_visible() then return end
   vim.schedule(function() require('blink.cmp.completion.list').select_next(opts) end)
+  return true
+end
+
+--- Inserts the next item (`auto_insert`), cycling to the top of the list if at the bottom, if `completion.list.cycle.from_bottom == true`.
+--- This will trigger completions if none are available, unlike `select_next` which would fallback to the next keymap in this case.
+function cmp.insert_next()
+  if not cmp.is_active() then return cmp.show_and_insert() end
+  vim.schedule(function() require('blink.cmp.completion.list').select_next({ auto_insert = true }) end)
+  return true
+end
+
+--- Inserts the previous item (`auto_insert`), cycling to the bottom of the list if at the top, if `completion.list.cycle.from_top == true`.
+--- This will trigger completions if none are available, unlike `select_prev` which would fallback to the next keymap in this case.
+function cmp.insert_prev()
+  if not cmp.is_active() then return cmp.show_and_insert() end
+  vim.schedule(function() require('blink.cmp.completion.list').select_prev({ auto_insert = true }) end)
   return true
 end
 
