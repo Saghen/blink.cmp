@@ -29,6 +29,8 @@
 --- @field opts? table
 --- @field async? boolean | fun(ctx: blink.cmp.Context): boolean Whether blink should wait for the source to return before showing the completions
 --- @field timeout_ms? number | fun(ctx: blink.cmp.Context): number How long to wait for the provider to return before showing completions and treating it as asynchronous
+--- @field kind_name? string Kind name to apply to returned items
+--- @field kind_icon? string Kind icon to apply to returned items
 --- @field transform_items? fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
 --- @field should_show_items? boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether or not to show the items
 --- @field max_items? number | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): number Maximum number of items to display in the menu
@@ -131,6 +133,8 @@ function sources.validate_provider(id, provider)
     opts = { provider.opts, 'table', true },
     async = { provider.async, { 'boolean', 'function' }, true },
     timeout_ms = { provider.timeout_ms, { 'number', 'function' }, true },
+    kind_name = { provider.kind_name, 'string', true },
+    kind_icon = { provider.kind_icon, 'string', true },
     transform_items = { provider.transform_items, 'function', true },
     should_show_items = { provider.should_show_items, { 'boolean', 'function' }, true },
     max_items = { provider.max_items, { 'number', 'function' }, true },
