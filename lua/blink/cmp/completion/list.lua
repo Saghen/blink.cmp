@@ -177,16 +177,16 @@ end
 function list.select_next(opts)
   if #list.items == 0 or list.context == nil then return end
 
-  -- haven't selected anything yet, select the first item
+  -- haven't selected anything yet, select the first item, if cycling enabled
   if list.selected_item_idx == nil then return list.select(1, opts) end
 
   -- end of the list
   if list.selected_item_idx == #list.items then
-    -- cycling around has been disabled, ignore
-    if not list.config.cycle.from_bottom then return end
-
     -- preselect is not enabled, we go back to no selection
     if not list.get_selection_mode(list.context).preselect then return list.select(nil, opts) end
+
+    -- cycling around has been disabled, ignore
+    if not list.config.cycle.from_bottom then return end
 
     -- otherwise, we cycle around
     return list.select(1, opts)
@@ -199,16 +199,20 @@ end
 function list.select_prev(opts)
   if #list.items == 0 or list.context == nil then return end
 
-  -- haven't selected anything yet, select the last item
-  if list.selected_item_idx == nil then return list.select(#list.items, opts) end
+  -- haven't selected anything yet, select the last item, if cycling enabled
+  if list.selected_item_idx == nil then
+    if not list.config.cycle.from_top then return end
+
+    return list.select(#list.items, opts)
+  end
 
   -- start of the list
   if list.selected_item_idx == 1 then
-    -- cycling around has been disabled, ignore
-    if not list.config.cycle.from_top then return end
-
     -- auto_insert is enabled, we go back to no selection
     if list.get_selection_mode(list.context).auto_insert then return list.select(nil, opts) end
+
+    -- cycling around has been disabled, ignore
+    if not list.config.cycle.from_top then return end
 
     -- otherwise, we cycle around
     return list.select(#list.items, opts)
