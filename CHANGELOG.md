@@ -2,12 +2,12 @@
 
 ### BREAKING CHANGES
 
-* add `<C-n>`, `<C-p>` and `<C-space>` to cmdline preset
+* add `<Left>`, `<Right>` and `<C-space>` to cmdline preset
 * fallback to next keymap when menu not shown for select_next/prev
 
 ### Features
 
-* add `<C-n>`, `<C-p>` and `<C-space>` to cmdline preset ([8f7c23d](https://github.com/Saghen/blink.cmp/commit/8f7c23d6a817d6039f1a90a23cfbc0fd165a4153)), closes [#1328](https://github.com/Saghen/blink.cmp/issues/1328)
+* add `<Left>`, `<Right>` and `<C-space>` to cmdline preset ([8f7c23d](https://github.com/Saghen/blink.cmp/commit/8f7c23d6a817d6039f1a90a23cfbc0fd165a4153)), closes [#1328](https://github.com/Saghen/blink.cmp/issues/1328)
 * fallback to next keymap when menu not shown for select_next/prev ([ffebcd2](https://github.com/Saghen/blink.cmp/commit/ffebcd2ad4ae7358bcd3f67b9975bfb9dbad2659)), closes [#1336](https://github.com/Saghen/blink.cmp/issues/1336)
 
 ### Bug Fixes
