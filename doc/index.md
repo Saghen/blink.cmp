@@ -39,6 +39,7 @@ This plugin is *beta* quality. Expect breaking changes and many bugs
 - [@wurli](https://github.com/wurli) Terminal completions
 - [@mikavilpas](https://github.com/mikavilpas) + [@xzbdmw](https://github.com/xzbdmw) Dot-repeat (`.`)
 - [@soifou](https://github.com/soifou)
+- [@FerretDetective](https://github.com/FerretDetective) `complete_func` source
 
 ## Compared to nvim-cmp
 
