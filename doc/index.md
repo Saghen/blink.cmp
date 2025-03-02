@@ -38,6 +38,7 @@ This plugin is *beta* quality. Expect breaking changes and many bugs
 - [@abeldekat](https://github.com/abeldekat) mini.snippets source
 - [@wurli](https://github.com/wurli) Terminal completions
 - [@mikavilpas](https://github.com/mikavilpas) + [@xzbdmw](https://github.com/xzbdmw) Dot-repeat (`.`)
+- [@soifou](https://github.com/soifou)
 
 ## Compared to nvim-cmp
 
