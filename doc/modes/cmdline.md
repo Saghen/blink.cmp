@@ -14,10 +14,14 @@ See the [reference configuration](../configuration/reference.md#cmdline) for the
 
 ## Keymap preset
 
-Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `'none'` to disable the preset. See the [keymap documentation](../configuration/keymap.md) for more information on defining your own.
+Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `'none'` to disable the preset or `'inherit'` to inherit the mappings from the top level `keymap`. See the [keymap documentation](../configuration/keymap.md) for more information on defining your own.
 
 ```lua
 {
+  -- optionally, inherit the mappings from the top level `keymap`
+  -- instead of using the neovim defaults
+  -- preset = 'inherit',
+
   ['<Tab>'] = {
     function(cmp)
       if cmp.is_ghost_text_visible() and not cmp.is_menu_visible() then return cmp.accept() end

@@ -596,6 +596,7 @@ You may set configurations which will override the default configuration, specif
 ```lua
 cmdline = {
   enabled = true,
+  -- use 'inherit' to inherit mappings from top level `keymap` config
   keymap = { preset = 'cmdline' },
   sources = function()
     local type = vim.fn.getcmdtype()
@@ -635,7 +636,7 @@ Terminal completions are nightly only! Known bugs in v0.10
 ```lua
 term = {
   enabled = false,
-  keymap = nil, -- Inherits from top level `keymap` config when not set
+  keymap = { preset = 'inherit' }, -- Inherits from top level `keymap` config when not set
   sources = {},
   completion = {
     trigger = {

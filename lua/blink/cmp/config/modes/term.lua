@@ -4,6 +4,7 @@ local term = {
   --- @type blink.cmp.TermConfig
   default = {
     enabled = false,
+    keymap = { preset = 'inherit' },
     sources = {},
     completion = {
       trigger = {

@@ -25,6 +25,7 @@
 
 --- @alias blink.cmp.KeymapPreset
 --- | 'none' No keymaps
+--- | 'inherit' Inherits the keymaps from the top level config. Only applicable to mode specific keymaps (i.e. cmdline, term)
 --- Mappings similar to the built-in completion:
 --- ```lua
 --- {
@@ -162,7 +163,8 @@ local keymap = {
 }
 
 --- @param config blink.cmp.KeymapConfig
-function keymap.validate(config)
+--- @param is_mode boolean? Is mode-specific keymap config
+function keymap.validate(config, is_mode)
   assert(config.cmdline == nil, '`keymap.cmdline` has been replaced with `cmdline.keymap`')
   assert(config.term == nil, '`keymap.term` has been replaced with `term.keymap`')
 
@@ -191,6 +193,7 @@ function keymap.validate(config)
     'snippet_backward',
   }
   local presets = { 'default', 'cmdline', 'super-tab', 'enter', 'none' }
+  if is_mode then table.insert(presets, 'inherit') end
 
   local validation_schema = {}
   for key, value in pairs(config) do

@@ -1,6 +1,6 @@
 --- @class blink.cmp.ModeConfig
 --- @field enabled? boolean
---- @field keymap? blink.cmp.KeymapConfig
+--- @field keymap blink.cmp.KeymapConfig
 --- @field sources string[] | fun(): string[]
 --- @field completion? blink.cmp.ModeCompletionConfig
 
@@ -43,7 +43,7 @@ function mode.validate(prefix, config)
     completion = { config.completion, 'table', true },
   }, config)
 
-  if config.keymap ~= nil then require('blink.cmp.config.keymap').validate(config.keymap) end
+  require('blink.cmp.config.keymap').validate(config.keymap, true)
 
   if config.completion ~= nil then
     validate(prefix .. '.completion', {

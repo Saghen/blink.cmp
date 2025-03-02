@@ -65,13 +65,15 @@ function keymap.setup()
 
   -- Apply cmdline keymaps
   if config.cmdline.enabled then
-    local cmdline_mappings = keymap.get_mappings(config.cmdline.keymap or config.keymap)
+    local cmdline_mappings =
+      keymap.get_mappings(config.cmdline.keymap.preset == 'inherit' and config.keymap or config.cmdline.keymap)
     require('blink.cmp.keymap.apply').cmdline_keymaps(cmdline_mappings)
   end
 
   -- Apply term keymaps
   if config.term.enabled then
-    local term_mappings = keymap.get_mappings(config.term.keymap or config.keymap)
+    local term_mappings =
+      keymap.get_mappings(config.term.keymap.preset == 'inherit' and config.keymap or config.term.keymap)
     require('blink.cmp.keymap.apply').term_keymaps(term_mappings)
   end
 end
