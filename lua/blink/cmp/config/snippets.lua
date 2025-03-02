@@ -34,8 +34,10 @@ local snippets = {
     active = by_preset({
       default = function(filter) return vim.snippet.active(filter) end,
       luasnip = function(filter)
-        if filter and filter.direction then return require('luasnip').jumpable(filter.direction) end
-        return require('luasnip').in_snippet()
+        local ls = require('luasnip')
+        if ls.expand_or_jumpable() then return true end
+        if filter and filter.direction then return ls.jumpable(filter.direction) end
+        return ls.in_snippet()
       end,
       mini_snippets = function()
         if not _G.MiniSnippets then error('mini.snippets has not been setup') end
@@ -44,7 +46,11 @@ local snippets = {
     }),
     jump = by_preset({
       default = function(direction) vim.snippet.jump(direction) end,
-      luasnip = function(direction) require('luasnip').jump(direction) end,
+      luasnip = function(direction)
+        local ls = require('luasnip')
+        if ls.expandable() then return ls.expand_or_jump() end
+        return ls.jumpable(direction) and ls.jump(direction)
+      end,
       mini_snippets = function(direction)
         if not _G.MiniSnippets then error('mini.snippets has not been setup') end
         MiniSnippets.session.jump(direction == -1 and 'prev' or 'next')

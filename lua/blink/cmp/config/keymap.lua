@@ -11,6 +11,8 @@
 --- | 'select_accept_and_enter' Select the first completion item, if there's no selection, accept and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_prev' Select the previous completion item
 --- | 'select_next' Select the next completion item
+--- | 'insert_prev' Insert the previous completion item (`auto_insert`), cycling to the bottom of the list if at the top, if `completion.list.cycle.from_top == true`. This will trigger completions if none are available, unlike `select_prev` which would fallback to the next keymap in this case.
+--- | 'insert_next' Insert the next completion item (`auto_insert`), cycling to the top of the list if at the bottom, if `completion.list.cycle.from_bottom == true`. This will trigger completions if none are available, unlike `select_next` which would fallback to the next keymap in this case.
 --- | 'show_documentation' Show the documentation window
 --- | 'hide_documentation' Hide the documentation window
 --- | 'scroll_documentation_up' Scroll the documentation window up
@@ -23,6 +25,7 @@
 
 --- @alias blink.cmp.KeymapPreset
 --- | 'none' No keymaps
+--- | 'inherit' Inherits the keymaps from the top level config. Only applicable to mode specific keymaps (i.e. cmdline, term)
 --- Mappings similar to the built-in completion:
 --- ```lua
 --- {
@@ -160,7 +163,8 @@ local keymap = {
 }
 
 --- @param config blink.cmp.KeymapConfig
-function keymap.validate(config)
+--- @param is_mode boolean? Is mode-specific keymap config
+function keymap.validate(config, is_mode)
   assert(config.cmdline == nil, '`keymap.cmdline` has been replaced with `cmdline.keymap`')
   assert(config.term == nil, '`keymap.term` has been replaced with `term.keymap`')
 
@@ -177,6 +181,8 @@ function keymap.validate(config)
     'select_accept_and_enter',
     'select_prev',
     'select_next',
+    'insert_prev',
+    'insert_next',
     'show_documentation',
     'hide_documentation',
     'scroll_documentation_up',
@@ -187,6 +193,7 @@ function keymap.validate(config)
     'snippet_backward',
   }
   local presets = { 'default', 'cmdline', 'super-tab', 'enter', 'none' }
+  if is_mode then table.insert(presets, 'inherit') end
 
   local validation_schema = {}
   for key, value in pairs(config) do

@@ -107,6 +107,8 @@ function trigger.show_if_on_trigger_character()
 end
 
 function trigger.show(opts)
+  if not config.enabled then return end
+
   opts = opts or {}
 
   -- update context

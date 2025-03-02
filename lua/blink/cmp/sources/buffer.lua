@@ -104,7 +104,7 @@ function buffer:get_completions(_, callback)
     if #buf_text < 20000 then
       run_sync(buf_text, transformed_callback)
     -- should take less than 10ms
-    elseif #buf_text < 500000 and fuzzy.implementation ~= 'lua' then
+    elseif #buf_text < 500000 and fuzzy.implementation_type == 'rust' then
       run_async(buf_text, transformed_callback)
     -- too big so ignore
     else

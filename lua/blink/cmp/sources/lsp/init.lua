@@ -20,6 +20,8 @@ function lsp.new(opts)
     opts
   )
 
+  require('blink.cmp.sources.lsp.commands').register()
+
   return setmetatable({ opts = opts }, { __index = lsp })
 end
 
