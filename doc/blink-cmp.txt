@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 01
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 02
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -2271,6 +2271,7 @@ CMDLINE
 >lua
     cmdline = {
       enabled = true,
+      -- use 'inherit' to inherit mappings from top level `keymap` config
       keymap = { preset = 'cmdline' },
       sources = function()
         local type = vim.fn.getcmdtype()
@@ -2305,10 +2306,10 @@ CMDLINE
 TERMINAL
 
 
-```lua term = { enabled = false, keymap = nil, -- Inherits from top
-level`keymap`config when not set sources = {}, completion = { trigger = {
-show_on_blocked_trigger_characters = {}, show_on_x_blocked_trigger_characters =
-nil, -- Inherits from top
+```lua term = { enabled = false, keymap = { preset = 'inherit' }, -- Inherits
+from top level`keymap`config when not set sources = {}, completion = { trigger
+= { show_on_blocked_trigger_characters = {},
+show_on_x_blocked_trigger_characters = nil, -- Inherits from top
 level`completion.trigger.show_on_blocked_trigger_characters`config when not set
 }, -- Inherits from top level config options when not set list = { selection =
 { -- When`true`, will automatically select the first item in the completion
@@ -2343,11 +2344,16 @@ complete list of options.
 KEYMAP PRESET ~
 
 Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to
-`'none'` to disable the preset. See the keymap documentation
-<../configuration/keymap.md> for more information on defining your own.
+`'none'` to disable the preset or `'inherit'` to inherit the mappings from the
+top level `keymap`. See the keymap documentation <../configuration/keymap.md>
+for more information on defining your own.
 
 >lua
     {
+      -- optionally, inherit the mappings from the top level `keymap`
+      -- instead of using the neovim defaults
+      -- preset = 'inherit',
+    
       ['<Tab>'] = {
         function(cmp)
           if cmp.is_ghost_text_visible() and not cmp.is_menu_visible() then return cmp.accept() end
