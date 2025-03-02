@@ -160,7 +160,9 @@ You may use a custom sort function to deprioritize LSPs such as Emmet Language S
 fuzzy = {
   sorts = {
     function(a, b)
-      if a.client_name == nil or b.client_name == nil then return end
+      if (a.client_name == nil or b.client_name == nil) or (a.client_name == b.client_name) then
+        return
+      end
       return b.client_name == 'emmet_ls'
     end,
     -- default sorts
