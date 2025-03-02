@@ -4,26 +4,29 @@
 ---
 --- @field open_with_signature_help fun(context: blink.cmp.SignatureHelpContext, signature_help?: lsp.SignatureHelp)
 --- @field close fun()
+--- @field should_auto_show fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
 --- @field scroll_up fun(amount: number)
 --- @field scroll_down fun(amount: number)
 --- @field update_position fun()
 
-local config = require('blink.cmp.config').signature.window
+local config = require('blink.cmp.config').signature
+local win_cfg = config.window
 local sources = require('blink.cmp.sources.lib')
 local menu = require('blink.cmp.completion.windows.menu')
 
 local signature = {
   win = require('blink.cmp.lib.window').new({
-    min_width = config.min_width,
-    max_width = config.max_width,
-    max_height = config.max_height,
-    border = config.border,
-    winblend = config.winblend,
-    winhighlight = config.winhighlight,
-    scrollbar = config.scrollbar,
+    min_width = win_cfg.min_width,
+    max_width = win_cfg.max_width,
+    max_height = win_cfg.max_height,
+    border = win_cfg.border,
+    winblend = win_cfg.winblend,
+    winhighlight = win_cfg.winhighlight,
+    scrollbar = win_cfg.scrollbar,
     wrap = true,
     filetype = 'blink-cmp-signature',
   }),
+  auto_show = config.auto_show,
   context = nil,
 }
 
@@ -54,16 +57,16 @@ function signature.open_with_signature_help(context, signature_help)
 
   local labels = vim.tbl_map(function(signature) return signature.label end, signature_help.signatures)
 
-  if signature.shown_signature ~= active_signature then
+  if signature.show_signature ~= active_signature then
     require('blink.cmp.lib.window.docs').render_detail_and_documentation({
       bufnr = signature.win:get_buf(),
       detail = labels,
-      documentation = config.show_documentation and active_signature.documentation or nil,
-      max_width = config.max_width,
-      use_treesitter_highlighting = config.treesitter_highlighting,
+      documentation = win_cfg.show_documentation and active_signature.documentation or nil,
+      max_width = win_cfg.max_width,
+      use_treesitter_highlighting = win_cfg.treesitter_highlighting,
     })
   end
-  signature.shown_signature = active_signature
+  signature.show_signature = active_signature
 
   -- highlight active parameter
   local _, active_highlight = vim.lsp.util.convert_signature_help_to_markdown_lines(
@@ -86,11 +89,19 @@ function signature.open_with_signature_help(context, signature_help)
     )
   end
 
-  signature.win:open()
-  signature.update_position()
+  if signature.should_auto_show(context, signature_help) then
+    signature.win:open()
+    signature.update_position()
+  end
+end
+
+function signature.should_auto_show(context, items)
+  if type(signature.auto_show) == 'function' then return signature.auto_show(context, items) end
+  return signature.auto_show
 end
 
 function signature.close()
+  signature.auto_show = config.auto_show
   if not signature.win:is_open() then return end
   signature.win:close()
 end
@@ -119,7 +130,7 @@ function signature.update_position()
 
   win:update_size()
 
-  local direction_priority = config.direction_priority
+  local direction_priority = win_cfg.direction_priority
 
   -- if the menu window is open, we want to place the signature window on the opposite side
   local menu_win_config = menu.win:get_win() and vim.api.nvim_win_get_config(menu.win:get_win())
@@ -129,7 +140,7 @@ function signature.update_position()
     direction_priority = menu_win_is_up and { 's' } or { 'n' }
   end
 
-  local pos = win:get_vertical_direction_and_height(direction_priority, config.max_height)
+  local pos = win:get_vertical_direction_and_height(direction_priority, win_cfg.max_height)
 
   -- couldn't find anywhere to place the window
   if not pos then

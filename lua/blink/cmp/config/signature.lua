@@ -1,5 +1,6 @@
 --- @class (exact) blink.cmp.SignatureConfig
 --- @field enabled boolean
+--- @field auto_show boolean
 --- @field trigger blink.cmp.SignatureTriggerConfig
 --- @field window blink.cmp.SignatureWindowConfig
 
@@ -29,6 +30,7 @@ local signature = {
   --- @type blink.cmp.SignatureConfig
   default = {
     enabled = false,
+    auto_show = true,
     trigger = {
       enabled = true,
       show_on_keyword = false,
@@ -56,6 +58,7 @@ local signature = {
 function signature.validate(config)
   validate('signature', {
     enabled = { config.enabled, 'boolean' },
+    auto_show = { config.auto_show, 'boolean' },
     trigger = { config.trigger, 'table' },
     window = { config.window, 'table' },
   }, config)
