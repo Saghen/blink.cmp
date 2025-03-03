@@ -45,15 +45,18 @@ function semantic.process_request(tokens)
     then
       -- add the brackets
       -- TODO: make dot repeatable
-      local text_edit = assert(request.item.textEdit)
+      local item_text_edit = assert(request.item.textEdit)
       local brackets_for_filetype = utils.get_for_filetype(request.filetype, request.item)
-      local line = vim.api.nvim_get_current_line()
-      local start_col = text_edit.range.start.character + #text_edit.newText
-      local new_line = line:sub(1, start_col)
-        .. brackets_for_filetype[1]
-        .. brackets_for_filetype[2]
-        .. line:sub(start_col + 1)
-      vim.api.nvim_set_current_line(new_line)
+      local start_col = item_text_edit.range.start.character + #item_text_edit.newText
+      vim.lsp.util.apply_text_edits({
+        {
+          newText = brackets_for_filetype[1] .. brackets_for_filetype[2],
+          range = {
+            start = { line = cursor[1] - 1, character = start_col },
+            ['end'] = { line = cursor[1] - 1, character = start_col },
+          },
+        },
+      }, vim.api.nvim_get_current_buf(), 'utf-8')
       vim.api.nvim_win_set_cursor(0, { cursor[1], start_col + #brackets_for_filetype[1] })
       return semantic.finish_request()
     end
