@@ -1,0 +1,35 @@
+/* Wrap text in code blocks */
+code {
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+}
+
+.content-container {
+  max-width: 800px !important;
+}
+
+/* Badges */
+
+.VPBadge > a {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+.dark {
+  --vp-badge-info-bg: rgb(55, 77, 113); /* Darker version of --vp-c-brand-2 */
+  --vp-badge-info-text: var(--vp-c-white);
+}
+
+/* Alerts */
+
+.custom-block.warning {
+  border-color: var(--vp-custom-block-important-border);
+  color: var(--vp-custom-block-important-text);
+  background-color: var(--vp-custom-block-important-bg);
+}
+
+.custom-block.info {
+  border-color: var(--vp-custom-block-note-border);
+  color: var(--vp-custom-block-note-text);
+  background-color: var(--vp-custom-block-note-bg);
+}

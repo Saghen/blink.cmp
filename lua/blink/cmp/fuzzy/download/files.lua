@@ -83,7 +83,7 @@ function files.get_version()
         return { tag = version }
       end
     end)
-    :catch(function() return {} end)
+    :catch(function() return { missing = true } end)
 end
 
 --- @param version string

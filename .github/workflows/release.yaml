@@ -15,11 +15,11 @@ jobs:
       matrix:
         include:
           ## Linux builds
-          # Glibc 2.31
-          - os: ubuntu-20.04
+          # Glibc 2.21
+          - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact_name: target/x86_64-unknown-linux-gnu/release/libblink_cmp_fuzzy.so
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
             artifact_name: target/aarch64-unknown-linux-gnu/release/libblink_cmp_fuzzy.so
           # Musl 1.2.3
@@ -29,7 +29,7 @@ jobs:
           - os: ubuntu-latest
             target: aarch64-unknown-linux-musl
             artifact_name: target/aarch64-unknown-linux-musl/release/libblink_cmp_fuzzy.so
-          # Android(Termux)
+          # Android (Termux)
           - os: ubuntu-latest
             target: aarch64-linux-android
             artifact_name: target/aarch64-linux-android/release/libblink_cmp_fuzzy.so
@@ -126,11 +126,11 @@ jobs:
 
       - name: Build
         run: npm ci && npm run build:release
-        working-directory: docs
+        working-directory: doc
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy docs/.vitepress/dist --project-name=blink-cmp
+          command: pages deploy doc/.vitepress/dist --project-name=blink-cmp

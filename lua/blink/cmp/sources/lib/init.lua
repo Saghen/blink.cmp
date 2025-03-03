@@ -50,14 +50,18 @@ function sources.get_all_providers()
 end
 
 function sources.get_enabled_provider_ids(mode)
+  if (mode == 'cmdline' and not config.cmdline.enabled) or (mode == 'term' and not config.term.enabled) then
+    return {}
+  end
+
   local enabled_providers = mode == 'cmdline' and config.cmdline.sources
     or mode == 'term' and config.term.sources
     or config.sources.per_filetype[vim.bo.filetype]
     or config.sources.default
 
-  if type(enabled_providers) == 'function' then return enabled_providers() end
+  if type(enabled_providers) == 'function' then enabled_providers = enabled_providers() end
   --- @cast enabled_providers string[]
-  return enabled_providers
+  return require('blink.cmp.lib.utils').deduplicate(enabled_providers)
 end
 
 function sources.get_enabled_providers(mode)

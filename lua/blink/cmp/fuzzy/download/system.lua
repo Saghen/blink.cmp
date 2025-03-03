@@ -44,13 +44,14 @@ function system.get_linux_libc()
       local stdout = process.stdout:gsub('%s+', '')
       return vim.fn.split(stdout, '-')[4]
     end)
+    :catch(function() end)
     -- Fall back to checking for alpine
     :map(function(libc)
       if libc ~= nil then return libc end
 
-      return async.task.new(function(resolve, reject)
+      return async.task.new(function(resolve)
         vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
-          if err then return reject(err) end
+          if err then return resolve('gnu') end
           resolve(is_alpine ~= nil and 'musl' or 'gnu')
         end)
       end)

@@ -9,14 +9,12 @@ local utils = {}
 --- NOTE: We disable some Lua diagnostics here since lua_ls isn't smart enough to
 --- realize that we're using an overloaded function.
 function utils._validate(spec)
-  return vim.validate(spec)
-  -- if vim.fn.has('nvim-0.11') == 0 then return vim.validate(spec) end
-  -- for key, key_spec in pairs(spec) do
-  --   local message = type(key_spec[3]) == 'string' and key_spec[3] or nil --[[@as string?]]
-  --   local optional = type(key_spec[3]) == 'boolean' and key_spec[3] or nil --[[@as boolean?]]
-  --   ---@diagnostic disable-next-line:param-type-mismatch, redundant-parameter
-  --   vim.validate(key, key_spec[1], key_spec[2], optional, message)
-  -- end
+  if vim.fn.has('nvim-0.11') == 0 then return vim.validate(spec) end
+  for key, key_spec in pairs(spec) do
+    local message = type(key_spec[3]) == 'string' and key_spec[3] or nil --[[@as string?]]
+    local optional = type(key_spec[3]) == 'boolean' and key_spec[3] or nil --[[@as boolean?]]
+    vim.validate(key, key_spec[1], key_spec[2], optional, message)
+  end
 end
 
 --- @param path string The path to the field being validated
@@ -25,7 +23,13 @@ end
 --- @see vim.validate
 function utils.validate(path, tbl, source)
   -- validate
-  local _, err = pcall(vim.validate, tbl)
+  local _, err = pcall(utils._validate, tbl)
+  -- remove stack trace from error message
+  if err ~= nil and vim.fn.has('nvim-0.11') == 1 then
+    local slice = require('blink.cmp.lib.utils').slice
+
+    err = table.concat(slice(vim.split(err, ':'), 3), ':'):gsub('^%s+', '')
+  end
   if err then error(path .. '.' .. err) end
 
   -- check for erroneous fields

@@ -8,6 +8,7 @@
 --- @field label_matched_indices number[]
 --- @field kind string
 --- @field kind_icon string
+--- @field kind_hl string
 --- @field icon_gap string
 --- @field deprecated boolean
 --- @field source_id string
@@ -43,10 +44,10 @@ local kinds = require('blink.cmp.types').CompletionItemKind
 --- @param matched_indices number[]
 --- @return blink.cmp.DrawItemContext
 function draw_context.new(draw, item_idx, item, matched_indices)
-  local kind = kinds[item.kind] or 'Unknown'
-  local kind_icon = require('blink.cmp.completion.windows.render.tailwind').get_kind_icon(item)
-    or config.kind_icons[kind]
-    or config.kind_icons.Field
+  local kind = item.kind_name or kinds[item.kind] or 'Unknown'
+  local kind_icon = item.kind_icon or config.kind_icons[kind] or config.kind_icons.Field
+  local kind_hl = item.kind_hl or ('BlinkCmpKind' .. (kinds[item.kind] or 'Unknown'))
+
   local icon_spacing = config.nerd_font_variant == 'mono' and '' or ' '
 
   -- Some LSPs can return labels with newlines
@@ -75,6 +76,7 @@ function draw_context.new(draw, item_idx, item, matched_indices)
     label_matched_indices = matched_indices,
     kind = kind,
     kind_icon = kind_icon,
+    kind_hl = kind_hl,
     icon_gap = config.nerd_font_variant == 'mono' and '' or ' ',
     deprecated = item.deprecated or (item.tags and vim.tbl_contains(item.tags, 1)) or false,
     source_id = source_id,

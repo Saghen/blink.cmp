@@ -1,0 +1,18 @@
+--- @class blink.cmp.FuzzyImplementation
+--- @field init_db fun(path: string, use_unsafe_no_lock: boolean)
+--- @field destroy_db fun()
+--- @field access fun(item: blink.cmp.CompletionItem)
+--- @field get_words fun(text: string): string[]
+--- @field set_provider_items fun(provider_id: string, items: blink.cmp.CompletionItem[])
+--- @field fuzzy fun(line: string, cursor_col: number, provider_id: string, match_suffix: boolean): number[], number[], boolean[]
+--- @field fuzzy_matched_indices fun(line: string, cursor_col: number, haystack: string[], match_suffix: boolean): number[][]
+--- @field get_keyword_range fun(line: string, col: number, match_suffix: boolean): number, number
+--- @field guess_edit_range fun(item: blink.cmp.CompletionItem, line: string, cursor_col: number, match_suffix: boolean): number, number
+
+--- @class blink.cmp.FuzzyOptions
+--- @field match_suffix boolean
+--- @field max_typos number
+--- @field use_frecency boolean
+--- @field use_proximity boolean
+--- @field nearby_words string[]
+--- @field snippet_score_offset number

@@ -103,8 +103,11 @@ function M.apply_mode_specific(cfg)
 
   apply_mode_specific_at_path({ 'completion', 'trigger', 'show_on_blocked_trigger_characters' })
   apply_mode_specific_at_path({ 'completion', 'trigger', 'show_on_x_blocked_trigger_characters' })
+  apply_mode_specific_at_path({ 'completion', 'list', 'selection', 'preselect' })
+  apply_mode_specific_at_path({ 'completion', 'list', 'selection', 'auto_insert' })
   apply_mode_specific_at_path({ 'completion', 'menu', 'auto_show' })
   apply_mode_specific_at_path({ 'completion', 'menu', 'draw', 'columns' })
+  apply_mode_specific_at_path({ 'completion', 'ghost_text', 'enabled' })
 end
 
 --- @param user_config blink.cmp.Config

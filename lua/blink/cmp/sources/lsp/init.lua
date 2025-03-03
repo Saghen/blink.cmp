@@ -1,10 +1,29 @@
 local async = require('blink.cmp.lib.async')
 
---- @type blink.cmp.Source
+--- @class blink.cmp.LSPSourceOpts
+--- @field tailwind_color_icon? string
+
+--- @class blink.cmp.LSPSource : blink.cmp.Source
+--- @field opts blink.cmp.LSPSourceOpts
+
+--- @type blink.cmp.LSPSource
 --- @diagnostic disable-next-line: missing-fields
 local lsp = {}
 
-function lsp.new() return setmetatable({}, { __index = lsp }) end
+function lsp.new(opts)
+  opts = opts or {}
+  opts.tailwind_color_icon = opts.tailwind_color_icon or '██'
+
+  require('blink.cmp.config.utils').validate(
+    'sources.providers.lsp.opts',
+    { tailwind_color_icon = { opts.tailwind_color_icon, 'string' } },
+    opts
+  )
+
+  require('blink.cmp.sources.lsp.commands').register()
+
+  return setmetatable({ opts = opts }, { __index = lsp })
+end
 
 --- Completion ---
 
@@ -34,20 +53,19 @@ function lsp:get_completions(context, callback)
   -- TODO: implement a timeout before returning the menu as-is. In the future, it would be neat
   -- to detect slow LSPs and consistently run them async
   local task = async.task
-    .await_all(vim.tbl_map(function(client) return completion_lib.get_completion_for_client(context, client) end, clients))
+    .await_all(
+      vim.tbl_map(
+        function(client) return completion_lib.get_completion_for_client(context, client, self.opts) end,
+        clients
+      )
+    )
     :map(function(responses)
       local final = { is_incomplete_forward = false, is_incomplete_backward = false, items = {} }
       for _, response in ipairs(responses) do
         final.is_incomplete_forward = final.is_incomplete_forward or response.is_incomplete_forward
         final.is_incomplete_backward = final.is_incomplete_backward or response.is_incomplete_backward
 
-        -- for performance, we append the shorter list to the longer one
-        if #final.items > #response.items then
-          vim.list_extend(final.items, response.items)
-        else
-          vim.list_extend(response.items, final.items)
-          final.items = response.items
-        end
+        vim.list_extend(final.items, response.items)
       end
       callback(final)
     end)
@@ -156,12 +174,14 @@ end
 
 --- Execute ---
 
-function lsp:execute(_, item, callback)
+function lsp:execute(source, item, callback)
   local client = vim.lsp.get_client_by_id(item.client_id)
   if client and item.command then
-    local success, request_id = client.request('workspace/executeCommand', item.command, function() callback() end)
-    if success and request_id ~= nil then
-      return function() client.cancel_request(request_id) end
+    if vim.fn.has('nvim-0.11') == 1 then
+      client:exec_cmd(item.command, { bufnr = source.bufnr }, function() callback() end)
+    else
+      -- TODO: remove this once 0.11 is the minimum version
+      client:_exec_cmd(item.command, { bufnr = source.bufnr }, function() callback() end)
     end
   else
     callback()

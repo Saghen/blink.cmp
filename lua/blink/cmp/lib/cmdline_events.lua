@@ -52,36 +52,55 @@ function cmdline_events:listen(opts)
   end)
 
   -- CursorMoved
-  local previous_cmdline = ''
-  vim.api.nvim_create_autocmd('CmdlineEnter', {
-    callback = function() previous_cmdline = '' end,
-  })
+  if vim.fn.has('nvim-0.11') == 1 then
+    vim.api.nvim_create_autocmd('CursorMovedC', {
+      callback = function()
+        if vim.api.nvim_get_mode().mode ~= 'c' then return end
+        if is_change_queued then return end
 
-  -- TODO: switch to CursorMovedC when nvim 0.11 is released
+        local is_ignored = self.ignore_next_cursor_moved
+        self.ignore_next_cursor_moved = false
+
+        opts.on_cursor_moved('CursorMoved', is_ignored)
+      end,
+    })
+
+  -- TODO: remove when nvim 0.11 is the minimum version
   -- HACK: check every 16ms (60 times/second) to see if the cursor moved
   -- for neovim < 0.11
-  local timer = vim.uv.new_timer()
-  local previous_cursor
-  local callback
-  callback = vim.schedule_wrap(function()
-    timer:start(16, 0, callback)
-    if vim.api.nvim_get_mode().mode ~= 'c' then return end
+  else
+    local previous_cmdline = ''
+    local previous_cursor
 
-    local cmdline_equal = vim.fn.getcmdline() == previous_cmdline
-    local cursor_equal = vim.fn.getcmdpos() == previous_cursor
+    local timer = vim.uv.new_timer()
+    local callback = vim.schedule_wrap(function()
+      if vim.api.nvim_get_mode().mode ~= 'c' then return end
 
-    previous_cmdline = vim.fn.getcmdline()
-    previous_cursor = vim.fn.getcmdpos()
+      local cmdline_equal = vim.fn.getcmdline() == previous_cmdline
+      local cursor_equal = vim.fn.getcmdpos() == previous_cursor
 
-    if cursor_equal or (not cmdline_equal and not did_backspace) then return end
-    did_backspace = false
+      previous_cmdline = vim.fn.getcmdline()
+      previous_cursor = vim.fn.getcmdpos()
 
-    local is_ignored = self.ignore_next_cursor_moved
-    self.ignore_next_cursor_moved = false
+      if cursor_equal or (not cmdline_equal and not did_backspace) then return end
+      did_backspace = false
 
-    opts.on_cursor_moved('CursorMoved', is_ignored)
-  end)
-  timer:start(16, 0, callback)
+      local is_ignored = self.ignore_next_cursor_moved
+      self.ignore_next_cursor_moved = false
+
+      opts.on_cursor_moved('CursorMoved', is_ignored)
+    end)
+
+    vim.api.nvim_create_autocmd('CmdlineEnter', {
+      callback = function()
+        previous_cmdline = ''
+        timer:start(16, 16, callback)
+      end,
+    })
+    vim.api.nvim_create_autocmd('CmdlineLeave', {
+      callback = function() timer:stop() end,
+    })
+  end
 
   vim.api.nvim_create_autocmd('CmdlineLeave', {
     callback = function() opts.on_leave() end,

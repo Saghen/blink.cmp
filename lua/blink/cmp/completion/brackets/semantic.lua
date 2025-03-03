@@ -47,6 +47,7 @@ function semantic.process_request(tokens)
       and cursor[2] <= token.end_col
     then
       -- add the brackets
+      -- TODO: make dot repeatable
       local text_edit = assert(request.item.textEdit)
       local brackets_for_filetype = utils.get_for_filetype(request.filetype, request.item)
       local line = vim.api.nvim_get_current_line()

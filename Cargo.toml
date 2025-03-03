@@ -4,12 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-path = "lua/blink/cmp/fuzzy/lib.rs"
+path = "lua/blink/cmp/fuzzy/rust/lib.rs"
 crate-type = ["cdylib"]
 
 [dependencies]
 regex = "1.11.1"
-frizbee = { git = "https://github.com/saghen/frizbee" }
+frizbee = "0.1.0"
 serde = { version = "1.0.216", features = ["derive"] }
 heed = "0.21.0"
 mlua = { version = "0.10.2", features = ["module", "luajit"] }

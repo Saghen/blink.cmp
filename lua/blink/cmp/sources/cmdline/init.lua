@@ -20,8 +20,9 @@ end
 function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':' } end
 
 function cmdline:get_completions(context, callback)
+  -- TODO: split doesn't handle escaped spaces
   local arguments = vim.split(context.line, ' ', { plain = true })
-  local arg_number = #vim.split(context.line:sub(1, context.cursor[2] + 1), ' ', { plain = true })
+  local arg_number = #vim.split(context.line:sub(1, context.cursor[2]), ' ', { plain = true })
   local text_before_argument = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
     .. (arg_number > 1 and ' ' or '')
 
@@ -48,19 +49,34 @@ function cmdline:get_completions(context, callback)
       local completion_type = completion_args[1]
       local completion_func = completion_args[2]
 
-      -- Handle custom completions explicitly, since otherwise they won't work in input() mode (getcmdtype() == '@')
-      -- TODO: however, we cannot handle v:lua, s:, and <sid> completions. is there a better solution here where we can
-      -- get completions in input() mode without calling ourselves?
-      if
-        vim.fn.getcmdtype() == '@'
-        and vim.startswith(completion_type, 'custom')
-        and not vim.startswith(completion_func:lower(), 's:')
-        and not vim.startswith(completion_func:lower(), 'v:lua')
-        and not vim.startswith(completion_func:lower(), '<sid>')
-      then
-        completions = vim.fn.call(completion_func, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
-        -- `custom,` type returns a string, delimited by newlines
-        if type(completions) == 'string' then completions = vim.split(completions, '\n') end
+      -- Input mode (vim.fn.input())
+      if vim.fn.getcmdtype() == '@' then
+        -- Handle custom completions explicitly, since `getcompletion()` will fail when using this type
+        -- TODO: we cannot handle v:lua, s:, and <sid> completions. is there a better solution here where we can
+        -- get completions in input() mode without calling ourselves?
+        if
+          vim.startswith(completion_type, 'custom')
+          and not vim.startswith(completion_func:lower(), 's:')
+          and not vim.startswith(completion_func:lower(), 'v:lua')
+          and not vim.startswith(completion_func:lower(), '<sid>')
+        then
+          completions = vim.fn.call(completion_func, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
+          -- `custom,` type returns a string, delimited by newlines
+          if type(completions) == 'string' then completions = vim.split(completions, '\n') end
+
+        -- Regular input completions, use the type defined by the input
+        else
+          local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
+          -- TODO: handle `custom` type
+          local type = not vim.startswith(completion_type, 'custom') and vim.fn.getcmdcompltype() or 'cmdline'
+          if type == '' then
+            completions = {}
+          else
+            completions = vim.fn.getcompletion(query, type)
+          end
+        end
+
+      -- Cmdline mode
       else
         local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
         completions = vim.fn.getcompletion(query, 'cmdline')
@@ -100,6 +116,7 @@ function cmdline:get_completions(context, callback)
       local completion_type = vim.fn.getcmdcompltype()
       local is_file_completion = completion_type == 'file' or completion_type == 'buffer'
       local is_first_arg = arg_number == 1
+      local is_lua_expr = completion_type == 'lua' and context.line:sub(1, 1) == '='
 
       local items = {}
       for _, completion in ipairs(completions) do
@@ -113,6 +130,9 @@ function cmdline:get_completions(context, callback)
 
           -- add prefix to the newText
           if not has_prefix then new_text = current_arg_prefix .. completion end
+        elseif is_lua_expr then
+          -- lua expr, e.g. `:=<expr>`
+          new_text = current_arg_prefix:sub(2, -1) .. completion
         end
 
         local start_pos = #text_before_argument

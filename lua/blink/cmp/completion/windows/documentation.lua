@@ -154,11 +154,9 @@ function docs.update_position()
   end
 
   -- decide direction, width and height of window
-  local win_width = docs.win:get_width()
-  local win_height = docs.win:get_height()
   local pos = docs.win:get_direction_with_window_constraints(menu.win, direction_priority, {
-    width = math.min(win_width, win_config.desired_min_width),
-    height = math.min(win_height, win_config.desired_min_height),
+    width = win_config.desired_min_width,
+    height = win_config.desired_min_height,
   })
 
   -- couldn't find anywhere to place the window

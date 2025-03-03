@@ -30,7 +30,8 @@
 --- @field providers? string[]
 --- @field initial_selected_item_idx? number
 
-local config = require('blink.cmp.config').completion.trigger
+local root_config = require('blink.cmp.config')
+local config = root_config.completion.trigger
 local context = require('blink.cmp.completion.trigger.context')
 local utils = require('blink.cmp.lib.utils')
 local fuzzy = require('blink.cmp.fuzzy')
@@ -139,19 +140,23 @@ function trigger.activate()
   })
 
   trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
-  trigger.cmdline_events:listen({
-    on_char_added = on_char_added,
-    on_cursor_moved = on_cursor_moved,
-    on_leave = function() trigger.hide() end,
-  })
+  if root_config.cmdline.enabled then
+    trigger.cmdline_events:listen({
+      on_char_added = on_char_added,
+      on_cursor_moved = on_cursor_moved,
+      on_leave = function() trigger.hide() end,
+    })
+  end
 
   trigger.term_events = require('blink.cmp.lib.term_events').new({
     has_context = function() return trigger.context ~= nil end,
   })
-  trigger.term_events:listen({
-    on_char_added = on_char_added,
-    on_term_leave = function() trigger.hide() end,
-  })
+  if root_config.term.enabled then
+    trigger.term_events:listen({
+      on_char_added = on_char_added,
+      on_term_leave = function() trigger.hide() end,
+    })
+  end
 end
 
 function trigger.resubscribe()
@@ -162,6 +167,9 @@ end
 function trigger.is_trigger_character(char, is_show_on_x)
   local sources = require('blink.cmp.sources.lib')
   local is_trigger = vim.tbl_contains(sources.get_trigger_characters(context.get_mode()), char)
+
+  -- ignore a-z and A-Z characters
+  if char:match('%a') then return false end
 
   local show_on_blocked_trigger_characters = type(config.show_on_blocked_trigger_characters) == 'function'
       and config.show_on_blocked_trigger_characters()

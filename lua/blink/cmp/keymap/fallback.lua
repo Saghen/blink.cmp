@@ -44,16 +44,16 @@ end
 --- Returns a function that will run the first non blink.cmp keymap for the given mode and key
 --- @param mode string
 --- @param key string
---- @return fun(): string?
+--- @return fun(mappings_only?: boolean): string?
 function fallback.wrap(mode, key)
   -- In default mode, there can't be multiple mappings on a single key for buffer local mappings
   -- In cmdline mode, there can't be multiple mappings on a single key for global mappings
   local buffer_mapping = mode ~= 'c' and fallback.get_non_blink_buffer_mapping_for_key(mode, key)
     or fallback.get_non_blink_global_mapping_for_key(mode, key)
-  return function()
+  return function(mappings_only)
     local mapping = buffer_mapping or fallback.get_non_blink_global_mapping_for_key(mode, key)
     if mapping then return fallback.run_non_blink_keymap(mapping, key) end
-    return vim.api.nvim_replace_termcodes(key, true, true, true)
+    if not mappings_only then return vim.api.nvim_replace_termcodes(key, true, true, true) end
   end
 end
 

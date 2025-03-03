@@ -22,11 +22,11 @@ jobs:
 
       - name: Build
         run: npm ci && npm run build
-        working-directory: docs
+        working-directory: doc
 
       - name: Deploy
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy docs/.vitepress/dist --project-name=blink-cmp-main
+          command: pages deploy doc/.vitepress/dist --project-name=blink-cmp-main

@@ -30,7 +30,7 @@ function completion.setup()
       -- since this was performed asynchronously, we check if the context has changed
       if trigger.context == nil or event.context.id ~= trigger.context.id then return end
       -- don't show the list if prefetching results
-      if event.context.trigger.kind == 'prefetch' then return end
+      if trigger.context.trigger.kind == 'prefetch' then return end
 
       -- don't show if all the sources that defined the trigger character returned no items
       if event.context.trigger.character ~= nil then
@@ -57,12 +57,25 @@ function completion.setup()
   --- list -> windows: ghost text and completion menu
   -- setup completion menu
   if config.completion.menu.enabled then
-    list.show_emitter:on(
-      function(event) require('blink.cmp.completion.windows.menu').open_with_items(event.context, event.items) end
-    )
-    list.hide_emitter:on(function() require('blink.cmp.completion.windows.menu').close() end)
+    local menu = function() return require('blink.cmp.completion.windows.menu') end
+
+    local loading_timer = vim.uv.new_timer()
+    trigger.show_emitter:on(function(event)
+      if event.context.trigger.kind ~= 'manual' then return end
+      loading_timer:start(500, 0, vim.schedule_wrap(function() menu().open_loading(event.context) end))
+    end)
+
+    list.show_emitter:on(function(event)
+      loading_timer:stop()
+      menu().open_with_items(event.context, event.items)
+    end)
+    list.hide_emitter:on(function()
+      loading_timer:stop()
+      menu().close()
+    end)
+
     list.select_emitter:on(function(event)
-      require('blink.cmp.completion.windows.menu').set_selected_item_idx(event.idx)
+      menu().set_selected_item_idx(event.idx)
       require('blink.cmp.completion.windows.documentation').auto_show_item(event.context, event.item)
     end)
   end

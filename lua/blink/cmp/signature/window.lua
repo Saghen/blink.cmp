@@ -129,7 +129,7 @@ function signature.update_position()
     direction_priority = menu_win_is_up and { 's' } or { 'n' }
   end
 
-  local pos = win:get_vertical_direction_and_height(direction_priority)
+  local pos = win:get_vertical_direction_and_height(direction_priority, config.max_height)
 
   -- couldn't find anywhere to place the window
   if not pos then

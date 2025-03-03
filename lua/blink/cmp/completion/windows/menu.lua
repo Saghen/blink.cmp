@@ -9,8 +9,10 @@
 --- @field position_update_emitter blink.cmp.EventEmitter<{}>
 ---
 --- @field open_with_items fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
+--- @field open_loading fun(context: blink.cmp.Context)
 --- @field open fun()
 --- @field close fun()
+--- @field should_auto_show fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
 --- @field set_selected_item_idx fun(idx?: number)
 --- @field update_position fun()
 --- @field redraw_if_needed fun()
@@ -49,14 +51,38 @@ vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
 function menu.open_with_items(context, items)
   menu.context = context
   menu.items = items
-  menu.selected_item_idx = menu.selected_item_idx ~= nil and math.min(menu.selected_item_idx, #items) or nil
+  menu.set_selected_item_idx(menu.selected_item_idx ~= nil and math.min(menu.selected_item_idx, #items) or nil)
 
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
-  menu.renderer:draw(context, menu.win:get_buf(), items, config.draw)
+  menu.renderer:draw(context, menu.win:get_buf(), items)
 
-  local auto_show = menu.auto_show
-  if type(auto_show) == 'function' then auto_show = auto_show(context, items) end
-  if auto_show then
+  if menu.should_auto_show(context, items) then
+    menu.open()
+    menu.update_position()
+  end
+end
+
+function menu.open_loading(context)
+  menu.context = context
+  menu.items = {}
+  menu.set_selected_item_idx(nil)
+
+  if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
+  menu.renderer:draw(context, menu.win:get_buf(), {
+    {
+      label = 'Loading...',
+
+      kind_icon = '󰒡',
+      kind_name = '',
+      kind = require('blink.cmp.types').CompletionItemKind.Function,
+
+      source_id = '',
+      source_name = '',
+      cursor_column = 0,
+    },
+  })
+
+  if menu.should_auto_show(context, {}) then
     menu.open()
     menu.update_position()
   end
@@ -87,6 +113,11 @@ function menu.set_selected_item_idx(idx)
   if menu.win:is_open() then menu.win:set_cursor({ idx or 1, 0 }) end
 end
 
+function menu.should_auto_show(context, items)
+  if type(menu.auto_show) == 'function' then return menu.auto_show(context, items) end
+  return menu.auto_show
+end
+
 --- TODO: Don't switch directions if the context is the same
 function menu.update_position()
   local context = menu.context
@@ -98,7 +129,7 @@ function menu.update_position()
   win:update_size()
 
   local border_size = win:get_border_size()
-  local pos = win:get_vertical_direction_and_height(config.direction_priority)
+  local pos = win:get_vertical_direction_and_height(config.direction_priority, config.max_height)
 
   -- couldn't find anywhere to place the window
   if not pos then
@@ -112,6 +143,7 @@ function menu.update_position()
   -- so the window doesnt move around as we type
   local row = pos.direction == 's' and 1 or -pos.height - border_size.vertical
 
+  -- in cmdline mode, we get the position from a function to support UI plugins like noice
   if vim.api.nvim_get_mode().mode == 'c' then
     local cmdline_position = config.cmdline_position()
     win:set_win_config({
@@ -119,6 +151,7 @@ function menu.update_position()
       row = cmdline_position[1] + row,
       col = math.max(cmdline_position[2] + context.bounds.start_col - alignment_start_col, 0),
     })
+  -- otherwise, we use the cursor position
   else
     local cursor_col = context.get_cursor()[2]
 

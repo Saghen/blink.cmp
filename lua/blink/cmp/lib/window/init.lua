@@ -40,7 +40,7 @@
 --- @field set_height fun(self: blink.cmp.Window, height: number)
 --- @field set_width fun(self: blink.cmp.Window, width: number)
 --- @field set_win_config fun(self: blink.cmp.Window, config: table)
---- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: ("n" | "s")[]): { height: number, direction: 'n' | 's' }?
+--- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: ("n" | "s")[], max_height: number): { height: number, direction: 'n' | 's' }?
 --- @field get_direction_with_window_constraints fun(self: blink.cmp.Window, anchor_win: blink.cmp.Window, direction_priority: ("n" | "s" | "e" | "w")[], desired_min_size?: { width: number, height: number }): { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
 --- @field redraw_if_needed fun(self: blink.cmp.Window)
 
@@ -319,9 +319,8 @@ end
 
 --- Gets the direction with the most space available, prioritizing the directions in the order of the
 --- direction_priority list
-function win:get_vertical_direction_and_height(direction_priority)
+function win:get_vertical_direction_and_height(direction_priority, max_height)
   local constraints = self.get_cursor_screen_position()
-  local max_height = self:get_height()
   local border_size = self:get_border_size()
   local function get_distance(direction)
     return direction == 's' and constraints.distance_from_bottom or constraints.distance_from_top
@@ -334,7 +333,7 @@ function win:get_vertical_direction_and_height(direction_priority)
   end)
 
   local direction = direction_priority_by_space[1]
-  local height = math.min(max_height, get_distance(direction))
+  local height = math.min(self:get_height(), get_distance(direction), max_height)
   if height <= border_size.vertical then return end
   return { height = height - border_size.vertical, direction = direction }
 end
