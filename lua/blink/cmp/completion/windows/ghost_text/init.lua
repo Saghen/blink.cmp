@@ -130,8 +130,11 @@ end
 
 function ghost_text.clear_preview()
   ghost_text.selected_item = nil
+
   if ghost_text.extmark_id ~= nil then
-    vim.api.nvim_buf_del_extmark(utils.get_buf(), highlight_ns, ghost_text.extmark_id)
+    local buf = utils.get_buf()
+    if vim.api.nvim_buf_is_valid(buf) then vim.api.nvim_buf_del_extmark(buf, highlight_ns, ghost_text.extmark_id) end
+
     ghost_text.extmark_id = nil
     utils.redraw_if_needed()
   end
