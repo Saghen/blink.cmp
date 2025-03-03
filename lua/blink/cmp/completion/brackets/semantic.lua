@@ -93,7 +93,7 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item)
       callback = resolve,
     }
 
-    -- semantic tokens are only requested on InsertLeave and on_refresh, so manually force a refresh
+    -- semantic tokens debounced, so manually request a refresh to avoid latency
     highlighter:send_request()
 
     -- first check if a semantic token already exists at the current cursor position
