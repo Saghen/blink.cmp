@@ -35,7 +35,6 @@ function semantic.process_request(tokens)
   -- cancel if the cursor moved, or if it's been too long
   if request.cursor[1] ~= cursor[1] or request.cursor[2] ~= cursor[2] then return semantic.finish_request() end
 
-  -- vim.print(tokens)
   for _, token in ipairs(tokens) do
     if
       (token.type == 'function' or token.type == 'method')

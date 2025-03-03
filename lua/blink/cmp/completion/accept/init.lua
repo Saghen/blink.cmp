@@ -103,7 +103,6 @@ local function accept(ctx, item, callback)
           or async.task.empty()
 
         brackets_task:map(function()
-          vim.print('done adding brackets')
           require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
           require('blink.cmp.signature.trigger').show_if_on_trigger_character()
           callback()
