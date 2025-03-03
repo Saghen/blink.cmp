@@ -77,15 +77,13 @@ function files.get_version()
   return files
     .read_file(files.version_path)
     :map(function(version)
-      if version == 'nix' then
-        return { nix = true }
-      elseif #version == 40 then
+      if #version == 40 then
         return { sha = version }
       else
         return { tag = version }
       end
     end)
-    :catch(function() return {} end)
+    :catch(function() return { missing = true } end)
 end
 
 --- @param version string
