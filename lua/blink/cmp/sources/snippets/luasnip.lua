@@ -89,7 +89,7 @@ function source:get_completions(ctx, callback)
       --- @type lsp.CompletionItem
       local item = {
         kind = require('blink.cmp.types').CompletionItemKind.Snippet,
-        label = snip.trigger,
+        label = snip.regTrig and snip.name or snip.trigger,
         insertText = snip.trigger,
         insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
         sortText = sort_text,
