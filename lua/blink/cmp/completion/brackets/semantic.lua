@@ -93,9 +93,6 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item)
       callback = resolve,
     }
 
-    -- semantic tokens are only requested on InsertLeave and on_refresh, so manually force a refresh
-    highlighter:send_request()
-
     -- first check if a semantic token already exists at the current cursor position
     -- we get the token 1 character before the cursor (`bar|` would check `r`)
     local tokens = vim.lsp.semantic_tokens.get_at_pos(0, cursor[1] - 1, cursor[2] - 1)
