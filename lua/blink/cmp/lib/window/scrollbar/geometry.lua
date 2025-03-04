@@ -23,6 +23,7 @@ local function get_win_buf_height(target_win)
   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   local height = 0
   for _, l in ipairs(lines) do
+    if vim.fn.type(l) == vim.v.t_blob then l = vim.fn.string(l) end
     height = height + math.max(1, (math.ceil(vim.fn.strwidth(l) / width)))
   end
   return height
