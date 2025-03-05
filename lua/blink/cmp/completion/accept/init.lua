@@ -1,3 +1,4 @@
+local async = require('blink.cmp.lib.async')
 local config = require('blink.cmp.config').completion.accept
 local text_edits_lib = require('blink.cmp.lib.text_edits')
 local brackets_lib = require('blink.cmp.completion.brackets')
@@ -63,7 +64,7 @@ local function accept(ctx, item, callback)
         end
       end
 
-      -- Add brackets to the text edit if needed
+      -- Add brackets to the text edit, if needed
       local brackets_status, text_edit_with_brackets, offset = brackets_lib.add_brackets(ctx, vim.bo.filetype, item)
       item.textEdit = text_edit_with_brackets
 
@@ -91,25 +92,21 @@ local function accept(ctx, item, callback)
         text_edits_lib.move_cursor_in_dot_repeat(offset)
       end
 
+      -- Notify the rust module that the item was accessed
+      require('blink.cmp.fuzzy').access(item)
+
       -- Let the source execute the item itself
-      sources.execute(ctx, item):map(function()
-        -- Check semantic tokens for brackets, if needed, and apply additional text edits
-        if brackets_status == 'check_semantic_token' then
-          -- TODO: since we apply the additional text edits after, auto imported functions will not
-          -- get auto brackets. If we apply them before, we have to modify the textEdit to compensate
-          brackets_lib.add_brackets_via_semantic_token(ctx, vim.bo.filetype, item, function()
-            require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
-            require('blink.cmp.signature.trigger').show_if_on_trigger_character()
-            callback()
-          end)
-        else
+      return sources.execute(ctx, item):map(function()
+        -- Check semantic tokens for brackets, if needed
+        local brackets_task = brackets_status == 'check_semantic_token'
+            and brackets_lib.add_brackets_via_semantic_token(ctx, vim.bo.filetype, item)
+          or async.task.empty()
+
+        brackets_task:map(function()
           require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
           require('blink.cmp.signature.trigger').show_if_on_trigger_character()
           callback()
-        end
-
-        -- Notify the rust module that the item was accessed
-        require('blink.cmp.fuzzy').access(item)
+        end)
       end)
     end)
     :catch(function(err) vim.notify(err, vim.log.levels.ERROR, { title = 'blink.cmp' }) end)
