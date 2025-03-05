@@ -50,7 +50,7 @@ end
 --- @param callback fun(items: blink.cmp.CompletionItem[])
 local function run_sync(buf_text, callback) callback(words_to_items(require('blink.cmp.fuzzy').get_words(buf_text))) end
 
-local function run_async(buf_text, callback)
+local function run_async_rust(buf_text, callback)
   local worker = uv.new_work(
     -- must use ffi directly since the normal one requires the config which isnt present
     function(buf_text, cpath)
@@ -63,6 +63,56 @@ local function run_async(buf_text, callback)
     end
   )
   worker:queue(buf_text, package.cpath)
+end
+
+local function run_async_lua(buf_text, callback)
+  local chunk_size = 8000 -- Min chunk size in bytes
+  local total_length = #buf_text
+  local max_chunks = math.ceil(total_length / chunk_size)
+
+  ---@type string[][]
+  local all_words = {}
+
+  for idx = 1, max_chunks do
+    local start_pos = (idx - 1) * chunk_size + 1
+    local end_pos = math.min(start_pos + chunk_size - 1, total_length)
+
+    -- Ensure we don't break in the middle of a word
+    if end_pos < total_length then
+      while end_pos < total_length and not string.match(string.sub(buf_text, end_pos, end_pos), '%s') do
+        end_pos = end_pos + 1
+      end
+    end
+
+    local chunk_text = string.sub(buf_text, start_pos, end_pos)
+
+    vim.defer_fn(
+      function()
+        all_words[idx] = require('blink.cmp.fuzzy').get_words(chunk_text)
+
+        if idx == max_chunks then
+          vim.schedule(function()
+            -- remove duplicates
+            ---@type string[]
+            local dedup_words = {}
+            local dict = {}
+            for _, chunk_words in ipairs(all_words) do
+              for _, word in ipairs(chunk_words) do
+                if dict[word] == nil then
+                  dict[word] = true
+                  dedup_words[#dedup_words + 1] = word
+                end
+              end
+            end
+
+            callback(words_to_items(dedup_words))
+          end)
+        end
+      end,
+      -- first iter is instant, then 2ms delay between chunks
+      (idx - 1) * 2
+    )
+  end
 end
 
 --- @class blink.cmp.BufferOpts
@@ -104,8 +154,12 @@ function buffer:get_completions(_, callback)
     if #buf_text < 20000 then
       run_sync(buf_text, transformed_callback)
     -- should take less than 10ms
-    elseif #buf_text < 500000 and fuzzy.implementation_type == 'rust' then
-      run_async(buf_text, transformed_callback)
+    elseif #buf_text < 500000 then
+      if fuzzy.implementation_type == 'rust' then
+        run_async_rust(buf_text, transformed_callback)
+      else
+        run_async_lua(buf_text, transformed_callback)
+      end
     -- too big so ignore
     else
       transformed_callback({})
