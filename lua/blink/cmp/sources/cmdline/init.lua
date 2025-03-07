@@ -17,6 +17,13 @@ function cmdline.new()
   return self
 end
 
+---@param name string
+---@return boolean?
+function cmdline:is_boolean_option(name)
+  local ok, opt = pcall(function() return vim.opt[name]:get() end)
+  if ok then return type(opt) == 'boolean' end
+end
+
 function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':' } end
 
 function cmdline:get_completions(context, callback)
@@ -114,7 +121,9 @@ function cmdline:get_completions(context, callback)
       end
 
       local completion_type = vim.fn.getcmdcompltype()
-      local is_file_completion = completion_type == 'file' or completion_type == 'buffer'
+      local is_file_completion = completion_type == 'file'
+        or completion_type == 'file_in_path'
+        or completion_type == 'buffer'
       local is_first_arg = arg_number == 1
       local is_lua_expr = completion_type == 'lua' and context.line:sub(1, 1) == '='
 
@@ -147,7 +156,7 @@ function cmdline:get_completions(context, callback)
           start_pos = start_pos + #prefix
         end
 
-        table.insert(items, {
+        local item = {
           label = filter_text,
           filterText = filter_text,
           -- move items starting with special characters to the end of the list
@@ -167,7 +176,18 @@ function cmdline:get_completions(context, callback)
             },
           },
           kind = require('blink.cmp.types').CompletionItemKind.Property,
-        })
+        }
+        items[#items + 1] = item
+
+        if completion_type == 'option' and cmdline:is_boolean_option(filter_text) then
+          filter_text = 'no' .. filter_text
+          items[#items + 1] = vim.tbl_deep_extend('force', {}, item, {
+            label = filter_text,
+            filterText = filter_text,
+            sortText = filter_text,
+            textEdit = { newText = 'no' .. new_text },
+          })
+        end
       end
 
       callback({
