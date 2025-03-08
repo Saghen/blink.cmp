@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 02
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 08
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -13,6 +13,7 @@ Table of Contents                                *blink-cmp-table-of-contents*
   - mini.deps                               |blink-cmp-installation-mini.deps|
 3. Recipes                                                 |blink-cmp-recipes|
   - General                                        |blink-cmp-recipes-general|
+  - Fuzzy (sorting/filtering)    |blink-cmp-recipes-fuzzy-(sorting/filtering)|
   - Completion menu drawing        |blink-cmp-recipes-completion-menu-drawing|
   - Sources                                        |blink-cmp-recipes-sources|
   - For writers                                |blink-cmp-recipes-for-writers|
@@ -427,6 +428,26 @@ by any of these three characters.
       vim.list_extend(trigger_characters, { '\n', '\t', ' ' })
       return trigger_characters
     end
+<
+
+
+FUZZY (SORTING/FILTERING)        *blink-cmp-recipes-fuzzy-(sorting/filtering)*
+
+
+ALWAYS PRIORITIZE EXACT MATCHES ~
+
+By default, the fuzzy matcher will give a bonus score of 4 to exact matches. If
+you want to ensure that exact matches are always prioritized, you may set
+
+>lua
+    fuzzy = {
+      sorts = {
+        'exact',
+        -- defaults
+        'score',
+        'sort_text',
+      },
+    }
 <
 
 
@@ -1210,7 +1231,8 @@ You may also build with nix via `nix run .#build-plugin`.
 
 CONFIGURATION ~
 
-See the fuzzy section of the reference configuration <./reference.md#fuzzy>
+See the fuzzy section of the reference configuration <./reference.md#fuzzy>.
+For recipes, see the recipes section <../recipes.md#fuzzy>.
 
 
 KEYMAP                                               *blink-cmp-config-keymap*
@@ -1658,6 +1680,7 @@ COMMUNITY SOURCES ~
 - blink-cmp-avante <https://github.com/Kaiser-Yang/blink-cmp-avante>
 - blink-cmp-conventional-commits <https://github.com/disrupted/blink-cmp-conventional-commits>
 - cmp-pandoc-references <https://github.com/jmbuhr/cmp-pandoc-references>
+- blink-cmp-im <https://github.com/yehuohan/blink-cmp-im>: Input Method source
 
 
 REFERENCE                                         *blink-cmp-config-reference*
@@ -2051,7 +2074,18 @@ FUZZY ~
     
       -- Controls which sorts to use and in which order, falling back to the next sort if the first one returns nil
       -- You may pass a function instead of a string to customize the sorting
-      sorts = { 'score', 'sort_text' },
+      sorts = {
+        -- (optionally) always prioritize exact matches
+        -- 'exact',
+    
+        -- pass a function for custom behavior
+        -- function(item_a, item_b)
+        --   return item_a.score > item_b.score
+        -- end,
+    
+        'score',
+        'sort_text',
+      },
     
       prebuilt_binaries = {
         -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`,
