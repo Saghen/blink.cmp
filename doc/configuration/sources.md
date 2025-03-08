@@ -93,3 +93,4 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-cmp-avante](https://github.com/Kaiser-Yang/blink-cmp-avante)
 - [blink-cmp-conventional-commits](https://github.com/disrupted/blink-cmp-conventional-commits)
 - [cmp-pandoc-references](https://github.com/jmbuhr/cmp-pandoc-references)
+- [blink-cmp-im](https://github.com/yehuohan/blink-cmp-im): Input Method source
