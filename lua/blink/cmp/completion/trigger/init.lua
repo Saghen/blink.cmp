@@ -249,11 +249,18 @@ function trigger.show(opts)
   -- if we're manually triggering, set it as the initial trigger kind
   if opts.trigger_kind == 'manual' then initial_trigger_kind = 'manual' end
 
+  local initial_trigger_character = trigger.context and trigger.context.trigger.initial_character
+    or opts.trigger_character
+  -- reset the initial character if the context iid has changed
+  if trigger.context ~= nil and trigger.context.id ~= trigger.current_context_id then
+    initial_trigger_character = nil
+  end
+
   trigger.context = context.new({
     id = trigger.current_context_id,
     providers = providers,
     initial_trigger_kind = initial_trigger_kind,
-    initial_trigger_character = trigger.context and trigger.context.trigger.initial_character or opts.trigger_character,
+    initial_trigger_character = initial_trigger_character,
     trigger_kind = opts.trigger_kind,
     trigger_character = opts.trigger_character,
     initial_selected_item_idx = opts.initial_selected_item_idx,
