@@ -22,14 +22,14 @@ end
 --- Gets the buffer to use for ghost text
 --- @return integer
 function utils.get_buf()
-  if vim.api.nvim_get_mode().mode == 'c' then return require('noice.ui.cmdline').position.buf end
+  if utils.is_noice() then return require('noice.ui.cmdline').position.buf end
   return vim.api.nvim_get_current_buf()
 end
 
 --- Gets the offset from the cursor, primarily used for noice cmdline
 --- @return integer
 function utils.get_offset()
-  if vim.api.nvim_get_mode().mode == 'c' then
+  if utils.is_noice() then
     return require('noice.ui.cmdline').position.cursor - (vim.fn.getcmdpos() - 1)
   end
   return 0
