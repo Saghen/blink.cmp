@@ -380,7 +380,18 @@ fuzzy = {
 
   -- Controls which sorts to use and in which order, falling back to the next sort if the first one returns nil
   -- You may pass a function instead of a string to customize the sorting
-  sorts = { 'score', 'sort_text' },
+  sorts = {
+    -- (optionally) always prioritize exact matches
+    -- 'exact',
+
+    -- pass a function for custom behavior
+    -- function(item_a, item_b)
+    --   return item_a.score > item_b.score
+    -- end,
+
+    'score',
+    'sort_text',
+  },
 
   prebuilt_binaries = {
     -- Whether or not to automatically download a prebuilt binary from github. If this is set to `false`,

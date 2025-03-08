@@ -152,6 +152,24 @@ sources.providers.lsp.override.get_trigger_characters = function(self)
 end
 ```
 
+
+## Fuzzy (sorting/filtering)
+
+### Always prioritize exact matches
+
+By default, the fuzzy matcher will give a bonus score of 4 to exact matches. If you want to ensure that exact matches are always prioritized, you may set
+
+```lua
+fuzzy = {
+  sorts = {
+    'exact',
+    -- defaults
+    'score',
+    'sort_text',
+  },
+}
+```
+
 ### Deprioritize specific LSP
 
 You may use a custom sort function to deprioritize LSPs such as Emmet Language Server (`emmet_ls`)
