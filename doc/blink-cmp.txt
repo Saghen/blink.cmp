@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 08
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 09
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -415,8 +415,8 @@ SHOW ON NEWLINE, TAB AND SPACE ~
 
 
 Note that you may want to add the override to other sources as well, since if
-the LSP doesn't return any items, we won’t show the menu if it was triggered
-by any of these three characters.
+the LSP doesn’t return any items, we won’t show the menu if it was
+triggered by any of these three characters.
 
 >lua
     -- by default, blink.cmp will block newline, tab and space trigger characters, disable that behavior
@@ -558,7 +558,7 @@ SOURCES                                            *blink-cmp-recipes-sources*
 BUFFER COMPLETION FROM ALL OPEN BUFFERS ~
 
 The default behavior is to only show completions from **visible** "normal"
-buffers (i.e. it wouldn't include neo-tree). This will instead show
+buffers (i.e. it wouldn’t include neo-tree). This will instead show
 completions from all buffers, even if they’re not visible on screen. Note
 that the performance impact of this has not been tested.
 
