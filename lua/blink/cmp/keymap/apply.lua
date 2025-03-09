@@ -1,6 +1,6 @@
 local apply = {}
 
-local snippet_commands = { 'snippet_forward', 'snippet_backward' }
+local snippet_commands = { 'snippet_forward', 'snippet_backward', 'show_signature', 'hide_signature' }
 
 --- Applies the keymaps to the current buffer
 --- @param keys_to_commands table<string, blink.cmp.KeymapCommand[]>
