@@ -33,6 +33,7 @@ end
 --- @return integer
 function utils.get_offset()
   if vim.api.nvim_get_mode().mode == 'c' then
+    if not utils.is_noice() then return 0 end
     return require('noice.ui.cmdline').position.cursor - (vim.fn.getcmdpos() - 1)
   end
   return 0
