@@ -1,6 +1,9 @@
 -- credit to https://github.com/hrsh7th/cmp-path for the original implementation
 -- and https://codeberg.org/FelipeLema/cmp-async-path for the async implementation
 
+-- TODO: more advanced detection of windows vs unix paths to resolve escape sequences
+-- like "Android\ Camera", which currently returns no items
+
 --- @class blink.cmp.PathOpts
 --- @field trailing_slash boolean
 --- @field label_trailing_slash boolean

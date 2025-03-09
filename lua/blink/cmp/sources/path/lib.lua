@@ -105,21 +105,55 @@ function lib.get_text_edit_ranges(context)
   local line_before_cursor = context.line:sub(1, context.cursor[2])
   local next_letter_is_slash = context.line:sub(context.cursor[2] + 1, context.cursor[2] + 1) == '/'
 
-  local parts = vim.split(line_before_cursor, '/')
-  local last_part = parts[#parts]
+  local last_part_idx = lib.get_last_path_part(line_before_cursor)
 
   -- TODO: return the insert and replace ranges, instead of only the insert range
   return {
     file = {
-      start = { line = context.cursor[1] - 1, character = context.cursor[2] - #last_part },
+      start = { line = context.cursor[1] - 1, character = last_part_idx - 1 },
       ['end'] = { line = context.cursor[1] - 1, character = context.cursor[2] },
     },
     directory = {
-      start = { line = context.cursor[1] - 1, character = context.cursor[2] - #last_part },
+      start = { line = context.cursor[1] - 1, character = last_part_idx - 1 },
       -- replace the slash after the cursor, if it exists
       ['end'] = { line = context.cursor[1] - 1, character = context.cursor[2] + (next_letter_is_slash and 1 or 0) },
     },
   }
+end
+
+--- @param path string
+--- @return number
+function lib.get_last_path_part(path)
+  local i = #path
+  local start_pos = 1
+  while i > 0 do
+    local char = path:sub(i, i)
+
+    -- Forward slash (linux/mac delimiter)
+    if char == '/' then
+      start_pos = i + 1
+      break
+
+    -- Backslash (windows delimiter or escape sequence)
+    elseif char == '\\' then
+      if i ~= #path then
+        -- if the next character is a special character, it's likely
+        -- an escape sequence
+        local next_char = path:sub(i + 1, i + 1)
+        if not next_char:match('[ "\'`$&*(){}[]|;:<>?]') then
+          start_pos = i + 1
+          break
+        end
+      else
+        start_pos = i + 1
+        break
+      end
+    end
+
+    i = i - 1
+  end
+
+  return start_pos
 end
 
 return lib
