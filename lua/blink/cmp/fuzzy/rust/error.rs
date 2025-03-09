@@ -7,7 +7,7 @@ pub enum Error {
     #[error("Failed to acquire lock for items by provider")]
     AcquireItemLock,
 
-    #[error("Attempted to use frencecy before initialization")]
+    #[error("Attempted to use frecency before initialization")]
     UseFrecencyBeforeInit,
 
     #[error(

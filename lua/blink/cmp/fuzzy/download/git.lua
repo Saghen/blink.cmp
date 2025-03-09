@@ -15,7 +15,7 @@ end
 
 function git.get_tag()
   return async.task.new(function(resolve, reject)
-    -- If repo_dir is nil, no git reposiory is found, similar to `out.code == 128`
+    -- If repo_dir is nil, no git repository is found, similar to `out.code == 128`
     local repo_dir = vim.fs.root(files.root_dir, '.git')
     if not repo_dir then resolve() end
 
@@ -43,7 +43,7 @@ end
 
 function git.get_sha()
   return async.task.new(function(resolve, reject)
-    -- If repo_dir is nil, no git reposiory is found, similar to `out.code == 128`
+    -- If repo_dir is nil, no git repository is found, similar to `out.code == 128`
     local repo_dir = vim.fs.root(files.root_dir, '.git')
     if not repo_dir then resolve() end
 
