@@ -56,6 +56,11 @@ local documentation = {
 }
 
 function documentation.validate(config)
+  assert(
+    config.update_delay_ms >= 50,
+    'completion.documentation.update_delay_ms must be >= 50. Setting it lower will cause noticeable lag'
+  )
+
   validate('completion.documentation', {
     auto_show = { config.auto_show, 'boolean' },
     auto_show_delay_ms = { config.auto_show_delay_ms, 'number' },
