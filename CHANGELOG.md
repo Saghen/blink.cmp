@@ -12,7 +12,7 @@
 
 ### Bug Fixes
 
-* **download:** correctly handle `download = false` and `implementationn = "rust"` ([#1334](https://github.com/Saghen/blink.cmp/issues/1334)) ([2c8e4c7](https://github.com/Saghen/blink.cmp/commit/2c8e4c78b2ca735262be2ef201c38738db3c9674))
+* **download:** correctly handle `download = false` and `implementation = "rust"` ([#1334](https://github.com/Saghen/blink.cmp/issues/1334)) ([2c8e4c7](https://github.com/Saghen/blink.cmp/commit/2c8e4c78b2ca735262be2ef201c38738db3c9674))
 * lua fuzzy implementation off by 1 and suffix matching ([2c1524f](https://github.com/Saghen/blink.cmp/commit/2c1524f369b27ec09ff7b0425188933768622918)), closes [#1335](https://github.com/Saghen/blink.cmp/issues/1335)
 * mini snippets validation ([c412578](https://github.com/Saghen/blink.cmp/commit/c412578824eb58f9f521643be16d9eb1568d068f)), closes [#1332](https://github.com/Saghen/blink.cmp/issues/1332) [#1342](https://github.com/Saghen/blink.cmp/issues/1342)
 

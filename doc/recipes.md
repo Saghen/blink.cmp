@@ -138,7 +138,7 @@ vim.api.nvim_create_autocmd('User', {
 This may not be working as expected at the moment. Please see [#836](https://github.com/Saghen/blink.cmp/issues/836)
 :::
 
-Note that you may want to add the override to other sources as well, since if the LSP doesnt return any items, we won't show the menu if it was triggered by any of these three characters.
+Note that you may want to add the override to other sources as well, since if the LSP doesn't return any items, we won't show the menu if it was triggered by any of these three characters.
 
 ```lua
 -- by default, blink.cmp will block newline, tab and space trigger characters, disable that behavior
@@ -270,7 +270,7 @@ completion = {
 
 ### Buffer completion from all open buffers
 
-The default behavior is to only show completions from **visible** "normal" buffers (i.e. it woudldn't include neo-tree). This will instead show completions from all buffers, even if they're not visible on screen. Note that the performance impact of this has not been tested. 
+The default behavior is to only show completions from **visible** "normal" buffers (i.e. it wouldn't include neo-tree). This will instead show completions from all buffers, even if they're not visible on screen. Note that the performance impact of this has not been tested.
 
 ```lua
 sources = {

@@ -50,7 +50,7 @@ sources.providers.lsp = {
   max_items = nil, -- Maximum number of items to display in the menu
   min_keyword_length = 0, -- Minimum number of characters in the keyword to trigger the provider
   -- If this provider returns 0 items, it will fallback to these providers.
-  -- If multiple providers falback to the same provider, all of the providers must return 0 items for it to fallback
+  -- If multiple providers fallback to the same provider, all of the providers must return 0 items for it to fallback
   fallbacks = {},
   score_offset = 0, -- Boost/penalize the score of the items
   override = nil, -- Override the source's functions

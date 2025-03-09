@@ -62,7 +62,7 @@ For more common configurations, see the [recipes](../recipes.md).
     default = { 'lsp', 'path', 'snippets', 'buffer' },
   },
 
-  -- Blink.cmp uses a Rust fuzzy matcher by default for frecency, proximity bonsu, typo resistance and
+  -- Blink.cmp uses a Rust fuzzy matcher by default for frecency, proximity bonus, typo resistance and
   -- significantly better performance. A lua implementation has been included as well.
   -- See the fuzzy documentation for more information
   fuzzy = { implementation = 'prefer_rust_with_warning' },

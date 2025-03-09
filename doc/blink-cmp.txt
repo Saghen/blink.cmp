@@ -415,7 +415,7 @@ SHOW ON NEWLINE, TAB AND SPACE ~
 
 
 Note that you may want to add the override to other sources as well, since if
-the LSP doesnt return any items, we won’t show the menu if it was triggered
+the LSP doesn't return any items, we won’t show the menu if it was triggered
 by any of these three characters.
 
 >lua
@@ -558,7 +558,7 @@ SOURCES                                            *blink-cmp-recipes-sources*
 BUFFER COMPLETION FROM ALL OPEN BUFFERS ~
 
 The default behavior is to only show completions from **visible** "normal"
-buffers (i.e. it woudldn’t include neo-tree). This will instead show
+buffers (i.e. it wouldn't include neo-tree). This will instead show
 completions from all buffers, even if they’re not visible on screen. Note
 that the performance impact of this has not been tested.
 
@@ -767,7 +767,7 @@ For more common configurations, see the recipes <../recipes.md>.
         default = { 'lsp', 'path', 'snippets', 'buffer' },
       },
     
-      -- Blink.cmp uses a Rust fuzzy matcher by default for frecency, proximity bonsu, typo resistance and
+      -- Blink.cmp uses a Rust fuzzy matcher by default for frecency, proximity bonus, typo resistance and
       -- significantly better performance. A lua implementation has been included as well.
       -- See the fuzzy documentation for more information
       fuzzy = { implementation = 'prefer_rust_with_warning' },
@@ -1628,7 +1628,7 @@ to the source directly, and will vary by source.
       max_items = nil, -- Maximum number of items to display in the menu
       min_keyword_length = 0, -- Minimum number of characters in the keyword to trigger the provider
       -- If this provider returns 0 items, it will fallback to these providers.
-      -- If multiple providers falback to the same provider, all of the providers must return 0 items for it to fallback
+      -- If multiple providers fallback to the same provider, all of the providers must return 0 items for it to fallback
       fallbacks = {},
       score_offset = 0, -- Boost/penalize the score of the items
       override = nil, -- Override the source's functions
@@ -1960,7 +1960,7 @@ COMPLETION DOCUMENTATION
       update_delay_ms = 50,
       -- Whether to use treesitter highlighting, disable if you run into performance issues
       treesitter_highlighting = true,
-      -- Draws the item in the documentation window, by default using an internal treessitter based implementation
+      -- Draws the item in the documentation window, by default using an internal treesitter based implementation
       draw = function(opts) opts.default_implementation() end,
       window = {
         min_width = 10,
@@ -2171,7 +2171,7 @@ PROVIDERS
         max_items = nil, -- Maximum number of items to display in the menu
         min_keyword_length = 0, -- Minimum number of characters in the keyword to trigger the provider
         -- If this provider returns 0 items, it will fallback to these providers.
-        -- If multiple providers falback to the same provider, all of the providers must return 0 items for it to fallback
+        -- If multiple providers fallback to the same provider, all of the providers must return 0 items for it to fallback
         fallbacks = {},
         score_offset = 0, -- Boost/penalize the score of the items
         override = nil, -- Override the source's functions
