@@ -50,9 +50,9 @@ end
 --- @param callback fun(items: blink.cmp.CompletionItem[])
 local function run_sync(buf_text, callback) callback(words_to_items(require('blink.cmp.fuzzy').get_words(buf_text))) end
 
-local function run_async(buf_text, callback)
+local function run_async_rust(buf_text, callback)
   local worker = uv.new_work(
-    -- must use ffi directly since the normal one requires the config which isnt present
+    -- must use rust module directly since the normal one requires the config which isnt present
     function(buf_text, cpath)
       package.cpath = cpath
       return table.concat(require('blink.cmp.fuzzy.rust').get_words(buf_text), '\n')
@@ -63,6 +63,52 @@ local function run_async(buf_text, callback)
     end
   )
   worker:queue(buf_text, package.cpath)
+end
+
+local function run_async_lua(buf_text, callback)
+  local min_chunk_size = 2000 -- Min chunk size in bytes
+  local max_chunk_size = 4000 -- Max chunk size in bytes
+  local total_length = #buf_text
+
+  ---@type table<string, boolean>
+  local words = {}
+
+  local cancelled = false
+  local pos = 1
+  local function next_chunk()
+    if cancelled then return end
+
+    local start_pos = pos
+    local end_pos = math.min(start_pos + min_chunk_size - 1, total_length)
+
+    -- Ensure we don't break in the middle of a word
+    if end_pos < total_length then
+      while
+        end_pos < total_length
+        and (end_pos - start_pos) < max_chunk_size
+        and not string.match(string.sub(buf_text, end_pos, end_pos), '%s')
+      do
+        end_pos = end_pos + 1
+      end
+    end
+
+    pos = end_pos + 1
+
+    local chunk_text = string.sub(buf_text, start_pos, end_pos)
+    local chunk_words = require('blink.cmp.fuzzy').get_words(chunk_text)
+    for _, word in ipairs(chunk_words) do
+      words[word] = true
+    end
+
+    -- next iter
+    if pos < total_length then return vim.schedule(next_chunk) end
+    -- or finish
+    vim.schedule(function() callback(words_to_items(vim.tbl_keys(words))) end)
+  end
+
+  next_chunk()
+
+  return function() cancelled = true end
 end
 
 --- @class blink.cmp.BufferOpts
@@ -104,16 +150,17 @@ function buffer:get_completions(_, callback)
     if #buf_text < 20000 then
       run_sync(buf_text, transformed_callback)
     -- should take less than 10ms
-    elseif #buf_text < 500000 and fuzzy.implementation_type == 'rust' then
-      run_async(buf_text, transformed_callback)
+    elseif #buf_text < 500000 then
+      if fuzzy.implementation_type == 'rust' then
+        return run_async_rust(buf_text, transformed_callback)
+      else
+        return run_async_lua(buf_text, transformed_callback)
+      end
     -- too big so ignore
     else
       transformed_callback({})
     end
   end)
-
-  -- TODO: cancel run_async
-  return function() end
 end
 
 return buffer
