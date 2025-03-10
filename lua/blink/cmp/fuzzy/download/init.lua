@@ -67,17 +67,21 @@ function download.ensure_downloaded(callback)
 
       -- downloading disabled but not built locally
       if not download_config.download then
-        vim.schedule(
-          function()
-            vim.notify('[blink.cmp]: No fuzzy matching library found', vim.log.levels.WARN, { title = 'blink.cmp' })
-          end
-        )
+        -- Fallback, just check if the shared rust library exists
+        local shared_library_found, _ = pcall(require, 'blink.cmp.fuzzy.rust')
+        if not shared_library_found then
+          vim.schedule(
+            function()
+              vim.notify('[blink.cmp]: No fuzzy matching library found', vim.log.levels.WARN, { title = 'blink.cmp' })
+            end
+          )
 
-        error(
-          'No fuzzy matching library found, but downloading from github is disabled.'
-            .. '\nEither run `cargo build --release` via your package manager, or set `fuzzy.prebuilt_binaries.download = true` in config.'
-            .. '\nSee the docs for more info.'
-        )
+          error(
+            'No fuzzy matching library found, but downloading from github is disabled.'
+              .. '\nEither run `cargo build --release` via your package manager, or set `fuzzy.prebuilt_binaries.download = true` in config.'
+              .. '\nSee the docs for more info.'
+          )
+        end
       end
 
       -- downloading enabled but not on a git tag
