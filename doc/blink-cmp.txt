@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 09
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 10
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -128,7 +128,7 @@ LAZY.NVIM                                   *blink-cmp-installation-lazy.nvim*
     {
       'saghen/blink.cmp',
       -- optional: provides snippets for the snippet source
-      dependencies = 'rafamadriz/friendly-snippets',
+      dependencies = { 'rafamadriz/friendly-snippets' },
     
       -- use a release tag to download pre-built binaries
       version = '*',
