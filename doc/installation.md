@@ -90,7 +90,7 @@ This can vary by config, but in general for nvim-lspconfig:
 
 {
   'neovim/nvim-lspconfig',
-  dependencies = { 'saghen/blink.cmp' },
+  dependencies = 'saghen/blink.cmp',
 
   -- example using `opts` for defining servers
   opts = {
