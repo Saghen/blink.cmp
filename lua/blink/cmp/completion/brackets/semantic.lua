@@ -16,7 +16,7 @@ local semantic = {
 }
 
 vim.api.nvim_create_autocmd('LspTokenUpdate', {
-  callback = function(args) semantic.process_request({ args.data.token }) end,
+  callback = vim.schedule_wrap(function(args) semantic.process_request({ args.data.token }) end),
 })
 
 function semantic.finish_request()
