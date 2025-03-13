@@ -1,6 +1,7 @@
 --- @class blink.cmp.LuasnipSourceOptions
 --- @field use_show_condition? boolean Whether to use show_condition for filtering snippets
 --- @field show_autosnippets? boolean Whether to show autosnippets in the completion list
+--- @field prefer_doc_trig? boolean When expanding `regTrig` snippets, prefer `docTrig` over `trig` placeholder
 
 --- @class blink.cmp.LuasnipSource : blink.cmp.Source
 --- @field config blink.cmp.LuasnipSourceOptions
@@ -15,6 +16,7 @@ local source = {}
 local defaults_config = {
   use_show_condition = true,
   show_autosnippets = true,
+  prefer_doc_trig = false,
 }
 
 function source.new(opts)
@@ -22,6 +24,7 @@ function source.new(opts)
   require('blink.cmp.config.utils').validate('sources.providers.luasnip', {
     use_show_condition = { config.use_show_condition, 'boolean' },
     show_autosnippets = { config.show_autosnippets, 'boolean' },
+    prefer_doc_trig = { config.prefer_doc_trig, 'boolean' },
   }, config)
 
   local self = setmetatable({}, { __index = source })
@@ -90,7 +93,7 @@ function source:get_completions(ctx, callback)
       local item = {
         kind = require('blink.cmp.types').CompletionItemKind.Snippet,
         label = snip.regTrig and snip.name or snip.trigger,
-        insertText = snip.trigger,
+        insertText = self.config.prefer_doc_trig and snip.docTrig or snip.trigger,
         insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
         sortText = sort_text,
         data = { snip_id = snip.id, show_condition = snip.show_condition },
@@ -142,7 +145,27 @@ function source:execute(_, item)
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
   -- if trigger is a pattern, expand "pattern" instead of actual snippet
-  if snip.regTrig then snip = snip:get_pattern_expand_helper() end
+  if snip.regTrig then
+    local docTrig = self.config.prefer_doc_trig and snip.docTrig
+    snip = snip:get_pattern_expand_helper()
+
+    -- See: https://github.com/Saghen/blink.cmp/issues/1373#issuecomment-2695850827
+    if docTrig then
+      local events = require('luasnip.util.events')
+      snip.callbacks[-1] = snip.callbacks[-1] or {}
+      snip.callbacks[-1][events.pre_expand] = function(snip, _)
+        if #snip.insert_nodes == 0 then
+          snip.insert_nodes[0].static_text = { docTrig }
+        else
+          local matches = { string.match(docTrig, snip.trigger) }
+          for i, match in ipairs(matches) do
+            local idx = i ~= #matches and i or 0
+            snip.insert_nodes[idx].static_text = { match }
+          end
+        end
+      end
+    end
+  end
 
   -- get (0, 0) indexed cursor position
   -- the completion has been accepted by this point, so ctx.cursor is out of date
