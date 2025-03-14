@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 10
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 14
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -2627,7 +2627,8 @@ to the community sources <../configuration/sources#community-sources> so that
 others may find it easily. You may also add the `blink-cmp` tag.
 
 Assuming you’ve defined your source in `lua/your-source/init.lua`, you may
-add it to blink.cmp like so (note that `init.lua` is used by default by lua):
+add it to blink.cmp like so (note that `init.lua` is used by default by lua
+when pointing to a directory):
 
 >lua
     {
