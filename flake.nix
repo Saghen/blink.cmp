@@ -1,5 +1,5 @@
 {
-  description = "Set of simple, performant neovim plugins";
+  description = "Performant, batteries-included completion plugin for Neovim";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
