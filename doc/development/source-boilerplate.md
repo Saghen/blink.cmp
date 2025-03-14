@@ -2,7 +2,7 @@
 
 If you're missing autocomplete, ensure you have [lazydev.nvim](https://github.com/folke/lazydev.nvim) installed. If you plan to publish your source, please use the format `blink-cmp-your-source` and submit a PR adding it to the [community sources](../configuration/sources#community-sources) so that others may find it easily. You may also add the `blink-cmp` tag.
 
-Assuming you've defined your source in `lua/your-source/init.lua`, you may add it to blink.cmp like so (note that `init.lua` is used by default by lua):
+Assuming you've defined your source in `lua/your-source/init.lua`, you may add it to blink.cmp like so (note that `init.lua` is used by default by lua when pointing to a directory):
 
 ```lua
 {
