@@ -20,7 +20,7 @@ local config = require('blink.cmp.config')
 --- @field apply_max_items_for_completions fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
 --- @field listen_on_completions fun(callback: fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[]))
 --- @field resolve fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
---- @field execute fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem): blink.cmp.Task
+--- @field execute fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem, default_implementation: fun(context?: blink.cmp.Context, item?: blink.cmp.CompletionItem)): blink.cmp.Task
 ---
 --- @field get_signature_help_trigger_characters fun(mode: blink.cmp.Mode): { trigger_characters: string[], retrigger_characters: string[] }
 --- @field get_signature_help fun(context: blink.cmp.SignatureHelpContext): blink.cmp.Task
@@ -191,7 +191,7 @@ end
 
 --- Execute ---
 
-function sources.execute(context, item)
+function sources.execute(context, item, default_implementation)
   local item_source = nil
   for _, source in pairs(sources.providers) do
     if source.id == item.source_id then
@@ -204,7 +204,7 @@ function sources.execute(context, item)
   end
 
   return item_source
-    :execute(context, item)
+    :execute(context, item, default_implementation)
     :catch(function(err) vim.print('failed to execute item with error: ' .. err) end)
 end
 

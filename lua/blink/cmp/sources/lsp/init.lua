@@ -174,7 +174,9 @@ end
 
 --- Execute ---
 
-function lsp:execute(source, item, callback)
+function lsp:execute(_, item, callback, default_implementation)
+  default_implementation()
+
   local client = vim.lsp.get_client_by_id(item.client_id)
   if client and item.command then
     if vim.fn.has('nvim-0.11') == 1 then

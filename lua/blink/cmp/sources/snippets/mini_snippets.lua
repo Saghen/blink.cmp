@@ -51,7 +51,7 @@ local function to_completion_items(snippets)
       kind = require('blink.cmp.types').CompletionItemKind.Snippet,
       label = snip.prefix,
       insertText = snip.prefix,
-      insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
+      insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
       data = { snip = snip },
     }
     table.insert(result, item)
@@ -122,16 +122,10 @@ function source:resolve(item, callback)
 end
 
 function source:execute(_, item)
-  -- Remove the word inserted by blink and insert snippet
   -- It's safe to assume that mode is insert during completion
 
   --- @type blink.cmp.MiniSnippetsSnippet
   local snip = item.data.snip
-
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  cursor[1] = cursor[1] - 1 -- nvim_buf_set_text: line is zero based
-  local start_col = cursor[2] - #item.insertText
-  vim.api.nvim_buf_set_text(0, cursor[1], start_col, cursor[1], cursor[2], {})
 
   local insert = MiniSnippets.config.expand.insert or MiniSnippets.default_insert
   ---@diagnostic disable-next-line: missing-return

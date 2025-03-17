@@ -140,7 +140,7 @@ function source:resolve(item, callback)
   callback(resolved_item)
 end
 
-function source:execute(_, item)
+function source:execute(ctx, item)
   local luasnip = require('luasnip')
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
@@ -168,23 +168,25 @@ function source:execute(_, item)
   end
 
   -- get (0, 0) indexed cursor position
-  -- the completion has been accepted by this point, so ctx.cursor is out of date
-  local cursor = vim.api.nvim_win_get_cursor(0)
+  local cursor = vim.deepcopy(ctx.cursor)
   cursor[1] = cursor[1] - 1
 
-  local expand_params = snip:matches(require('luasnip.util.util').get_current_line_to_cursor())
-
+  local range = require('blink.cmp.lib.text_edits').get_from_item(item).range
   local clear_region = {
-    from = { cursor[1], cursor[2] - #item.insertText },
-    to = cursor,
+    from = { range.start.line, range.start.character },
+    to = { range['end'].line, range['end'].character },
   }
-  if expand_params ~= nil and expand_params.clear_region ~= nil then
-    clear_region = expand_params.clear_region
-  elseif expand_params ~= nil and expand_params.trigger ~= nil then
-    clear_region = {
-      from = { cursor[1], cursor[2] - #expand_params.trigger },
-      to = cursor,
-    }
+
+  local expand_params = snip:matches(require('luasnip.util.util').get_current_line_to_cursor())
+  if expand_params ~= nil then
+    if expand_params.clear_region ~= nil then
+      clear_region = expand_params.clear_region
+    elseif expand_params.trigger ~= nil then
+      clear_region = {
+        from = { cursor[1], cursor[2] - #expand_params.trigger },
+        to = cursor,
+      }
+    end
   end
 
   luasnip.snip_expand(snip, { expand_params = expand_params, clear_region = clear_region })
