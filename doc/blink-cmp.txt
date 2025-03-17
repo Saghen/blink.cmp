@@ -270,11 +270,7 @@ GENERAL                                            *blink-cmp-recipes-general*
 DISABLE PER FILETYPE ~
 
 >lua
-    enabled = function()
-      return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype)
-        and vim.bo.buftype ~= "prompt"
-        and vim.b.completion ~= false
-    end,
+    enabled = function() return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) end,
 <
 
 
@@ -712,11 +708,7 @@ For more common configurations, see the recipes <../recipes.md>.
 >lua
     {
       -- Disable for some filetypes
-      enabled = function()
-        return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype)
-          and vim.bo.buftype ~= "prompt"
-          and vim.b.completion ~= false
-      end,
+      enabled = function() return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) end,
     
       -- Disable cmdline
       cmdline = {
@@ -1683,8 +1675,8 @@ REFERENCE                                         *blink-cmp-config-reference*
 
 
 >lua
-    -- Enables keymaps, completions and signature help when true
-    enabled = function() return vim.bo.buftype ~= "prompt" and vim.b.completion ~= false end,
+    -- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
+    enabled = function() return true end,
     
     -- See the "keymap" page for more information
     keymap = { preset = 'default' },
