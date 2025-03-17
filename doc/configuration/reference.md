@@ -5,8 +5,8 @@ Do not copy the default configuration! Only include options you want to change i
 :::
 
 ```lua
--- Enables keymaps, completions and signature help when true
-enabled = function() return vim.bo.buftype ~= "prompt" and vim.b.completion ~= false end,
+-- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
+enabled = function() return true end,
 
 -- See the "keymap" page for more information
 keymap = { preset = 'default' },

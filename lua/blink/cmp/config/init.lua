@@ -1,5 +1,5 @@
 --- @class (exact) blink.cmp.ConfigStrict
---- @field enabled fun(): boolean
+--- @field enabled fun(): boolean Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
 --- @field keymap blink.cmp.KeymapConfig
 --- @field completion blink.cmp.CompletionConfig
 --- @field fuzzy blink.cmp.FuzzyConfig
@@ -13,7 +13,7 @@
 local validate = require('blink.cmp.config.utils').validate
 --- @type blink.cmp.ConfigStrict
 local config = {
-  enabled = function() return vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false end,
+  enabled = function() return true end,
   keymap = require('blink.cmp.config.keymap').default,
   completion = require('blink.cmp.config.completion').default,
   fuzzy = require('blink.cmp.config.fuzzy').default,
@@ -115,6 +115,15 @@ function M.merge_with(user_config)
   config = vim.tbl_deep_extend('force', config, user_config)
   M.validate(config)
   M.apply_mode_specific(config)
+end
+
+--- Overrides
+
+function M.enabled()
+  if vim.api.nvim_get_mode().mode == 'c' then return config.cmdline.enabled end
+  if vim.api.nvim_get_mode().mode == 't' then return config.term.enabled end
+
+  return vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false and config.enabled()
 end
 
 return setmetatable(M, {

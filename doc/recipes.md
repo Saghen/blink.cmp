@@ -7,11 +7,7 @@
 ### Disable per filetype
 
 ```lua
-enabled = function()
-  return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype)
-    and vim.bo.buftype ~= "prompt"
-    and vim.b.completion ~= false
-end,
+enabled = function() return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) end,
 ```
 
 ### Disable completion in *only* shell command mode
