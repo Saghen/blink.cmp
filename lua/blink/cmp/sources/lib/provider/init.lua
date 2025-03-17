@@ -27,8 +27,10 @@ local source = {}
 local async = require('blink.cmp.lib.async')
 
 function source.new(id, config)
-  assert(type(config.name) == 'string', 'Each source in config.sources.providers must have a "name" of type string')
   assert(type(config.module) == 'string', 'Each source in config.sources.providers must have a "module" of type string')
+
+  -- Default "name" to capitalized id
+  if config.name == nil then config.name = id:sub(1, 1):upper() .. id:sub(2) end
 
   local self = setmetatable({}, { __index = source })
   self.id = id

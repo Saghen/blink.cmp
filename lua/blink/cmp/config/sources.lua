@@ -23,8 +23,8 @@
 --- @field providers table<string, blink.cmp.SourceProviderConfig>
 
 --- @class blink.cmp.SourceProviderConfig
---- @field name string
 --- @field module string
+--- @field name? string
 --- @field enabled? boolean | fun(): boolean Whether or not to enable the provider
 --- @field opts? table
 --- @field async? boolean | fun(ctx: blink.cmp.Context): boolean Whether blink should wait for the source to return before showing the completions
@@ -62,27 +62,22 @@ local sources = {
         end,
       },
       path = {
-        name = 'Path',
         module = 'blink.cmp.sources.path',
         score_offset = 3,
         fallbacks = { 'buffer' },
       },
       snippets = {
-        name = 'Snippets',
         module = 'blink.cmp.sources.snippets',
         score_offset = -3,
       },
       buffer = {
-        name = 'Buffer',
         module = 'blink.cmp.sources.buffer',
         score_offset = -3,
       },
       cmdline = {
-        name = 'cmdline',
         module = 'blink.cmp.sources.cmdline',
       },
       omni = {
-        name = 'Omni',
         module = 'blink.cmp.sources.complete_func',
         enabled = function() return vim.bo.omnifunc ~= 'v:lua.vim.lsp.omnifunc' end,
         ---@type blink.cmp.CompleteFuncOpts
@@ -90,13 +85,10 @@ local sources = {
           complete_func = function() return vim.bo.omnifunc end,
         },
       },
-      -- NOTE: in future we may want a built-in terminal source. For now
-      -- the infrastructure exists, e.g. so community terminal sources can be
+      -- NOTE: in the future, we may want a built-in terminal source. For now
+      -- the infrastructure exists, so community terminal sources can be
       -- added, but this functionality is not baked into blink.cmp.
-      -- term = {
-      --   name = 'term',
-      --   module = 'blink.cmp.sources.term',
-      -- },
+      -- term = { module = 'blink.cmp.sources.term' },
     },
   },
 }
@@ -134,8 +126,8 @@ function sources.validate_provider(id, provider)
   )
 
   validate('sources.providers.' .. id, {
-    name = { provider.name, 'string' },
     module = { provider.module, 'string' },
+    name = { provider.name, 'string', true },
     enabled = { provider.enabled, { 'boolean', 'function' }, true },
     opts = { provider.opts, 'table', true },
     async = { provider.async, { 'boolean', 'function' }, true },
