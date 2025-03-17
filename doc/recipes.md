@@ -296,10 +296,10 @@ sources = {
 ```lua
 sources.default = function(ctx)
   local success, node = pcall(vim.treesitter.get_node)
-  if vim.bo.filetype == 'lua' then
-    return { 'lsp', 'path' }
-  elseif success and node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
+  if success and node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
     return { 'buffer' }
+  elseif vim.bo.filetype == 'lua' then
+    return { 'lsp', 'path' }
   else
     return { 'lsp', 'path', 'snippets', 'buffer' }
   end
