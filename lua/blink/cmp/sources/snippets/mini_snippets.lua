@@ -122,6 +122,8 @@ function source:resolve(item, callback)
 end
 
 function source:execute(_, item)
+  require('blink.cmp.lib.text_edits').apply({ newText = '', range = item.textEdit.range })
+
   -- It's safe to assume that mode is insert during completion
 
   --- @type blink.cmp.MiniSnippetsSnippet
