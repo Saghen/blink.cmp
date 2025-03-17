@@ -34,24 +34,22 @@ Note: By default, Blink will attempt to use the rust implementation of the fuzzy
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
-    -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept, C-n/C-p for up/down)
-    -- 'super-tab' for mappings similar to vscode (tab to accept, arrow keys for up/down)
-    -- 'enter' for mappings similar to 'super-tab' but with 'enter' to accept
+    -- 'default' (recommended) for mappings similar to built-in completions (C-y to accept)
+    -- 'super-tab' for mappings similar to vscode (tab to accept)
+    -- 'enter' for enter to accept
+    -- 'none' for no mappings
     --
     -- All presets have the following mappings:
     -- C-space: Open menu or open docs if already open
+    -- C-n/C-p or Up/Down: Select next/previous item
     -- C-e: Hide menu
-    -- C-k: Toggle signature help
+    -- C-k: Toggle signature help (if signature.enabled = true)
     --
-    -- See the full "keymap" documentation for information on defining your own keymap.
+    -- See :h blink-cmp-config-keymap for defining your own keymap
     keymap = { preset = 'default' },
 
     appearance = {
-      -- Sets the fallback highlight groups to nvim-cmp's highlight groups
-      -- Useful for when your theme doesn't support blink.cmp
-      -- Will be removed in a future release
-      use_nvim_cmp_as_default = true,
-      -- Set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
+      -- 'mono' (default) for 'Nerd Font Mono' or 'normal' for 'Nerd Font'
       -- Adjusts spacing to ensure icons are aligned
       nerd_font_variant = 'mono'
     },
@@ -62,7 +60,7 @@ Note: By default, Blink will attempt to use the rust implementation of the fuzzy
       default = { 'lsp', 'path', 'snippets', 'buffer' },
     },
 
-    -- Blink.cmp uses a Rust fuzzy matcher by default for typo resistance and significantly better performance
+    -- (Default) Rust fuzzy matcher for typo resistance and significantly better performance
     -- You may use a lua implementation instead by using `implementation = "lua"` or fallback to the lua implementation,
     -- when the Rust fuzzy matcher is not available, by using `implementation = "prefer_rust"`
     --
@@ -126,9 +124,7 @@ The following section includes only the installation and, optionally, building o
 -- use a release tag to download pre-built binaries
 MiniDeps.add({
   source = "saghen/blink.cmp",
-  depends = {
-  "rafamadriz/friendly-snippets",
-  },
+  depends = { "rafamadriz/friendly-snippets" },
   checkout = "some.version", -- check releases for latest tag
 })
 

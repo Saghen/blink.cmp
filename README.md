@@ -34,12 +34,12 @@ Head over to the [documentation website](https://cmp.saghen.dev/installation) fo
 
 ### Contributors
 
-- [@stefanboca](https://github.com/stefanboca) Author of [blink.compat](https://github.com/saghen/blink.compat)
+- [@stefanboca](https://github.com/stefanboca) Author of [blink.compat](https://github.com/saghen/blink.compat) and maintainer
+- [@soifou](https://github.com/soifou) Maintainer
 - [@lopi-py](https://github.com/lopi-py) Windowing code
 - [@scottmckendry](https://github.com/scottmckendry) CI and prebuilt binaries
 - [@balssh](https://github.com/Balssh) + [@konradmalik](https://github.com/konradmalik) Nix flake, nixpkg and nixvim
 - [@abeldekat](https://github.com/abeldekat) mini.snippets source
 - [@wurli](https://github.com/wurli) Terminal completions
 - [@mikavilpas](https://github.com/mikavilpas) + [@xzbdmw](https://github.com/xzbdmw) Dot-repeat (`.`)
-- [@soifou](https://github.com/soifou)
 - [@FerretDetective](https://github.com/FerretDetective) `complete_func` source
