@@ -319,30 +319,31 @@ function cmp.get_lsp_capabilities(override, include_nvim_defaults)
 end
 
 --- Add a new source provider at runtime
+--- @deprecated Use `cmp.add_source_provider` instead
 --- @param source_id string
 --- @param source_config blink.cmp.SourceProviderConfig
 function cmp.add_provider(source_id, source_config)
+  vim.deprecate('cmp.add_provider', 'cmp.add_source_provider', 'v1.0.0', 'blink-cmp')
+  return cmp.add_source_provider(source_id, source_config)
+end
+
+--- Add a new source provider at runtime
+--- @param source_id string
+--- @param source_config blink.cmp.SourceProviderConfig
+function cmp.add_source_provider(source_id, source_config)
   local config = require('blink.cmp.config')
+
   assert(config.sources.providers[source_id] == nil, 'Provider with id ' .. source_id .. ' already exists')
   require('blink.cmp.config.sources').validate_provider(source_id, source_config)
+
   config.sources.providers[source_id] = source_config
 end
 
---- Adds a source to the list of enable sources for a given filetype
+--- Adds a source provider to the list of enable sources for a given filetype
 --- @param filetype string
---- @param source string
-function cmp.add_filetype_source(filetype, source)
-  local config = require('blink.cmp.config')
-
-  assert(
-    type(config.sources.per_filetype[filetype]) ~= 'function',
-    'Sources for filetype "' .. filetype .. '" has been set to a function, so we cannot add a source to it'
-  )
-  if config.sources.per_filetype[filetype] == nil then config.sources.per_filetype[filetype] = {} end
-
-  local sources = config.sources.per_filetype[filetype]
-  --- @cast sources string[]
-  table.insert(sources, source)
+--- @param source_id string
+function cmp.add_filetype_source(filetype, source_id)
+  require('blink.cmp.sources.lib').add_filetype_provider_id(filetype, source_id)
 end
 
 return cmp

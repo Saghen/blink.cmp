@@ -4,8 +4,8 @@ local config = require('blink.cmp.config')
 --- @class blink.cmp.Sources
 --- @field completions_queue blink.cmp.SourcesQueue | nil
 --- @field current_signature_help blink.cmp.Task | nil
---- @field sources_registered boolean
 --- @field providers table<string, blink.cmp.SourceProvider>
+--- @field per_filetype_provider_ids table<string, string[]>
 --- @field completions_emitter blink.cmp.EventEmitter<blink.cmp.SourceCompletionsEvent>
 ---
 --- @field get_all_providers fun(): blink.cmp.SourceProvider[]
@@ -13,6 +13,7 @@ local config = require('blink.cmp.config')
 --- @field get_enabled_providers fun(mode: blink.cmp.Mode): table<string, blink.cmp.SourceProvider>
 --- @field get_provider_by_id fun(id: string): blink.cmp.SourceProvider
 --- @field get_trigger_characters fun(mode: blink.cmp.Mode): string[]
+--- @field add_filetype_provider_id fun(filetype: string, provider_id: string)
 ---
 --- @field emit_completions fun(context: blink.cmp.Context, responses: table<string, blink.cmp.CompletionResponse>)
 --- @field request_completions fun(context: blink.cmp.Context)
@@ -38,6 +39,7 @@ local config = require('blink.cmp.config')
 local sources = {
   completions_queue = nil,
   providers = {},
+  per_filetype_provider_ids = {},
   completions_emitter = require('blink.cmp.lib.event_emitter').new('source_completions', 'BlinkCmpSourceCompletions'),
 }
 
@@ -61,6 +63,11 @@ function sources.get_enabled_provider_ids(mode)
 
   if type(enabled_providers) == 'function' then enabled_providers = enabled_providers() end
   --- @cast enabled_providers string[]
+
+  if sources.per_filetype_provider_ids[vim.bo.filetype] ~= nil then
+    enabled_providers = vim.list_extend(enabled_providers, sources.per_filetype_provider_ids[vim.bo.filetype])
+  end
+
   return require('blink.cmp.lib.utils').deduplicate(enabled_providers)
 end
 
@@ -99,6 +106,11 @@ function sources.get_provider_by_id(provider_id)
   end
 
   return sources.providers[provider_id]
+end
+
+function sources.add_filetype_provider_id(filetype, provider_id)
+  if sources.per_filetype_provider_ids[filetype] == nil then sources.per_filetype_provider_ids[filetype] = {} end
+  table.insert(sources.per_filetype_provider_ids[filetype], provider_id)
 end
 
 --- Completion ---
