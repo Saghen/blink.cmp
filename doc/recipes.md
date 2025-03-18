@@ -312,13 +312,13 @@ sources.providers.snippets.should_show_items = function(ctx)
 end
 ```
 
-### Set source icon and name
+### Set source kind icon and name
 
 ```lua
 sources.providers.copilot.transform_items = function(ctx, items)
   for _, item in ipairs(items) do
-    item.source_icon = ''
-    item.source_name = 'Copilot'
+    item.kind_icon = ''
+    item.kind_name = 'Copilot'
   end
   return items
 end
