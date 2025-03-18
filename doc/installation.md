@@ -146,7 +146,6 @@ capabilities = vim.tbl_deep_extend('force', {
     }
   }
 })
-
 ```
 
 ## `mini.deps`
