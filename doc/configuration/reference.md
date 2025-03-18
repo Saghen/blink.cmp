@@ -6,6 +6,9 @@ Do not copy the default configuration! Only include options you want to change i
 
 ```lua
 -- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
+-- If the function returns 'force', the default conditions for disabling the plugin will be ignored
+-- Default conditions: (vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false)
+-- Note that the default conditions are ignored when `vim.b.completion` is explcitly set to `true`
 enabled = function() return true end,
 
 -- See the "keymap" page for more information

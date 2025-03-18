@@ -1,5 +1,5 @@
 --- @class (exact) blink.cmp.ConfigStrict
---- @field enabled fun(): boolean Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
+--- @field enabled fun(): boolean | 'force' Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term). If the function returns 'force', the default conditions for disabling the plugin will be ignored
 --- @field keymap blink.cmp.KeymapConfig
 --- @field completion blink.cmp.CompletionConfig
 --- @field fuzzy blink.cmp.FuzzyConfig
@@ -123,7 +123,14 @@ function M.enabled()
   if vim.api.nvim_get_mode().mode == 'c' then return config.cmdline.enabled end
   if vim.api.nvim_get_mode().mode == 't' then return config.term.enabled end
 
-  return vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false and config.enabled()
+  local user_enabled = config.enabled()
+  -- User explicitly ignores default conditions
+  if user_enabled == 'force' then return true end
+
+  -- Buffer explicitly set completion to true, always enable
+  if user_enabled and vim.b.completion == true then return true end
+
+  return user_enabled and vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false
 end
 
 return setmetatable(M, {
