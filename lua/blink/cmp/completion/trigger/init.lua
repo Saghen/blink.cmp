@@ -89,8 +89,6 @@ local function on_cursor_moved(event, is_ignored)
     return
   end
 
-  local is_on_trigger_for_show = trigger.is_trigger_character(char_under_cursor)
-
   -- TODO: doesn't handle `a` where the cursor moves immediately after
   -- Reproducible with `example.|a` and pressing `a`, should not show the menu
   local insert_enter_on_trigger_character = config.show_on_trigger_character
@@ -103,11 +101,7 @@ local function on_cursor_moved(event, is_ignored)
     trigger.show({ trigger_kind = 'keyword' })
 
   -- check if we've entered insert mode on a trigger character
-  -- or if we've moved onto a trigger character while open
-  elseif
-    insert_enter_on_trigger_character
-    or (is_on_trigger_for_show and trigger.context ~= nil and trigger.context.trigger.kind ~= 'prefetch')
-  then
+  elseif insert_enter_on_trigger_character then
     trigger.context = nil
     trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
 
@@ -272,6 +266,7 @@ end
 
 function trigger.hide()
   if not trigger.context then return end
+
   trigger.context = nil
   trigger.hide_emitter:emit()
 end
