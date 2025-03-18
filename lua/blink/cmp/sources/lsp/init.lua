@@ -177,7 +177,7 @@ end
 
 --- Execute ---
 
-function lsp:execute(_, item, callback, default_implementation)
+function lsp:execute(source, item, callback, default_implementation)
   default_implementation()
 
   local client = vim.lsp.get_client_by_id(item.client_id)
