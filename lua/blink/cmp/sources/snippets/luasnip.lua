@@ -82,7 +82,7 @@ function source:get_completions(ctx, callback)
     if self.config.show_autosnippets then
       local autosnippets = require('luasnip').get_snippets(ft, { type = 'autosnippets' })
       for _, s in ipairs(autosnippets) do
-        add_luasnip_callback(s, 'leave', require('blink.cmp').hide)
+        add_luasnip_callback(s, 'enter', require('blink.cmp').hide)
       end
       snippets = require('blink.cmp.lib.utils').shallow_copy(snippets)
       vim.list_extend(snippets, autosnippets)
