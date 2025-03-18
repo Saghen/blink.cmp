@@ -1,3 +1,70 @@
+## [0.14.0](https://github.com/Saghen/blink.cmp/compare/v0.13.1...v0.14.0) (2025-03-18)
+
+### Highlights
+
+- The `enabled` option now includes `vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false` and mode checks internally
+  - When replacing this option, you no longer need to include those checks
+- `sources.providers[id].name` is no longer required, and defaults to the `id` capitalized
+  - For example, `id = buffer` will default to `name = Buffer`)
+
+### BREAKING CHANGES
+
+* use default sources when dynamically adding filetype sources
+* apply default and mode specific rules to `enabled` by default
+* require sources to explicitly use default accept implementation
+* allow creating generic sources for `complete-functions` (#1351)
+
+### Features
+
+* add `'inherit'` keymap preset for modes ([e58c130](https://github.com/Saghen/blink.cmp/commit/e58c130e0de93f374037076981b8cae19887cdc6)), closes [#1327](https://github.com/Saghen/blink.cmp/issues/1327)
+* add `insert_prev/next` commands and `is_active` API ([0a7f700](https://github.com/Saghen/blink.cmp/commit/0a7f7002e89a2cadd20c99e78ced3cb9167b2497)), closes [#1367](https://github.com/Saghen/blink.cmp/issues/1367)
+* add `nu` to blocked auto bracket filetypes ([ef9d861](https://github.com/Saghen/blink.cmp/commit/ef9d861952bfe29d096c993d4bd69576e09447fe)), closes [#1383](https://github.com/Saghen/blink.cmp/issues/1383)
+* allow creating generic sources for `complete-functions` ([#1351](https://github.com/Saghen/blink.cmp/issues/1351)) ([02136c1](https://github.com/Saghen/blink.cmp/commit/02136c182f93b7f3bd8d8b0a745b4d3abc95ce5c))
+* apply default and mode specific rules to `enabled` by default ([23c2afa](https://github.com/Saghen/blink.cmp/commit/23c2afa1fa0b8082659b6c696b69bfe5f0cff49b))
+* default `source.providers[id].name` to source id capitalized ([6ded22a](https://github.com/Saghen/blink.cmp/commit/6ded22acedb222370c88a386ca47bf7a4e68310f)), closes [#1353](https://github.com/Saghen/blink.cmp/issues/1353)
+* don't trigger when CursorMoved onto trigger character ([be15af8](https://github.com/Saghen/blink.cmp/commit/be15af8ce2e643f7fd8d2f51820c243d3c54a013))
+* enable cmdline in cmdline mode only ([6a98990](https://github.com/Saghen/blink.cmp/commit/6a989902c9227227729ee5dd602b5577c28f96fc)), closes [#1405](https://github.com/Saghen/blink.cmp/issues/1405)
+* force update_delay_ms to >= 50 ([cf0c7e3](https://github.com/Saghen/blink.cmp/commit/cf0c7e37f391c8a6e430cb7d9cdee1f440d1bd7c)), closes [#1352](https://github.com/Saghen/blink.cmp/issues/1352)
+* handle large buf text completion with pure lua ([#1394](https://github.com/Saghen/blink.cmp/issues/1394)) ([8e744eb](https://github.com/Saghen/blink.cmp/commit/8e744eb176fd79c3e410fd3b8aeedd3b55e7bf3c))
+* ignore htmx-lsp client (hack) ([d5aa7f4](https://github.com/Saghen/blink.cmp/commit/d5aa7f455a41f483051db12aedb0ce9bafde6786)), closes [#825](https://github.com/Saghen/blink.cmp/issues/825)
+* **keymap:** toggle signature help window in snippet ([#1411](https://github.com/Saghen/blink.cmp/issues/1411)) ([86d7cd6](https://github.com/Saghen/blink.cmp/commit/86d7cd6f3a0debf6bcb5a2187ea019214a62f2ff))
+* only check cmdline cursor position when in cmdline mode ([8a17009](https://github.com/Saghen/blink.cmp/commit/8a170091a67e3fb521f86e0334fc3b996591e1ec)), closes [#1355](https://github.com/Saghen/blink.cmp/issues/1355)
+* require sources to explicitly use default accept implementation ([c5ca0f2](https://github.com/Saghen/blink.cmp/commit/c5ca0f2acd46c574a9926d7262c9662e237c5b4f))
+* **snippet:** add opt-in `prefer_doc_trig` for luasnip regex trigger ([#1426](https://github.com/Saghen/blink.cmp/issues/1426)) ([d3607d2](https://github.com/Saghen/blink.cmp/commit/d3607d2daa4fd4f06e8f9c22e1b2a272fdd7fc30)), closes [#1373](https://github.com/Saghen/blink.cmp/issues/1373)
+* support `triggerParameterHints` and `triggerSuggest` LSP client commands ([4ed2fa7](https://github.com/Saghen/blink.cmp/commit/4ed2fa70752c89688917924a1c7fbdae008e36ee)), closes [#1333](https://github.com/Saghen/blink.cmp/issues/1333)
+* use builtin neovim semantic token api ([#1186](https://github.com/Saghen/blink.cmp/issues/1186)) ([bf810eb](https://github.com/Saghen/blink.cmp/commit/bf810ebe1251dfa756c7fa328e56b0c2e157d313)), closes [#187](https://github.com/Saghen/blink.cmp/issues/187)
+* use default sources when dynamically adding filetype sources ([183dd14](https://github.com/Saghen/blink.cmp/commit/183dd1468a3a943f16735a671a2983db8f50c504)), closes [#1217](https://github.com/Saghen/blink.cmp/issues/1217)
+
+### Bug Fixes
+
+* buffer source using rust matcher during async ([bf8ee3a](https://github.com/Saghen/blink.cmp/commit/bf8ee3a687a6b99f0bdb65a27a3ba6fcf0012192)), closes [#1346](https://github.com/Saghen/blink.cmp/issues/1346)
+* bypass prebuilt binary download on nix ([6c83ef1](https://github.com/Saghen/blink.cmp/commit/6c83ef1ae34abd7ef9a32bfcd9595ac77b61037c)), closes [#1334](https://github.com/Saghen/blink.cmp/issues/1334)
+* check if frizzbee shared library exists ([#1417](https://github.com/Saghen/blink.cmp/issues/1417)) ([bfa1aea](https://github.com/Saghen/blink.cmp/commit/bfa1aea2cc8754db36729f32d669bb855037eb9f)), closes [#1410](https://github.com/Saghen/blink.cmp/issues/1410)
+* **cmdline:** correctly handle bulk deletions in nvim < 0.11 ([#1427](https://github.com/Saghen/blink.cmp/issues/1427)) ([3900772](https://github.com/Saghen/blink.cmp/commit/39007722d159372489e5051258ba7cc7f336a1b9)), closes [#1369](https://github.com/Saghen/blink.cmp/issues/1369)
+* **cmdline:** handle boolean options and improve file completion ([#1399](https://github.com/Saghen/blink.cmp/issues/1399)) ([43687e3](https://github.com/Saghen/blink.cmp/commit/43687e3b780f7537b1af78d65b5f4504b93274bc)), closes [#1366](https://github.com/Saghen/blink.cmp/issues/1366)
+* disable binary checks when version file missing ([bcae807](https://github.com/Saghen/blink.cmp/commit/bcae8076af3aba729f4eeb2940c6b5dc45304085)), closes [#1376](https://github.com/Saghen/blink.cmp/issues/1376) [#1364](https://github.com/Saghen/blink.cmp/issues/1364)
+* downloader never downloading if version and library missing ([38a234e](https://github.com/Saghen/blink.cmp/commit/38a234e9050b4f3e740545365246ec9181205c04))
+* drop `client_name` from LSP item when resolving ([e66e50e](https://github.com/Saghen/blink.cmp/commit/e66e50e99e735ebee0434567c091068f131ef853)), closes [#1347](https://github.com/Saghen/blink.cmp/issues/1347)
+* ensure noice never required in cmdline ([9645614](https://github.com/Saghen/blink.cmp/commit/96456149ebe4b6c74aa8efbec37e536561270990)), closes [#1406](https://github.com/Saghen/blink.cmp/issues/1406) [#1396](https://github.com/Saghen/blink.cmp/issues/1396)
+* **ghost-text:** check buffer valid before deleting extmark ([273bb36](https://github.com/Saghen/blink.cmp/commit/273bb364d8601dd72ca0b657079f4624bc76c3af)), closes [#1378](https://github.com/Saghen/blink.cmp/issues/1378)
+* handle blob-type in documentation height computation ([#1384](https://github.com/Saghen/blink.cmp/issues/1384)) ([becb5d4](https://github.com/Saghen/blink.cmp/commit/becb5d4256bedc9cba2b68cfa611f8c82f93795e)), closes [#1320](https://github.com/Saghen/blink.cmp/issues/1320)
+* improve luasnip integration and expand functionality ([#1375](https://github.com/Saghen/blink.cmp/issues/1375)) ([f0f68a1](https://github.com/Saghen/blink.cmp/commit/f0f68a1df964dd146abb6f524b6c055ccd7893c5))
+* incorrect initial trigger character ([6eea1bb](https://github.com/Saghen/blink.cmp/commit/6eea1bb18771128b68000eb6d7e4ac26249db35e))
+* list selection cycling with preselect = false ([62c0532](https://github.com/Saghen/blink.cmp/commit/62c05326fe2943d1a25e9d8a6113c5f54c1e8586))
+* lsp client command names ([36a8b30](https://github.com/Saghen/blink.cmp/commit/36a8b30f20131eb51983d69afe49d399786c2388))
+* **lsp:** missing `source` parameter ([#1451](https://github.com/Saghen/blink.cmp/issues/1451)) ([5e2c28b](https://github.com/Saghen/blink.cmp/commit/5e2c28bff4356340bac5111bfd01d77ff1ea4f4c))
+* **luasnip:** hide completion window when expanding autosnippets ([#1450](https://github.com/Saghen/blink.cmp/issues/1450)) ([cf83e5d](https://github.com/Saghen/blink.cmp/commit/cf83e5db39a41a52077de6b204dd419d099f170f)), closes [#1018](https://github.com/Saghen/blink.cmp/issues/1018)
+* **luasnip:** use `enter` instead of `leave` luasnip event ([#1455](https://github.com/Saghen/blink.cmp/issues/1455)) ([cb5142e](https://github.com/Saghen/blink.cmp/commit/cb5142e3126833f3ddccf2898f297eb8a459b625))
+* mini snippets source not clearing keyword ([970dae0](https://github.com/Saghen/blink.cmp/commit/970dae08be3b9c06b298730f3b312ebfb98cac7c))
+* never show signature help if disabled ([f29498e](https://github.com/Saghen/blink.cmp/commit/f29498e5f0f9a78bddb9d1c03c67e213896291d3)), closes [#1062](https://github.com/Saghen/blink.cmp/issues/1062)
+* **nix:** don't add trailing newline to version ([#1356](https://github.com/Saghen/blink.cmp/issues/1356)) ([c90bd67](https://github.com/Saghen/blink.cmp/commit/c90bd6745e243d6cdc01a23f85ecdfb2f9cebabe))
+* off by one error in within_query_bounds ([60a571e](https://github.com/Saghen/blink.cmp/commit/60a571e2155c18d18a6021ad4f89709d46e8445a))
+* prefer luasnip name over regex trigger in completion results ([#1382](https://github.com/Saghen/blink.cmp/issues/1382)) ([662a67c](https://github.com/Saghen/blink.cmp/commit/662a67c6277790140c16164f3eca17fa19ae7a4c)), closes [#1373](https://github.com/Saghen/blink.cmp/issues/1373)
+* preserve 'buflisted' state when applying LSP text edits ([#1432](https://github.com/Saghen/blink.cmp/issues/1432)) ([16fece7](https://github.com/Saghen/blink.cmp/commit/16fece774c9ad818ac8eb0f4f88fec3258053869))
+* return 0 offset when in cmdline without noice ([b737295](https://github.com/Saghen/blink.cmp/commit/b737295fbe38b6a7dca01e6068a56cda23407f0a)), closes [#1406](https://github.com/Saghen/blink.cmp/issues/1406)
+* schedule semantic process request from LspTokenUpdate ([0075a2d](https://github.com/Saghen/blink.cmp/commit/0075a2d6591dc249d3c149a027cf49fc4754d096))
+* text edit range on windows paths ([86bf6fd](https://github.com/Saghen/blink.cmp/commit/86bf6fd96af672797c1269e8388d43f3db41804c)), closes [#1385](https://github.com/Saghen/blink.cmp/issues/1385)
+
 ## [0.13.1](https://github.com/Saghen/blink.cmp/compare/v0.13.0...v0.13.1) (2025-02-27)
 
 ### BREAKING CHANGES
