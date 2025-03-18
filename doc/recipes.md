@@ -312,6 +312,18 @@ sources.providers.snippets.should_show_items = function(ctx)
 end
 ```
 
+### Set source icon and name
+
+```lua
+sources.providers.copilot.transform_items = function(ctx, items)
+  for _, item in ipairs(items) do
+    item.source_icon = ''
+    item.source_name = 'Copilot'
+  end
+  return items
+end
+```
+
 ### Disable all snippets
 
 See the [relevant section in the snippets documentation](./configuration/snippets.md#disable-all-snippets)
