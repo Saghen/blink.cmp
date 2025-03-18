@@ -78,8 +78,10 @@ end
 --- @return boolean
 function context:within_query_bounds(cursor)
   local row, col = cursor[1], cursor[2]
+  col = col + 1 -- Convert from 0-indexed to 1-indexed
+
   local bounds = self.bounds
-  return row == bounds.line_number and col >= bounds.start_col and col < (bounds.start_col + bounds.length)
+  return row == bounds.line_number and col >= bounds.start_col and col <= (bounds.start_col + bounds.length)
 end
 
 function context.get_mode()
