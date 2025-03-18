@@ -19,6 +19,15 @@ local defaults_config = {
   prefer_doc_trig = false,
 }
 
+---@param snippet table
+---@param event string
+---@param callback fun(table, table)
+local function add_luasnip_callback(snippet, event, callback)
+  local events = require('luasnip.util.events')
+  snippet.callbacks[-1] = snippet.callbacks[-1] or {}
+  snippet.callbacks[-1][events[event]] = callback
+end
+
 function source.new(opts)
   local config = vim.tbl_deep_extend('keep', opts, defaults_config)
   require('blink.cmp.config.utils').validate('sources.providers.luasnip', {
@@ -72,6 +81,9 @@ function source:get_completions(ctx, callback)
     local snippets = require('luasnip').get_snippets(ft, { type = 'snippets' })
     if self.config.show_autosnippets then
       local autosnippets = require('luasnip').get_snippets(ft, { type = 'autosnippets' })
+      for _, s in ipairs(autosnippets) do
+        add_luasnip_callback(s, 'leave', require('blink.cmp').hide)
+      end
       snippets = require('blink.cmp.lib.utils').shallow_copy(snippets)
       vim.list_extend(snippets, autosnippets)
     end
@@ -149,11 +161,8 @@ function source:execute(ctx, item)
     local docTrig = self.config.prefer_doc_trig and snip.docTrig
     snip = snip:get_pattern_expand_helper()
 
-    -- See: https://github.com/Saghen/blink.cmp/issues/1373#issuecomment-2695850827
     if docTrig then
-      local events = require('luasnip.util.events')
-      snip.callbacks[-1] = snip.callbacks[-1] or {}
-      snip.callbacks[-1][events.pre_expand] = function(snip, _)
+      add_luasnip_callback(snip, 'pre_expand', function(snip, _)
         if #snip.insert_nodes == 0 then
           snip.insert_nodes[0].static_text = { docTrig }
         else
@@ -163,7 +172,7 @@ function source:execute(ctx, item)
             snip.insert_nodes[idx].static_text = { match }
           end
         end
-      end
+      end)
     end
   end
 
