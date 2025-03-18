@@ -116,6 +116,39 @@ This can vary by config, but in general for nvim-lspconfig:
 }
 ```
 
+#### Merging LSP capabilities
+
+Blink.cmp's `get_lsp_capabilities` function includes the built-in LSP capabilities by default. To merge with your own capabilities, use the first argument, which acts as an override.
+
+```lua
+local capabilities = {
+  textDocument = {
+    foldingRange = {
+      dynamicRegistration = false,
+      lineFoldingOnly = true
+    }
+  }
+}
+
+capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
+
+-- or equivalently
+
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+
+capabilities = vim.tbl_deep_extend('force', capabilities, require('blink.cmp').get_lsp_capabilities({}, false))
+
+capabilities = vim.tbl_deep_extend('force', {
+  textDocument = {
+    foldingRange = {
+      dynamicRegistration = false,
+      lineFoldingOnly = true
+    }
+  }
+})
+
+```
+
 ## `mini.deps`
 
 The following section includes only the installation and, optionally, building of the fuzzy matcher. Check the [lazy.nvim](#lazy.nvim) section for recommended configuration options and setting up `nvim-lspconfig`.
