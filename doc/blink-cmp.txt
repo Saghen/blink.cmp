@@ -637,13 +637,13 @@ trigger characters are `.`, `"`, `'`.
 <
 
 
-SET SOURCE ICON AND NAME ~
+SET SOURCE KIND ICON AND NAME ~
 
 >lua
     sources.providers.copilot.transform_items = function(ctx, items)
       for _, item in ipairs(items) do
-        item.source_icon = ''
-        item.source_name = 'Copilot'
+        item.kind_icon = ''
+        item.kind_name = 'Copilot'
       end
       return items
     end
