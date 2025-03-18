@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 17
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 18
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -598,6 +598,19 @@ trigger characters are `.`, `"`, `'`.
 >lua
     sources.providers.snippets.should_show_items = function(ctx)
       return ctx.trigger.initial_kind ~= 'trigger_character'
+    end
+<
+
+
+SET SOURCE ICON AND NAME ~
+
+>lua
+    sources.providers.copilot.transform_items = function(ctx, items)
+      for _, item in ipairs(items) do
+        item.source_icon = ''
+        item.source_name = 'Copilot'
+      end
+      return items
     end
 <
 
