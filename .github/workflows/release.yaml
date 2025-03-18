@@ -54,16 +54,16 @@ jobs:
 
       - name: Install Rust
         run: |
-          rustup toolchain install nightly
-          rustup default nightly
+          # https://github.com/rust-cross/cargo-zigbuild/issues/327
+          rustup toolchain install nightly-2025-02-19
+          rustup default nightly-2025-02-19
           rustup target add ${{ matrix.target }}
 
       - name: Build for Linux
         if: contains(matrix.os, 'ubuntu')
         run: |
           cargo install cross --git https://github.com/cross-rs/cross
-          # https://github.com/rust-cross/cargo-zigbuild/issues/327
-          RUSTFLAGS="-Zlinker-features=-lld" cross build --release --target ${{ matrix.target }}
+          cross build --release --target ${{ matrix.target }}
           mv "${{ matrix.artifact_name }}" "${{ matrix.target }}.so"
 
       - name: Build for macOS
