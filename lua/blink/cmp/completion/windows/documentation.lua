@@ -24,6 +24,7 @@ local docs = {
     min_width = win_config.min_width,
     max_width = win_config.max_width,
     max_height = win_config.max_height,
+    default_border = 'padded',
     border = win_config.border,
     winblend = win_config.winblend,
     winhighlight = win_config.winhighlight,

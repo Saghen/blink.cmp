@@ -25,7 +25,7 @@ local window = {
     enabled = true,
     min_width = 15,
     max_height = 10,
-    border = 'none',
+    border = nil,
     winblend = 0,
     winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
     -- keep the cursor X lines away from the top/bottom of the window
@@ -136,7 +136,7 @@ function window.validate(config)
     enabled = { config.enabled, 'boolean' },
     min_width = { config.min_width, 'number' },
     max_height = { config.max_height, 'number' },
-    border = { config.border, { 'string', 'table' } },
+    border = { config.border, { 'string', 'table' }, true },
     winblend = { config.winblend, 'number' },
     winhighlight = { config.winhighlight, 'string' },
     scrolloff = { config.scrolloff, 'number' },

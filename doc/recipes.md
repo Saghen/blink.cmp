@@ -68,6 +68,8 @@ completion = {
 
 ### Border
 
+On neovim 0.11+, you may use the `vim.o.winborder` option to set the default border for all floating windows. You may override that option with your own border value as shown below.
+
 ```lua
 completion = {
   menu = { border = 'single' },

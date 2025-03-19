@@ -17,6 +17,7 @@ local signature = {
     min_width = config.min_width,
     max_width = config.max_width,
     max_height = config.max_height,
+    default_border = 'padded',
     border = config.border,
     winblend = config.winblend,
     winhighlight = config.winhighlight,

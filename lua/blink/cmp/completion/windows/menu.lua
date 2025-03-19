@@ -25,6 +25,7 @@ local menu = {
   win = require('blink.cmp.lib.window').new({
     min_width = config.min_width,
     max_height = config.max_height,
+    default_border = 'none',
     border = config.border,
     winblend = config.winblend,
     winhighlight = config.winhighlight,
