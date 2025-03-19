@@ -31,7 +31,7 @@ function scrollbar_win:show_thumb(geometry)
   else
     -- update with the geometry
     local thumb_existing_config = vim.api.nvim_win_get_config(self.thumb_win)
-    local thumb_config = vim.tbl_deep_extend('force', thumb_existing_config, geometry)
+    local thumb_config = vim.tbl_deep_extend('force', thumb_existing_config, geometry, { border = 'none' })
     vim.api.nvim_win_set_config(self.thumb_win, thumb_config)
   end
 
