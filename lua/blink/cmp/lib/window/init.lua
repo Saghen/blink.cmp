@@ -108,9 +108,10 @@ function win:open()
 
   -- support neovim 0.11+ vim.o.winborder option
   local border = self.config.border or self.config.default_border
-  if vim.o.winborder ~= nil and self.config.border == nil then
-    if vim.o.winborder ~= '' then
-      border = vim.o.winborder
+  local has_winborder, winborder = pcall(function() return vim.o.winborder end)
+  if has_winborder and self.config.border == nil then
+    if winborder ~= '' then
+      border = winborder
     else
       border = self.config.default_border
     end
