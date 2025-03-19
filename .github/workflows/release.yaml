@@ -54,6 +54,8 @@ jobs:
 
       - name: Install Rust
         run: |
+          echo -e '[toolchain]\nchannel = "nightly-2025-02-19"' > rust-toolchain.toml
+
           # https://github.com/rust-cross/cargo-zigbuild/issues/327
           rustup toolchain install nightly-2025-02-19
           rustup default nightly-2025-02-19
