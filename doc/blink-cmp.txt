@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 18
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 19
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -373,6 +373,10 @@ currently on the first one.
 
 
 BORDER ~
+
+On neovim 0.11+, you may use the `vim.o.winborder` option to set the default
+border for all floating windows. You may override that option with your own
+border value as shown below.
 
 >lua
     completion = {
@@ -1876,7 +1880,7 @@ COMPLETION MENU
       enabled = true,
       min_width = 15,
       max_height = 10,
-      border = 'none',
+      border = nil, -- Defaults to `vim.o.winborder` on nvim 0.11+
       winblend = 0,
       winhighlight = 'Normal:BlinkCmpMenu,FloatBorder:BlinkCmpMenuBorder,CursorLine:BlinkCmpMenuSelection,Search:None',
       -- Keep the cursor X lines away from the top/bottom of the window
@@ -2002,7 +2006,7 @@ COMPLETION DOCUMENTATION
         min_width = 10,
         max_width = 80,
         max_height = 20,
-        border = 'padded',
+        border = nil, -- Defaults to `vim.o.winborder` on nvim 0.11+ or 'padded' when not defined/<=0.10
         winblend = 0,
         winhighlight = 'Normal:BlinkCmpDoc,FloatBorder:BlinkCmpDocBorder,EndOfBuffer:BlinkCmpDoc',
         -- Note that the gutter will be disabled when border ~= 'none'
@@ -2061,7 +2065,7 @@ SIGNATURE ~
         min_width = 1,
         max_width = 100,
         max_height = 10,
-        border = 'padded',
+        border = nil, -- Defaults to `vim.o.winborder` on nvim 0.11+ or 'padded' when not defined/<=0.10
         winblend = 0,
         winhighlight = 'Normal:BlinkCmpSignatureHelp,FloatBorder:BlinkCmpSignatureHelpBorder',
         scrollbar = false, -- Note that the gutter will be disabled when border ~= 'none'
