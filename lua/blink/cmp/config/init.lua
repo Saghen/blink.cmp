@@ -133,6 +133,7 @@ function M.enabled()
   return user_enabled and vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false
 end
 
+--- @type blink.cmp.ConfigStrict
 return setmetatable(M, {
   __index = function(_, k) return config[k] end,
 })

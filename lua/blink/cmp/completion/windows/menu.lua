@@ -22,7 +22,7 @@ local config = require('blink.cmp.config').completion.menu
 --- @type blink.cmp.CompletionMenu
 --- @diagnostic disable-next-line: missing-fields
 local menu = {
-  win = require('blink.cmp.lib.window').new({
+  win = require('blink.cmp.lib.window').new('menu', {
     min_width = config.min_width,
     max_height = config.max_height,
     default_border = 'none',

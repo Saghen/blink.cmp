@@ -13,7 +13,7 @@ local sources = require('blink.cmp.sources.lib')
 local menu = require('blink.cmp.completion.windows.menu')
 
 local signature = {
-  win = require('blink.cmp.lib.window').new({
+  win = require('blink.cmp.lib.window').new('signature', {
     min_width = config.min_width,
     max_width = config.max_width,
     max_height = config.max_height,
