@@ -132,7 +132,6 @@ function win:open()
   vim.api.nvim_set_option_value('filetype', self.config.filetype, { buf = self.buf })
 
   self.cursor_line:update(self.id)
-
   if self.scrollbar then self.scrollbar:update(self.id) end
   self:redraw_if_needed()
 end
