@@ -74,7 +74,7 @@ local function apply_item(ctx, item)
   require('blink.cmp.fuzzy').access(item)
 
   -- Check semantic tokens for brackets, if needed, asynchronously
-  if brackets_status ~= 'check_semantic_token' then
+  if brackets_status == 'check_semantic_token' then
     brackets_lib.add_brackets_via_semantic_token(ctx, vim.bo.filetype, item)
   end
 end

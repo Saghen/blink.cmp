@@ -32,7 +32,7 @@ function semantic.process_request(tokens)
   if request == nil then return end
 
   local cursor = vim.api.nvim_win_get_cursor(0)
-  -- cancel if the cursor moved, or if it's been too long
+  -- cancel if the cursor moved
   if request.cursor[1] ~= cursor[1] or request.cursor[2] ~= cursor[2] then return semantic.finish_request() end
 
   for _, token in ipairs(tokens) do
