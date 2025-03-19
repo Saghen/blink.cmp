@@ -1,6 +1,8 @@
 -- TODO: The scrollbar and redrawing logic should be done by wrapping the functions that would
 -- trigger a redraw or update the window
 
+local utils = require('blink.cmp.lib.window.utils')
+
 --- @class blink.cmp.WindowOptions
 --- @field min_width? number
 --- @field max_width? number
@@ -60,8 +62,7 @@ function win.new(config)
     max_width = config.max_width,
     max_height = config.max_height or 10,
     cursorline = config.cursorline or false,
-    default_border = config.default_border,
-    border = config.border,
+    border = utils.pick_border(config.border, config.default_border),
     wrap = config.wrap or false,
     winblend = config.winblend or 0,
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
@@ -106,18 +107,6 @@ function win:open()
   -- window already exists
   if self.id ~= nil and vim.api.nvim_win_is_valid(self.id) then return end
 
-  -- support neovim 0.11+ vim.o.winborder option
-  local border = self.config.border or self.config.default_border
-  local has_winborder, winborder = pcall(function() return vim.o.winborder end)
-  if has_winborder and self.config.border == nil then
-    if winborder ~= '' then
-      border = winborder
-    else
-      border = self.config.default_border
-    end
-  end
-  if self.config.border == 'padded' then border = { ' ', '', '', ' ', '', '', ' ', ' ' } end
-
   -- create window
   self.id = vim.api.nvim_open_win(self:get_buf(), false, {
     relative = 'cursor',
@@ -127,7 +116,7 @@ function win:open()
     row = 1,
     col = 1,
     zindex = 1001,
-    border = border,
+    border = self.config.border == 'padded' and { ' ', '', '', ' ', '', '', ' ', ' ' } or self.config.border,
   })
   vim.api.nvim_set_option_value('winblend', self.config.winblend, { win = self.id })
   vim.api.nvim_set_option_value('winhighlight', self.config.winhighlight, { win = self.id })
