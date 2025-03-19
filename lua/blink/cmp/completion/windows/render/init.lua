@@ -112,6 +112,8 @@ function renderer:draw(context, bufnr, items)
     line = line:sub(1, -self.gap - 1)
 
     if self.padding[2] > 0 then line = line .. string.rep(' ', self.padding[2]) end
+    line = string.gsub(line, '\r', '')
+    line = string.gsub(line, '\n', '')
 
     table.insert(lines, line)
   end
