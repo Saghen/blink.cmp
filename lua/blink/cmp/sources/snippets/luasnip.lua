@@ -183,7 +183,7 @@ function source:execute(ctx, item)
   local range = require('blink.cmp.lib.text_edits').get_from_item(item).range
   local clear_region = {
     from = { range.start.line, range.start.character },
-    to = { range['end'].line, range['end'].character },
+    to = cursor,
   }
 
   local expand_params = snip:matches(require('luasnip.util.util').get_current_line_to_cursor())
