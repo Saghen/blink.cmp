@@ -85,7 +85,6 @@ Explanation from TJ: https://youtu.be/m8C0Cq9Uv9o?t=1275
 This can vary by config, but in general for nvim-lspconfig:
 
 ```lua
-
 {
   'neovim/nvim-lspconfig',
   dependencies = { 'saghen/blink.cmp' },
