@@ -117,7 +117,12 @@ function download.ensure_downloaded(callback)
       )
       return download.download(target_git_tag)
     end)
-    :map(function() callback(nil, 'rust') end)
+    :map(function()
+      -- clear cached module first since we call it in the pcall above
+      package.loaded['blink.cmp.fuzzy.rust'] = nil
+
+      callback(nil, 'rust')
+    end)
     :catch(function(err)
       -- fallback to lua implementation
       if fuzzy_config.implementation == 'prefer_rust' then
