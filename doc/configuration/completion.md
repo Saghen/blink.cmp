@@ -57,7 +57,9 @@ Shows after entering insert mode on top of a trigger character.
 completion.trigger.show_on_insert_on_trigger_character = true
 -- Optionally, set a list of characters that will not trigger the completion window,
 -- even when sources request it. The following are the defaults:
-completion.trigger.show_on_x_blocked_trigger_characters = { "'", '"', '(', '{', '[' }
+completion.trigger.show_on_x_blocked_trigger_characters = {
+  "'", '"', '(', '{', '['
+}
 ```
 
 <video src="https://github.com/user-attachments/assets/9e7aa3c2-4756-4a5e-a0e8-303d3ae0fda9" muted autoplay loop />
@@ -72,7 +74,7 @@ completion.trigger.show_on_accept_on_trigger_character = true
 completion.trigger.show_on_x_blocked_trigger_characters = { "'", '"', '(', '{', '[' }
 ```
 
-TODO: Find a case where this actually fires : )
+Fires after accepting a path completion item, for example: `| -> foo/|`
 :::
 
 <!-- panvimdoc-include-comment
