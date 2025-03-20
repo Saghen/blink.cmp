@@ -1,5 +1,7 @@
 # Recipes
 
+Feel free to open a PR with any of your own recipes!
+
 [[toc]]
 
 ## General
@@ -31,25 +33,21 @@ sources = {
 
 Full discussion: https://github.com/Saghen/blink.cmp/issues/1367
 
-Tab: If completion hasn't been triggered yet, insert the first suggestion; if it has, cycle to the next suggestion.
-
-Shift-Tab: Navigate to the previous suggestion or cancel completion if currently on the first one.
-
 ```lua
--- helper function to check if there's a word before the cursor.
 local has_words_before = function()
-  local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+  local col = vim.api.nvim_win_get_cursor(0)[2]
   if col == 0 then
     return false
   end
-  local text = vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]
-  return text:sub(col, col):match("%s") == nil
+  local line = vim.api.nvim_get_current_line():sub()
+  return line:sub(col, col):match("%s") == nil
 end
 
 -- in your blink configuration
 keymap = {
   preset = 'none',
 
+  -- If completion hasn't been triggered yet, insert the first suggestion; if it has, cycle to the next suggestion.
   ['<Tab>'] = {
     function(cmp)
       if has_words_before() then
@@ -58,6 +56,7 @@ keymap = {
     end,
     'fallback',
   },
+  -- Navigate to the previous suggestion or cancel completion if currently on the first one.
   ['<S-Tab>'] = { 'insert_prev' },
 },
 completion = {
@@ -80,7 +79,7 @@ signature = { window = { border = 'single' } },
 
 ### Select Nth item from the list
 
-Here's an example configuration that allows you to select the nth item from the list, based on [#382](https://github.com/Saghen/blink.cmp/issues/382):
+Based on [#382](https://github.com/Saghen/blink.cmp/issues/382)
 
 ```lua
 keymap = {
@@ -133,7 +132,7 @@ vim.api.nvim_create_autocmd('User', {
 ### Show on newline, tab and space
 
 ::: warning
-This may not be working as expected at the moment. Please see [#836](https://github.com/Saghen/blink.cmp/issues/836)
+Not working as expected, see [#836](https://github.com/Saghen/blink.cmp/issues/836)
 :::
 
 Note that you may want to add the override to other sources as well, since if the LSP doesn't return any items, we won't show the menu if it was triggered by any of these three characters.
@@ -155,7 +154,7 @@ end
 
 ### Always prioritize exact matches
 
-By default, the fuzzy matcher will give a bonus score of 4 to exact matches. If you want to ensure that exact matches are always prioritized, you may set
+By default, the fuzzy matcher will give a bonus score of 4 to exact matches. If you want to ensure that exact matches are always prioritized, you may set:
 
 ```lua
 fuzzy = {
@@ -199,12 +198,18 @@ completion = {
     draw = {
       components = {
         kind_icon = {
-          ellipsis = false,
           text = function(ctx)
             local kind_icon, _, _ = require('mini.icons').get('lsp', ctx.kind)
             return kind_icon
           end,
-          -- Optionally, you may also use the highlights from mini.icons
+          -- (optional) use highlights from mini.icons
+          highlight = function(ctx)
+            local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+            return hl
+          end,
+        },
+        kind = {
+          -- (optional) use highlights from mini.icons
           highlight = function(ctx)
             local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
             return hl
@@ -226,7 +231,6 @@ completion = {
     draw = {
       components = {
         kind_icon = {
-          ellipsis = false,
           text = function(ctx)
             local lspkind = require("lspkind")
             local icon = ctx.kind_icon
