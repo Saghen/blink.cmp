@@ -71,7 +71,18 @@ pub fn fuzzy(
 ) -> (Vec<i32>, Vec<u32>, Vec<bool>) {
     let haystack_labels = haystack
         .iter()
-        .map(|s| s.filter_text.clone().unwrap_or(s.label.clone()))
+        .map(|s| {
+            let text = s.filter_text.clone().unwrap_or(s.label.clone());
+            if text.len() > 512 {
+                // Truncate to 512 bytes, but ensure valid UTF-8
+                let mut truncated = text.into_bytes();
+                truncated.truncate(512);
+                // Convert back to String, replacing invalid UTF-8 (if any)
+                String::from_utf8(truncated).unwrap_or_default()
+            } else {
+                text
+            }
+        })
         .collect::<Vec<_>>();
     let options = frizbee::Options {
         max_typos: Some(opts.max_typos),
