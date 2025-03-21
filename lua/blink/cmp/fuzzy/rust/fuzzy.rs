@@ -71,7 +71,25 @@ pub fn fuzzy(
 ) -> (Vec<i32>, Vec<u32>, Vec<bool>) {
     let haystack_labels = haystack
         .iter()
-        .map(|s| s.filter_text.clone().unwrap_or(s.label.clone()))
+        .map(|s| {
+            let mut text = s.filter_text.clone().unwrap_or(s.label.clone());
+            if text.len() > 512 {
+                let mut current_len = 0;
+                for c in text.chars() {
+                    // Check if adding this character would exceed 512 bytes
+                    let char_byte_len = c.len_utf8();
+                    if current_len + char_byte_len > 512 {
+                        break;
+                    }
+                    current_len += char_byte_len;
+                }
+                // Truncate to the valid byte boundary
+                text.truncate(current_len);
+                text
+            } else {
+                text
+            }
+        })
         .collect::<Vec<_>>();
     let options = frizbee::Options {
         max_typos: Some(opts.max_typos),
