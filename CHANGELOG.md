@@ -12,7 +12,7 @@
 * `padded` border type passed to `nvim_open_win` ([13ce441](https://github.com/Saghen/blink.cmp/commit/13ce441233e48d186eb10abb7c830700304cf361))
 * cursor line hl name from existing cursor line hl ([f86f162](https://github.com/Saghen/blink.cmp/commit/f86f1628b4d295384a017cc89e4f46aaf2298e36))
 * **download:** handle first-time loading issue of rust lua module ([#1472](https://github.com/Saghen/blink.cmp/issues/1472)) ([40a9786](https://github.com/Saghen/blink.cmp/commit/40a97868b94fb88946b0fe018ec68392ff3a3ef5)), closes [#38a234e9](https://github.com/Saghen/blink.cmp/issues/38a234e9) [#1471](https://github.com/Saghen/blink.cmp/issues/1471)
-* **luasnip:** use `cusor` to locate `clear_region.to` ([#1459](https://github.com/Saghen/blink.cmp/issues/1459)) ([0a56a23](https://github.com/Saghen/blink.cmp/commit/0a56a2337dad26c78183ef2a83df5fcbcf59fd00))
+* **luasnip:** use `cursor` to locate `clear_region.to` ([#1459](https://github.com/Saghen/blink.cmp/issues/1459)) ([0a56a23](https://github.com/Saghen/blink.cmp/commit/0a56a2337dad26c78183ef2a83df5fcbcf59fd00))
 * pcall getting vim.o.winborder ([c1407e0](https://github.com/Saghen/blink.cmp/commit/c1407e04c6c51ce9e35d3ba37e59e6634014d6de))
 * **scrollbar:** explicitly set border to 'none' ([#1461](https://github.com/Saghen/blink.cmp/issues/1461)) ([1825d4d](https://github.com/Saghen/blink.cmp/commit/1825d4dbdfa6d78fcc445e1268047757800b853f))
 * semantic token auto brackets running when disabled, and vice versa ([5b1d349](https://github.com/Saghen/blink.cmp/commit/5b1d3498b13c9321c4ed862a217889a22fc3e565)), closes [#1465](https://github.com/Saghen/blink.cmp/issues/1465)
