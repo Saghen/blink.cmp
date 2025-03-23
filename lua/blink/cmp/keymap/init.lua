@@ -63,18 +63,15 @@ function keymap.setup()
     require('blink.cmp.keymap.apply').keymap_to_current_buffer(mappings)
   end
 
-  -- Apply cmdline keymaps
-  if config.cmdline.enabled then
-    local cmdline_mappings =
-      keymap.get_mappings(config.cmdline.keymap.preset == 'inherit' and config.keymap or config.cmdline.keymap)
-    require('blink.cmp.keymap.apply').cmdline_keymaps(cmdline_mappings)
-  end
-
-  -- Apply term keymaps
-  if config.term.enabled then
-    local term_mappings =
-      keymap.get_mappings(config.term.keymap.preset == 'inherit' and config.keymap or config.term.keymap)
-    require('blink.cmp.keymap.apply').term_keymaps(term_mappings)
+  -- Apply cmdline and term keymaps
+  for _, mode in ipairs({ 'cmdline', 'term' }) do
+    local config_mode = config[mode]
+    if config_mode.enabled then
+      local keymaps = config_mode.keymap.preset == 'inherit'
+        and vim.tbl_deep_extend('force', config.keymap, config_mode.keymap)
+      local mappings = keymap.get_mappings(keymaps or config_mode.keymap)
+      require('blink.cmp.keymap.apply')[mode .. '_keymaps'](mappings)
+    end
   end
 end
 
