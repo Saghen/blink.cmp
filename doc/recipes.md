@@ -14,7 +14,7 @@ enabled = function() return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.f
 
 ### Disable completion in *only* shell command mode
 
-Windows when inside of git bash or WSL may cause a hang with shell commands. This disables cmdline completions only when running shell commands ( i.e. [ ':!' , ':%!' ] ), but still allows completion in other command modes ( i.e. [ ':' , ':help', '/' , '?' ] etc ).
+When inside of git bash or WSL on windows, you may experience a hang with shell commands. The following disables cmdline completions only when running shell commands (i.e. `[':!' , ':%!']`), but still allows completion in other command modes (i.e. `[':' , ':help', '/' , '?', ...]`).
 
 ```lua
 sources = {
