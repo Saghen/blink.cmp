@@ -46,35 +46,40 @@ end
 
 function keymap.setup()
   local config = require('blink.cmp.config')
+  local apply = require('blink.cmp.keymap.apply')
+
   local mappings = keymap.get_mappings(config.keymap)
+
   -- We set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
   -- from overriding our mappings. We also use InsertEnter to avoid conflicts with keymaps
   -- applied on other autocmds, such as LspAttach used by nvim-lspconfig and most configs
   vim.api.nvim_create_autocmd('InsertEnter', {
     callback = function()
       if not require('blink.cmp.config').enabled() then return end
-      require('blink.cmp.keymap.apply').keymap_to_current_buffer(mappings)
+      apply.keymap_to_current_buffer(mappings)
     end,
   })
 
   -- This is not called when the plugin loads since it first checks if the binary is
   -- installed. As a result, when lazy-loaded on InsertEnter, the event may be missed
   if vim.api.nvim_get_mode().mode == 'i' and require('blink.cmp.config').enabled() then
-    require('blink.cmp.keymap.apply').keymap_to_current_buffer(mappings)
+    apply.keymap_to_current_buffer(mappings)
   end
 
-  -- Apply cmdline keymaps
-  if config.cmdline.enabled then
-    local cmdline_mappings =
-      keymap.get_mappings(config.cmdline.keymap.preset == 'inherit' and config.keymap or config.cmdline.keymap)
-    require('blink.cmp.keymap.apply').cmdline_keymaps(cmdline_mappings)
-  end
+  -- Apply cmdline and term keymaps
+  for _, mode in ipairs({ 'cmdline', 'term' }) do
+    local mode_config = config[mode]
+    if mode_config.enabled then
+      local mode_keymap = mode_config.keymap
 
-  -- Apply term keymaps
-  if config.term.enabled then
-    local term_mappings =
-      keymap.get_mappings(config.term.keymap.preset == 'inherit' and config.keymap or config.term.keymap)
-    require('blink.cmp.keymap.apply').term_keymaps(term_mappings)
+      if mode_config.keymap.preset == 'inherit' then
+        mode_keymap = vim.tbl_deep_extend('force', config.keymap, mode_config.keymap)
+        mode_keymap.preset = config.keymap.preset
+      end
+
+      local mode_mappings = keymap.get_mappings(mode_keymap)
+      apply[mode .. '_keymaps'](mode_mappings)
+    end
   end
 end
 
