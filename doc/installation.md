@@ -74,12 +74,12 @@ Note: By default, Blink will attempt to use the rust implementation of the fuzzy
 }
 ```
 
+### LSP Capabilities
+
 ::: warning
 On Neovim 0.11+ and Blink.cmp 0.10+ with `vim.lsp.config`, you may skip this step.
 This is still required when using `nvim-lspconfig` until [this issue is completed](https://github.com/neovim/nvim-lspconfig/issues/3494)
 :::
-
-### LSP Capabilities
 
 LSP servers and clients communicate which features they support through "capabilities". By default, Neovim supports a subset of the LSP specification. With blink.cmp, Neovim has _more_ capabilities which are communicated to the LSP servers.
 
