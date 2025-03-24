@@ -1,3 +1,21 @@
+## [0.14.2](https://github.com/Saghen/blink.cmp/compare/v0.14.1...v0.14.2) (2025-03-24)
+
+### Features
+
+* completions in dap-repl by default, document `enabled` behavior ([51d3ad4](https://github.com/Saghen/blink.cmp/commit/51d3ad4ae11b8b981da89759f5a5ee6578971cb2)), closes [#1492](https://github.com/Saghen/blink.cmp/issues/1492)
+* **keymap:** allow to override `inherit` preset with user keymaps ([#1483](https://github.com/Saghen/blink.cmp/issues/1483)) ([2477442](https://github.com/Saghen/blink.cmp/commit/247744293512c852f6932982126a0bf118f4a2ad)), closes [#1479](https://github.com/Saghen/blink.cmp/issues/1479)
+
+### Bug Fixes
+
+* add bracket exception for `except` statements in python ([2a5a6da](https://github.com/Saghen/blink.cmp/commit/2a5a6da63f0236e7c3d89449cec2dea6d0391325)), closes [#1188](https://github.com/Saghen/blink.cmp/issues/1188)
+* **cmdline:** separetely caculate start_pos for `:=xx` ([#1488](https://github.com/Saghen/blink.cmp/issues/1488)) ([873512b](https://github.com/Saghen/blink.cmp/commit/873512b79cda43a35a9f68ca8d7d541e2b9b69d6))
+* **fuzzy:** truncate length of `filter_text` to 512 ([#1475](https://github.com/Saghen/blink.cmp/issues/1475)) ([cb15a0f](https://github.com/Saghen/blink.cmp/commit/cb15a0fe998e53c5b2a1041467b6342450a4a5a0))
+* use only first line for preview ([e843b91](https://github.com/Saghen/blink.cmp/commit/e843b9100baa435c989c9ba6540e91091b7cbfe6)), closes [#1477](https://github.com/Saghen/blink.cmp/issues/1477)
+
+### Performance Improvements
+
+* lookup rather than iteration one by one ([#1490](https://github.com/Saghen/blink.cmp/issues/1490)) ([61636a2](https://github.com/Saghen/blink.cmp/commit/61636a2630acd4a0b5711f684509cb8b3e78941c))
+
 ## [0.14.1](https://github.com/Saghen/blink.cmp/compare/v0.14.0...v0.14.1) (2025-03-20)
 
 ### Features

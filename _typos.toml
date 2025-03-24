@@ -1,5 +1,5 @@
 [files]
-extend-exclude = []
+extend-exclude = ["/CHANGELOG.md"]
 
 [default.extend-words]
 noice = "noice"
