@@ -11,6 +11,9 @@ local function preview(item)
     text_edit.newText = get_prefix_before_brackets_and_quotes(snippet)
   end
 
+  -- only keep the first line
+  text_edit.newText = vim.split(text_edit.newText, '\n', { plain = true, trimempty = true })[1]
+
   local original_cursor = vim.api.nvim_win_get_cursor(0)
   local cursor_pos = {
     text_edit.range.start.line + 1,
