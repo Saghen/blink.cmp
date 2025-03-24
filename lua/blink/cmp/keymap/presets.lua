@@ -1,7 +1,6 @@
 --- @type table<string, table<string, blink.cmp.KeymapCommand[]>>
 local presets = {
   none = {},
-  inherit = {},
 
   default = {
     ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
