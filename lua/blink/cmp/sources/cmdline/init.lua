@@ -149,12 +149,15 @@ function cmdline:get_completions(context, callback)
         local start_pos = #text_before_argument
 
         -- exclude range on the first argument
-        if is_first_arg then
+        if is_first_arg and not is_lua_expr then
           local prefix = longest_match(current_arg, {
             "^%s*'<%s*,%s*'>%s*", -- Visual range, e.g., '<,>'
             '^%s*%d+%s*,%s*%d+%s*', -- Numeric range, e.g., 3,5
             '^%s*[%p]+%s*', -- One or more punctuation characters
           })
+          start_pos = start_pos + #prefix
+        elseif is_first_arg and is_lua_expr then
+          local prefix = current_arg:match('^=%s*')
           start_pos = start_pos + #prefix
         end
 
