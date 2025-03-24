@@ -16,11 +16,33 @@ This plugin is *beta* quality. Expect breaking changes and many bugs
 - Extensive LSP support ([tracker](/development/lsp-tracker.md))
 - [Snippet support](/configuration/snippets.html): native `vim.snippet` (including `friendly-snippets`), `LuaSnip` and `mini.snippets`
 - External sources support ([community sources](/configuration/sources.html#community-sources) and [compatibility layer for `nvim-cmp` sources](https://github.com/saghen/blink.compat))
-- Auto-bracket support based on semantic tokens
-- Signature help (experimental, opt-in)
-- Command line completion
-- Terminal completion (Nightly only! No source for shell completions exists yet, contributions welcome!)
-- [Comparison with nvim-cmp](https://cmp.saghen.dev/#compared-to-nvim-cmp)
+- [Auto-bracket support](https://cmp.saghen.dev/configuration/completion.html#auto-brackets) based on semantic tokens
+- [Signature help](https://cmp.saghen.dev/configuration/signature.html) (experimental, opt-in)
+- [Command line completion](https://cmp.saghen.dev/modes/cmdline.html)
+- [Terminal completion](https://cmp.saghen.dev/modes/term) (Nightly only! No source for shell completions exists yet, contributions welcome!)
+
+## Compared to built-in completion
+
+- Typo resistant fuzzy matching
+  - [Smarter scoring](https://github.com/saghen/frizbee?tab=readme-ov-file#algorithm)
+  - Proximity + frecency score bonuses
+- Prefetching to minimize LSP latency
+- Support for [external non-LSP sources](https://cmp.saghen.dev/configuration/sources.html#community-sources) (snippets, path, buffer, git, ripgrep, ...)
+- [Documentation popup](https://cmp.saghen.dev/configuration/completion.html#documentation)
+- [Ghost text](https://cmp.saghen.dev/configuration/completion.html#ghost-text)
+- [Signature help](https://cmp.saghen.dev/configuration/signature.html)
+- [Auto-bracket support](https://cmp.saghen.dev/configuration/completion.html#auto-brackets) based on semantic tokens
+
+## Compared to nvim-cmp
+
+- Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
+- Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
+  - You may try [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim) which includes many performance patches, some of which have been merged into nvim-cmp
+- Boosts completion item score via frecency _and_ proximity bonus. nvim-cmp boosts score via proximity bonus and optionally by recency
+- Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
+- Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
+- Built-in auto bracket and signature help support
+- Prefetching to minimize LSP latency
 
 ## Special Thanks
 
@@ -40,19 +62,3 @@ This plugin is *beta* quality. Expect breaking changes and many bugs
 - [@mikavilpas](https://github.com/mikavilpas) + [@xzbdmw](https://github.com/xzbdmw) Dot-repeat (`.`)
 - [@soifou](https://github.com/soifou)
 - [@FerretDetective](https://github.com/FerretDetective) `complete_func` source
-
-## Compared to nvim-cmp
-
-- Avoids the complexity of nvim-cmp's configuration by providing sensible defaults
-- Updates on every keystroke with 0.5-4ms of overhead, versus nvim-cmp's default debounce of 60ms with 2-50ms hitches from processing
-  - You may try [magazine.nvim](https://github.com/iguanacucumber/magazine.nvim) which includes many performance patches, some of which have been merged into nvim-cmp
-- Boosts completion item score via frecency _and_ proximity bonus. nvim-cmp boosts score via proximity bonus and optionally by recency
-- Typo-resistant fuzzy matching unlike nvim-cmp's fzf-style fuzzy matching
-- Core sources (buffer, snippets, path, lsp) are built-in versus nvim-cmp's exclusively external sources
-- Built-in auto bracket and signature help support
-- Prefetching to minimize LSP latency
-
-### Planned missing features
-
-- Significantly more testing
-- No breaking changes

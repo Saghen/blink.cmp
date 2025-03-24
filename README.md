@@ -12,13 +12,14 @@
 - Works out of the box with no additional configuration
 - Updates on every keystroke (0.5-4ms async, single core)
 - [Typo resistant fuzzy](https://github.com/saghen/frizbee) with frecency and proximity bonus
-- Extensive LSP support ([tracker](./doc/development/lsp-tracker.md))
-- [Snippet support](https://cmp.saghen.dev/configuration/snippets.html): native `vim.snippet` (including `friendly-snippets`), `LuaSnip` and `mini.snippets`
-- External sources support ([community sources](https://cmp.saghen.dev/configuration/sources.html#community-sources) and [compatibility layer for `nvim-cmp` sources](https://github.com/saghen/blink.compat))
-- Auto-bracket support based on semantic tokens
-- Signature help (experimental, opt-in)
-- Command line completion
-- Terminal completion (Nightly only! No source for shell completions exists yet, contributions welcome!)
+- Extensive LSP support ([tracker](/development/lsp-tracker.md))
+- [Snippet support](/configuration/snippets.html): native `vim.snippet` (including `friendly-snippets`), `LuaSnip` and `mini.snippets`
+- External sources support ([community sources](/configuration/sources.html#community-sources) and [compatibility layer for `nvim-cmp` sources](https://github.com/saghen/blink.compat))
+- [Auto-bracket support](https://cmp.saghen.dev/configuration/completion.html#auto-brackets) based on semantic tokens
+- [Signature help](https://cmp.saghen.dev/configuration/signature.html) (experimental, opt-in)
+- [Command line completion](https://cmp.saghen.dev/modes/cmdline.html)
+- [Terminal completion](https://cmp.saghen.dev/modes/term) (Nightly only! No source for shell completions exists yet, contributions welcome!)
+- [Comparison with built-in completion](https://cmp.saghen.dev/#compared-to-built-in-completion)
 - [Comparison with nvim-cmp](https://cmp.saghen.dev/#compared-to-nvim-cmp)
 
 ## Installation
