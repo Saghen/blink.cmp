@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 20
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 24
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -246,7 +246,7 @@ argument, which acts as an override.
     
     capabilities = vim.tbl_deep_extend('force', capabilities, require('blink.cmp').get_lsp_capabilities({}, false))
     
-    capabilities = vim.tbl_deep_extend('force', {
+    capabilities = vim.tbl_deep_extend('force', capabilities, {
       textDocument = {
         foldingRange = {
           dynamicRegistration = false,
