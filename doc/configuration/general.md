@@ -10,7 +10,13 @@ For more common configurations, see the [recipes](../recipes.md).
 
 ```lua
 {
-  -- Disable for some filetypes
+  -- Enables keymaps, completions and signature help when true (doesn't apply to cmdline or term)
+  --
+  -- If the function returns 'force', the default conditions for disabling the plugin will be ignored
+  -- Default conditions: (vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false)
+  -- Note that the default conditions are ignored when `vim.b.completion` is explicitly set to `true`
+  --
+  -- Exceptions: vim.bo.filetype == 'dap-repl'
   enabled = function() return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) end,
 
   -- Disable cmdline
