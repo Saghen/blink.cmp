@@ -40,7 +40,6 @@ Table of Contents                                *blink-cmp-table-of-contents*
 ==============================================================================
 1. Introduction                                       *blink-cmp-introduction*
 
-
 **blink.cmp** is a completion plugin with support for LSPs and external sources
 that updates on every keystroke with minimal overhead (0.5-4ms async). It uses
 an optional </configuration/fuzzy.html#rust-vs-lua-implementation> custom fuzzy
@@ -322,10 +321,10 @@ DISABLE PER FILETYPE ~
 
 DISABLE COMPLETION IN ONLY SHELL COMMAND MODE ~
 
-Windows when inside of git bash or WSL may cause a hang with shell commands.
-This disables cmdline completions only when running shell commands ( i.e. [
-':!' , ':%!' ] ), but still allows completion in other command modes ( i.e. [
-':' , ':help', '/' , '?' ] etc ).
+When inside of git bash or WSL on windows, you may experience a hang with shell
+commands. The following disables cmdline completions only when running shell
+commands (i.e. `[':!' , ':%!']`), but still allows completion in other command
+modes (i.e. `[':' , ':help', '/' , '?', ...]`).
 
 >lua
     sources = {
