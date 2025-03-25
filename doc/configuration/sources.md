@@ -1,7 +1,9 @@
 ---
 title: Sources
 ---
+
 # Sources<!-- panvimdoc-ignore-start --> <Badge type="info"><a href="./reference#sources">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
+
 ::: info
 Check out the [recipes](../recipes.md#sources) for some common configurations
 :::
@@ -91,3 +93,4 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-cmp-conventional-commits](https://github.com/disrupted/blink-cmp-conventional-commits)
 - [cmp-pandoc-references](https://github.com/jmbuhr/cmp-pandoc-references)
 - [blink-cmp-im](https://github.com/yehuohan/blink-cmp-im): Input Method source
+- [ecolog.nvim](https://github.com/philosofonusus/ecolog.nvim)
