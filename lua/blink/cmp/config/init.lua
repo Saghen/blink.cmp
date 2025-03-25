@@ -131,7 +131,7 @@ function M.enabled()
   if user_enabled and vim.b.completion == true then return true end
 
   -- Exceptions
-  if vim.bo.filetype == 'dap-repl' then return true end
+  if user_enabled and vim.bo.filetype == 'dap-repl' then return true end
 
   return user_enabled and vim.bo.buftype ~= 'prompt' and vim.b.completion ~= false
 end
