@@ -31,7 +31,7 @@ end
 
 ---@param item blink.cmp.CompletionItem
 function fuzzy.access(item)
-  if fuzzy.implementation ~= 'rust' then return end
+  if fuzzy.implementation_type ~= 'rust' then return end
 
   fuzzy.init_db()
 
