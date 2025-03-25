@@ -2,7 +2,7 @@
 
 **blink.cmp** is a completion plugin with support for LSPs and external sources that updates on every keystroke with minimal overhead (0.5-4ms async). It uses an [optional](/configuration/fuzzy.html#rust-vs-lua-implementation) custom [fuzzy matcher](https://github.com/saghen/frizbee) to easily handle 20k+ items. It provides extensibility via pluggable sources (LSP, snippets, etc), component based rendering and scripting for the configuration.
 
-<video controls autoplay muted src="https://github.com/user-attachments/assets/9849e57a-3c2c-49a8-959c-dbb7fef78c80"></video>
+<video controls autoplay muted src="https://github.com/user-attachments/assets/bd1e25dd-48b0-4d33-90f4-1468d822f2be"></video>
 
 ## Features
 
