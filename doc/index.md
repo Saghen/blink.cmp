@@ -9,25 +9,25 @@
 - Works out of the box with no additional configuration
 - Updates on every keystroke (0.5-4ms async, single core)
 - [Typo resistant fuzzy](https://github.com/saghen/frizbee) with frecency and proximity bonus
-- Extensive LSP support ([tracker](/development/lsp-tracker.md))
-- [Snippet support](/configuration/snippets.html): native `vim.snippet` (including `friendly-snippets`), `LuaSnip` and `mini.snippets`
-- External sources support ([community sources](/configuration/sources.html#community-sources) and [compatibility layer for `nvim-cmp` sources](https://github.com/saghen/blink.compat))
-- [Auto-bracket support](https://cmp.saghen.dev/configuration/completion.html#auto-brackets) based on semantic tokens
-- [Signature help](https://cmp.saghen.dev/configuration/signature.html) (experimental, opt-in)
-- [Command line completion](https://cmp.saghen.dev/modes/cmdline.html)
-- [Terminal completion](https://cmp.saghen.dev/modes/term) (Nightly only! No source for shell completions exists yet, contributions welcome!)
+- Extensive LSP support ([tracker](/development/lsp-tracker))
+- [Snippet support](/configuration/snippets): native `vim.snippet` (including `friendly-snippets`), `LuaSnip` and `mini.snippets`
+- External sources support ([community sources](/configuration/sources#community-sources) and [compatibility layer for `nvim-cmp` sources](https://github.com/saghen/blink.compat))
+- [Auto-bracket support](/configuration/completion#auto-brackets) based on semantic tokens
+- [Signature help](/configuration/signature) (experimental, opt-in)
+- [Command line completion](/modes/cmdline)
+- [Terminal completion](/modes/term) (Nightly only! No source for shell completions exists yet, contributions welcome!)
 
 ## Compared to built-in completion
 
 - Typo resistant fuzzy matching
-  - [Smarter scoring](https://github.com/saghen/frizbee?tab=readme-ov-file#algorithm)
+  - [Smarter scoring](https://github.com/saghen/frizbee#algorithm)
   - Proximity + frecency score bonuses
 - Prefetching to minimize LSP latency
-- Support for [external non-LSP sources](https://cmp.saghen.dev/configuration/sources.html#community-sources) (snippets, path, buffer, git, ripgrep, ...)
-- [Documentation popup](https://cmp.saghen.dev/configuration/completion.html#documentation)
-- [Ghost text](https://cmp.saghen.dev/configuration/completion.html#ghost-text)
-- [Signature help](https://cmp.saghen.dev/configuration/signature.html)
-- [Auto-bracket support](https://cmp.saghen.dev/configuration/completion.html#auto-brackets) based on semantic tokens
+- Support for [external non-LSP sources](/configuration/sources.html#community-sources) (snippets, path, buffer, git, ripgrep, ...)
+- [Documentation popup](/configuration/completion.html#documentation)
+- [Ghost text](/configuration/completion.html#ghost-text)
+- [Signature help](/configuration/signature.html)
+- [Auto-bracket support](/configuration/completion.html#auto-brackets) based on semantic tokens
 
 ## Compared to nvim-cmp
 

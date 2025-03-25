@@ -41,7 +41,7 @@ By default, the `snippets` source will check `~/.config/nvim/snippets` for your 
 ```lua
 {
   'saghen/blink.cmp',
-  version = '*',
+  version = '1.*',
   -- !Important! Make sure you're using the latest release of LuaSnip
   -- `main` does not work at the moment
   dependencies = { 'L3MON4D3/LuaSnip', version = 'v2.*' },

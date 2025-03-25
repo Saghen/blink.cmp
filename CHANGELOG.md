@@ -1,3 +1,23 @@
+## [1.0.0](https://github.com/Saghen/blink.cmp/compare/v0.14.2...v1.0.0) (2025-03-25)
+
+10 months, 133 contributors and 1214 commits later... blink.cmp is stable! Special thanks to:
+
+- @stefanboca for writing blink.compat and extensive work on frizbee
+- @soifou for maintaining the repo and carrying the luasnip source
+- @scottmckendry who 
+- @mikavilpas + @xzbdmw for implementing dot-repeat support
+- [And many more!](https://github.com/Saghen/blink.cmp?tab=readme-ov-file#special-thanks)
+
+### Features
+
+* reduce snippet score offset from -6 to -4 ([62317cb](https://github.com/Saghen/blink.cmp/commit/62317cb002411a9784b0a8c10f5ef093bdfd6fdf))
+
+### Bug Fixes
+
+* disable completions when `vim.b.completion` is false ([79545c3](https://github.com/Saghen/blink.cmp/commit/79545c371ab08cf4563fffb9f5c7a7c9e8fbc786))
+* disable in dap-repl if user disabled ([0153b5b](https://github.com/Saghen/blink.cmp/commit/0153b5b0e0ae9a5298060fd7588af35f6168d9b2)), closes [#1495](https://github.com/Saghen/blink.cmp/issues/1495)
+* frecency db not updating ([ccdef85](https://github.com/Saghen/blink.cmp/commit/ccdef85a32a674f0cbe60c9e2c055b76f9379f76))
+
 ## [0.14.2](https://github.com/Saghen/blink.cmp/compare/v0.14.1...v0.14.2) (2025-03-24)
 
 ### Features
