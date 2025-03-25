@@ -1,9 +1,7 @@
 ---
 title: Sources
 ---
-
 # Sources<!-- panvimdoc-ignore-start --> <Badge type="info"><a href="./reference#sources">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
-
 ::: info
 Check out the [recipes](../recipes.md#sources) for some common configurations
 :::
