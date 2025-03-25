@@ -501,6 +501,7 @@ sources.providers = {
 
   snippets = {
     module = 'blink.cmp.sources.snippets',
+    score_offset = -1, -- receives a -3 from top level snippets.score_offset
 
     -- For `snippets.preset == 'default'`
     opts = {
@@ -533,6 +534,7 @@ sources.providers = {
 
   buffer = {
     module = 'blink.cmp.sources.buffer',
+    score_offset = -3,
     opts = {
       -- default to all visible buffers
       get_bufnrs = function()

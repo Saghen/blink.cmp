@@ -68,7 +68,7 @@ local sources = {
       },
       snippets = {
         module = 'blink.cmp.sources.snippets',
-        score_offset = -3,
+        score_offset = -1, -- receives a -3 from top level snippets.score_offset
       },
       buffer = {
         module = 'blink.cmp.sources.buffer',
