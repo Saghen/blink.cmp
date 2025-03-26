@@ -1524,7 +1524,7 @@ Here’s an example, using the linux/mac path for the neovim configuration:
         "body": [
           "local ${1:foo} = ${2:bar}",
           "return ${3:baz}"
-        ],
+        ]
       }
     }
 <

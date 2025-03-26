@@ -31,7 +31,7 @@ By default, the `snippets` source will check `~/.config/nvim/snippets` for your 
     "body": [
       "local ${1:foo} = ${2:bar}",
       "return ${3:baz}"
-    ],
+    ]
   }
 }
 ```
