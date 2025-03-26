@@ -67,8 +67,8 @@ local function apply_item(ctx, item)
     local indent_size = vim.lsp.util.get_effective_tabstop(cur_bufnr)
     local expandtab = vim.bo[cur_bufnr].expandtab
     if expandtab then
-      local num_spaces = string.rep(" ", indent_size)
-      item.textEdit.newText = item.textEdit.newText:gsub("\t", num_spaces)
+      local num_spaces = string.rep(' ', indent_size)
+      item.textEdit.newText = item.textEdit.newText:gsub('\t', num_spaces)
     end
 
     local new_cursor = text_edits_lib.get_apply_end_position(item.textEdit, all_text_edits)
