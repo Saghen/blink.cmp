@@ -61,6 +61,16 @@ local function apply_item(ctx, item)
 
     -- OR Normal: Apply the text edit and move the cursor
   else
+    -- Account for \t characters in text
+    -- Use user's tabstop if expandtab is enabled for buffer
+    local cur_bufnr = vim.api.nvim_get_current_buf()
+    local indent_size = vim.lsp.util.get_effective_tabstop(cur_bufnr)
+    local expandtab = vim.bo[cur_bufnr].expandtab
+    if expandtab then
+      local num_spaces = string.rep(" ", indent_size)
+      item.textEdit.newText = item.textEdit.newText:gsub("\t", num_spaces)
+    end
+
     local new_cursor = text_edits_lib.get_apply_end_position(item.textEdit, all_text_edits)
     new_cursor[2] = new_cursor[2]
 
