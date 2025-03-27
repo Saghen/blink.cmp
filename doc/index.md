@@ -24,7 +24,6 @@
   - Proximity + frecency score bonuses
 - Prefetching to minimize LSP latency
 - Support for [external non-LSP sources](/configuration/sources.html#community-sources) (snippets, path, buffer, git, ripgrep, ...)
-- [Documentation popup](/configuration/completion.html#documentation)
 - [Ghost text](/configuration/completion.html#ghost-text)
 - [Signature help](/configuration/signature.html)
 - [Auto-bracket support](/configuration/completion.html#auto-brackets) based on semantic tokens
