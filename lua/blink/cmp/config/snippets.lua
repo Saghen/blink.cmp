@@ -48,7 +48,10 @@ local snippets = {
       default = function(direction) vim.snippet.jump(direction) end,
       luasnip = function(direction)
         local ls = require('luasnip')
-        if ls.expandable() then return ls.expand_or_jump() end
+        -- Handle hidden snippets
+        if not require('blink.cmp').is_visible() and not ls.in_snippet() and ls.expandable() then
+          return ls.expand_or_jump()
+        end
         return ls.jumpable(direction) and ls.jump(direction)
       end,
       mini_snippets = function(direction)
