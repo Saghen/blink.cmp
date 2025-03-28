@@ -55,9 +55,23 @@ function utils.validate(path, tbl, source)
         table.insert(_msg, { ' ' .. k .. ' ', 'DiagnosticVirtualTextError' })
         table.insert(_msg, { ' Unexpected field in configuration!', 'Comment' })
 
-        vim.api.nvim_echo(_msg, true, {
-          verbose = false,
-        })
+        if package.loaded['noice'] then
+          --- BUG, `vim.ui_attach()` can't open windows
+          --- when starting Neovim.
+          --- Delay the message.
+          vim.defer_fn(
+            function()
+              vim.api.nvim_echo(_msg, true, {
+                verbose = false,
+              })
+            end,
+            200
+          )
+        else
+          vim.api.nvim_echo(_msg, true, {
+            verbose = false,
+          })
+        end
       else
         vim.notify_once(
           '[blink.cmp]: ' .. new_path .. ' → ' .. k .. ': Unexpected field in configuration!',
