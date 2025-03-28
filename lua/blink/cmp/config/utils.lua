@@ -41,13 +41,13 @@ function utils.validate(path, tbl, source)
       if vim.api.nvim_echo then
         local path_parts = vim.split(path, ".", { plain = true });
         local _msg = {
-            { " blink.cmp ", "DiagnosticVirtualTextWarn" },
-            { ": ", "Comment" }
+          { " blink.cmp ", "DiagnosticVirtualTextWarn" },
+          { ": ", "Comment" }
         };
 
-        for p, part in ipairs(path_parts) do
-            table.insert(_msg, { " " .. part .. " ", "DiagnosticVirtualTextInfo" });
-            table.insert(_msg, { " → ", "Comment" });
+        for _, part in ipairs(path_parts) do
+          table.insert(_msg, { " " .. part .. " ", "DiagnosticVirtualTextInfo" });
+          table.insert(_msg, { " → ", "Comment" });
         end
 
         --- Highlight the last segment in ERROR since that's
@@ -56,7 +56,7 @@ function utils.validate(path, tbl, source)
         table.insert(_msg, { " Unexpected field in configuration!", "Comment" })
 
         vim.api.nvim_echo(_msg, true, {
-            verbose = false
+          verbose = false
         })
       else
         vim.notify_once("[blink.cmp]: " .. new_path .. " → " .. k .. ": Unexpected field in configuration!", vim.log.levels.WARN, {});
