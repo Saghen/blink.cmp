@@ -17,6 +17,20 @@ function utils._validate(spec)
   end
 end
 
+--- Checks if `ext_message` is in use.
+--- NOTE, Do not use `nvim_list_uis()`, `ui_attach()` will receive all events
+--- regardless of the value of {options}.
+---@return boolean
+local function has_ext_messages()
+  if package.loaded['noice'] then
+    return true -- noice.nvim
+  elseif package.loaded['notify'] then
+    return true -- nvim-notify
+  end
+
+  return false
+end
+
 --- @param path string The path to the field being validated
 --- @param tbl table The table to validate
 --- @param source table The original table that we're validating against
@@ -55,18 +69,17 @@ function utils.validate(path, tbl, source)
         table.insert(_msg, { ' ' .. k .. ' ', 'DiagnosticVirtualTextError' })
         table.insert(_msg, { ' Unexpected field in configuration!', 'Comment' })
 
-        if package.loaded['noice'] then
+        if has_ext_messages() then
           --- BUG, `vim.ui_attach()` can't open windows
           --- when starting Neovim.
           --- Delay the message.
-          vim.defer_fn(
-            function()
+          vim.api.nvim_create_autocmd('UIEnter', {
+            callback = function()
               vim.api.nvim_echo(_msg, true, {
                 verbose = false,
               })
             end,
-            200
-          )
+          })
         else
           vim.api.nvim_echo(_msg, true, {
             verbose = false,
