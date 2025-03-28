@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 26
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 28
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1713,6 +1713,7 @@ COMMUNITY SOURCES ~
 - blink-cmp-ripgrep <https://github.com/niuiic/blink-cmp-rg.nvim>
 - blink-cmp-ctags <https://github.com/netmute/blink-cmp-ctags>
 - blink-copilot <https://github.com/fang2hou/blink-copilot>
+- blink-cmp-supermaven <https://github.com/Huijiro/blink-cmp-supermaven>
 - blink-cmp-copilot <https://github.com/giuxtaposition/blink-cmp-copilot>
 - minuet-ai.nvim <https://github.com/milanglacier/minuet-ai.nvim>
 - blink-emoji.nvim <https://github.com/moyiz/blink-emoji.nvim>
