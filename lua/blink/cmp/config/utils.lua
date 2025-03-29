@@ -17,19 +17,48 @@ function utils._validate(spec)
   end
 end
 
---- Checks if `ext_message` is in use.
---- NOTE, Do not use `nvim_list_uis()`, `ui_attach()` will receive all events
---- regardless of the value of {options}.
----@return boolean
-local function has_ext_messages()
-  if package.loaded['noice'] then
-    return true -- noice.nvim
-  elseif package.loaded['notify'] then
-    return true -- nvim-notify
-  end
+---@type boolean Have we passed UIEnter?
+local _ui_entered = false
+---@type function[] List of notifications.
+local _msg_callbacks = {}
 
-  return false
+--- Fancy notification wrapper.
+---@param msg [ string, string? ][]
+---@param fallback string
+local function _notify(msg, fallback, lvl)
+  if vim.api.nvim_echo then
+    if _ui_entered then
+      --- After UIEnter emit message
+      --- immediately.
+      vim.api.nvim_echo(msg, true, {
+        verbose = false,
+      })
+    else
+      --- Queue notification for the
+      --- UIEnter event.
+      table.insert(
+        _msg_callbacks,
+        function()
+          vim.api.nvim_echo(msg, true, {
+            verbose = false,
+          })
+        end
+      )
+    end
+  elseif fallback then
+    vim.notify_once(fallback, lvl or vim.log.levels.WARN, { title = 'blink.cmp' })
+  end
 end
+
+vim.api.nvim_create_autocmd('UIEnter', {
+  callback = function()
+    _ui_entered = true
+
+    for _, fn in ipairs(_msg_callbacks) do
+      pcall(fn)
+    end
+  end,
+})
 
 --- @param path string The path to the field being validated
 --- @param tbl table The table to validate
@@ -70,28 +99,7 @@ function utils.validate(path, tbl, source)
         table.insert(_msg, { ' ' .. k .. ' ', 'DiagnosticVirtualTextError' })
         table.insert(_msg, { ' Unexpected field in configuration!', 'Comment' })
 
-        if has_ext_messages() then
-          --- BUG, `vim.ui_attach()` can't open windows
-          --- when starting Neovim.
-          --- Delay the message.
-          vim.api.nvim_create_autocmd('UIEnter', {
-            callback = function()
-              vim.api.nvim_echo(_msg, true, {
-                verbose = false,
-              })
-            end,
-          })
-        else
-          vim.api.nvim_echo(_msg, true, {
-            verbose = false,
-          })
-        end
-      else
-        vim.notify_once(
-          '[blink.cmp]: ' .. new_path .. ' → ' .. k .. ': Unexpected field in configuration!',
-          vim.log.levels.WARN,
-          { title = 'blink.cmp' }
-        )
+        _notify(_msg, '[blink.cmp]: ' .. new_path .. ' → ' .. k .. ': Unexpected field in configuration!')
       end
     end
   end
