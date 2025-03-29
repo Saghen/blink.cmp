@@ -29,6 +29,32 @@ sources = {
 }
 ```
 
+### Disable completion source when command mode contains a bang
+
+This configuration handles the situation when a "bang" (exclamation mark) is entered in command mode. Typically, if the auto-show menu is active (for example, when running commands like `!sort` or `!uniq`), sourcing the command will eventually fail and hang the program. To prevent this, the snippet disables the completion source when a bang is detected in the command line.
+
+```lua
+sources = {
+  providers = {
+    cmdline = {
+      sources = function()
+        local type = vim.fn.getcmdtype()
+        -- Search forward and backward
+        if type == '/' or type == '?' then return { 'buffer' } end
+        -- Commands
+        if type == ':' or type == '@' then
+          if vim.fn.getcmdline():match("!") ~= nil then
+            return {}
+          end
+
+          return 'cmdline'
+        end
+        return {}
+      end,
+    }
+  }
+```
+
 ### Emacs behavior
 
 Full discussion: https://github.com/Saghen/blink.cmp/issues/1367
