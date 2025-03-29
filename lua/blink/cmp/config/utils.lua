@@ -53,6 +53,7 @@ function utils.validate(path, tbl, source)
       local new_path = string.gsub(path, '%.', ' → ')
 
       if vim.api.nvim_echo then
+        ---@type string[]
         local path_parts = vim.split(path, '.', { plain = true })
         local _msg = {
           { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
@@ -89,7 +90,7 @@ function utils.validate(path, tbl, source)
         vim.notify_once(
           '[blink.cmp]: ' .. new_path .. ' → ' .. k .. ': Unexpected field in configuration!',
           vim.log.levels.WARN,
-          {}
+          { title = 'blink.cmp' }
         )
       end
     end
