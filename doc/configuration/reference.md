@@ -549,6 +549,12 @@ sources.providers = {
 
   cmdline = {
     module = 'blink.cmp.sources.cmdline',
+    -- Disable shell commands on windows, since they cause neovim to hang
+    enabled = function()
+      return vim.fn.has('win32') == 0
+        or vim.fn.getcmdtype() ~= ':'
+        or not vim.fn.getcmdline():match("^[%%0-9,'<>%-]*!")
+    end,
   },
 
   omni = {
