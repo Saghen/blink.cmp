@@ -24,7 +24,7 @@ function cursor_line:update(win)
   if not vim.api.nvim_win_is_valid(win) then return end
 
   local winhighlight = vim.api.nvim_get_option_value('winhighlight', { win = win })
-  local cursorline_hl = winhighlight:match('CursorLine:(.*),') or 'CursorLine'
+  local cursorline_hl = winhighlight:match('CursorLine:([^,]*)') or 'CursorLine'
 
   local hl_params = vim.api.nvim_get_hl(0, { name = cursorline_hl, link = false })
   if not hl_params.bg then return end
