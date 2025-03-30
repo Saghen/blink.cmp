@@ -14,13 +14,13 @@ local function request(context, client)
     }
     if context.trigger.kind == 'trigger_character' then params.context.triggerCharacter = context.trigger.character end
 
-    local _, request_id = client.request(
+    local _, request_id = client:request(
       'textDocument/completion',
       params,
       function(err, result) resolve({ err = err, result = result }) end
     )
     return function()
-      if request_id ~= nil then client.cancel_request(request_id) end
+      if request_id ~= nil then client:cancel_request(request_id) end
     end
   end)
 end
