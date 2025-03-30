@@ -506,6 +506,29 @@ Server (`emmet_ls`)
 <
 
 
+EXCLUDE KEYWORDS/CONSTANTS FROM AUTOCOMPLETE ~
+
+Removes language keywords/constants (if, else, while, etc.) provided by the
+language server from completion results. Useful if you prefer to use builtin or
+custom snippets for such constructs.
+
+>lua
+    sources = {
+      providers = {
+        lsp = {
+          name = 'LSP',
+          module = 'blink.cmp.sources.lsp',
+          transform_items = function(_, items)
+            return vim.tbl_filter(function(item)
+              return item.kind ~= require('blink.cmp.types').CompletionItemKind.Keyword
+            end, items)
+          end,
+        },
+      },
+    }
+<
+
+
 COMPLETION MENU DRAWING            *blink-cmp-recipes-completion-menu-drawing*
 
 
