@@ -186,9 +186,9 @@ fuzzy = {
 }
 ```
 
-### Exclude constants from autocomplete
+### Exclude keywords/constants from autocomplete
 
-Removes language constants (if, else, while, etc.) provided by the language server from completion results. Useful if you prefer to use builtin or custom snippets for such constructs.
+Removes language keywords/constants (if, else, while, etc.) provided by the language server from completion results. Useful if you prefer to use builtin or custom snippets for such constructs.
 
 ```lua
 sources = {
@@ -198,7 +198,7 @@ sources = {
       module = 'blink.cmp.sources.lsp',
       transform_items = function(_, items)
         return vim.tbl_filter(function(item)
-          return item.kind ~= vim.lsp.protocol.CompletionItemKind.Keyword
+          return item.kind ~= require('blink.cmp.types').CompletionItemKind.Keyword
         end, items)
       end,
     },
