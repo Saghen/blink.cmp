@@ -53,6 +53,15 @@ function lsp:get_completions(context, callback)
     vim.lsp.get_clients({ bufnr = 0, method = 'textDocument/completion' })
   )
 
+  if vim.fn.has('nvim-0.11') ~= 1 then
+    clients = vim.tbl_map(function(client)
+      return setmetatable({
+        cancel_request = function(_, ...) return client.cancel_request(...) end,
+        request = function(_, ...) return client.request(...) end,
+      }, { __index = client })
+    end, clients)
+  end
+
   -- TODO: implement a timeout before returning the menu as-is. In the future, it would be neat
   -- to detect slow LSPs and consistently run them async
   local task = async.task
@@ -87,7 +96,7 @@ function lsp:resolve(item, callback)
   -- strip blink specific fields to avoid decoding errors on some LSPs
   item = require('blink.cmp.sources.lib.utils').blink_item_to_lsp_item(item)
 
-  local success, request_id = client.request('completionItem/resolve', item, function(error, resolved_item)
+  local success, request_id = client:request('completionItem/resolve', item, function(error, resolved_item)
     if error or resolved_item == nil then
       callback(item)
       return
@@ -112,7 +121,7 @@ function lsp:resolve(item, callback)
   end)
   if not success then callback(item) end
   if request_id ~= nil then
-    return function() client.cancel_request(request_id) end
+    return function() client:cancel_request(request_id) end
   end
 end
 
