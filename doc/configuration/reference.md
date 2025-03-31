@@ -422,7 +422,16 @@ fuzzy = {
     force_system_triple = nil,
 
     -- Extra arguments that will be passed to curl like { 'curl', ..extra_curl_args, ..built_in_args }
-    extra_curl_args = {}
+    extra_curl_args = {},
+
+    proxy = {
+
+        -- When downloading a prebuilt binary, use the HTTPS_PROXY environment variable
+        from_env = true,
+
+        -- When downloading a prebuilt binary, use this proxy URL. This will ignore the HTTPS_PROXY environment variable
+        url = nil,
+    },
   },
 }
 ```
