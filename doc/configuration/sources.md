@@ -86,6 +86,7 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-cmp-dictionary](https://github.com/Kaiser-Yang/blink-cmp-dictionary)
 - [blink-cmp-git](https://github.com/Kaiser-Yang/blink-cmp-git)
 - [blink-cmp-spell](https://github.com/ribru17/blink-cmp-spell.git)
+- [blink-cmp-tmux](https://github.com/mgalliou/blink-cmp-tmux)
 - [css-vars.nvim](https://github.com/jdrupal-dev/css-vars.nvim)
 - [blink-cmp-env](https://github.com/bydlw98/blink-cmp-env)
 - [blink-cmp-avante](https://github.com/Kaiser-Yang/blink-cmp-avante)
