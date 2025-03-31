@@ -35,7 +35,6 @@ local snippets = {
       default = function(filter) return vim.snippet.active(filter) end,
       luasnip = function(filter)
         local ls = require('luasnip')
-        if ls.expand_or_jumpable() then return true end
         if filter and filter.direction then return ls.jumpable(filter.direction) end
         return ls.in_snippet()
       end,
