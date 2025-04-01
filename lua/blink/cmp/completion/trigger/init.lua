@@ -14,6 +14,7 @@
 ---
 --- @field activate fun()
 --- @field resubscribe fun() Effectively ensures that our autocmd listeners run last, after other registered listeners
+--- @field is_blocked_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
@@ -98,7 +99,17 @@ local function on_cursor_moved(event, is_ignored)
 
   -- check if we're still within the bounds of the query used for the context
   if trigger.context ~= nil and trigger.context:within_query_bounds(cursor) then
-    trigger.show({ trigger_kind = 'keyword' })
+    -- XXX: when config.prefetch_on_insert is true,
+    -- when enter insert mode at the beginning of a word and press tab,
+    -- foo |baz, `|` is the cursor position
+    -- foo    |baz
+    -- on_cursor_moved() is called and hit this if branch, and the completion window pops up
+    -- this check filters that case
+    -- maybe in that case, on_cursor_moved() should not be called,
+    -- or trigger.context should be nil like when config.prefetch_on_insert is false
+    if not trigger.is_blocked_trigger_character(char_under_cursor, true) then
+      trigger.show({ trigger_kind = 'keyword' })
+    end
 
   -- check if we've entered insert mode on a trigger character
   elseif insert_enter_on_trigger_character then
@@ -158,13 +169,7 @@ function trigger.resubscribe()
   trigger.buffer_events:resubscribe({ on_char_added = on_char_added })
 end
 
-function trigger.is_trigger_character(char, is_show_on_x)
-  local sources = require('blink.cmp.sources.lib')
-  local is_trigger = vim.tbl_contains(sources.get_trigger_characters(context.get_mode()), char)
-
-  -- ignore a-z and A-Z characters
-  if char:match('%a') then return false end
-
+function trigger.is_blocked_trigger_character(char, is_show_on_x)
   local show_on_blocked_trigger_characters = type(config.show_on_blocked_trigger_characters) == 'function'
       and config.show_on_blocked_trigger_characters()
     or config.show_on_blocked_trigger_characters
@@ -176,6 +181,17 @@ function trigger.is_trigger_character(char, is_show_on_x)
 
   local is_blocked = vim.tbl_contains(show_on_blocked_trigger_characters, char)
     or (is_show_on_x and vim.tbl_contains(show_on_x_blocked_trigger_characters, char))
+  return is_blocked
+end
+
+function trigger.is_trigger_character(char, is_show_on_x)
+  local sources = require('blink.cmp.sources.lib')
+  local is_trigger = vim.tbl_contains(sources.get_trigger_characters(context.get_mode()), char)
+
+  -- ignore a-z and A-Z characters
+  if char:match('%a') then return false end
+
+  local is_blocked = trigger.is_blocked_trigger_character(char, is_show_on_x)
 
   return is_trigger and not is_blocked
 end
