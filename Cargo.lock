@@ -130,9 +130,12 @@ dependencies = [
 
 [[package]]
 name = "frizbee"
-version = "0.1.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a41389b8dc6620a01fc8cb5970baf47f996557c1920367564598d615f6351423"
+checksum = "cec02591eaedd144dbd7ed646623373ba0e959768b5a5622c918eb850e4d336c"
+dependencies = [
+ "memchr",
+]
 
 [[package]]
 name = "heed"

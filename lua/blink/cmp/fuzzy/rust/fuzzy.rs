@@ -3,6 +3,7 @@
 use crate::frecency::FrecencyTracker;
 use crate::keyword;
 use crate::lsp_item::LspItem;
+use frizbee::Options;
 use mlua::prelude::*;
 use mlua::FromLua;
 use mlua::Lua;
@@ -73,12 +74,12 @@ pub fn fuzzy(
         .iter()
         .map(|s| {
             let mut text = s.filter_text.clone().unwrap_or(s.label.clone());
-            if text.len() > 512 {
+            if text.len() > 1024 {
                 let mut current_len = 0;
                 for c in text.chars() {
-                    // Check if adding this character would exceed 512 bytes
+                    // Check if adding this character would exceed 1024 bytes
                     let char_byte_len = c.len_utf8();
-                    if current_len + char_byte_len > 512 {
+                    if current_len + char_byte_len > 1024 {
                         break;
                     }
                     current_len += char_byte_len;
@@ -167,17 +168,25 @@ pub fn fuzzy_matched_indices(
     let mut matches = group_by_needle(line, cursor_col, haystack, match_suffix)
         .into_iter()
         .flat_map(|(needle, haystack)| {
-            frizbee::match_list_for_matched_indices(
+            let mut matches = frizbee::match_list(
                 &needle,
                 &haystack
                     .iter()
                     .map(|(_, str)| str.as_str())
                     .collect::<Vec<_>>(),
-            )
-            .into_iter()
-            .enumerate()
-            .map(|(idx, matched_indices)| (haystack[idx].0, matched_indices))
-            .collect::<Vec<_>>()
+                Options {
+                    matched_indices: true,
+                    stable_sort: false,
+                    ..Default::default()
+                },
+            );
+            matches.sort_by_key(|mtch| mtch.index_in_haystack);
+
+            matches
+                .into_iter()
+                .enumerate()
+                .map(|(idx, match_)| (haystack[idx].0, match_.indices.unwrap_or_default()))
+                .collect::<Vec<_>>()
         })
         .collect::<Vec<_>>();
     matches.sort_by_key(|mtch| mtch.0);
