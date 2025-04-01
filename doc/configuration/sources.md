@@ -40,7 +40,7 @@ sources.providers.lsp = {
   --- NOTE: All of these options may be functions to get dynamic behavior
   --- See the type definitions for more information
   enabled = true, -- Whether or not to enable the provider
-  async = false, -- Whether we should wait for the provider to return before showing the completions
+  async = false, -- Whether we should show the completions before this provider returns, without waiting for it
   timeout_ms = 2000, -- How long to wait for the provider to return before showing completions and treating it as asynchronous
   transform_items = nil, -- Function to transform the items before they're returned
   should_show_items = true, -- Whether or not to show the items
