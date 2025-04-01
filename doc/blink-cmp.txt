@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 March 31
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 01
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -2241,7 +2241,7 @@ PROVIDERS
         --- See the type definitions for more information
         name = nil, -- Defaults to the id ("lsp" in this case) capitalized when not set
         enabled = true, -- Whether or not to enable the provider
-	async = false, -- Whether we should show the completions before this provider returns, without waiting for it
+        async = false, -- Whether we should show the completions before this provider returns, without waiting for it
         timeout_ms = 2000, -- How long to wait for the provider to return before showing completions and treating it as asynchronous
         transform_items = nil, -- Function to transform the items before they're returned
         should_show_items = true, -- Whether or not to show the items
