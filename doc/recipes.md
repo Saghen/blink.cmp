@@ -152,6 +152,8 @@ end
 
 ## Fuzzy (sorting/filtering)
 
+[See the full docs](./configuration/fuzzy.md)
+
 ### Always prioritize exact matches
 
 By default, the fuzzy matcher will give a bonus score of 4 to exact matches. If you want to ensure that exact matches are always prioritized, you may set:
@@ -207,6 +209,8 @@ sources = {
 ```
 
 ## Completion menu drawing
+
+[See the full docs](./configuration/completion.md#menu-draw)
 
 ### Kind icon background
 
@@ -308,6 +312,8 @@ completion = {
 ```
 
 ## Sources
+
+[See the full docs](./configuration/sources.md)
 
 ### Buffer completion from all open buffers
 

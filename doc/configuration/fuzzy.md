@@ -52,7 +52,7 @@ You may also build with nix via `nix run .#build-plugin`.
 
 ## Configuration
 
-See the [fuzzy section of the reference configuration](./reference.md#fuzzy). For recipes, see [the recipes section](../recipes.md#fuzzy).
+See the [fuzzy section of the reference configuration](./reference.md#fuzzy). For recipes, see [the recipes section](../recipes.md#fuzzy-sorting-filtering).
 
 ### Sorting
 

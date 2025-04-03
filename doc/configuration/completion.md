@@ -251,7 +251,7 @@ Manages the appearance of the completion menu. You may prevent the menu from aut
 
 ### Menu Draw <!-- panvimdoc-ignore-start --><Badge type="info"><a href="./reference#completion-menu-draw">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
 
-[Check out the recipes!](./recipes.md#completion-menu-drawing)
+[Check out the recipes!](../recipes.md#completion-menu-drawing)
 
 blink.cmp uses a grid-based layout to render the completion menu. The components, defined in `draw.components[string]`, define `text` and `highlight` functions which are called for each completion item. The `highlight` function will be called only when the item appears on screen, so expensive operations such as Treesitter highlighting may be performed. The components may define their min and max width, where `ellipsis = true` (enabled by default), will draw the `…` character when the text is truncated. Setting `width.fill = true` will fill the remaining space, effectively making subsequent components right aligned, with respect to their column.
 
