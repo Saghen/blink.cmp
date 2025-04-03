@@ -25,7 +25,7 @@
 - Prefetching to minimize LSP latency
 - Support for [external non-LSP sources](/configuration/sources.html#community-sources) (snippets, path, buffer, git, ripgrep, ...)
 - [Ghost text](/configuration/completion.html#ghost-text)
-- [Signature help](/configuration/signature.html)
+- [Automatic signature help](/configuration/signature.html)
 - [Auto-bracket support](/configuration/completion.html#auto-brackets) based on semantic tokens
 
 ## Compared to nvim-cmp
