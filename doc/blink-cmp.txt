@@ -532,6 +532,27 @@ custom snippets for such constructs.
 COMPLETION MENU DRAWING            *blink-cmp-recipes-completion-menu-drawing*
 
 
+KIND ICON BACKGROUND ~
+
+You’ll need to configure your highlights (`BlinkCmpKind` or
+`BlinkCmpKind<kind>`) to your desired background and foreground colors.
+
+>lua
+    completion = {
+      menu = {
+        draw = {
+          padding = { 0, 1 }, -- padding only on right side
+          components = {
+            kind_icon = {
+              text = function(ctx) return ' ' .. ctx.kind_icon .. ctx.icon_gap .. ' ' end
+            }
+          }
+        }
+      }
+    }
+<
+
+
 MINI.ICONS ~
 
 Original discussion <https://github.com/Saghen/blink.cmp/discussions/458>
@@ -2003,7 +2024,7 @@ COMPLETION MENU DRAW
         kind_icon = {
           ellipsis = false,
           text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
-          highlight = function(ctx) return ctx.kind_hl end,
+          highlight = function(ctx) return { { group = ctx.kind_hl, priority = 20000 } } end,
         },
     
         kind = {
