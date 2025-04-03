@@ -60,7 +60,8 @@ The sorting can be customized by providing a custom function to sort the entries
 
 - `exact`: Sorts by exact match, case-sensitive
 - `score`: Sorts by the fuzzy matching score
-- `sort_text`: Sorts by the `sortText` field provided by sources/LSPs
+- `sort_text`: Sorts by the `sortText` field
+  - Generally, this field provides better sorting than `label` as the source/LSP may prioritize items relevant to the current context
 - `label`: Sorts by the `label` field, deprioritizing entries with a leading `_`
 - `kind`: Sorts by the numeric `kind` field, check the order via `:lua vim.print(vim.lsp.protocol.CompletionItemKind)`
 
