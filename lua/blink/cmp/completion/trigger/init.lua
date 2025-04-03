@@ -57,6 +57,9 @@ local function on_char_added(char, is_ignored)
 
   -- character is part of a keyword
   elseif fuzzy.is_keyword_character(char) and (config.show_on_keyword or trigger.context ~= nil) then
+    -- typed after auto insertion, refresh the menu
+    if require('blink.cmp.completion.list').preview_undo ~= nil then trigger.context = nil end
+
     trigger.show({ trigger_kind = 'keyword' })
 
   -- nothing matches so hide
