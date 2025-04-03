@@ -49,7 +49,7 @@ function cursor_line:update(win)
         hl_group = hack_hl,
         hl_mode = 'combine',
         ephemeral = true,
-        priority = 10000,
+        priority = config.appearance.cursor_line_highlight_priority,
       })
     end,
   })

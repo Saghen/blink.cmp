@@ -1,6 +1,7 @@
 --- @class (exact) blink.cmp.AppearanceConfig
 --- @field highlight_ns number
 --- @field use_nvim_cmp_as_default boolean Sets the fallback highlight groups to nvim-cmp's highlight groups. Useful for when your theme doesn't support blink.cmp, will be removed in a future release.
+--- @field cursor_line_highlight_priority number Sets the priority on the cursor line's highlight group. Useful for drawing it under background highlights of your components, like kind icons, by setting priority to 0.
 --- @field nerd_font_variant 'mono' | 'normal' Set to 'mono' for 'Nerd Font Mono' or 'normal' for 'Nerd Font'. Adjusts spacing to ensure icons are aligned
 --- @field kind_icons table<string, string>
 
@@ -10,6 +11,7 @@ local appearance = {
   default = {
     highlight_ns = vim.api.nvim_create_namespace('blink_cmp'),
     use_nvim_cmp_as_default = false,
+    cursor_line_highlight_priority = 10000,
     nerd_font_variant = 'mono',
     kind_icons = {
       Text = '󰉿',
@@ -49,6 +51,7 @@ local appearance = {
 function appearance.validate(config)
   validate('appearance', {
     highlight_ns = { config.highlight_ns, 'number' },
+    cursor_line_highlight_priority = { config.cursor_line_highlight_priority, 'number' },
     use_nvim_cmp_as_default = { config.use_nvim_cmp_as_default, 'boolean' },
     nerd_font_variant = { config.nerd_font_variant, 'string' },
     kind_icons = { config.kind_icons, 'table' },
