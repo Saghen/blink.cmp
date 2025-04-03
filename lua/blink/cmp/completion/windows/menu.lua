@@ -154,9 +154,8 @@ function menu.update_position()
     })
   -- otherwise, we use the cursor position
   else
-    local cursor_col = context.get_cursor()[2]
-
-    local col = context.bounds.start_col - alignment_start_col - cursor_col - 1 - border_size.left
+    local cursor_col = vim.fn.virtcol({ context.get_cursor()[1], context.get_cursor()[2]})
+    local col = vim.fn.virtcol({context.get_cursor()[1], context.bounds.start_col - 1}) - alignment_start_col - cursor_col - border_size.left
     if config.draw.align_to == 'cursor' then col = 0 end
 
     win:set_win_config({ relative = 'cursor', row = row, col = col })
