@@ -62,12 +62,14 @@ The sorting can be customized by providing a custom function to sort the entries
 - `score`: Sorts by the fuzzy matching score
 - `sort_text`: Sorts by the `sortText` field
   - Generally, this field provides better sorting than `label` as the source/LSP may prioritize items relevant to the current context
+  - If you're writing your own source, use this field to control sort order, instead of requiring users to add a sort function
 - `label`: Sorts by the `label` field, deprioritizing entries with a leading `_`
 - `kind`: Sorts by the numeric `kind` field, check the order via `:lua vim.print(vim.lsp.protocol.CompletionItemKind)`
 
 ```lua
 fuzzy = {
   sorts = {
+    -- example custom sorting function, ensuring `_` entries are always last (not actually recommended!)
     function(a, b)
         if a.label:sub(1, 1) == "_" ~= a.label:sub(1, 1) == "_" then
             -- return true to sort `a` after `b`, and vice versa
