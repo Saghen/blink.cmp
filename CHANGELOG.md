@@ -4,7 +4,7 @@
 
 - `<Tab>` now shows the menu when ghost text is visible in cmdline with `noice.nvim`
 - Many fixes to menu unexpectedly opening or staying open (i.e. after pressing `<Tab>`)
-- `frizbee` (fuzzy matcher) updated to `v0.3.0` (fuzzy matcher)
+- `frizbee` (fuzzy matcher) updated to `v0.3.0`
   - Capitals now receive a bonus similar to delimiters, for better matching on PascalCase and camelCase (i.e. `fb` matched on `fooBar` beats `foobar`)
   - Delimiters no longer incorrectly receive a bonus when coming after a delimiter (i.e. `f_b` matched on `foo__bar` no longer beats `foo_bar`)
 - Cmdline shell commands have been disabled by default on windows
