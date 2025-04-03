@@ -210,6 +210,7 @@ completion.menu.draw = {
     kind_icon = {
       ellipsis = false,
       text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
+      -- Set the highlight priority to 20000 to beat the cursorline's default priority of 10000
       highlight = function(ctx) return { { group = ctx.kind_hl, priority = 20000 } } end,
     },
 
