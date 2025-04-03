@@ -1,3 +1,9 @@
+## [1.1.1](https://github.com/Saghen/blink.cmp/compare/v1.1.0...v1.1.1) (2025-04-03)
+
+### Bug Fixes
+
+* resolve failing on 0.10 due to missing client wrap ([f3f4bb8](https://github.com/Saghen/blink.cmp/commit/f3f4bb8aac48cd342f74543548bd97d71e3f6343))
+
 ## [1.1.0](https://github.com/Saghen/blink.cmp/compare/v1.0.0...v1.1.0) (2025-04-03)
 
 ### Highlights
