@@ -102,6 +102,7 @@ local function on_cursor_moved(event, is_ignored)
   -- check if we're still within the bounds of the query used for the context
   if
     trigger.context ~= nil
+    and trigger.context.trigger.kind ~= 'prefetch'
     and trigger.context:within_query_bounds(cursor, trigger.is_trigger_character(char_under_cursor))
   then
     trigger.show({ trigger_kind = 'keyword' })
