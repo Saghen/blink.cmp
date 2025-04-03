@@ -45,13 +45,13 @@ function cmdline:get_completions(context, callback)
   local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, context.line, {})
   local cmd = (valid_cmd and parsed.cmd) or arguments[1] or ''
 
+  local is_help_command = constants.help_commands[cmd] and arg_number > 1
+
   local task = async.task
     .empty()
     :map(function()
       -- Special case for help where we read all the tags ourselves
-      if constants.help_commands[cmd] and arg_number > 1 then
-        return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix)
-      end
+      if is_help_command then return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix) end
 
       local completions = {}
       local completion_args = vim.split(vim.fn.getcmdcompltype(), ',', { plain = true })
@@ -196,7 +196,7 @@ function cmdline:get_completions(context, callback)
       end
 
       callback({
-        is_incomplete_backward = true,
+        is_incomplete_backward = not is_help_command,
         is_incomplete_forward = false,
         items = items,
       })
