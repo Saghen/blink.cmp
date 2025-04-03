@@ -425,7 +425,6 @@ fuzzy = {
     extra_curl_args = {},
 
     proxy = {
-
         -- When downloading a prebuilt binary, use the HTTPS_PROXY environment variable
         from_env = true,
 
