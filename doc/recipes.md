@@ -208,6 +208,25 @@ sources = {
 
 ## Completion menu drawing
 
+### Kind icon background
+
+You'll need to configure your highlights (`BlinkCmpKind` or `BlinkCmpKind<kind>`) to your desired background and foreground colors.
+
+```lua
+completion = {
+  menu = {
+    draw = {
+      padding = { 0, 1 }, -- padding only on right side
+      components = {
+        kind_icon = {
+          text = function(ctx) return ' ' .. ctx.kind_icon .. ctx.icon_gap .. ' ' end
+        }
+      }
+    }
+  }
+}
+```
+
 ### `mini.icons`
 
 [Original discussion](https://github.com/Saghen/blink.cmp/discussions/458)
