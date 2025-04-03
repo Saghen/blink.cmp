@@ -72,7 +72,7 @@ local window = {
         kind_icon = {
           ellipsis = false,
           text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
-          highlight = function(ctx) return ctx.kind_hl end,
+          highlight = function(ctx) return { { group = ctx.kind_hl, priority = 20000 } } end,
         },
 
         kind = {
