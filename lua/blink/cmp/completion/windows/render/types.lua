@@ -10,6 +10,7 @@
 --- @field [number] number Start and end index of the highlight
 --- @field group? string Highlight group
 --- @field params? table Additional parameters passed as the `params` field of the highlight
+--- @field priority? number Priority of the highlight
 ---
 --- @class blink.cmp.DrawWidth
 --- @field fixed? number Fixed width
