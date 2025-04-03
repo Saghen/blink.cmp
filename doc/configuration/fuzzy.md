@@ -69,7 +69,7 @@ The sorting can be customized by providing a custom function to sort the entries
 ```lua
 fuzzy = {
   sorts = {
-    -- example custom sorting function, ensuring `_` entries are always last (not actually recommended!)
+    -- example custom sorting function, ensuring `_` entries are always last (untested, YMMV)
     function(a, b)
         if a.label:sub(1, 1) == "_" ~= a.label:sub(1, 1) == "_" then
             -- return true to sort `a` after `b`, and vice versa
