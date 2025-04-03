@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 01
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 03
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1303,6 +1303,39 @@ CONFIGURATION ~
 
 See the fuzzy section of the reference configuration <./reference.md#fuzzy>.
 For recipes, see the recipes section <../recipes.md#fuzzy>.
+
+
+SORTING
+
+The sorting can be customized by providing a custom function to sort the
+entries, based on sorting in Lua
+<https://www.lua.org/manual/5.1/manual.html#pdf-table.sort>, or by using one of
+the built-in sorts:
+
+- `exact`: Sorts by exact match, case-sensitive
+- `score`: Sorts by the fuzzy matching score
+- `sort_text`: Sorts by the `sortText` field
+    - Generally, this field provides better sorting than `label` as the source/LSP may prioritize items relevant to the current context
+    - If you’re writing your own source, use this field to control sort order, instead of requiring users to add a sort function
+- `label`: Sorts by the `label` field, deprioritizing entries with a leading `_`
+- `kind`: Sorts by the numeric `kind` field, check the order via `:lua vim.print(vim.lsp.protocol.CompletionItemKind)`
+
+>lua
+    fuzzy = {
+      sorts = {
+        -- example custom sorting function, ensuring `_` entries are always last (untested, YMMV)
+        function(a, b)
+            if a.label:sub(1, 1) == "_" ~= a.label:sub(1, 1) == "_" then
+                -- return true to sort `a` after `b`, and vice versa
+                return not a.label:sub(1, 1) == "_"
+            end
+            -- nothing returned, fallback to the next sort
+        end,
+        -- default sorts
+        'score',
+        'sort_text',
+    }
+<
 
 
 KEYMAP                                               *blink-cmp-config-keymap*
