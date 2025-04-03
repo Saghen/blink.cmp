@@ -94,14 +94,16 @@ local function on_cursor_moved(event, is_ignored)
 
   -- TODO: doesn't handle `a` where the cursor moves immediately after
   -- Reproducible with `example.|a` and pressing `a`, should not show the menu
-  local is_trigger_character = trigger.is_trigger_character(char_under_cursor, true)
   local insert_enter_on_trigger_character = config.show_on_trigger_character
     and config.show_on_insert_on_trigger_character
     and is_enter_event
-    and is_trigger_character
+    and trigger.is_trigger_character(char_under_cursor, true)
 
   -- check if we're still within the bounds of the query used for the context
-  if trigger.context ~= nil and trigger.context:within_query_bounds(cursor, is_trigger_character) then
+  if
+    trigger.context ~= nil
+    and trigger.context:within_query_bounds(cursor, trigger.is_trigger_character(char_under_cursor))
+  then
     trigger.show({ trigger_kind = 'keyword' })
 
   -- check if we've entered insert mode on a trigger character
