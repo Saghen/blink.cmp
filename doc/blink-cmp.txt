@@ -467,6 +467,8 @@ triggered by any of these three characters.
 
 FUZZY (SORTING/FILTERING)        *blink-cmp-recipes-fuzzy-(sorting/filtering)*
 
+See the full docs <./configuration/fuzzy.md>
+
 
 ALWAYS PRIORITIZE EXACT MATCHES ~
 
@@ -530,6 +532,8 @@ custom snippets for such constructs.
 
 
 COMPLETION MENU DRAWING            *blink-cmp-recipes-completion-menu-drawing*
+
+See the full docs <./configuration/completion.md#menu-draw>
 
 
 KIND ICON BACKGROUND ~
@@ -636,6 +640,8 @@ Original discussion <https://github.com/Saghen/blink.cmp/discussions/1146>
 
 
 SOURCES                                            *blink-cmp-recipes-sources*
+
+See the full docs <./configuration/sources.md>
 
 
 BUFFER COMPLETION FROM ALL OPEN BUFFERS ~
@@ -1155,6 +1161,8 @@ manually showing it with the `show` keymap command.
 
 MENU DRAW 
 
+Check out the recipes! <../recipes.md#completion-menu-drawing>
+
 blink.cmp uses a grid-based layout to render the completion menu. The
 components, defined in `draw.components[string]`, define `text` and `highlight`
 functions which are called for each completion item. The `highlight` function
@@ -1323,7 +1331,7 @@ You may also build with nix via `nix run .#build-plugin`.
 CONFIGURATION ~
 
 See the fuzzy section of the reference configuration <./reference.md#fuzzy>.
-For recipes, see the recipes section <../recipes.md#fuzzy>.
+For recipes, see the recipes section <../recipes.md#fuzzy-sorting-filtering>.
 
 
 SORTING
