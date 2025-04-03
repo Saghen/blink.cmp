@@ -56,10 +56,11 @@ function cmdline_events:listen(opts)
     vim.api.nvim_create_autocmd('CursorMovedC', {
       callback = function()
         if vim.api.nvim_get_mode().mode ~= 'c' then return end
-        if is_change_queued then return end
 
         local is_ignored = self.ignore_next_cursor_moved
         self.ignore_next_cursor_moved = false
+
+        if is_change_queued then return end
 
         opts.on_cursor_moved('CursorMoved', is_ignored)
       end,
