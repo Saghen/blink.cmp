@@ -53,3 +53,29 @@ You may also build with nix via `nix run .#build-plugin`.
 ## Configuration
 
 See the [fuzzy section of the reference configuration](./reference.md#fuzzy). For recipes, see [the recipes section](../recipes.md#fuzzy).
+
+### Sorting
+
+The sorting can be customized by providing a custom function to sort the entries, based on [sorting in Lua](https://www.lua.org/manual/5.1/manual.html#pdf-table.sort), or by using one of the built-in sorts:
+
+- `exact`: Sorts by exact match, case-sensitive
+- `score`: Sorts by the fuzzy matching score
+- `sort_text`: Uses the `sortText` field provided by sources/LSPs
+- `label`: Uses the `label` field, deprioritizing entries with a leading `_`
+- `kind`: Sorts by the numeric `kind` field, check the order via `:lua vim.print(vim.lsp.protocol.CompletionItemKind)`
+
+```lua
+fuzzy = {
+  sorts = {
+    function(a, b)
+        if a.label:sub(1, 1) == "_" ~= a.label:sub(1, 1) == "_" then
+            -- return true to sort `a` after `b`, and vice versa
+            return not a.label:sub(1, 1) == "_"
+        end
+        -- nothing returned, fallback to the next sort
+    end,
+    -- default sorts
+    'score',
+    'sort_text',
+}
+```

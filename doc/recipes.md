@@ -167,47 +167,6 @@ fuzzy = {
 }
 ```
 
-### Basic Guide to sorting
-
-The sorting can be customized by providing a custom function to sort the entries.
-This sorting function is based on sorting in Lua, you should read the
-[documentation](https://www.lua.org/manual/5.1/manual.html#pdf-table.sort) carefull to understand the basics.
-The full snippet is shown below, but for clarity only the function will be discussed in detail.
-```lua
-fuzzy = {
-  sorts = {
-    function(a, b)
-            --Function to do the sorting based on comparing two entries.
-            return
-      end,
-    -- default sorts
-    'score',
-    'sort_text',
-}
-```
-
-First of all, this config is done such that a function that returns nothing does not affect the results:
-```lua
-    function(a, b)
-            -- Since the function does not return something useful,
-            -- the other sorting methods are used.
-            return
-      end
-```
-This is usefull for "skipping" entries whose order should be kept.
-
-To validate/display/explore the options, you may print the inputs:
-
-```lua
-    function(a, b)
-        --Does not affect the sort order, but shows inputs
-            print(vim.inspect(a), vim.inspect(b))
-            return
-      end
-```
-This will be noisy, but a quick glance should help gauge what fields are worth
-considering.
-
 ### Deprioritize specific LSP
 
 You may use a custom sort function to deprioritize LSPs such as Emmet Language Server (`emmet_ls`)
