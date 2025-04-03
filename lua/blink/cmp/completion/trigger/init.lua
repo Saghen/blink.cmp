@@ -81,11 +81,11 @@ local function on_cursor_moved(event, is_ignored)
   -- but don't send an on_show event upstream
   if is_ignored and event == 'CursorMoved' then
     if trigger.context ~= nil then
-      -- TODO: If we `auto_insert` with the `path` source, we may end up on a trigger character
+      -- If we `auto_insert` with the `path` source, we may end up on a trigger character
       -- i.e. `downloads/`. If we naively update the context, we'll show the menu with the
-      -- existing context. So we clear the context if we're not on a keyword character.
-      -- Is there a better solution here?
-      if not is_keyword then trigger.context = nil end
+      -- existing context
+      -- TODO: is this still needed since we handle this in char added?
+      if require('blink.cmp.completion.list').preview_undo ~= nil then trigger.context = nil end
 
       trigger.show({ send_upstream = false, trigger_kind = 'keyword' })
     end
