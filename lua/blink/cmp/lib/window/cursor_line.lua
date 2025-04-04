@@ -7,14 +7,17 @@ local config = require('blink.cmp.config')
 --- This behavior is generally undesirable, so we instead draw the background above all highlights.
 --- @class blink.cmp.CursorLine
 --- @field name string
+--- @field priority number
 --- @field ns number
 local cursor_line = {}
 
 --- @param name string
+--- @param priority number Priority of the background highlight for the cursorline, defaults to 10000. Setting this to 0 will render it below other highlights
 --- @return blink.cmp.CursorLine
-function cursor_line.new(name)
+function cursor_line.new(name, priority)
   local self = setmetatable({}, { __index = cursor_line })
   self.name = name
+  self.priority = priority or 10000
   self.ns = vim.api.nvim_create_namespace('blink_cmp_' .. name)
   return self
 end
@@ -49,7 +52,7 @@ function cursor_line:update(win)
         hl_group = hack_hl,
         hl_mode = 'combine',
         ephemeral = true,
-        priority = 10000,
+        priority = self.priority,
       })
     end,
   })

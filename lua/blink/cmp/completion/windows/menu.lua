@@ -30,6 +30,7 @@ local menu = {
     winblend = config.winblend,
     winhighlight = config.winhighlight,
     cursorline = false,
+    cursorline_priority = config.draw.cursorline_priority,
     scrolloff = config.scrolloff,
     scrollbar = config.scrollbar,
     filetype = 'blink-cmp-menu',

@@ -60,6 +60,8 @@ local window = {
       padding = 1,
       -- Gap between columns
       gap = 1,
+      -- Priority of the cursorline highlight, setting this to 0 will render it below other highlights
+      cursorline_priority = 10000,
       treesitter = {}, -- Use treesitter to highlight the label text of completions from these sources
       -- Components to render, grouped by column
       columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
@@ -189,6 +191,7 @@ function window.validate(config)
       'a number or a tuple of 2 numbers (i.e. [1, 2])',
     },
     gap = { config.draw.gap, 'number' },
+    cursorline_priority = { config.draw.cursorline_priority, 'number' },
 
     treesitter = { config.draw.treesitter, 'table' },
 

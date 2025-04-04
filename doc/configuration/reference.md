@@ -194,6 +194,8 @@ completion.menu.draw = {
   padding = 1,
   -- Gap between columns
   gap = 1,
+  -- Priority of the cursorline highlight, setting this to 0 will render it below other highlights
+  cursorline_priority = 10000,
   -- Use treesitter to highlight the label text for the given list of sources
   treesitter = {},
   -- treesitter = { 'lsp' }

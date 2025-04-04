@@ -8,6 +8,7 @@ local utils = require('blink.cmp.lib.window.utils')
 --- @field max_width? number
 --- @field max_height? number
 --- @field cursorline? boolean
+--- @field cursorline_priority? number
 --- @field default_border? blink.cmp.WindowBorder
 --- @field border? blink.cmp.WindowBorder
 --- @field wrap? boolean
@@ -72,7 +73,7 @@ function win.new(name, config)
   }
   self.redraw_queued = false
 
-  self.cursor_line = require('blink.cmp.lib.window.cursor_line').new(name)
+  self.cursor_line = require('blink.cmp.lib.window.cursor_line').new(name, config.cursorline_priority)
 
   if self.config.scrollbar then
     -- Enable the gutter if there's no border, or the border is a space

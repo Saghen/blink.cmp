@@ -274,6 +274,22 @@ completion.menu.draw.columns = { { "label", "label_description", gap = 1 }, { "k
 - `source_name`: Shows the name of the source that provided the item, from the `sources.providers.*.name` (e.g. `LSP`)
 - `source_id`: Shows the id of the source that provided the item, from the `sources.providers[id]` (e.g. `lsp`)
 
+#### Cursorline
+
+The cursorline background will be rendered with a priority of `10000` to ensure that highlights with backgrounds (such as those from the default theme) will be overridden by the cursorline. If you'd like to use a background in your highlight, set the priority to `10001` or higher.
+
+```lua
+completion.menu.draw.components.label.kind_icon.highlight = function(ctx)
+  return { { group = ctx.kind_hl, priority = 20000 } }
+end
+```
+
+Or you may set the cursorline highlight priority to `0`
+
+```lua
+completion.menu.draw.cursorline_priority = 0
+```
+
 ### Treesitter
 
 You may use treesitter to highlight the label text for the given list of sources. This feature is barebones, as it highlights the item as-is.
