@@ -22,13 +22,7 @@ Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `'none
   -- instead of using the neovim defaults
   -- preset = 'inherit',
 
-  ['<Tab>'] = {
-    function(cmp)
-      if cmp.is_ghost_text_visible() and not cmp.is_menu_visible() then return cmp.accept() end
-    end,
-    'show_and_insert',
-    'select_next',
-  },
+  ['<Tab>'] = { 'show_and_insert', 'select_next' },
   ['<S-Tab>'] = { 'show_and_insert', 'select_prev' },
 
   ['<C-space>'] = { 'show', 'fallback' },
@@ -45,7 +39,7 @@ Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `'none
 
 ## Ghost text
 
-When [noice.nvim](https://github.com/folke/noice.nvim) is detected, ghost text will be shown, likely similar to your terminal shell completions. Pressing `<Tab>` while ghost text is visible will accept the completion. When not visible, `<Tab>` will open the menu and insert the first item as per usual.
+When [noice.nvim](https://github.com/folke/noice.nvim) is detected, ghost text will be shown, likely similar to your terminal shell completions. Pressing `<Tab>` will open the menu and insert the first item as per usual.
 
 <img src="https://github.com/user-attachments/assets/b2fa6f41-4937-47bf-86b3-d82e9ec86b12">
 
