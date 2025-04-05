@@ -30,6 +30,7 @@ local docs = {
     winhighlight = win_config.winhighlight,
     scrollbar = win_config.scrollbar,
     wrap = true,
+    linebreak = true,
     filetype = 'blink-cmp-documentation',
     scrolloff = 0,
   }),
