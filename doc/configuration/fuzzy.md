@@ -64,7 +64,8 @@ The sorting can be customized by providing a custom function to sort the entries
   - Generally, this field provides better sorting than `label` as the source/LSP may prioritize items relevant to the current context
   - If you're writing your own source, use this field to control sort order, instead of requiring users to add a sort function
 - `label`: Sorts by the `label` field, deprioritizing entries with a leading `_`
-- `kind`: Sorts by the numeric `kind` field, check the order via `:lua vim.print(vim.lsp.protocol.CompletionItemKind)`
+- `kind`: Sorts by the numeric `kind` field
+  - Check the order via `:lua vim.print(vim.lsp.protocol.CompletionItemKind)`
 
 ```lua
 fuzzy = {
