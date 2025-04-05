@@ -17,6 +17,49 @@ function utils._validate(spec)
   end
 end
 
+---@type boolean Have we passed UIEnter?
+local _ui_entered = false
+---@type function[] List of notifications.
+local _msg_callbacks = {}
+
+--- Fancy notification wrapper.
+---@param msg [ string, string? ][]
+---@param fallback string
+local function _notify(msg, fallback, lvl)
+  if vim.api.nvim_echo then
+    if _ui_entered then
+      --- After UIEnter emit message
+      --- immediately.
+      vim.api.nvim_echo(msg, true, {
+        verbose = false,
+      })
+    else
+      --- Queue notification for the
+      --- UIEnter event.
+      table.insert(
+        _msg_callbacks,
+        function()
+          vim.api.nvim_echo(msg, true, {
+            verbose = false,
+          })
+        end
+      )
+    end
+  elseif fallback then
+    vim.notify_once(fallback, lvl or vim.log.levels.WARN, { title = 'blink.cmp' })
+  end
+end
+
+vim.api.nvim_create_autocmd('UIEnter', {
+  callback = function()
+    _ui_entered = true
+
+    for _, fn in ipairs(_msg_callbacks) do
+      pcall(fn)
+    end
+  end,
+})
+
 --- @param path string The path to the field being validated
 --- @param tbl table The table to validate
 --- @param source table The original table that we're validating against
@@ -34,7 +77,31 @@ function utils.validate(path, tbl, source)
 
   -- check for erroneous fields
   for k, _ in pairs(source) do
-    if tbl[k] == nil then error(path .. '.' .. k .. ': unexpected field found in configuration') end
+    if tbl[k] == nil then
+      ---@type string Use `→` to make each part distinct. `.` may confuse non-programmer users.
+      local new_path = string.gsub(path, '%.', ' → ')
+
+      if vim.api.nvim_echo then
+        ---@type string[]
+        local path_parts = vim.split(path, '.', { plain = true })
+        local _msg = {
+          { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
+          { ': ', 'Comment' },
+        }
+
+        for _, part in ipairs(path_parts) do
+          table.insert(_msg, { ' ' .. part .. ' ', 'DiagnosticVirtualTextInfo' })
+          table.insert(_msg, { ' → ', 'Comment' })
+        end
+
+        --- Highlight the last segment in ERROR since that's
+        --- where the issue lies.
+        table.insert(_msg, { ' ' .. k .. ' ', 'DiagnosticVirtualTextError' })
+        table.insert(_msg, { ' Unexpected field in configuration!', 'Comment' })
+
+        _notify(_msg, '[blink.cmp]: ' .. new_path .. ' → ' .. k .. ': Unexpected field in configuration!')
+      end
+    end
   end
 end
 

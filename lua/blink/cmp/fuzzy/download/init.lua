@@ -7,6 +7,49 @@ local system = require('blink.cmp.fuzzy.download.system')
 
 local download = {}
 
+---@type boolean Have we passed UIEnter?
+local _ui_entered = false
+---@type function[] List of notifications.
+local _msg_callbacks = {}
+
+--- Fancy notification wrapper.
+---@param msg [ string, string? ][]
+---@param fallback string
+local function _notify(msg, fallback, lvl)
+  if vim.api.nvim_echo then
+    if _ui_entered then
+      --- After UIEnter emit message
+      --- immediately.
+      vim.api.nvim_echo(msg, true, {
+        verbose = false,
+      })
+    else
+      --- Queue notification for the
+      --- UIEnter event.
+      table.insert(
+        _msg_callbacks,
+        function()
+          vim.api.nvim_echo(msg, true, {
+            verbose = false,
+          })
+        end
+      )
+    end
+  elseif fallback then
+    vim.notify_once(fallback, lvl or vim.log.levels.WARN, { title = 'blink.cmp' })
+  end
+end
+
+vim.api.nvim_create_autocmd('UIEnter', {
+  callback = function()
+    _ui_entered = true
+
+    for _, fn in ipairs(_msg_callbacks) do
+      pcall(fn)
+    end
+  end,
+})
+
 --- @param callback fun(err: string | nil, fuzzy_implementation?: 'lua' | 'rust')
 function download.ensure_downloaded(callback)
   callback = vim.schedule_wrap(callback)
@@ -35,85 +78,156 @@ function download.ensure_downloaded(callback)
         -- out of date
         vim.schedule(
           function()
-            vim.notify(
-              '[blink.cmp]: Found an outdated version of the locally built fuzzy matching library',
-              vim.log.levels.WARN,
-              { title = 'blink.cmp' }
-            )
+            _notify({
+              { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
+              { ': Found an ', 'Comment' },
+              { 'outdated version', 'DiagnosticWarn' },
+              { ' of the locally built ', 'Comment' },
+              { 'fuzzy matching library', 'DiagnosticHint' },
+              { '.', 'Comment' },
+            }, '[blink.cmp]: Found an outdated version of the locally built fuzzy matching library.')
           end
         )
 
         -- downloading enabled but not on a git tag, error
         if download_config.download and target_git_tag == nil then
           if target_git_tag == nil then
-            error(
-              "Found an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag."
-                .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config.'
-                .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config.'
-                .. '\nSee the docs for more info.'
+            _notify(
+              {
+                { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
+                { ": Couldn't update the ", 'Comment' },
+                { 'outdated version', 'DiagnosticWarn' },
+                { ' of the ', 'Comment' },
+                { 'fuzzy matching library', 'DiagnosticHint' },
+                { ' due to not being in a ', 'Comment' },
+                { 'git tag', 'DiagnosticHint' },
+                { '. Try running ', 'Comment' },
+                { ' cargo build --release ', 'DiagnosticVirtualTextHint' },
+                { ' or enable ', 'Comment' },
+                { 'fuzzy.prebuilt_binaries.', 'DiagnosticHint' },
+                { 'ignore_version_mismatch', 'DiagnosticOk' },
+                { ' or ', 'Comment' },
+                { 'fuzzy.prebuilt_binaries.', 'DiagnosticHint' },
+                { 'force_version', 'DiagnosticOk' },
+                { ' .', 'Comment' },
+              },
+              '[blink.cmp]: Couldn\'t update the "outdated version" of the fuzzy matching library due to not being in a "git tag". Try running "cargo build --release" or enable "fuzzy.prebuilt_binaries.ignore_version_mismatch" or "fuzzy.prebuilt_binaries.force_version".'
             )
           end
 
         -- downloading is disabled, error
         else
-          error(
-            'Found an outdated version of the fuzzy matching library, but downloading from github is disabled.'
-              .. '\n!! FOR DEVELOPERS !!, set `fuzzy.prebuilt_binaries.ignore_version_mismatch = true` in config.'
-              .. '\n!! FOR USERS !!, either run `cargo build --release` via your package manager, or set either `fuzzy.prebuilt_binaries.download = true` or `fuzzy.prebuilt_binaries.force_version` in config.'
-              .. '\nSee the docs for more info.'
+          _notify(
+            {
+              { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
+              { ": Couldn't update the ", 'Comment' },
+              { 'outdated version', 'DiagnosticWarn' },
+              { ' of the ', 'Comment' },
+              { 'fuzzy matching library', 'DiagnosticHint' },
+              { ' due to github downloads being ', 'Comment' },
+              { 'disabled', 'DiagnosticHint' },
+              { '. Try running ', 'Comment' },
+              { ' cargo build --release ', 'DiagnosticVirtualTextHint' },
+              { ' or enable ', 'Comment' },
+              { 'fuzzy.prebuilt_binaries.', 'DiagnosticHint' },
+              { 'ignore_version_mismatch', 'DiagnosticOk' },
+              { ' or ', 'Comment' },
+              { 'fuzzy.prebuilt_binaries.', 'DiagnosticHint' },
+              { 'force_version', 'DiagnosticOk' },
+              { '.', 'Comment' },
+            },
+            '[blink.cmp]: Couldn\'t update the "outdated version" of the fuzzy matching library due to github downloads being "disabled". Try running "cargo build --release" or enable "fuzzy.prebuilt_binaries.ignore_version_mismatch" or "fuzzy.prebuilt_binaries.force_version".'
           )
         end
       end
 
       -- downloading disabled but not built locally
       if not download_config.download then
-        -- Fallback, just check if the shared rust library exists
-        vim.schedule(
-          function()
-            vim.notify('[blink.cmp]: No fuzzy matching library found', vim.log.levels.ERROR, { title = 'blink.cmp' })
-          end
-        )
+        ---@type boolean Have we already raised the error?
+        local raised_error = false
 
-        error(
-          'No fuzzy matching library found, but downloading from github is disabled.'
-            .. '\nEither run `cargo build --release` via your package manager, or set `fuzzy.prebuilt_binaries.download = true` in config.'
-            .. '\nSee the docs for more info.'
+        -- Fallback, just check if the shared rust library exists
+        vim.schedule(function()
+          if raised_error then return end
+
+          _notify({
+            { ' blink.cmp ', 'DiagnosticVirtualTextError' },
+            { ': No Fuzzy matching library found!', 'Comment' },
+          }, '[blink.cmp]: No Fuzzy matching library found!')
+        end)
+
+        _notify(
+          {
+            { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
+            { ': No fuzzy matching library found!', 'Comment' },
+            { '. Try running ', 'Comment' },
+            { ' cargo build --release ', 'DiagnosticVirtualTextHint' },
+            { ' or enable ', 'Comment' },
+            { 'fuzzy.prebuilt_binaries.', 'DiagnosticHint' },
+            { 'download', 'DiagnosticOk' },
+            { ' .', 'Comment' },
+          },
+          'blink.cmp : No fuzzy matching library found!. Try running "cargo build --release" or enable "fuzzy.prebuilt_binaries.download".'
         )
+        raised_error = true
       end
 
       -- downloading enabled but not on a git tag
       if target_git_tag == nil then
-        vim.schedule(
-          function()
-            vim.notify('[blink.cmp]: No fuzzy matching library found', vim.log.levels.ERROR, { title = 'blink.cmp' })
-          end
-        )
+        ---@type boolean Have we already raised the error?
+        local raised_error = false
 
-        error(
-          "No fuzzy matching library found, but can't download from github due to not being on a git tag and no `fuzzy.prebuilt_binaries.force_version` is set."
-            .. '\nEither run `cargo build --release` via your package manager, switch to a git tag, or set `fuzzy.prebuilt_binaries.force_version` in config.'
-            .. '\nSee the docs for more info.'
+        vim.schedule(function()
+          if raised_error then return end
+
+          _notify({
+            { ' blink.cmp ', 'DiagnosticVirtualTextError' },
+            { ': No Fuzzy matching library found!', 'Comment' },
+          }, '[blink.cmp]: No Fuzzy matching library found!')
+        end)
+
+        _notify(
+          {
+            { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
+            { ': No fuzzy matching library found!', 'Comment' },
+            { '. Try running ', 'Comment' },
+            { ' cargo build --release ', 'DiagnosticVirtualTextHint' },
+            { ' or switch to a ', 'Comment' },
+            { ' git tag ', 'DiagnosticVirtualTextHint' },
+            { ' or enable ', 'Comment' },
+            { 'fuzzy.prebuilt_binaries.', 'DiagnosticHint' },
+            { 'force_version', 'DiagnosticOk' },
+            { ' .', 'Comment' },
+          },
+          'blink.cmp : No fuzzy matching library found! Try running "cargo build --release" or switch tp a "git tag" or enable "fuzzy.prebuilt_binaries.force_version".'
         )
+        raised_error = true
       end
 
       -- already downloaded and the correct version, just verify the checksum, and re-download if checksum fails
       if version.current.tag == target_git_tag then
         return files.verify_checksum():catch(function(err)
-          vim.schedule(function()
-            vim.notify(err, vim.log.levels.WARN, { title = 'blink.cmp' })
-            vim.notify(
-              '[blink.cmp]: Pre-built binary failed checksum verification, re-downloading',
-              vim.log.levels.WARN,
-              { title = 'blink.cmp' }
-            )
-          end)
+          vim.schedule(
+            function()
+              _notify({
+                { ' blink.cmp ', 'DiagnosticVirtualTextInfo' },
+                { 'Pre-built binary checksum verification failed, ', 'Comment' },
+                { err, 'DiagnosticError' },
+              }, '[blink.cmp]: Pre-built binary checksum verification failed, ' .. err, vim.log.levels.ERROR)
+            end
+          )
           return download.download(target_git_tag)
         end)
       end
 
       -- download as per usual
       vim.schedule(
-        function() vim.notify('[blink.cmp]: Downloading pre-built binary', vim.log.levels.INFO, { title = 'blink.cmp' }) end
+        function()
+          _notify({
+            { ' blink.cmp ', 'DiagnosticVirtualTextInfo' },
+            { ': Downloading pre-built binary.', 'Comment' },
+          }, '[blink.cmp]: Downloading pre-built binaries.', vim.log.levels.INFO)
+        end
       )
       return download.download(target_git_tag)
     end)
@@ -130,18 +244,28 @@ function download.ensure_downloaded(callback)
 
       -- fallback to lua implementation and emit warning
       elseif fuzzy_config.implementation == 'prefer_rust_with_warning' then
-        vim.schedule(function()
-          vim.notify(
-            '[blink.cmp]: Falling back to Lua implementation due to error while downloading pre-built binary:\n' .. err,
-            vim.log.levels.WARN,
-            { title = 'blink.cmp' }
-          )
-          vim.notify(
-            "[blink.cmp]: Set `fuzzy.implementation = 'prefer_rust' | 'lua'` to suppress this warning.",
-            vim.log.levels.WARN,
-            { title = 'blink.cmp' }
-          )
-        end)
+        vim.schedule(
+          function()
+            _notify(
+              {
+                { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
+                { ': Falling back to ', 'Comment' },
+                { ' Lua implementation ', 'DiagnosticHint' },
+                { ' due to error while downloading pre-built binary, set ', 'Comment' },
+                { 'fuzzy.', 'DiagnosticHint' },
+                { 'implementation', 'DiagnosticOk' },
+                { ' to ', 'Comment' },
+                { ' "prefer_rust" ', 'DiagnosticVirtualTextHint' },
+                { ' or ', 'Comment' },
+                { ' "lua" ', 'DiagnosticVirtualTextHint' },
+                { ' to hide this, ', 'Comment' },
+                { err or '', 'DiagnosticError' },
+              },
+              '[blink.cmp]: Falling back to "Lua implementation" due to error while downloading pre-built binary, set "fuzzy.implementation" to "prefer_rust" or "lua" to hide this,'
+                .. (err or '')
+            )
+          end
+        )
         callback(nil, 'lua')
       else
         callback(err)
@@ -163,9 +287,20 @@ end
 function download.from_github(tag)
   return system.get_triple():map(function(system_triple)
     if not system_triple then
-      return error(
-        'Your system is not supported by pre-built binaries. You must run cargo build --release via your package manager with rust nightly. See the README for more info.'
+      _notify(
+        {
+          { ' blink.cmp ', 'DiagnosticVirtualTextWarn' },
+          { ': Your system is not supported by ', 'Comment' },
+          { ' pre-built binary ', 'DiagnosticVirtualTextInfo' },
+          { ', You should run ', 'Comment' },
+          { ' cargo build --release ', 'DiagnosticVirtualTextHint' },
+          { ' with ', 'Comment' },
+          { ' Rust nightly ', 'DiagnosticVirtualTextHint' },
+          { '.', 'Comment' },
+        },
+        '[blink.cmp]: Your system is not supported by "pre-built library", you must run "cargo build --release" with "Rust nightly".'
       )
+      return
     end
 
     local base_url = 'https://github.com/saghen/blink.cmp/releases/download/' .. tag .. '/'
