@@ -28,8 +28,9 @@ function docs.render_detail_and_documentation(opts)
 
   local doc_lines = {}
   if opts.documentation ~= nil then
-    local doc = type(opts.documentation) == 'string' and opts.documentation or opts.documentation.value
-    if doc then doc_lines = docs.split_lines(doc) end
+    local doc = opts.documentation
+    if type(opts.documentation) == 'string' then doc = { kind = 'plaintext', value = opts.documentation } end
+    vim.lsp.util.convert_input_to_markdown_lines(doc, doc_lines)
   end
 
   ---@type string[]
