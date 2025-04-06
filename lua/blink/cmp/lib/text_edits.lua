@@ -16,7 +16,13 @@ function text_edits.apply(text_edit, additional_text_edits)
   if mode == 'default' then
     -- writing to dot repeat may fail in cases like `q:`, which aren't easy to detect
     -- so we ignore the error
-    if config.completion.accept.dot_repeat then pcall(text_edits.write_to_dot_repeat, text_edit) end
+    if config.completion.accept.dot_repeat then
+      -- disable neovide redraw to prevent unwanted cursor movements. Keep it outside of the write_to_dot_repeat
+      -- function to guarantee that the redraw is re-enabled even if the function call fails.
+      if neovide and neovide.disable_redraw then neovide.disable_redraw() end
+      pcall(text_edits.write_to_dot_repeat, text_edit)
+      if neovide and neovide.enable_redraw then neovide.enable_redraw() end
+    end
 
     local all_edits = utils.shallow_copy(additional_text_edits)
     table.insert(all_edits, text_edit)
@@ -383,6 +389,8 @@ function text_edits.write_to_dot_repeat(text_edit)
 
     -- exit completion mode
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Plug>BlinkCmpDotRepeatHack', true, true, true), 'in', false)
+    -- make sure that the screen is updated and the mouse cursor returned to the right position before re-enabling redrawing
+    vim.api.nvim__redraw({ cursor = true, flush = true })
   end)
 end
 
