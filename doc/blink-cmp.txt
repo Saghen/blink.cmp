@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 05
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 06
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1834,6 +1834,7 @@ COMMUNITY SOURCES ~
 - cmp-pandoc-references <https://github.com/jmbuhr/cmp-pandoc-references>
 - blink-cmp-im <https://github.com/yehuohan/blink-cmp-im>: Input Method source
 - ecolog.nvim <https://github.com/philosofonusus/ecolog.nvim>
+- gitmoji.nvim <https://github.com/Dynge/gitmoji.nvim/>: Completion for gitmojis <https://gitmoji.dev/>
 
 
 REFERENCE                                         *blink-cmp-config-reference*
