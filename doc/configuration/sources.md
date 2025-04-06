@@ -94,3 +94,4 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [cmp-pandoc-references](https://github.com/jmbuhr/cmp-pandoc-references)
 - [blink-cmp-im](https://github.com/yehuohan/blink-cmp-im): Input Method source
 - [ecolog.nvim](https://github.com/philosofonusus/ecolog.nvim)
+- [gitmoji.nvim](https://github.com/Dynge/gitmoji.nvim/): Completion for [gitmojis](https://gitmoji.dev/)
