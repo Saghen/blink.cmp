@@ -99,7 +99,7 @@ function completion.get_completion_for_client(context, client, opts)
     if client.name == 'emmet_ls' or client.name == 'emmet-language-server' then
       require('blink.cmp.sources.lsp.hacks.emmet').process_response(response)
     end
-    if client.name == 'tailwindcss' then
+    if client.name == 'tailwindcss' or client.name == 'cssls' then
       require('blink.cmp.sources.lsp.hacks.tailwind').process_response(response, opts.tailwind_color_icon)
     end
     cache.set(context, client, response)
