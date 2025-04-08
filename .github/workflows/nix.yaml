@@ -2,7 +2,29 @@ name: Test Nix
 
 on:
   push:
+    paths:
+      - "**/*.lua"
+      - "**/*.rs"
+      - ".cargo/**"
+      - Cargo.lock
+      - Cargo.toml
+      - Cross.toml
+      - rust-toolchain.toml
+      - flake.lock
+      - flake.nix
+      - .github/workflows/nix.yaml
   pull_request:
+    paths:
+      - "**/*.lua"
+      - "**/*.rs"
+      - ".cargo/**"
+      - Cargo.lock
+      - Cargo.toml
+      - Cross.toml
+      - rust-toolchain.toml
+      - flake.lock
+      - flake.nix
+      - .github/workflows/nix.yaml
 
 jobs:
   build:
