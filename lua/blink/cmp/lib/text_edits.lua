@@ -351,39 +351,64 @@ function text_edits.write_to_dot_repeat(text_edit)
   )
   local chars_to_insert = text_edit.newText
 
-  utils.with_no_autocmds(function()
-    local curr_win = vim.api.nvim_get_current_win()
+  utils.defer_neovide_redraw(function()
+    utils.with_no_autocmds(function()
+      local curr_win = vim.api.nvim_get_current_win()
 
-    -- create temporary floating window and buffer for writing
-    local buf = get_dot_repeat_buffer()
-    local win = vim.api.nvim_open_win(buf, true, {
-      relative = 'win',
-      win = vim.api.nvim_get_current_win(),
-      width = 1,
-      height = 1,
-      row = 0,
-      col = 0,
-      noautocmd = true,
-    })
-    vim.api.nvim_buf_set_text(0, 0, 0, 0, 0, { '_' .. string.rep('a', chars_to_delete) })
-    vim.api.nvim_win_set_cursor(0, { 1, chars_to_delete + 1 })
+      -- create temporary floating window and buffer for writing
+      local buf = get_dot_repeat_buffer()
+      local win = vim.api.nvim_open_win(buf, true, {
+        relative = 'win',
+        win = vim.api.nvim_get_current_win(),
+        width = 1,
+        height = 1,
+        row = 0,
+        col = 0,
+        noautocmd = true,
+      })
+      vim.api.nvim_buf_set_text(0, 0, 0, 0, 0, { '_' .. string.rep('a', chars_to_delete) })
+      vim.api.nvim_win_set_cursor(0, { 1, chars_to_delete + 1 })
 
-    -- emulate builtin completion (dot repeat)
-    local saved_completeopt = vim.opt.completeopt
-    local saved_shortmess = vim.o.shortmess
-    vim.opt.completeopt = ''
-    if not vim.o.shortmess:match('c') then vim.o.shortmess = vim.o.shortmess .. 'c' end
-    vim.fn.complete(1, { '_' .. chars_to_insert })
-    vim.opt.completeopt = saved_completeopt
-    vim.o.shortmess = saved_shortmess
+      -- emulate builtin completion (dot repeat)
+      local saved_completeopt = vim.opt.completeopt
+      local saved_shortmess = vim.o.shortmess
+      vim.opt.completeopt = ''
+      if not vim.o.shortmess:match('c') then vim.o.shortmess = vim.o.shortmess .. 'c' end
+      vim.fn.complete(1, { '_' .. chars_to_insert })
+      vim.opt.completeopt = saved_completeopt
+      vim.o.shortmess = saved_shortmess
 
-    -- close window and focus original window
-    vim.api.nvim_win_close(win, true)
-    vim.api.nvim_set_current_win(curr_win)
+      -- close window and focus original window
+      vim.api.nvim_win_close(win, true)
+      vim.api.nvim_set_current_win(curr_win)
 
-    -- exit completion mode
-    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Plug>BlinkCmpDotRepeatHack', true, true, true), 'in', false)
+      -- exit completion mode
+      vim.api.nvim_feedkeys(
+        vim.api.nvim_replace_termcodes('<Plug>BlinkCmpDotRepeatHack', true, true, true),
+        'in',
+        false
+      )
+    end)
   end)
+end
+
+--- Disable redraw in neovide for the duration of the callback
+--- Useful for preventing the cursor from jumping to the top left during `vim.fn.complete`
+--- @generic T
+--- @param fn fun(): T
+--- @return T
+function utils.defer_neovide_redraw(fn)
+  if neovide and neovide.disable_redraw then neovide.disable_redraw() end
+
+  local success, result = pcall(fn)
+
+  -- make sure that the screen is updated and the mouse cursor returned to the right position before re-enabling redrawing
+  pcall(vim.api.nvim__redraw, { cursor = true, flush = true })
+
+  if neovide and neovide.enable_redraw then neovide.enable_redraw() end
+
+  if not success then error(result) end
+  return result
 end
 
 --- Moves the cursor while preserving dot repeat
