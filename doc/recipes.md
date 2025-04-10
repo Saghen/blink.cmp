@@ -39,7 +39,7 @@ local has_words_before = function()
   if col == 0 then
     return false
   end
-  local line = vim.api.nvim_get_current_line():sub()
+  local line = vim.api.nvim_get_current_line()
   return line:sub(col, col):match("%s") == nil
 end
 
