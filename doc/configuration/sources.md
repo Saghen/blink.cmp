@@ -57,7 +57,7 @@ sources.providers.lsp = {
 ## Terminal and Cmdline Sources
 
 ::: info
-Terminal completions are nightly only! Known bugs in v0.10. Cmdline completions are supported on all versions
+Terminal completions are 0.11+ only! Known bugs in v0.10. Cmdline completions are supported on all versions
 :::
 
 You may use `cmdline` and `term` sources via the `cmdline.sources` and `term.sources` tables. You may see the defaults in the [reference](./reference.md#mode-specific). There's no source for shell completions at the moment, [contributions welcome](https://github.com/Saghen/blink.cmp/issues/1149)!

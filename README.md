@@ -15,7 +15,7 @@
 - [Auto-bracket support](https://cmp.saghen.dev/configuration/completion.html#auto-brackets) based on semantic tokens
 - [Signature help](https://cmp.saghen.dev/configuration/signature.html) (experimental, opt-in)
 - [Command line completion](https://cmp.saghen.dev/modes/cmdline.html)
-- [Terminal completion](https://cmp.saghen.dev/modes/term) (Nightly only! No source for shell completions exists yet, contributions welcome!)
+- [Terminal completion](https://cmp.saghen.dev/modes/term) (0.11+ only! No source for shell completions exists yet, contributions welcome!)
 - [Comparison with built-in completion](https://cmp.saghen.dev/#compared-to-built-in-completion)
 - [Comparison with nvim-cmp](https://cmp.saghen.dev/#compared-to-nvim-cmp)
 

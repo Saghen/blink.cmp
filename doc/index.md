@@ -15,7 +15,7 @@
 - [Auto-bracket support](/configuration/completion#auto-brackets) based on semantic tokens
 - [Signature help](/configuration/signature) (experimental, opt-in)
 - [Command line completion](/modes/cmdline)
-- [Terminal completion](/modes/term) (Nightly only! No source for shell completions exists yet, contributions welcome!)
+- [Terminal completion](/modes/term) (0.11+ only! No source for shell completions exists yet, contributions welcome!)
 
 ## Compared to built-in completion
 

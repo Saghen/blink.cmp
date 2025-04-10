@@ -671,7 +671,7 @@ cmdline = {
 ### Terminal
 
 ::: warning
-Terminal completions are nightly only! Known bugs in v0.10
+Terminal completions are 0.11+ only! Known bugs in v0.10
 :::
 
 ```lua
