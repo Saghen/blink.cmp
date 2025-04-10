@@ -557,6 +557,8 @@ sources.providers = {
           :filter(function(buf) return vim.bo[buf].buftype ~= 'nofile' end)
           :totable()
       end,
+      -- buffers when searching with `/` or `?`
+      get_search_bufnrs = function() return { vim.api.nvim_get_current_buf() } end,
     }
   },
 

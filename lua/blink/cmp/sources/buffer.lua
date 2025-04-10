@@ -7,10 +7,10 @@ local uv = vim.uv
 
 --- @param bufnr integer
 --- @return string
-local function get_buf_text(bufnr)
+local function get_buf_text(bufnr, exclude_word_under_cursor)
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
 
-  if bufnr ~= vim.api.nvim_get_current_buf() then return table.concat(lines, '\n') end
+  if bufnr ~= vim.api.nvim_get_current_buf() or not exclude_word_under_cursor then return table.concat(lines, '\n') end
 
   -- exclude word under the cursor for the current buffer
   local line_number = vim.api.nvim_win_get_cursor(0)[1]
@@ -113,6 +113,7 @@ end
 
 --- @class blink.cmp.BufferOpts
 --- @field get_bufnrs fun(): integer[]
+--- @field get_search_bufnrs fun(): integer[]
 
 --- Public API
 
@@ -130,6 +131,7 @@ function buffer.new(opts)
         :filter(function(buf) return vim.bo[buf].buftype ~= 'nofile' end)
         :totable()
     end
+  self.get_search_bufnrs = opts.get_search_bufnrs or function() return { vim.api.nvim_get_current_buf() } end
   return self
 end
 
@@ -139,10 +141,13 @@ function buffer:get_completions(_, callback)
   end
 
   vim.schedule(function()
-    local bufnrs = require('blink.cmp.lib.utils').deduplicate(self.get_bufnrs())
+    local is_search = vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype())
+    local get_bufnrs = is_search and self.get_search_bufnrs or self.get_bufnrs
+    local bufnrs = require('blink.cmp.lib.utils').deduplicate(get_bufnrs())
+
     local buf_texts = {}
     for _, buf in ipairs(bufnrs) do
-      table.insert(buf_texts, get_buf_text(buf))
+      table.insert(buf_texts, get_buf_text(buf, not is_search))
     end
     local buf_text = table.concat(buf_texts, '\n')
 
