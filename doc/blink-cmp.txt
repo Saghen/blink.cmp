@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 08
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 10
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -59,7 +59,7 @@ FEATURES                                     *blink-cmp-introduction-features*
 - Auto-bracket support </configuration/completion#auto-brackets> based on semantic tokens
 - Signature help </configuration/signature> (experimental, opt-in)
 - Command line completion </modes/cmdline>
-- Terminal completion </modes/term> (Nightly only! No source for shell completions exists yet, contributions welcome!)
+- Terminal completion </modes/term> (0.11+ only! No source for shell completions exists yet, contributions welcome!)
 
 
 COMPARED TO BUILT-IN COMPLETION*blink-cmp-introduction-compared-to-built-in-completion*
@@ -349,7 +349,7 @@ Full discussion: https://github.com/Saghen/blink.cmp/issues/1367
       if col == 0 then
         return false
       end
-      local line = vim.api.nvim_get_current_line():sub()
+      local line = vim.api.nvim_get_current_line()
       return line:sub(col, col):match("%s") == nil
     end
     
