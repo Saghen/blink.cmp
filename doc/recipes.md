@@ -6,10 +6,27 @@ Feel free to open a PR with any of your own recipes!
 
 ## General
 
-### Disable per filetype
+### Disable per filetype/buffer
+
+You may change the `enabled` function to return `false` for any case you'd like to disable completion.
 
 ```lua
 enabled = function() return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) end,
+```
+
+or set `vim.b.completion = false` on the buffer
+
+```lua
+-- via an autocmd
+vim.api.nvim_create_autocmd('BufEnter', {
+  pattern = '*.lua',
+  callback = function()
+    vim.b.completion = false
+  end,
+})
+
+-- or via ftplugin/some-filetype.lua
+vim.b.completion = false
 ```
 
 ### Disable completion in *only* shell command mode
