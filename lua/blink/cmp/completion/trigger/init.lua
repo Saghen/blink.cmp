@@ -218,6 +218,22 @@ function trigger.show_if_on_trigger_character(opts)
 end
 
 function trigger.show(opts)
+  local get_allowed_buftypes = function()
+    local allowed = require('blink.cmp.config').buftype_allow_list
+    if allowed == nil then return { 'acwrite', 'terminal' } end
+    return allowed
+  end
+  local is_buftype_allowed = function()
+    local buftype = vim.bo.buftype
+    local allowed = get_allowed_buftypes()
+    -- empty string is the default value for buftype, we'll always allow it
+    if not vim.tbl_contains(allowed, '') then table.insert(allowed, '') end
+    -- Special Case: if the list is empty, we allow all buftypes
+    if #allowed == 0 then return true end
+    return vim.tbl_contains(allowed, buftype)
+  end
+
+  if not is_buftype_allowed() then return trigger.hide() end
   if not require('blink.cmp.config').enabled() then return trigger.hide() end
 
   opts = opts or {}
