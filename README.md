@@ -41,3 +41,4 @@ Head over to the [documentation website](https://cmp.saghen.dev/installation) fo
 - [@wurli](https://github.com/wurli) Terminal completions
 - [@mikavilpas](https://github.com/mikavilpas) + [@xzbdmw](https://github.com/xzbdmw) Dot-repeat (`.`)
 - [@FerretDetective](https://github.com/FerretDetective) `complete_func` source
+- [@krovuxdev](https://github.com/krovuxdev) Community moderation and help
