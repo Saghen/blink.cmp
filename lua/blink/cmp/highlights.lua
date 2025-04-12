@@ -27,7 +27,7 @@ function highlights.setup()
   set_hl('BlinkCmpScrollBarThumb', { link = 'PmenuThumb' })
   set_hl('BlinkCmpScrollBarGutter', { link = 'PmenuSbar' })
 
-  set_hl('BlinkCmpGhostText', { link = use_nvim_cmp and 'CmpGhostText' or 'NonText' })
+  set_hl('BlinkCmpGhostText', { link = 'NonText' })
 
   set_hl('BlinkCmpMenu', { link = 'Pmenu' })
   set_hl('BlinkCmpMenuBorder', { link = 'Pmenu' })
