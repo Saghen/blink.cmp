@@ -16,12 +16,16 @@ function fs.scan_dir_async(path)
 
       local function read_dir()
         uv.fs_readdir(handle, function(err, entries)
-          if err ~= nil or entries == nil then return reject(err) end
+          if err ~= nil or entries == nil then
+            uv.fs_closedir(handle, function() end)
+            return reject(err)
+          end
 
           vim.list_extend(all_entries, entries)
           if #entries == max_entries then
             read_dir()
           else
+            uv.fs_closedir(handle, function() end)
             resolve(all_entries)
           end
         end)
