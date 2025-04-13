@@ -133,6 +133,7 @@ completion.accept = {
     -- Default brackets to use for unknown languages
     default_brackets = { '(', ')' },
     -- Overrides the default blocked filetypes
+    -- See: https://github.com/Saghen/blink.cmp/blob/main/lua/blink/cmp/completion/brackets/config.lua#L5-L9
     override_brackets_for_filetypes = {},
     -- Synchronously use the kind of the item to determine if brackets should be added
     kind_resolution = {
