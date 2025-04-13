@@ -1,4 +1,3 @@
-local async = require('blink.cmp.lib.async')
 local config = require('blink.cmp.config').completion.accept
 local text_edits_lib = require('blink.cmp.lib.text_edits')
 local brackets_lib = require('blink.cmp.completion.brackets')
