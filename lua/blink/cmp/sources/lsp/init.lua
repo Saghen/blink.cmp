@@ -69,7 +69,7 @@ function lsp:get_completions(context, callback)
   -- TODO: implement a timeout before returning the menu as-is. In the future, it would be neat
   -- to detect slow LSPs and consistently run them async
   local task = async.task
-    .await_all(
+    .all(
       vim.tbl_map(
         function(client) return completion_lib.get_completion_for_client(context, client, self.opts) end,
         clients

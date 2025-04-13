@@ -42,7 +42,7 @@ function help.get_completions(arg_prefix)
   local help_files = vim.api.nvim_get_runtime_file('doc/tags', true)
 
   return async.task
-    .await_all(vim.tbl_map(read_tags_from_file, help_files))
+    .all(vim.tbl_map(read_tags_from_file, help_files))
     :map(function(tags_arrs) return require('blink.cmp.lib.utils').flatten(tags_arrs) end)
     :map(function(tags)
       -- TODO: remove after adding support for fuzzy matching on custom range

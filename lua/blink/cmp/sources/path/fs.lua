@@ -46,7 +46,7 @@ function fs.fs_stat_all(cwd, entries)
       end)
     )
   end
-  return async.task.await_all(tasks):map(function(entries)
+  return async.task.all(tasks):map(function(entries)
     return vim.tbl_filter(function(entry) return entry ~= nil end, entries)
   end)
 end

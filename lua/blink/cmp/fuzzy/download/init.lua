@@ -14,7 +14,7 @@ function download.ensure_downloaded(callback)
   if fuzzy_config.implementation == 'lua' then return callback(nil, 'lua') end
 
   async.task
-    .await_all({ git.get_version(), files.get_version() })
+    .all({ git.get_version(), files.get_version() })
     :map(function(results)
       return {
         git = results[1],
@@ -174,7 +174,7 @@ function download.from_github(tag)
 
     return async
       .task
-      .await_all({
+      .all({
         download.download_file(library_url, files.lib_filename .. '.tmp'),
         download.download_file(checksum_url, files.checksum_filename),
       })
@@ -194,7 +194,7 @@ end
 
 --- @param url string
 --- @param filename string
---- @return blink.cmp.Task
+--- @return blink.cmp.Task<nil>
 function download.download_file(url, filename)
   return async.task.new(function(resolve, reject)
     local args = { 'curl' }
