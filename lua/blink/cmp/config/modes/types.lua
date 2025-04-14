@@ -1,7 +1,7 @@
 --- @class blink.cmp.ModeConfig
 --- @field enabled? boolean
 --- @field keymap blink.cmp.KeymapConfig
---- @field sources string[] | fun(): string[]
+--- @field sources blink.cmp.SourceList
 --- @field completion? blink.cmp.ModeCompletionConfig
 
 --- @class blink.cmp.ModeCompletionConfig

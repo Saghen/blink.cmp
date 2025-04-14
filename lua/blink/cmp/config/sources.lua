@@ -14,8 +14,8 @@
 ---     end
 ---   end
 --- ```
---- @field default string[] | fun(): string[]
---- @field per_filetype table<string, string[] | fun(): string[]>
+--- @field default blink.cmp.SourceList
+--- @field per_filetype table<string, blink.cmp.SourceList>
 ---
 --- @field transform_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
 --- @field min_keyword_length number | fun(ctx: blink.cmp.Context): number Minimum number of characters in the keyword to trigger
