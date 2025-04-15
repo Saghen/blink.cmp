@@ -44,7 +44,7 @@ function download.ensure_downloaded(callback)
         )
 
         -- downloading enabled but not on a git tag, error
-        if download_config.download and target_git_tag == nil then
+        if download_config.download then
           if target_git_tag == nil then
             error(
               "Found an outdated version of the fuzzy matching library, but can't download from github due to not being on a git tag."
