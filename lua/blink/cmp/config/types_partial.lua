@@ -1,4 +1,4 @@
----@alias blink.cmp.SourceList string[] | fun(): string[]
+--- @alias blink.cmp.SourceList string[] | fun(): string[]
 
 --- @class (exact) blink.cmp.Config : blink.cmp.ConfigStrict
 --- @field enabled? fun(): boolean
@@ -85,7 +85,5 @@
 --- @class (exact) blink.cmp.AppearanceConfigPartial : blink.cmp.AppearanceConfig, {}
 
 --- @class (exact) blink.cmp.CmdlineConfigPartial : blink.cmp.CmdlineConfig, {}
---- @field sources? blink.cmp.SourceList
 
 --- @class (exact) blink.cmp.TermConfigPartial : blink.cmp.TermConfig, {}
---- @field sources? blink.cmp.SourceList
