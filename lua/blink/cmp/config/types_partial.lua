@@ -1,3 +1,5 @@
+--- @alias blink.cmp.SourceList string[] | fun(): string[]
+
 --- @class (exact) blink.cmp.Config : blink.cmp.ConfigStrict
 --- @field enabled? fun(): boolean
 --- @field keymap? blink.cmp.KeymapConfig
@@ -83,11 +85,5 @@
 --- @class (exact) blink.cmp.AppearanceConfigPartial : blink.cmp.AppearanceConfig, {}
 
 --- @class (exact) blink.cmp.CmdlineConfigPartial : blink.cmp.CmdlineConfig, {}
---- @field sources? blink.cmp.CmdlineSourceConfigPartial
-
---- @class (exact) blink.cmp.CmdlineSourceConfigPartial : blink.cmp.CmdlineSourceConfig, {}
 
 --- @class (exact) blink.cmp.TermConfigPartial : blink.cmp.TermConfig, {}
---- @field sources? blink.cmp.TermSourceConfigPartial
-
---- @class (exact) blink.cmp.TermSourceConfigPartial : blink.cmp.TermSourceConfig, {}
