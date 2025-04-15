@@ -241,7 +241,7 @@ function sources.get_signature_help(context)
     table.insert(tasks, source:get_signature_help(context))
   end
 
-  sources.current_signature_help = async.task.await_all(tasks):map(function(signature_helps)
+  sources.current_signature_help = async.task.all(tasks):map(function(signature_helps)
     return vim.tbl_filter(function(signature_help) return signature_help ~= nil end, signature_helps)
   end)
   return sources.current_signature_help

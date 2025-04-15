@@ -13,6 +13,13 @@ local function by_preset(handlers)
   end
 end
 
+--- Guess whether we can expand an hidden luasnip snippet
+--- @return boolean
+local function is_hidden_snippet()
+  local ls = require('luasnip')
+  return not require('blink.cmp').is_visible() and not ls.in_snippet() and ls.expandable()
+end
+
 local validate = require('blink.cmp.config.utils').validate
 local snippets = {
   --- @type blink.cmp.SnippetsConfig
@@ -35,7 +42,7 @@ local snippets = {
       default = function(filter) return vim.snippet.active(filter) end,
       luasnip = function(filter)
         local ls = require('luasnip')
-        if ls.expand_or_jumpable() then return true end
+        if is_hidden_snippet() then return true end
         if filter and filter.direction then return ls.jumpable(filter.direction) end
         return ls.in_snippet()
       end,
@@ -48,7 +55,7 @@ local snippets = {
       default = function(direction) vim.snippet.jump(direction) end,
       luasnip = function(direction)
         local ls = require('luasnip')
-        if ls.expandable() then return ls.expand_or_jump() end
+        if is_hidden_snippet() then return ls.expand_or_jump() end
         return ls.jumpable(direction) and ls.jump(direction)
       end,
       mini_snippets = function(direction)

@@ -3,7 +3,7 @@ local files = require('blink.cmp.fuzzy.download.files')
 local git = {}
 
 function git.get_version()
-  return async.task.await_all({ git.get_tag(), git.get_sha() }):map(
+  return async.task.all({ git.get_tag(), git.get_sha() }):map(
     function(results)
       return {
         tag = results[1],

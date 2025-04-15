@@ -40,7 +40,7 @@ sources.providers.lsp = {
   --- NOTE: All of these options may be functions to get dynamic behavior
   --- See the type definitions for more information
   enabled = true, -- Whether or not to enable the provider
-  async = false, -- Whether we should wait for the provider to return before showing the completions
+  async = false, -- Whether we should show the completions before this provider returns, without waiting for it
   timeout_ms = 2000, -- How long to wait for the provider to return before showing completions and treating it as asynchronous
   transform_items = nil, -- Function to transform the items before they're returned
   should_show_items = true, -- Whether or not to show the items
@@ -57,7 +57,7 @@ sources.providers.lsp = {
 ## Terminal and Cmdline Sources
 
 ::: info
-Terminal completions are nightly only! Known bugs in v0.10. Cmdline completions are supported on all versions
+Terminal completions are 0.11+ only! Known bugs in v0.10. Cmdline completions are supported on all versions
 :::
 
 You may use `cmdline` and `term` sources via the `cmdline.sources` and `term.sources` tables. You may see the defaults in the [reference](./reference.md#mode-specific). There's no source for shell completions at the moment, [contributions welcome](https://github.com/Saghen/blink.cmp/issues/1149)!
@@ -78,6 +78,7 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-cmp-ripgrep](https://github.com/niuiic/blink-cmp-rg.nvim)
 - [blink-cmp-ctags](https://github.com/netmute/blink-cmp-ctags)
 - [blink-copilot](https://github.com/fang2hou/blink-copilot)
+- [blink-cmp-supermaven](https://github.com/Huijiro/blink-cmp-supermaven)
 - [blink-cmp-copilot](https://github.com/giuxtaposition/blink-cmp-copilot)
 - [minuet-ai.nvim](https://github.com/milanglacier/minuet-ai.nvim)
 - [blink-emoji.nvim](https://github.com/moyiz/blink-emoji.nvim)
@@ -85,6 +86,7 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-cmp-dictionary](https://github.com/Kaiser-Yang/blink-cmp-dictionary)
 - [blink-cmp-git](https://github.com/Kaiser-Yang/blink-cmp-git)
 - [blink-cmp-spell](https://github.com/ribru17/blink-cmp-spell.git)
+- [blink-cmp-tmux](https://github.com/mgalliou/blink-cmp-tmux)
 - [css-vars.nvim](https://github.com/jdrupal-dev/css-vars.nvim)
 - [blink-cmp-env](https://github.com/bydlw98/blink-cmp-env)
 - [blink-cmp-avante](https://github.com/Kaiser-Yang/blink-cmp-avante)
@@ -92,3 +94,4 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [cmp-pandoc-references](https://github.com/jmbuhr/cmp-pandoc-references)
 - [blink-cmp-im](https://github.com/yehuohan/blink-cmp-im): Input Method source
 - [ecolog.nvim](https://github.com/philosofonusus/ecolog.nvim)
+- [gitmoji.nvim](https://github.com/Dynge/gitmoji.nvim/): Completion for [gitmojis](https://gitmoji.dev/)

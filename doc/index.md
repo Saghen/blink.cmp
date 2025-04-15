@@ -15,7 +15,7 @@
 - [Auto-bracket support](/configuration/completion#auto-brackets) based on semantic tokens
 - [Signature help](/configuration/signature) (experimental, opt-in)
 - [Command line completion](/modes/cmdline)
-- [Terminal completion](/modes/term) (Nightly only! No source for shell completions exists yet, contributions welcome!)
+- [Terminal completion](/modes/term) (0.11+ only! No source for shell completions exists yet, contributions welcome!)
 
 ## Compared to built-in completion
 
@@ -24,9 +24,8 @@
   - Proximity + frecency score bonuses
 - Prefetching to minimize LSP latency
 - Support for [external non-LSP sources](/configuration/sources.html#community-sources) (snippets, path, buffer, git, ripgrep, ...)
-- [Documentation popup](/configuration/completion.html#documentation)
 - [Ghost text](/configuration/completion.html#ghost-text)
-- [Signature help](/configuration/signature.html)
+- [Automatic signature help](/configuration/signature.html)
 - [Auto-bracket support](/configuration/completion.html#auto-brackets) based on semantic tokens
 
 ## Compared to nvim-cmp
@@ -58,3 +57,4 @@
 - [@mikavilpas](https://github.com/mikavilpas) + [@xzbdmw](https://github.com/xzbdmw) Dot-repeat (`.`)
 - [@soifou](https://github.com/soifou)
 - [@FerretDetective](https://github.com/FerretDetective) `complete_func` source
+- [@krovuxdev](https://github.com/krovuxdev) Community moderation and help

@@ -57,6 +57,9 @@ local function on_char_added(char, is_ignored)
 
   -- character is part of a keyword
   elseif fuzzy.is_keyword_character(char) and (config.show_on_keyword or trigger.context ~= nil) then
+    -- typed after auto insertion, refresh the menu
+    if require('blink.cmp.completion.list').preview_undo ~= nil then trigger.context = nil end
+
     trigger.show({ trigger_kind = 'keyword' })
 
   -- nothing matches so hide
@@ -78,11 +81,11 @@ local function on_cursor_moved(event, is_ignored)
   -- but don't send an on_show event upstream
   if is_ignored and event == 'CursorMoved' then
     if trigger.context ~= nil then
-      -- TODO: If we `auto_insert` with the `path` source, we may end up on a trigger character
+      -- If we `auto_insert` with the `path` source, we may end up on a trigger character
       -- i.e. `downloads/`. If we naively update the context, we'll show the menu with the
-      -- existing context. So we clear the context if we're not on a keyword character.
-      -- Is there a better solution here?
-      if not is_keyword then trigger.context = nil end
+      -- existing context
+      -- TODO: is this still needed since we handle this in char added?
+      if require('blink.cmp.completion.list').preview_undo ~= nil then trigger.context = nil end
 
       trigger.show({ send_upstream = false, trigger_kind = 'keyword' })
     end
@@ -97,7 +100,11 @@ local function on_cursor_moved(event, is_ignored)
     and trigger.is_trigger_character(char_under_cursor, true)
 
   -- check if we're still within the bounds of the query used for the context
-  if trigger.context ~= nil and trigger.context:within_query_bounds(cursor) then
+  if
+    trigger.context ~= nil
+    and trigger.context.trigger.kind ~= 'prefetch'
+    and trigger.context:within_query_bounds(cursor, trigger.is_trigger_character(char_under_cursor))
+  then
     trigger.show({ trigger_kind = 'keyword' })
 
   -- check if we've entered insert mode on a trigger character
@@ -245,7 +252,7 @@ function trigger.show(opts)
 
   local initial_trigger_character = trigger.context and trigger.context.trigger.initial_character
     or opts.trigger_character
-  -- reset the initial character if the context iid has changed
+  -- reset the initial character if the context id has changed
   if trigger.context ~= nil and trigger.context.id ~= trigger.current_context_id then
     initial_trigger_character = nil
   end

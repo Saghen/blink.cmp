@@ -133,6 +133,7 @@ completion.accept = {
     -- Default brackets to use for unknown languages
     default_brackets = { '(', ')' },
     -- Overrides the default blocked filetypes
+    -- See: https://github.com/Saghen/blink.cmp/blob/main/lua/blink/cmp/completion/brackets/config.lua#L5-L9
     override_brackets_for_filetypes = {},
     -- Synchronously use the kind of the item to determine if brackets should be added
     kind_resolution = {
@@ -194,6 +195,8 @@ completion.menu.draw = {
   padding = 1,
   -- Gap between columns
   gap = 1,
+  -- Priority of the cursorline highlight, setting this to 0 will render it below other highlights
+  cursorline_priority = 10000,
   -- Use treesitter to highlight the label text for the given list of sources
   treesitter = {},
   -- treesitter = { 'lsp' }
@@ -210,7 +213,8 @@ completion.menu.draw = {
     kind_icon = {
       ellipsis = false,
       text = function(ctx) return ctx.kind_icon .. ctx.icon_gap end,
-      highlight = function(ctx) return ctx.kind_hl end,
+      -- Set the highlight priority to 20000 to beat the cursorline's default priority of 10000
+      highlight = function(ctx) return { { group = ctx.kind_hl, priority = 20000 } } end,
     },
 
     kind = {
@@ -422,7 +426,15 @@ fuzzy = {
     force_system_triple = nil,
 
     -- Extra arguments that will be passed to curl like { 'curl', ..extra_curl_args, ..built_in_args }
-    extra_curl_args = {}
+    extra_curl_args = {},
+
+    proxy = {
+        -- When downloading a prebuilt binary, use the HTTPS_PROXY environment variable
+        from_env = true,
+
+        -- When downloading a prebuilt binary, use this proxy URL. This will ignore the HTTPS_PROXY environment variable
+        url = nil,
+    },
   },
 }
 ```
@@ -459,6 +471,8 @@ sources.providers = {
   lsp = {
     name = 'LSP',
     module = 'blink.cmp.sources.lsp',
+    -- You may enable the buffer source, when LSP is available, by setting this to `{}`
+    -- You may want to set the score_offset of the buffer source to a lower value, such as -5 in this case
     fallbacks = { 'buffer' },
     -- Filter text items from the LSP provider, since we have the buffer provider for that
     transform_items = function(_, items)
@@ -474,7 +488,7 @@ sources.providers = {
     --- See the type definitions for more information
     name = nil, -- Defaults to the id ("lsp" in this case) capitalized when not set
     enabled = true, -- Whether or not to enable the provider
-    async = false, -- Whether we should wait for the provider to return before showing the completions
+    async = false, -- Whether we should show the completions before this provider returns, without waiting for it
     timeout_ms = 2000, -- How long to wait for the provider to return before showing completions and treating it as asynchronous
     transform_items = nil, -- Function to transform the items before they're returned
     should_show_items = true, -- Whether or not to show the items
@@ -544,11 +558,19 @@ sources.providers = {
           :filter(function(buf) return vim.bo[buf].buftype ~= 'nofile' end)
           :totable()
       end,
+      -- buffers when searching with `/` or `?`
+      get_search_bufnrs = function() return { vim.api.nvim_get_current_buf() } end,
     }
   },
 
   cmdline = {
     module = 'blink.cmp.sources.cmdline',
+    -- Disable shell commands on windows, since they cause neovim to hang
+    enabled = function()
+      return vim.fn.has('win32') == 0
+        or vim.fn.getcmdtype() ~= ':'
+        or not vim.fn.getcmdline():match("^[%%0-9,'<>%-]*!")
+    end,
   },
 
   omni = {
@@ -652,7 +674,7 @@ cmdline = {
 ### Terminal
 
 ::: warning
-Terminal completions are nightly only! Known bugs in v0.10
+Terminal completions are 0.11+ only! Known bugs in v0.10
 :::
 
 ```lua

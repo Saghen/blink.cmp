@@ -19,7 +19,7 @@
 ---
 --- @field new fun(opts: blink.cmp.ContextOpts): blink.cmp.Context
 --- @field get_keyword fun(): string
---- @field within_query_bounds fun(self: blink.cmp.Context, cursor: number[]): boolean
+--- @field within_query_bounds fun(self: blink.cmp.Context, cursor: number[], include_start_bound?: boolean): boolean
 ---
 --- @field get_mode fun(): blink.cmp.Mode
 --- @field get_cursor fun(): number[]
@@ -75,13 +75,19 @@ function context.get_keyword()
 end
 
 --- @param cursor number[]
+--- Whether to include the start boundary as inside of the query
+--- I.e. start_col = 1 (one indexed), cursor[2] = 0 (zero indexed) would be considered within the query bounds with this flag enabled.
+--- @param include_start_bound? boolean
 --- @return boolean
-function context:within_query_bounds(cursor)
+function context:within_query_bounds(cursor, include_start_bound)
   local row, col = cursor[1], cursor[2]
   col = col + 1 -- Convert from 0-indexed to 1-indexed
 
   local bounds = self.bounds
-  return row == bounds.line_number and col >= bounds.start_col and col <= (bounds.start_col + bounds.length)
+  if include_start_bound then
+    return row == bounds.line_number and col >= bounds.start_col and col <= (bounds.start_col + bounds.length)
+  end
+  return row == bounds.line_number and col > bounds.start_col and col <= (bounds.start_col + bounds.length)
 end
 
 function context.get_mode()

@@ -2,6 +2,7 @@
 --- @field align_to? string | 'none' | 'cursor' Align the window to the component with the given name, or to the cursor
 --- @field padding? number | number[] Padding on the left and right of the grid
 --- @field gap? number Gap between columns
+--- @field cursorline_priority? number Priority of the background highlight for the cursorline, defaults to 10000. Setting this to 0 will render it below other highlights
 --- @field columns? blink.cmp.DrawColumnDefinition[] | fun(context: blink.cmp.Context): blink.cmp.DrawColumnDefinition[] Components to render, grouped by column
 --- @field components? table<string, blink.cmp.DrawComponent> Component definitions
 --- @field treesitter? string[] Use treesitter to highlight the label text of completions from these sources
@@ -9,7 +10,7 @@
 --- @class blink.cmp.DrawHighlight
 --- @field [number] number Start and end index of the highlight
 --- @field group? string Highlight group
---- @field params? table Additional parameters passed as the `params` field of the highlight
+--- @field priority? number Priority of the highlight
 ---
 --- @class blink.cmp.DrawWidth
 --- @field fixed? number Fixed width

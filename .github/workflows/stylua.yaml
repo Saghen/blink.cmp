@@ -7,7 +7,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "**/*.lua"
+      - .stylua.toml
+      - .github/workflows/stylua.yaml
   pull_request:
+    paths:
+      - "**/*.lua"
+      - .stylua.toml
+      - .github/workflows/stylua.yaml
 
 env:
   CLICOLOR: 1
@@ -26,4 +34,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: latest
-          args: --color=always --check lua
+          args: --color=always --check .

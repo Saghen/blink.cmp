@@ -1,3 +1,47 @@
+## [1.1.1](https://github.com/Saghen/blink.cmp/compare/v1.1.0...v1.1.1) (2025-04-03)
+
+### Bug Fixes
+
+* resolve failing on 0.10 due to missing client wrap ([f3f4bb8](https://github.com/Saghen/blink.cmp/commit/f3f4bb8aac48cd342f74543548bd97d71e3f6343))
+
+## [1.1.0](https://github.com/Saghen/blink.cmp/compare/v1.0.0...v1.1.0) (2025-04-03)
+
+### Highlights
+
+- `<Tab>` now shows the menu when ghost text is visible in cmdline with `noice.nvim`
+- Many fixes to menu unexpectedly opening or staying open (i.e. after pressing `<Tab>`)
+- `frizbee` (fuzzy matcher) updated to `v0.3.0`
+  - Capitals now receive a bonus similar to delimiters, for better matching on PascalCase and camelCase (i.e. `fb` matched on `fooBar` beats `foobar`)
+  - Delimiters no longer incorrectly receive a bonus when coming after a delimiter (i.e. `f_b` matched on `foo__bar` no longer beats `foo_bar`)
+- Cmdline shell commands have been disabled by default on windows
+  - You may re-enable them by overriding the logic with `sources.providers.cmdline.enabled = true`
+- [Recipe for kind icon with background](https://cmp.saghen.dev/recipes#kind-icon-background)
+
+### Features
+
+* bump frizbee to 0.3.0 ([46188c1](https://github.com/Saghen/blink.cmp/commit/46188c1092f81b05b777f9f634d509ffaeb53917)), closes [#1147](https://github.com/Saghen/blink.cmp/issues/1147) [#1473](https://github.com/Saghen/blink.cmp/issues/1473)
+* **cmdline:** show menu on tab when ghost text visible ([380548f](https://github.com/Saghen/blink.cmp/commit/380548f9820082be5b5a733586b7fe8fd3560fbf))
+* configure lua_ls type checking ([c7ceb78](https://github.com/Saghen/blink.cmp/commit/c7ceb78ec51594ee2ce0599bf4fbcd0173e2398c))
+* set kind icon default priority to `20000` ([f1e1940](https://github.com/Saghen/blink.cmp/commit/f1e1940a31f4b748559851a7adca43506a55a991))
+* support highlight priority for menu draw ([bf2b10e](https://github.com/Saghen/blink.cmp/commit/bf2b10e85fe08ba7891ae72802e818fe9af05f9b))
+* use non-deprecated LSP methods when supported ([033fbcc](https://github.com/Saghen/blink.cmp/commit/033fbcc7ec55546aa0c3889aa50b6e76915c3f62))
+
+### Bug Fixes
+
+* cmdline ignoring two cursor moved events after auto insert ([40adb0d](https://github.com/Saghen/blink.cmp/commit/40adb0d6c596d533240a1d3c5e7a66161636104a))
+* disable cmdline shell completions on windows by default ([3350451](https://github.com/Saghen/blink.cmp/commit/335045136a8f2924c04aefd13207dd6874df654e)), closes [#1529](https://github.com/Saghen/blink.cmp/issues/1529) [#795](https://github.com/Saghen/blink.cmp/issues/795) [#1167](https://github.com/Saghen/blink.cmp/issues/1167)
+* **docs:** show_documentation crashing when documentation is nil ([#1552](https://github.com/Saghen/blink.cmp/issues/1552)) ([6fe420a](https://github.com/Saghen/blink.cmp/commit/6fe420a3d122ff0d613ea2fc4f70cff2eb16e69e))
+* ignore prefetch context for cursor moved updates ([a8c5684](https://github.com/Saghen/blink.cmp/commit/a8c5684ba1c996f165ef0956feb90c66d7e8bd81)), closes [#1563](https://github.com/Saghen/blink.cmp/issues/1563) [#1569](https://github.com/Saghen/blink.cmp/issues/1569)
+* maintain menu when cursor moves onto trigger character ([61178aa](https://github.com/Saghen/blink.cmp/commit/61178aa4d11bb1d1b74e30921511b025811b983b)), closes [#1559](https://github.com/Saghen/blink.cmp/issues/1559)
+* menu position for multibyte characters ([#1573](https://github.com/Saghen/blink.cmp/issues/1573)) ([bd086ef](https://github.com/Saghen/blink.cmp/commit/bd086ef156ca19385114d7bd3a0d870e17dd6800))
+* refresh the menu on char after auto insertion ([6f3baea](https://github.com/Saghen/blink.cmp/commit/6f3baea09209c52f552ffd318d6da498716dd90f)), closes [#1568](https://github.com/Saghen/blink.cmp/issues/1568)
+* **snippet:** correctly expand luasnip hidden snippet ([#1521](https://github.com/Saghen/blink.cmp/issues/1521)) ([c02a45b](https://github.com/Saghen/blink.cmp/commit/c02a45b3f6ba212789095b9f18e3093683ff5537)), closes [#f0f68](https://github.com/Saghen/blink.cmp/issues/f0f68) [#1503](https://github.com/Saghen/blink.cmp/issues/1503) [#1515](https://github.com/Saghen/blink.cmp/issues/1515)
+* **snippet:** keep luasnip item in completion list on exact match ([#1554](https://github.com/Saghen/blink.cmp/issues/1554)) ([623ed75](https://github.com/Saghen/blink.cmp/commit/623ed751616726e78f547cbba19cb6829011da3d)), closes [#1553](https://github.com/Saghen/blink.cmp/issues/1553)
+* **trigger:** adjust query bounds logic to handle 0-indexed cursor ([#1559](https://github.com/Saghen/blink.cmp/issues/1559)) ([b83ffad](https://github.com/Saghen/blink.cmp/commit/b83ffad9fb7126d32c2c086bd331f16392f29104)), closes [#1500](https://github.com/Saghen/blink.cmp/issues/1500)
+* use max of label, insert_text and filter_text guessed edit ranges ([7d5ddba](https://github.com/Saghen/blink.cmp/commit/7d5ddbae953f42f787a62972f563951f30438eec)), closes [#1340](https://github.com/Saghen/blink.cmp/issues/1340)
+* use regular trigger characters for keeping menu open ([6172f8f](https://github.com/Saghen/blink.cmp/commit/6172f8fba999bb83faa532a0bdf5910fcd7041c0))
+* **window:** correctly extract `CursorLine` winhiglight ([#1536](https://github.com/Saghen/blink.cmp/issues/1536)) ([e28d61e](https://github.com/Saghen/blink.cmp/commit/e28d61ee057239c437aaa5aa48106c5d4eb303a3)), closes [#1513](https://github.com/Saghen/blink.cmp/issues/1513)
+
 ## [1.0.0](https://github.com/Saghen/blink.cmp/compare/v0.14.2...v1.0.0) (2025-03-25)
 
 10 months, 133 contributors and 1214 commits later... blink.cmp is stable! Special thanks to:

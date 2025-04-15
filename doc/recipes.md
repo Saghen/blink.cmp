@@ -6,10 +6,27 @@ Feel free to open a PR with any of your own recipes!
 
 ## General
 
-### Disable per filetype
+### Disable per filetype/buffer
+
+You may change the `enabled` function to return `false` for any case you'd like to disable completion.
 
 ```lua
 enabled = function() return not vim.tbl_contains({ "lua", "markdown" }, vim.bo.filetype) end,
+```
+
+or set `vim.b.completion = false` on the buffer
+
+```lua
+-- via an autocmd
+vim.api.nvim_create_autocmd('BufEnter', {
+  pattern = '*.lua',
+  callback = function()
+    vim.b.completion = false
+  end,
+})
+
+-- or via ftplugin/some-filetype.lua
+vim.b.completion = false
 ```
 
 ### Disable completion in *only* shell command mode
@@ -39,7 +56,7 @@ local has_words_before = function()
   if col == 0 then
     return false
   end
-  local line = vim.api.nvim_get_current_line():sub()
+  local line = vim.api.nvim_get_current_line()
   return line:sub(col, col):match("%s") == nil
 end
 
@@ -152,6 +169,8 @@ end
 
 ## Fuzzy (sorting/filtering)
 
+[See the full docs](./configuration/fuzzy.md)
+
 ### Always prioritize exact matches
 
 By default, the fuzzy matcher will give a bonus score of 4 to exact matches. If you want to ensure that exact matches are always prioritized, you may set:
@@ -186,7 +205,48 @@ fuzzy = {
 }
 ```
 
+### Exclude keywords/constants from autocomplete
+
+Removes language keywords/constants (if, else, while, etc.) provided by the language server from completion results. Useful if you prefer to use builtin or custom snippets for such constructs.
+
+```lua
+sources = {
+  providers = {
+    lsp = {
+      name = 'LSP',
+      module = 'blink.cmp.sources.lsp',
+      transform_items = function(_, items)
+        return vim.tbl_filter(function(item)
+          return item.kind ~= require('blink.cmp.types').CompletionItemKind.Keyword
+        end, items)
+      end,
+    },
+  },
+}
+```
+
 ## Completion menu drawing
+
+[See the full docs](./configuration/completion.md#menu-draw)
+
+### Kind icon background
+
+You'll need to configure your highlights (`BlinkCmpKind` or `BlinkCmpKind<kind>`) to your desired background and foreground colors.
+
+```lua
+completion = {
+  menu = {
+    draw = {
+      padding = { 0, 1 }, -- padding only on right side
+      components = {
+        kind_icon = {
+          text = function(ctx) return ' ' .. ctx.kind_icon .. ctx.icon_gap .. ' ' end
+        }
+      }
+    }
+  }
+}
+```
 
 ### `mini.icons`
 
@@ -269,6 +329,8 @@ completion = {
 ```
 
 ## Sources
+
+[See the full docs](./configuration/sources.md)
 
 ### Buffer completion from all open buffers
 

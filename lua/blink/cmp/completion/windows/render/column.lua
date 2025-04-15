@@ -108,6 +108,7 @@ function column:get_line_highlights(line_idx)
             offset + (highlight[2] or #text),
             group = highlight.group,
             params = highlight.params,
+            priority = highlight.priority,
           })
         end
       end

@@ -251,6 +251,8 @@ Manages the appearance of the completion menu. You may prevent the menu from aut
 
 ### Menu Draw <!-- panvimdoc-ignore-start --><Badge type="info"><a href="./reference#completion-menu-draw">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
 
+[Check out the recipes!](../recipes.md#completion-menu-drawing)
+
 blink.cmp uses a grid-based layout to render the completion menu. The components, defined in `draw.components[string]`, define `text` and `highlight` functions which are called for each completion item. The `highlight` function will be called only when the item appears on screen, so expensive operations such as Treesitter highlighting may be performed. The components may define their min and max width, where `ellipsis = true` (enabled by default), will draw the `…` character when the text is truncated. Setting `width.fill = true` will fill the remaining space, effectively making subsequent components right aligned, with respect to their column.
 
 Columns effectively allow you to vertically align a set of components. Each column, defined as an array in `draw.columns`, will be rendered for all of the completion items, where the longest rendered row will determine the width of the column. You may define `gap = number` in your column to insert a gap between components.
@@ -271,6 +273,22 @@ completion.menu.draw.columns = { { "label", "label_description", gap = 1 }, { "k
   - If the `label_description` is missing from your items, ensure you've [setup LSP capabilities](../installation) and that your LSP supports the feature
 - `source_name`: Shows the name of the source that provided the item, from the `sources.providers.*.name` (e.g. `LSP`)
 - `source_id`: Shows the id of the source that provided the item, from the `sources.providers[id]` (e.g. `lsp`)
+
+#### Cursorline
+
+The cursorline background will be rendered with a priority of `10000` to ensure that highlights with backgrounds (such as those from the default theme) will be overridden by the cursorline. If you'd like to use a background in your highlight, set the priority to `10001` or higher.
+
+```lua
+completion.menu.draw.components.label.kind_icon.highlight = function(ctx)
+  return { { group = ctx.kind_hl, priority = 20000 } }
+end
+```
+
+Or you may set the cursorline highlight priority to `0`
+
+```lua
+completion.menu.draw.cursorline_priority = 0
+```
 
 ### Treesitter
 

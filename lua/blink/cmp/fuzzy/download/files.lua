@@ -59,16 +59,14 @@ function files.get_checksum_for_file(path)
 end
 
 function files.verify_checksum()
-  return async.task
-    .await_all({ files.get_checksum(), files.get_checksum_for_file(files.lib_path) })
-    :map(function(checksums)
-      assert(#checksums == 2, 'Expected 2 checksums, got ' .. #checksums)
-      assert(checksums[1] and checksums[2], 'Expected checksums to be non-nil')
-      assert(
-        checksums[1] == checksums[2],
-        'Checksum of pre-built binary does not match. Expected "' .. checksums[1] .. '", got "' .. checksums[2] .. '"'
-      )
-    end)
+  return async.task.all({ files.get_checksum(), files.get_checksum_for_file(files.lib_path) }):map(function(checksums)
+    assert(#checksums == 2, 'Expected 2 checksums, got ' .. #checksums)
+    assert(checksums[1] and checksums[2], 'Expected checksums to be non-nil')
+    assert(
+      checksums[1] == checksums[2],
+      'Checksum of pre-built binary does not match. Expected "' .. checksums[1] .. '", got "' .. checksums[2] .. '"'
+    )
+  end)
 end
 
 --- Prebuilt binary ---

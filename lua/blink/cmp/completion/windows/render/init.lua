@@ -47,6 +47,7 @@ function renderer.new(draw)
               hl_mode = 'combine',
               hl_eol = true,
               ephemeral = true,
+              priority = highlight.priority,
             })
           end
           offset = offset + #text + self.gap

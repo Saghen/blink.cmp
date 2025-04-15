@@ -28,8 +28,9 @@ function docs.render_detail_and_documentation(opts)
 
   local doc_lines = {}
   if opts.documentation ~= nil then
-    local doc = type(opts.documentation) == 'string' and opts.documentation or opts.documentation.value
-    doc_lines = docs.split_lines(doc)
+    local doc = opts.documentation
+    if type(opts.documentation) == 'string' then doc = { kind = 'plaintext', value = opts.documentation } end
+    vim.lsp.util.convert_input_to_markdown_lines(doc, doc_lines)
   end
 
   ---@type string[]
@@ -74,6 +75,8 @@ end
 --- TODO: only render what's visible
 function docs.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
   local Range = require('vim.treesitter._range')
+  local treesitter_priority = vim.fn.has('nvim-0.11') == 1 and vim.hl.priorities.treesitter
+    or vim.highlight.priorities.treesitter
 
   local root_lang = vim.treesitter.language.get_lang(filetype)
   if root_lang == nil then return end
@@ -109,7 +112,7 @@ function docs.highlight_with_treesitter(bufnr, filetype, start_line, end_line)
         -- The "priority" attribute can be set at the pattern level or on a particular capture
         local priority = (
           tonumber(metadata.priority or metadata[capture] and metadata[capture].priority)
-          or vim.highlight.priorities.treesitter
+          or treesitter_priority
         )
 
         -- The "conceal" attribute can be set at the pattern level or on a particular capture

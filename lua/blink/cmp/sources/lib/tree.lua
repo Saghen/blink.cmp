@@ -80,7 +80,7 @@ function tree:get_completions(context, on_items_by_provider)
         -- run dependents if the source returned 0 items
         nodes_falling_back[node.id] = true
         local tasks = vim.tbl_map(function(dependent) return get_completions_for_node(dependent) end, node.dependents)
-        async.task.await_all(tasks):map(resolve):catch(reject)
+        async.task.all(tasks):map(resolve):catch(reject)
       end)
     end)
   end
@@ -88,7 +88,7 @@ function tree:get_completions(context, on_items_by_provider)
   -- run the top level nodes and let them fall back to their dependents if needed
   local tasks = vim.tbl_map(function(node) return get_completions_for_node(node) end, self:get_top_level_nodes())
   return async.task
-    .await_all(tasks)
+    .all(tasks)
     :map(function()
       should_push_upstream = true
 

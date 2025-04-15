@@ -1,9 +1,11 @@
+local typescript_exceptions = function(ctx) return ctx.line:find('^%s*import%s') == nil end
+
 return {
   -- stylua: ignore
   blocked_filetypes = {
     'sql', 'ruby', 'perl', 'lisp', 'scheme', 'clojure',
     'prolog', 'vb', 'elixir', 'smalltalk', 'applescript',
-    'elm', 'rust', 'nu'
+    'elm', 'rust', 'nu', 'cpp'
   },
   per_filetype = {
     -- languages with a space
@@ -45,6 +47,11 @@ return {
           and ctx.line:find('^%s*from%s') == nil
           and ctx.line:find('^%s*except%s') == nil
       end,
+      -- ignore `import ...` statements
+      javascript = typescript_exceptions,
+      javascriptreact = typescript_exceptions,
+      typescript = typescript_exceptions,
+      typescriptreact = typescript_exceptions,
     },
   },
 }

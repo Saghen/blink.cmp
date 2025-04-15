@@ -8,9 +8,11 @@ local utils = require('blink.cmp.lib.window.utils')
 --- @field max_width? number
 --- @field max_height? number
 --- @field cursorline? boolean
+--- @field cursorline_priority? number
 --- @field default_border? blink.cmp.WindowBorder
 --- @field border? blink.cmp.WindowBorder
 --- @field wrap? boolean
+--- @field linebreak? boolean
 --- @field winblend? number
 --- @field winhighlight? string
 --- @field scrolloff? number
@@ -64,6 +66,7 @@ function win.new(name, config)
     cursorline = config.cursorline or false,
     border = utils.pick_border(config.border, config.default_border),
     wrap = config.wrap or false,
+    linebreak = config.linebreak or false,
     winblend = config.winblend or 0,
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
@@ -72,7 +75,7 @@ function win.new(name, config)
   }
   self.redraw_queued = false
 
-  self.cursor_line = require('blink.cmp.lib.window.cursor_line').new(name)
+  self.cursor_line = require('blink.cmp.lib.window.cursor_line').new(name, config.cursorline_priority)
 
   if self.config.scrollbar then
     -- Enable the gutter if there's no border, or the border is a space
@@ -123,6 +126,7 @@ function win:open()
   vim.api.nvim_set_option_value('winblend', self.config.winblend, { win = self.id })
   vim.api.nvim_set_option_value('winhighlight', self.config.winhighlight, { win = self.id })
   vim.api.nvim_set_option_value('wrap', self.config.wrap, { win = self.id })
+  vim.api.nvim_set_option_value('linebreak', self.config.linebreak, { win = self.id })
   vim.api.nvim_set_option_value('foldenable', false, { win = self.id })
   vim.api.nvim_set_option_value('conceallevel', 2, { win = self.id })
   vim.api.nvim_set_option_value('concealcursor', 'n', { win = self.id })
