@@ -41,32 +41,8 @@ function download.ensure_downloaded(callback)
           { 'fuzzy matching library', 'DiagnosticInfo' },
         })
 
-        -- downloading enabled but not on a git tag, error
-        if download_config.download and target_git_tag == nil then
-          if target_git_tag == nil then
-            utils.notify({
-              { "Couldn't download the updated " },
-              { 'fuzzy matching library', 'DiagnosticInfo' },
-              { ' due to not being on a ' },
-              { 'git tag', 'DiagnosticInfo' },
-              { '. Try building from source via ' },
-              { " build = 'cargo build --release' ", 'DiagnosticVirtualTextInfo' },
-              { ' in your lazy.nvim spec and re-installing (requires Rust nightly), or switch to a ' },
-              { 'git tag', 'DiagnosticInfo' },
-              { ' via ' },
-              { " version = '1.*' ", 'DiagnosticVirtualTextInfo' },
-              { ' in your lazy.nvim spec. Or ignore this error by enabling ' },
-              { 'fuzzy.prebuilt_binaries.', 'DiagnosticInfo' },
-              { 'ignore_version_mismatch', 'DiagnosticWarn' },
-              { '. Or force a specific version via ' },
-              { 'fuzzy.prebuilt_binaries.', 'DiagnosticInfo' },
-              { 'force_version', 'DiagnosticWarn' },
-            })
-            return false
-          end
-
         -- downloading is disabled, error
-        else
+        if not download_config.download then
           utils.notify({
             { "Couldn't update fuzzy matching library due to github downloads being disabled." },
             { ' Try setting ' },
@@ -75,6 +51,28 @@ function download.ensure_downloaded(callback)
             { 'fuzzy.prebuilt_binaries.', 'DiagnosticInfo' },
             { 'ignore_version_mismatch', 'DiagnosticWarn' },
             { ' or set ' },
+            { 'fuzzy.prebuilt_binaries.', 'DiagnosticInfo' },
+            { 'force_version', 'DiagnosticWarn' },
+          })
+          return false
+
+        -- downloading enabled but not on a git tag, error
+        elseif target_git_tag == nil then
+          utils.notify({
+            { "Couldn't download the updated " },
+            { 'fuzzy matching library', 'DiagnosticInfo' },
+            { ' due to not being on a ' },
+            { 'git tag', 'DiagnosticInfo' },
+            { '. Try building from source via ' },
+            { " build = 'cargo build --release' ", 'DiagnosticVirtualTextInfo' },
+            { ' in your lazy.nvim spec and re-installing (requires Rust nightly), or switch to a ' },
+            { 'git tag', 'DiagnosticInfo' },
+            { ' via ' },
+            { " version = '1.*' ", 'DiagnosticVirtualTextInfo' },
+            { ' in your lazy.nvim spec. Or ignore this error by enabling ' },
+            { 'fuzzy.prebuilt_binaries.', 'DiagnosticInfo' },
+            { 'ignore_version_mismatch', 'DiagnosticWarn' },
+            { '. Or force a specific version via ' },
             { 'fuzzy.prebuilt_binaries.', 'DiagnosticInfo' },
             { 'force_version', 'DiagnosticWarn' },
           })
