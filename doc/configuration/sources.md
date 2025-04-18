@@ -95,3 +95,4 @@ The command `:BlinkCmp status` can be used to view which sources providers are e
 - [blink-cmp-im](https://github.com/yehuohan/blink-cmp-im): Input Method source
 - [ecolog.nvim](https://github.com/philosofonusus/ecolog.nvim)
 - [gitmoji.nvim](https://github.com/Dynge/gitmoji.nvim/): Completion for [gitmojis](https://gitmoji.dev/)
+- [blink-cmp-agda-symbols](https://github.com/4e554c4c/blink-cmp-agda-symbols): Completion for [Agda](https://wiki.portal.chalmers.se/agda/pmwiki.php)
