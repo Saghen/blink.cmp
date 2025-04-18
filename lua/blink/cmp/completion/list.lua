@@ -183,7 +183,8 @@ function list.select_next(opts)
   -- end of the list
   if list.selected_item_idx == #list.items then
     -- preselect is not enabled, we go back to no selection
-    if not list.get_selection_mode(list.context).preselect then return list.select(nil, opts) end
+    local select_mode = list.get_selection_mode(list.context)
+    if not select_mode.preselect or select_mode.auto_insert then return list.select(nil, opts) end
 
     -- cycling around has been disabled, ignore
     if not list.config.cycle.from_bottom then return end
@@ -209,7 +210,8 @@ function list.select_prev(opts)
   -- start of the list
   if list.selected_item_idx == 1 then
     -- auto_insert is enabled, we go back to no selection
-    if list.get_selection_mode(list.context).auto_insert then return list.select(nil, opts) end
+    local select_mode = list.get_selection_mode(list.context)
+    if not select_mode.preselect or select_mode.auto_insert then return list.select(nil, opts) end
 
     -- cycling around has been disabled, ignore
     if not list.config.cycle.from_top then return end
