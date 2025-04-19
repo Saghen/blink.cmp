@@ -20,7 +20,7 @@ function cmp.setup(opts)
   config.merge_with(opts)
 
   require('blink.cmp.fuzzy.download').ensure_downloaded(function(err, fuzzy_implementation)
-    if err then return vim.notify(err, vim.log.levels.ERROR) end
+    if err then error(err) end
     require('blink.cmp.fuzzy').set_implementation(fuzzy_implementation)
 
     -- setup highlights, keymap, completion, commands and signature help

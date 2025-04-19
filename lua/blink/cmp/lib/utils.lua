@@ -163,4 +163,42 @@ function utils.with_no_autocmds(cb)
   return result_or_err
 end
 
+---@type boolean Have we passed UIEnter?
+local _ui_entered = vim.v.vim_did_enter == 1 -- technically for VimEnter, but should be good enough for when we're lazy loaded
+---@type function[] List of notifications.
+local _notification_queue = {}
+
+--- Fancy notification wrapper.
+--- @param msg [string, string?][]
+--- @param lvl? number
+function utils.notify(msg, lvl)
+  local header_hl = 'DiagnosticVirtualTextWarn'
+  if lvl == vim.log.levels.ERROR then
+    header_hl = 'DiagnosticVirtualTextError'
+  elseif lvl == vim.log.levels.INFO then
+    header_hl = 'DiagnosticVirtualTextInfo'
+  end
+
+  table.insert(msg, 1, { ' blink.cmp ', header_hl })
+  table.insert(msg, 2, { ' ' })
+
+  if _ui_entered then
+    -- After UIEnter emit message immediately
+    vim.api.nvim_echo(msg, true, { err = true, verbose = false })
+  else
+    -- Queue notification for the UIEnter event.
+    table.insert(_notification_queue, function() vim.api.nvim_echo(msg, true, { verbose = false }) end)
+  end
+end
+
+vim.api.nvim_create_autocmd('UIEnter', {
+  callback = function()
+    _ui_entered = true
+
+    for _, fn in ipairs(_notification_queue) do
+      pcall(fn)
+    end
+  end,
+})
+
 return utils
