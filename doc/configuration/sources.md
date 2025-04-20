@@ -54,6 +54,19 @@ sources.providers.lsp = {
 }
 ```
 
+### Show Buffer completions with LSP
+
+By default, the buffer source will only show when the LSP source returns no items. You may always show the buffer source via:
+
+```lua
+sources = {
+  providers = {
+    -- defaults to `{ 'buffer' }`
+    lsp = { fallbacks = {} }
+  }
+}
+```
+
 ## Terminal and Cmdline Sources
 
 ::: info
@@ -71,6 +84,8 @@ Blink can use `nvim-cmp` sources through a compatibility layer developed by [ste
 The command `:BlinkCmp status` can be used to view which sources providers are enabled or not enabled.
 
 ## Community sources
+
+See [blink.compat](https://github.com/Saghen/blink.compat) for using `nvim-cmp` sources
 
 - [lazydev](https://github.com/folke/lazydev.nvim)
 - [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
