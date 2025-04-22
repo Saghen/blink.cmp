@@ -325,6 +325,7 @@ local dot_repeat_buffer = nil
 local function get_dot_repeat_buffer()
   if dot_repeat_buffer == nil or not vim.api.nvim_buf_is_valid(dot_repeat_buffer) then
     dot_repeat_buffer = vim.api.nvim_create_buf(false, true)
+    vim.bo[dot_repeat_buffer].filetype = 'blink-cmp-dot-repeat'
     vim.bo[dot_repeat_buffer].buftype = 'nofile'
   end
   return dot_repeat_buffer
