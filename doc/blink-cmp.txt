@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 20
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 22
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -2589,7 +2589,8 @@ enabled = nil } } }
 
 COMMAND LINE (CMDLINE)                *blink-cmp-modes-command-line-(cmdline)*
 
-By default, blink.cmp enabled cmdline completions (`cmdline.enabled = true`),
+
+By default, cmdline completions are enabled (`cmdline.enabled = true`),
 matching the behavior of the built-in `cmdline` completion:
 
 - Menu will not show automatically (`cmdline.completion.menu.auto_show = false`)
