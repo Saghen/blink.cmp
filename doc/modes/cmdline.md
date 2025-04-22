@@ -1,6 +1,17 @@
 # Command line (cmdline)
 
-By default, blink.cmp enabled cmdline completions (`cmdline.enabled = true`), matching the behavior of the built-in `cmdline` completion:
+::: info
+If you want cmdline's behavior to match the default mode, try the following config:
+
+```lua
+cmdline = {
+  keymap = { preset = 'inherit' },
+  completion = { menu = { auto_show = true } },
+},
+```
+:::
+
+By default, cmdline completions are enabled (`cmdline.enabled = true`), matching the behavior of the built-in `cmdline` completion:
 
 - Menu will not show automatically (`cmdline.completion.menu.auto_show = false`)
 - Pressing `<Tab>` will show the completion menu and insert the first item
