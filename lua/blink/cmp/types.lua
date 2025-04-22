@@ -11,6 +11,8 @@
 --- @field kind_name? string
 --- @field kind_icon? string
 --- @field kind_hl? string
+--- @field exact? boolean
+--- @field score? number
 
 return {
   -- some plugins mutate the vim.lsp.protocol.CompletionItemKind table
