@@ -26,9 +26,19 @@ function keymap.merge_mappings(existing_mappings, new_mappings)
   return merged_mappings
 end
 
----@param keymap_config blink.cmp.KeymapConfig
-function keymap.get_mappings(keymap_config)
+--- @param keymap_config blink.cmp.KeymapConfig
+--- @param mode blink.cmp.Mode
+function keymap.get_mappings(keymap_config, mode)
   local mappings = vim.deepcopy(keymap_config)
+
+  -- Remove unused keys
+  if mode ~= 'default' then
+    for key, commands in pairs(mappings) do
+      if key ~= 'preset' and not require('blink.cmp.keymap.apply').has_insert_command(commands) then
+        mappings[key] = nil
+      end
+    end
+  end
 
   -- Handle preset
   if mappings.preset then
@@ -48,7 +58,7 @@ function keymap.setup()
   local config = require('blink.cmp.config')
   local apply = require('blink.cmp.keymap.apply')
 
-  local mappings = keymap.get_mappings(config.keymap)
+  local mappings = keymap.get_mappings(config.keymap, 'default')
 
   -- We set on the buffer directly to avoid buffer-local keymaps (such as from autopairs)
   -- from overriding our mappings. We also use InsertEnter to avoid conflicts with keymaps
@@ -70,14 +80,14 @@ function keymap.setup()
   for _, mode in ipairs({ 'cmdline', 'term' }) do
     local mode_config = config[mode]
     if mode_config.enabled then
-      local mode_keymap = mode_config.keymap
+      local mode_keymap = vim.deepcopy(mode_config.keymap)
 
       if mode_config.keymap.preset == 'inherit' then
         mode_keymap = vim.tbl_deep_extend('force', config.keymap, mode_config.keymap)
         mode_keymap.preset = config.keymap.preset
       end
 
-      local mode_mappings = keymap.get_mappings(mode_keymap)
+      local mode_mappings = keymap.get_mappings(mode_keymap, mode)
       apply[mode .. '_keymaps'](mode_mappings)
     end
   end

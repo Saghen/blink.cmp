@@ -39,11 +39,7 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
   -- snippet mode: uses only snippet commands
   for key, commands in pairs(keys_to_commands) do
-    local has_snippet_command = false
-    for _, command in ipairs(commands) do
-      if vim.tbl_contains(snippet_commands, command) or type(command) == 'function' then has_snippet_command = true end
-    end
-    if not has_snippet_command or #commands == 0 then goto continue end
+    if not apply.has_snippet_commands(commands) or #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('s', key)
     apply.set('s', key, function()
@@ -73,6 +69,13 @@ end
 function apply.has_insert_command(commands)
   for _, command in ipairs(commands) do
     if not vim.tbl_contains(snippet_commands, command) and command ~= 'fallback' then return true end
+  end
+  return false
+end
+
+function apply.has_snippet_commands(commands)
+  for _, command in ipairs(commands) do
+    if vim.tbl_contains(snippet_commands, command) or type(command) == 'function' then return true end
   end
   return false
 end
@@ -110,6 +113,11 @@ function apply.term_keymaps(keys_to_commands)
 end
 
 function apply.cmdline_keymaps(keys_to_commands)
+  -- skip if we've already applied the keymaps
+  for _, mapping in ipairs(vim.api.nvim_get_keymap('c')) do
+    if mapping.desc == 'blink.cmp' then return end
+  end
+
   -- cmdline mode: uses only insert commands
   for key, commands in pairs(keys_to_commands) do
     if not apply.has_insert_command(commands) or #commands == 0 then goto continue end
