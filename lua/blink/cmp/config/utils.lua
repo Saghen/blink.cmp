@@ -34,7 +34,23 @@ function utils.validate(path, tbl, source)
 
   -- check for erroneous fields
   for k, _ in pairs(source) do
-    if tbl[k] == nil then error(path .. '.' .. k .. ': unexpected field found in configuration') end
+    if tbl[k] == nil then
+      ---@type string[]
+      local path_parts = vim.split(path, '.', { plain = true })
+      local msg = {}
+
+      for _, part in ipairs(path_parts) do
+        table.insert(msg, { ' ' .. part .. ' ', 'DiagnosticVirtualTextInfo' })
+        table.insert(msg, { ' → ' })
+      end
+
+      --- Highlight the last segment in ERROR since that's
+      --- where the issue lies.
+      table.insert(msg, { ' ' .. k .. ' ', 'DiagnosticVirtualTextError' })
+      table.insert(msg, { ' Unexpected field in configuration!' })
+
+      require('blink.cmp.lib.utils').notify(msg)
+    end
   end
 end
 
