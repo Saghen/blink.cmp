@@ -1329,8 +1329,8 @@ INSTALLATION ~
 PREBUILT BINARIES (DEFAULT ON A RELEASE TAG)
 
 By default, Blink will download a prebuilt binary from the latest release, when
-you’re on a release tag (via `version = '*'` on `lazy.nvim` for example). If
-you’re not on a release tag, you may force a specific version via
+you’re on a release tag (via `version = '1.*'` on `lazy.nvim` for example).
+If you’re not on a release tag, you may force a specific version via
 `fuzzy.prebuilt_binaries.force_version`. See the latest release
 <https://github.com/saghen/blink.cmp/releases/latest> for supported systems.
 See `prebuilt_binaries` section of the reference configuration
