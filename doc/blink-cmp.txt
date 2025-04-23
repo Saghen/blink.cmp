@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 22
+*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 23
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -40,12 +40,12 @@ Table of Contents                                *blink-cmp-table-of-contents*
 ==============================================================================
 1. Introduction                                       *blink-cmp-introduction*
 
-**blink.cmp** is a completion plugin with support for LSPs and external sources
-that updates on every keystroke with minimal overhead (0.5-4ms async). It uses
-an optional </configuration/fuzzy.html#rust-vs-lua-implementation> custom fuzzy
-matcher <https://github.com/saghen/frizbee> to easily handle 20k+ items. It
-provides extensibility via pluggable sources (LSP, snippets, etc), component
-based rendering and scripting for the configuration.
+**blink.cmp** is a completion plugin with support for LSPs, cmdline, signature
+help and snippets. It uses an optional
+<https://cmp.saghen.dev/configuration/fuzzy.html#rust-vs-lua-implementation>
+custom fuzzy matcher <https://github.com/saghen/frizbee> for typo resistance.
+It provides extensibility via pluggable sources (LSP, buffer, snippets, etc),
+component based rendering and scripting for the configuration.
 
 
 FEATURES                                     *blink-cmp-introduction-features*
