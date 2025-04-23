@@ -33,7 +33,7 @@ local function apply_item(ctx, item)
     local parsed_snippet = require('blink.cmp.sources.snippets.utils').safe_parse(item.textEdit.newText)
     if
       parsed_snippet ~= nil
-      -- snippets automatically handle identation on newlines, while our implementation does not,
+      -- snippets automatically handle indentation on newlines, while our implementation does not,
       -- so ignore for muli-line snippets
       and #vim.split(tostring(parsed_snippet), '\n') == 1
       and #parsed_snippet.data.children == 1
