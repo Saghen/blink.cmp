@@ -101,7 +101,7 @@ end
 
 function context.set_cursor(cursor)
   local mode = context.get_mode()
-  if mode == 'default' then return vim.api.nvim_win_set_cursor(0, cursor) end
+  if mode == 'default' or mode == 'term' then return vim.api.nvim_win_set_cursor(0, cursor) end
 
   assert(mode == 'cmdline', 'Unsupported mode for setting cursor: ' .. mode)
   assert(cursor[1] == 1, 'Cursor must be on the first line in cmdline mode')

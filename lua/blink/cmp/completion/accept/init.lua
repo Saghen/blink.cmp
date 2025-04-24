@@ -68,7 +68,7 @@ local function apply_item(ctx, item)
 
     text_edits_lib.apply(item.textEdit, all_text_edits)
 
-    if ctx.get_mode() ~= 'term' then ctx.set_cursor(new_cursor) end
+    ctx.set_cursor(new_cursor)
     text_edits_lib.move_cursor_in_dot_repeat(offset)
   end
 
