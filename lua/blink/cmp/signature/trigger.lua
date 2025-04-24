@@ -12,6 +12,7 @@
 --- @field is_retrigger boolean
 --- @field active_signature_help lsp.SignatureHelp | nil
 --- @field trigger { kind: lsp.SignatureHelpTriggerKind, character?: string }
+--- @field by_show_on_insert boolean
 
 --- @class blink.cmp.SignatureTrigger
 --- @field current_context_id number
@@ -23,7 +24,7 @@
 --- @field activate fun()
 --- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
 --- @field show_if_on_trigger_character fun()
---- @field show fun(opts?: { trigger_character: string })
+--- @field show fun(opts?: { trigger_character: string, by_show_on_insert?: boolean })
 --- @field hide fun()
 --- @field set_active_signature_help fun(signature_help: lsp.SignatureHelp)
 
@@ -72,11 +73,11 @@ function trigger.activate()
       if not config.enabled and trigger.context == nil then
         return
       elseif config.show_on_insert_on_trigger_character and is_on_trigger and event == 'InsertEnter' then
-        trigger.show({ trigger_character = char_under_cursor })
+        trigger.show({ trigger_character = char_under_cursor, by_show_on_insert = true })
       elseif event == 'CursorMoved' and trigger.context ~= nil then
         trigger.show()
       elseif event == 'InsertEnter' and config.show_on_insert then
-        trigger.show()
+        trigger.show({ by_show_on_insert = true })
       end
     end,
     on_insert_leave = function() trigger.hide() end,
@@ -126,6 +127,7 @@ function trigger.show(opts)
     },
     is_retrigger = trigger.context ~= nil,
     active_signature_help = trigger.context and trigger.context.active_signature_help or nil,
+    by_show_on_insert = opts.by_show_on_insert,
   }
 
   trigger.show_emitter:emit({ context = trigger.context })

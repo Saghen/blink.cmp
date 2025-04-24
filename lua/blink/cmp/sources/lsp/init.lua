@@ -166,6 +166,8 @@ function lsp:get_signature_help(context, callback)
   local offset_encoding = first_client and first_client.offset_encoding or 'utf-16'
 
   local params = vim.lsp.util.make_position_params(nil, offset_encoding)
+  params.position.line = context.cursor[1] - 1
+  params.position.character = context.cursor[2]
   params.context = {
     triggerKind = context.trigger.kind,
     triggerCharacter = context.trigger.character,
