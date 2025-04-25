@@ -1,9 +1,9 @@
 local regex = require('blink.cmp.sources.path.regex')
 local lib = {}
 
---- @param get_cwd fun(context: blink.cmp.Context): string
+--- @param opts blink.cmp.PathOpts
 --- @param context blink.cmp.Context
-function lib.dirname(get_cwd, context)
+function lib.dirname(opts, context)
   -- HACK: move this :sub logic into the context?
   -- it's not obvious that you need to avoid going back a char if the start_col == end_col
   local line_before_cursor = context.line:sub(1, context.bounds.start_col - (context.bounds.length == 0 and 1 or 0))
@@ -13,7 +13,7 @@ function lib.dirname(get_cwd, context)
   local dirname = string.gsub(string.sub(line_before_cursor, s + 2), regex.NAME .. '*$', '') -- exclude '/'
   local prefix = string.sub(line_before_cursor, 1, s + 1) -- include '/'
 
-  local buf_dirname = get_cwd(context)
+  local buf_dirname = opts.get_cwd(context)
   if vim.api.nvim_get_mode().mode == 'c' then buf_dirname = vim.fn.getcwd() end
   if prefix:match('%.%./$') then return vim.fn.resolve(buf_dirname .. '/../' .. dirname) end
   if prefix:match('%./$') or prefix:match('"$') or prefix:match("'$") then
@@ -37,7 +37,13 @@ function lib.dirname(get_cwd, context)
     accept = accept and not prefix:match('[%d%)]%s*/$')
     -- Ignore / comment
     accept = accept and (not prefix:match('^[%s/]*$') or not lib.is_slash_comment())
-    if accept then return vim.fn.resolve('/' .. dirname) end
+    if accept then
+      if opts.ignore_root_slash then
+        return vim.fn.resolve(buf_dirname .. '/' .. dirname)
+      else
+        return vim.fn.resolve('/' .. dirname)
+      end
+    end
   end
   -- Windows drive letter (C:/)
   if prefix:match('(%a:)[/\\]$') then return vim.fn.resolve(prefix:match('(%a:)[/\\]$') .. '/' .. dirname) end

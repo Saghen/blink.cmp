@@ -9,6 +9,7 @@
 --- @field label_trailing_slash boolean
 --- @field get_cwd fun(context: blink.cmp.Context): string
 --- @field show_hidden_files_by_default boolean
+--- @field ignore_root_slash boolean
 
 --- @class blink.cmp.Source
 --- @field opts blink.cmp.PathOpts
@@ -23,12 +24,14 @@ function path.new(opts)
     label_trailing_slash = true,
     get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,
     show_hidden_files_by_default = false,
+    ignore_root_slash = false,
   })
   require('blink.cmp.config.utils').validate('sources.providers.path', {
     trailing_slash = { opts.trailing_slash, 'boolean' },
     label_trailing_slash = { opts.label_trailing_slash, 'boolean' },
     get_cwd = { opts.get_cwd, 'function' },
     show_hidden_files_by_default = { opts.show_hidden_files_by_default, 'boolean' },
+    ignore_root_slash = { opts.ignore_root_slash, 'boolean' },
   }, opts)
 
   self.opts = opts
@@ -43,7 +46,7 @@ function path:get_completions(context, callback)
 
   local lib = require('blink.cmp.sources.path.lib')
 
-  local dirname = lib.dirname(self.opts.get_cwd, context)
+  local dirname = lib.dirname(self.opts, context)
   if not dirname then return callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} }) end
 
   local include_hidden = self.opts.show_hidden_files_by_default
