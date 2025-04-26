@@ -183,8 +183,7 @@ function utils.notify(msg, lvl)
   table.insert(msg, 2, { ' ' })
 
   if _ui_entered then
-    -- After UIEnter emit message immediately
-    vim.api.nvim_echo(msg, true, { err = true, verbose = false })
+    vim.schedule(function() vim.api.nvim_echo(msg, true, { err = true, verbose = false }) end)
   else
     -- Queue notification for the UIEnter event.
     table.insert(_notification_queue, function() vim.api.nvim_echo(msg, true, { verbose = false }) end)
