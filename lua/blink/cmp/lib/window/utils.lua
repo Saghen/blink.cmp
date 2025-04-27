@@ -2,7 +2,7 @@ local utils = {}
 
 --- @param border blink.cmp.WindowBorder
 --- @param default blink.cmp.WindowBorder
---- @return 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | string[]
+--- @return 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'bold' | 'padded' | string[]
 function utils.pick_border(border, default)
   if border ~= nil then return border end
 
