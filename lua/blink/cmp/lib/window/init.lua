@@ -36,7 +36,7 @@ local utils = require('blink.cmp.lib.window.utils')
 --- @field set_option_value fun(self: blink.cmp.Window, option: string, value: any)
 --- @field update_size fun(self: blink.cmp.Window)
 --- @field get_content_height fun(self: blink.cmp.Window): number
---- @field get_border_size fun(self: blink.cmp.Window, border?: 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'padded' | string[]): { vertical: number, horizontal: number, left: number, right: number, top: number, bottom: number }
+--- @field get_border_size fun(self: blink.cmp.Window, border?: 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'bold' | 'padded' | string[]): { vertical: number, horizontal: number, left: number, right: number, top: number, bottom: number }
 --- @field expand_border_chars fun(border: string[]): string[]
 --- @field get_height fun(self: blink.cmp.Window): number
 --- @field get_content_width fun(self: blink.cmp.Window): number
