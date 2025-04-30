@@ -102,7 +102,7 @@ function source:should_show_items(context, items)
 
   -- for manual trigger, we ignore the min_keyword_length set globally, but still respect per-provider
   local global_min_keyword_length = 0
-  if context.trigger.initial_kind ~= 'manual' then
+  if context.trigger.initial_kind ~= 'manual' and context.trigger.initial_kind ~= 'trigger_character' then
     local global_min_keyword_length_func_or_num = require('blink.cmp.config').sources.min_keyword_length
     if type(global_min_keyword_length_func_or_num) == 'function' then
       global_min_keyword_length = global_min_keyword_length_func_or_num(context)
