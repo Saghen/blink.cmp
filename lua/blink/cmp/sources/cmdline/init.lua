@@ -83,6 +83,8 @@ function cmdline:get_completions(context, callback)
           else
             completions = vim.fn.getcompletion(query, type)
           end
+          -- Ensure completions is a table, as getcompletion can return numbers on error
+          if type(completions) ~= 'table' then completions = {} end
         end
 
       -- Cmdline mode
@@ -90,6 +92,9 @@ function cmdline:get_completions(context, callback)
         local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
         completions = vim.fn.getcompletion(query, 'cmdline')
       end
+
+      -- Ensure completions is a table, as getcompletion can return numbers on error
+      if type(completions) ~= 'table' then completions = {} end
 
       -- Special case for files, escape special characters
       if constants.file_commands[cmd] then
