@@ -77,6 +77,8 @@ function sources.get_enabled_provider_ids(mode)
     vim.list_extend(providers, filetype_providers)
 
     if filetype_providers.inherit_defaults then vim.list_extend(providers, default_providers) end
+  else
+    providers = default_providers
   end
 
   -- Dynamically injected sources
