@@ -20,9 +20,14 @@ sources = {
   -- so you don't need to define them in `sources.providers`
   default = { 'lsp', 'buffer', 'snippets', 'path' },
 
-  per_filetype = { sql = { 'dadbod' } }
+  per_filetype = {
+    sql = { 'dadbod' }
+    -- optionally inherit from the `default` sources
+    lua = { inherit_defaults = true, 'lazydev' }
+  },
   providers = {
     dadbod = { module = "vim_dadbod_completion.blink" },
+    lazydev = { ... }
   }
 }
 ```

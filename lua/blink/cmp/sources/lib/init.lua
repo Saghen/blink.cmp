@@ -42,6 +42,7 @@ local sources = {
   per_filetype_provider_ids = {},
   completions_emitter = require('blink.cmp.lib.event_emitter').new('source_completions', 'BlinkCmpSourceCompletions'),
 }
+local deduplicate = require('blink.cmp.lib.utils').deduplicate
 
 function sources.get_all_providers()
   local providers = {}
@@ -52,23 +53,38 @@ function sources.get_all_providers()
 end
 
 function sources.get_enabled_provider_ids(mode)
-  if (mode == 'cmdline' and not config.cmdline.enabled) or (mode == 'term' and not config.term.enabled) then
-    return {}
+  -- Mode-specific sources
+  if mode == 'cmdline' or mode == 'term' then
+    if not config[mode].enabled then return {} end
+
+    local providers = config[mode].sources
+    if type(providers) == 'function' then providers = providers() end
+
+    return deduplicate(providers)
   end
 
-  local enabled_providers = mode == 'cmdline' and config.cmdline.sources
-    or mode == 'term' and config.term.sources
-    or config.sources.per_filetype[vim.bo.filetype]
-    or config.sources.default
+  -- Default sources
+  local default_providers = config.sources.default
+  if type(default_providers) == 'function' then default_providers = default_providers() end
+  --- @cast default_providers string[]
 
-  if type(enabled_providers) == 'function' then enabled_providers = enabled_providers() end
-  --- @cast enabled_providers string[]
+  -- Filetype-specific sources
+  local providers = {}
+  if config.sources.per_filetype[vim.bo.filetype] ~= nil then
+    local filetype_providers = config.sources.per_filetype[vim.bo.filetype]
+    if type(filetype_providers) == 'function' then filetype_providers = filetype_providers() end
 
+    vim.list_extend(providers, filetype_providers)
+
+    if filetype_providers.inherit_defaults then vim.list_extend(providers, default_providers) end
+  end
+
+  -- Dynamically injected sources
   if sources.per_filetype_provider_ids[vim.bo.filetype] ~= nil then
-    enabled_providers = vim.list_extend(enabled_providers, sources.per_filetype_provider_ids[vim.bo.filetype])
+    vim.list_extend(providers, sources.per_filetype_provider_ids[vim.bo.filetype])
   end
 
-  return require('blink.cmp.lib.utils').deduplicate(enabled_providers)
+  return deduplicate(providers)
 end
 
 function sources.get_enabled_providers(mode)

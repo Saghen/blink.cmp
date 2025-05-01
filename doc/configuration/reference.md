@@ -450,7 +450,8 @@ sources = {
   
   -- You may also define providers per filetype
   per_filetype = {
-    -- lua = { 'lsp', 'path' },
+    -- optionally inherit from the `default` sources
+    -- lua = { inherit_defaults = true, 'lsp', 'path' },
   },
 
   -- Function to use when transforming the items before they're returned for all providers

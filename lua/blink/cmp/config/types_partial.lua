@@ -1,5 +1,3 @@
---- @alias blink.cmp.SourceList string[] | fun(): string[]
-
 --- @class (exact) blink.cmp.Config : blink.cmp.ConfigStrict
 --- @field enabled? fun(): boolean
 --- @field keymap? blink.cmp.KeymapConfig

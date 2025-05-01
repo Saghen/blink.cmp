@@ -15,12 +15,15 @@
 ---   end
 --- ```
 --- @field default blink.cmp.SourceList
---- @field per_filetype table<string, blink.cmp.SourceList>
+--- @field per_filetype table<string, blink.cmp.SourceListPerFiletype>
 ---
 --- @field transform_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[] Function to transform the items before they're returned
 --- @field min_keyword_length number | fun(ctx: blink.cmp.Context): number Minimum number of characters in the keyword to trigger
 ---
 --- @field providers table<string, blink.cmp.SourceProviderConfig>
+
+--- @alias blink.cmp.SourceList string[] | fun(): string[]
+--- @alias blink.cmp.SourceListPerFiletype { inherit_defaults?: boolean, [number]: string } | fun(): ({ inherit_defaults?: boolean, [number]: string })
 
 --- @class blink.cmp.SourceProviderConfig
 --- @field module string
