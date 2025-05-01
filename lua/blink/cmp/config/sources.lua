@@ -7,7 +7,7 @@
 ---     local node = vim.treesitter.get_node()
 ---     if vim.bo.filetype == 'lua' then
 ---       return { 'lsp', 'path' }
----     elseif node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }), node:type())
+---     elseif node and vim.tbl_contains({ 'comment', 'line_comment', 'block_comment' }, node:type()) then
 ---       return { 'buffer' }
 ---     else
 ---       return { 'lsp', 'path', 'snippets', 'buffer' }
