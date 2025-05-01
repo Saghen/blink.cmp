@@ -122,8 +122,13 @@ function cmdline_events:suppress_events_for_callback(cb)
 
   if not vim.api.nvim_get_mode().mode == 'c' then return end
 
+  -- HACK: the cursor may move from position 1 to 0 and back to 1 during the callback
+  -- This will trigger a CursorMovedC event, but we can't detect it simply by checking the cursor position
+  -- since they're equal before vs after the callback. So instead, we always mark the cursor as ignored in
+  -- but if the cursor was equal, we undo the ignore after a small delay
+  self.ignore_next_cursor_moved = true
   local cursor_after = vim.fn.getcmdpos()
-  self.ignore_next_cursor_moved = self.ignore_next_cursor_moved or cursor_after ~= cursor_before
+  if cursor_after == cursor_before then vim.defer_fn(function() self.ignore_next_cursor_moved = false end, 20) end
 end
 
 return cmdline_events
