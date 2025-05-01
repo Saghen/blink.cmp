@@ -12,6 +12,8 @@ local ghost_text = {
   selected_item = nil,
   --- @type integer?
   extmark_id = nil,
+  --- @type integer?
+  extmark_buf = nil,
   --- @type integer
   ns = vim.api.nvim_create_namespace('blink_cmp_ghost_text'),
 }
@@ -125,6 +127,7 @@ function ghost_text.draw_preview()
       virt_lines = virt_lines,
       hl_mode = 'combine',
     })
+  ghost_text.extmark_buf = buf
 
   utils.redraw_if_needed()
 end
@@ -133,9 +136,8 @@ function ghost_text.clear_preview()
   ghost_text.selected_item = nil
 
   if ghost_text.extmark_id ~= nil then
-    local buf = utils.get_buf()
-    if buf ~= nil and vim.api.nvim_buf_is_valid(buf) then
-      vim.api.nvim_buf_del_extmark(buf, highlight_ns, ghost_text.extmark_id)
+    if ghost_text.extmark_buf ~= nil and vim.api.nvim_buf_is_valid(ghost_text.extmark_buf) then
+      vim.api.nvim_buf_del_extmark(ghost_text.extmark_buf, highlight_ns, ghost_text.extmark_id)
     end
 
     ghost_text.extmark_id = nil
