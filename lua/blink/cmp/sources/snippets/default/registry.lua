@@ -141,10 +141,10 @@ function registry:expand_vars(snippet)
       if eager_vars[data.name] then
         resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', eager_vars[data.name])
       elseif lazy_vars[data.name] then
-        resolved_snippet = resolved_snippet:gsub(
-          '%$[{]?(' .. data.name .. ')[}]?',
-          lazy_vars[data.name]({ clipboard_register = self.config.clipboard_register })
-        )
+        local replacement = lazy_vars[data.name]({ clipboard_register = self.config.clipboard_register })
+        -- gsub otherwise fails with strings like `%20` in the replacement string
+        local escaped_for_gsub = replacement:gsub('%%', '%%%%')
+        resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', escaped_for_gsub)
       end
     end
   end
