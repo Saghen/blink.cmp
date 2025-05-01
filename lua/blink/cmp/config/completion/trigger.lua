@@ -12,7 +12,7 @@ local validate = require('blink.cmp.config.utils').validate
 local trigger = {
   --- @type blink.cmp.CompletionTriggerConfig
   default = {
-    prefetch_on_insert = true,
+    prefetch_on_insert = false,
     show_in_snippet = true,
     show_on_keyword = true,
     show_on_trigger_character = true,
