@@ -69,22 +69,27 @@ function cmdline:get_completions(context, callback)
           and not vim.startswith(completion_func:lower(), 'v:lua')
           and not vim.startswith(completion_func:lower(), '<sid>')
         then
-          completions = vim.fn.call(completion_func, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
-          -- `custom,` type returns a string, delimited by newlines
-          if type(completions) == 'string' then completions = vim.split(completions, '\n') end
+          local success, fn_completions =
+            pcall(vim.fn.call, completion_func, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
+
+          if success then
+            if type(fn_completions) == 'table' then
+              completions = fn_completions
+            -- `custom,` type returns a string, delimited by newlines
+            elseif type(fn_completions) == 'string' then
+              completions = vim.split(fn_completions, '\n')
+            end
+          end
 
         -- Regular input completions, use the type defined by the input
         else
           local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
           -- TODO: handle `custom` type
-          local l_type = not vim.startswith(completion_type, 'custom') and vim.fn.getcmdcompltype() or 'cmdline'
-          if l_type == '' then
-            completions = {}
-          else
-            completions = vim.fn.getcompletion(query, l_type)
+          local compl_type = not vim.startswith(completion_type, 'custom') and vim.fn.getcmdcompltype() or 'cmdline'
+          if compl_type ~= '' then
+            completions = vim.fn.getcompletion(query, compl_type)
+            if type(completions) ~= 'table' then completions = {} end
           end
-          -- Ensure completions is a table, as getcompletion can return numbers on error
-          if type(completions) ~= 'table' then completions = {} end
         end
 
       -- Cmdline mode
@@ -92,9 +97,6 @@ function cmdline:get_completions(context, callback)
         local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
         completions = vim.fn.getcompletion(query, 'cmdline')
       end
-
-      -- Ensure completions is a table, as getcompletion can return numbers on error
-      if type(completions) ~= 'table' then completions = {} end
 
       -- Special case for files, escape special characters
       if constants.file_commands[cmd] then
