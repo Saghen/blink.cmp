@@ -1,5 +1,8 @@
 -- Run with `nvim -u repro.lua`
 -- Please update the code below to reproduce your issue
+--
+-- If you get warnings about prebuilt binaries, you may use `fuzzy.implementation = 'lua'`
+-- but note this has caveats: https://cmp.saghen.dev/configuration/fuzzy.html#rust-vs-lua-implementation
 
 vim.env.LAZY_STDPATH = '.repro'
 load(vim.fn.system('curl -s https://raw.githubusercontent.com/folke/lazy.nvim/main/bootstrap.lua'))()
