@@ -24,6 +24,8 @@ local defaults_config = {
 ---@param callback fun(table, table)
 local function add_luasnip_callback(snippet, event, callback)
   local events = require('luasnip.util.events')
+  -- not defined for autosnippets
+  if snippet.callbacks == nil then return end
   snippet.callbacks[-1] = snippet.callbacks[-1] or {}
   snippet.callbacks[-1][events[event]] = callback
 end
