@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0          Last change: 2025 April 25
+*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 01
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1767,9 +1767,14 @@ options.
       -- so you don't need to define them in `sources.providers`
       default = { 'lsp', 'buffer', 'snippets', 'path' },
     
-      per_filetype = { sql = { 'dadbod' } }
+      per_filetype = {
+        sql = { 'dadbod' }
+        -- optionally inherit from the `default` sources
+        lua = { inherit_defaults = true, 'lazydev' }
+      },
       providers = {
         dadbod = { module = "vim_dadbod_completion.blink" },
+        lazydev = { ... }
       }
     }
 <
@@ -2337,7 +2342,8 @@ See the |blink-cmp-mode-specific-configurations| for setting sources for
       
       -- You may also define providers per filetype
       per_filetype = {
-        -- lua = { 'lsp', 'path' },
+        -- optionally inherit from the `default` sources
+        -- lua = { inherit_defaults = true, 'lsp', 'path' },
       },
     
       -- Function to use when transforming the items before they're returned for all providers
