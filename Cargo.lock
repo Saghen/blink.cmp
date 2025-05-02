@@ -40,6 +40,7 @@ name = "blink-cmp-fuzzy"
 version = "0.1.0"
 dependencies = [
  "frizbee",
+ "fuzzy-matcher",
  "heed",
  "mlua",
  "regex",
@@ -155,6 +156,15 @@ checksum = "28cdd590bfddb0f4c639c85ea093fbadf23abcad6aa0d95eb30faea79de43e2a"
 dependencies = [
  "memchr",
  "rayon",
+]
+
+[[package]]
+name = "fuzzy-matcher"
+version = "0.3.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "54614a3312934d066701a80f20f15fa3b56d67ac7722b39eea5b4c9dd1d66c94"
+dependencies = [
+ "thread_local",
 ]
 
 [[package]]
@@ -732,6 +742,16 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "thread_local"
+version = "1.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b9ef9bad013ada3808854ceac7b46812a6465ba368859a37e2100283d2d719c"
+dependencies = [
+ "cfg-if",
+ "once_cell",
 ]
 
 [[package]]
