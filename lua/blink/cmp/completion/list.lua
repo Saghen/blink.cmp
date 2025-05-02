@@ -27,7 +27,8 @@
 --- @field accept fun(opts?: blink.cmp.CompletionListAcceptOpts): boolean Applies the currently selected item, returning true if it succeeded
 
 --- @class blink.cmp.CompletionListSelectOpts
---- @field auto_insert? boolean When `true`, inserts the completion item automatically when selecting it
+--- @field auto_insert? boolean Insert the completion item automatically when selecting it
+--- @field on_ghost_text? boolean Run when ghost text is visible, instead of only when the menu is visible
 
 --- @class blink.cmp.CompletionListSelectAndAcceptOpts
 --- @field callback? fun() Called after the item is accepted

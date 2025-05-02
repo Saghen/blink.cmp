@@ -55,8 +55,10 @@ keymap = {
   - Useful in `cmdline` mode to accept the current item and run the command
 - `select_prev`: Selects the previous item, cycling to the bottom of the list if at the top, if `completion.list.cycle.from_top == true`
   - Optionally control the `auto_insert` property of `completion.list.selection`: `function(cmp) cmp.select_prev({ auto_insert = false }) end`
+  - Optionally, run when ghost text is visible, instead of only when the menu is visible: `function(cmp) cmp.select_prev({ on_ghost_text = true })`
 - `select_next`: Selects the next item, cycling to the top of the list if at the bottom, if `completion.list.cycle.from_bottom == true`
   - Optionally control the `auto_insert` property of `completion.list.selection`: `function(cmp) cmp.select_next({ auto_insert = false }) end`
+  - Optionally, run when ghost text is visible, instead of only when the menu is visible: `function(cmp) cmp.select_next({ on_ghost_text = true })`
 - `insert_prev`: Inserts the previous item (`auto_insert`), cycling to the bottom of the list if at the top, if `completion.list.cycle.from_top == true`. This will trigger completions if none are available, unlike `select_prev` which would fallback to the next keymap in this case.
 - `insert_next`: Inserts the next item (`auto_insert`), cycling to the top of the list if at the bottom, if `completion.list.cycle.from_bottom == true`. This will trigger completions if none are available, unlike `select_next` which would fallback to the next keymap in this case.
 - `show_documentation`: Shows the documentation for the currently selected item
