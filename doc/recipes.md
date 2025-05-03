@@ -166,6 +166,23 @@ sources.providers.lsp.override.get_trigger_characters = function(self)
 end
 ```
 
+### Automatically show function signature after completion
+
+Also see [#1593](https://github.com/Saghen/blink.cmp/issues/1593#issuecomment-2795097967)
+
+```lua
+vim.api.nvim_create_autocmd("User", {
+  pattern = "BlinkCmpAccept",
+  callback = function(ev)
+    local item = ev.data.item
+    if item.kind == require("blink.cmp.types").CompletionItemKind.Function then
+      vim.defer_fn(function()
+        require("blink.cmp").show_signature()
+      end, 10)
+    end
+  end,
+})
+```
 
 ## Fuzzy (sorting/filtering)
 
