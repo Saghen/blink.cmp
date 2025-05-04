@@ -1673,11 +1673,12 @@ LUASNIP ~
         },
       }
     }
-    
-    
-    ## `mini.snippets`
-    
-    ```lua
+<
+
+
+`mini.snippets` ~
+
+>lua
     {
       'saghen/blink.cmp',
       dependencies = 'echasnovski/mini.snippets',
