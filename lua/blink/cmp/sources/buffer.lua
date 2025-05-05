@@ -70,9 +70,6 @@ local function run_async_lua(buf_text, callback)
   local max_chunk_size = 4000 -- Max chunk size in bytes
   local total_length = #buf_text
 
-  ---@type table<string, boolean>
-  local words = {}
-
   local cancelled = false
   local pos = 1
   local function next_chunk()
@@ -96,14 +93,12 @@ local function run_async_lua(buf_text, callback)
 
     local chunk_text = string.sub(buf_text, start_pos, end_pos)
     local chunk_words = require('blink.cmp.fuzzy').get_words(chunk_text)
-    for _, word in ipairs(chunk_words) do
-      words[word] = true
-    end
+    local words = require('blink.cmp.lib.utils').deduplicate(chunk_words)
 
     -- next iter
     if pos < total_length then return vim.schedule(next_chunk) end
     -- or finish
-    vim.schedule(function() callback(words_to_items(vim.tbl_keys(words))) end)
+    vim.schedule(function() callback(words_to_items(words)) end)
   end
 
   next_chunk()
