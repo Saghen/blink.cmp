@@ -1,4 +1,4 @@
-*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 02
+*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 05
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1676,7 +1676,7 @@ LUASNIP ~
 <
 
 
-`mini.snippets` ~
+MINI.SNIPPETS ~
 
 >lua
     {
