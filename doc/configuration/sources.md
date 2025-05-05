@@ -116,3 +116,4 @@ See [blink.compat](https://github.com/Saghen/blink.compat) for using `nvim-cmp` 
 - [ecolog.nvim](https://github.com/philosofonusus/ecolog.nvim)
 - [gitmoji.nvim](https://github.com/Dynge/gitmoji.nvim/): Completion for [gitmojis](https://gitmoji.dev/)
 - [blink-cmp-agda-symbols](https://github.com/4e554c4c/blink-cmp-agda-symbols): Completion for [Agda](https://wiki.portal.chalmers.se/agda/pmwiki.php)
+- [blink-cmp-latex](https://github.com/erooke/blink-cmp-latex): Completion for unicode symbols via latex macros
