@@ -54,7 +54,7 @@ There's a great introduction to writing custom snippets [in the nvim-scissors re
     },
   }
 }
-
+```
 
 ## `mini.snippets`
 
