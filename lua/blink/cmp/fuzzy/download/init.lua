@@ -123,7 +123,9 @@ function download.ensure_downloaded(callback)
 
       -- download as per usual
       utils.notify({ { 'Downloading pre-built binary' } }, vim.log.levels.INFO)
-      return download.download(target_git_tag)
+      return download
+        .download(target_git_tag)
+        :map(function() utils.notify({ { 'Downloaded pre-built binary successfully' } }, vim.log.levels.INFO) end)
     end)
     :map(function(success)
       if success == false then
