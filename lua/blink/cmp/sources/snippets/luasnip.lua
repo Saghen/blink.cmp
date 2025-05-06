@@ -179,7 +179,7 @@ function source:execute(ctx, item)
   end
 
   -- get (0, 0) indexed cursor position
-  local cursor = vim.deepcopy(ctx.cursor)
+  local cursor = ctx.get_cursor()
   cursor[1] = cursor[1] - 1
 
   local range = require('blink.cmp.lib.text_edits').get_from_item(item).range
