@@ -1,4 +1,4 @@
-*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 05
+*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 09
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -899,7 +899,7 @@ For more common configurations, see the recipes <../recipes.md>.
 APPEARANCE                                       *blink-cmp-config-appearance*
 
 If you’re looking for how to change the appearance of the completion menu,
-check out the menu draw configuration <./completion#completion-menu-draw>.
+check out the menu draw configuration <./completion#menu-draw>.
 
 
 HIGHLIGHT GROUPS ~
