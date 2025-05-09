@@ -242,7 +242,7 @@ local function inside_comment_block()
     end
     local node_under_cursor = vim.treesitter.get_node()
     local parser = vim.treesitter.get_parser(nil, nil, { error = false })
-    local query = vim.treesitter.query.get(vim.bo.filetype, 'highlights')
+    local query = vim.treesitter.query.get(parser:lang(), 'highlights')
     if not parser or not node_under_cursor or not query then
         return false
     end
