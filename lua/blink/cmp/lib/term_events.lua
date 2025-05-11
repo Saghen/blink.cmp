@@ -27,6 +27,7 @@ function term_events.new(opts)
 end
 
 local term_on_key_ns = vim.api.nvim_create_namespace('blink-term-keypress')
+local term_command_start_ns = vim.api.nvim_create_namespace('blink-term-command-start')
 
 --- Normalizes the autocmds + ctrl+c into a common api and handles ignored events
 function term_events:listen(opts)
@@ -67,6 +68,28 @@ function term_events:listen(opts)
     callback = function()
       last_char = ''
       vim.schedule(function() opts.on_term_leave() end)
+    end,
+  })
+
+  --- To build proper shell completions we need to know where prompts end and typed commands start.
+  --- The most reliable way to get this information is to listen for terminal escape sequences. This
+  --- adds a listener for the terminal escape sequence \027]133;B (called FTCS_COMMAND_START) which
+  --- marks the start of a command. To enable plugins to access this information later we put an extmark
+  --- at the position in the buffer.
+  --- For documentation on FTCS_COMMAND_START see https://iterm2.com/3.0/documentation-escape-codes.html
+  ---
+  --- Example:
+  --- If you type "ls --he" into a terminal buffer in neovim the current line will look something like this:
+  --- ~/Downloads > ls --he|
+  --- "~/Downloads > " is your prompt <- an extmark is added after this
+  --- "ls --he" is the command you typed <- this is what we need to provide proper shell completions
+  --- "|" marks your cursor position
+  vim.api.nvim_create_autocmd('TermRequest', {
+    callback = function(args)
+      if string.match(args.data.sequence, '^\027]133;B') then
+        local row, col = table.unpack(args.data.cursor)
+        vim.api.nvim_buf_set_extmark(args.buf, term_command_start_ns, row - 1, col, {})
+      end
     end,
   })
 end
