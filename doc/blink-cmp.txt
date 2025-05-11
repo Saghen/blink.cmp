@@ -1,4 +1,4 @@
-*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 09
+*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 11
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1881,6 +1881,7 @@ sources
 - gitmoji.nvim <https://github.com/Dynge/gitmoji.nvim/>: Completion for gitmojis <https://gitmoji.dev/>
 - blink-cmp-agda-symbols <https://github.com/4e554c4c/blink-cmp-agda-symbols>: Completion for Agda <https://wiki.portal.chalmers.se/agda/pmwiki.php>
 - blink-cmp-latex <https://github.com/erooke/blink-cmp-latex>: Completion for unicode symbols via latex macros
+- blink-cmp-npm <https://github.com/alexandre-abrioux/blink-cmp-npm.nvim>: Completion for NPM package names and versions
 
 
 REFERENCE                                         *blink-cmp-config-reference*
