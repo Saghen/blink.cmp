@@ -7,7 +7,7 @@
 --- @field enabled boolean Show the signature help automatically
 --- @field show_on_keyword boolean Show the signature help window after typing any of alphanumerics, `-` or `_`
 --- @field blocked_trigger_characters string[]
---- @field blocked_retrigger_characters string[] When the signature help window has already been shown, don't update after typing these charcters
+--- @field blocked_retrigger_characters string[] When the signature help window has already been shown, don't update after typing these characters
 --- @field show_on_trigger_character boolean Show the signature help window after typing a trigger character
 --- @field show_on_insert boolean Show the signature help window when entering insert mode
 --- @field show_on_insert_on_trigger_character boolean Show the signature help window when the cursor comes after a trigger character when entering insert mode
