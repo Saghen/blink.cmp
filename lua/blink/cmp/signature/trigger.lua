@@ -81,6 +81,18 @@ function trigger.activate()
     end,
     on_insert_leave = function() trigger.hide() end,
   })
+
+  if config.show_on_accept then
+    require('blink.cmp.completion.list').accept_emitter:on(function()
+      local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
+      local char_under_cursor = vim.api.nvim_get_current_line():sub(cursor_col, cursor_col)
+
+      local is_on_trigger = trigger.is_trigger_character(char_under_cursor)
+      local opts = is_on_trigger and { trigger_character = char_under_cursor } or nil
+
+      trigger.show(opts)
+    end)
+  end
 end
 
 function trigger.is_trigger_character(char, is_retrigger)
