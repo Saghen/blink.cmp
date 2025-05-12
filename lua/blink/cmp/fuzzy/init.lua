@@ -35,21 +35,24 @@ function fuzzy.access(item)
 
   fuzzy.init_db()
 
-  local serialized_item = vim.tbl_extend(
-    'force',
-    item,
-    -- the documentation may have a draw() function that will throw an error
-    -- when serialized. Hide it to avoid the issue.
-    { documentation = {} } --[[@as blink.cmp.CompletionItem | {}]]
-  )
+  -- send only the properties we need for LspItem
+  local trimmed_item = {
+    label = item.label,
+    filterText = item.filterText,
+    sortText = item.sortText,
+    insertText = item.insertText,
+    kind = item.kind,
+    score_offset = item.score_offset,
+    source_id = item.source_id,
+  }
 
   -- writing to the db takes ~10ms, so schedule writes in another thread
   vim.uv
     .new_work(function(itm, cpath)
       package.cpath = cpath
-      require('blink.cmp.fuzzy.rust').access(vim.mpack.decode(itm))
+      require('blink.cmp.fuzzy.rust').access(require('string.buffer').decode(itm))
     end, function() end)
-    :queue(vim.mpack.encode(serialized_item), package.cpath)
+    :queue(require('string.buffer').encode(trimmed_item), package.cpath)
 end
 
 ---@param lines string
