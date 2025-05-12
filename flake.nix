@@ -55,6 +55,7 @@
               fileset = rustFs;
             };
             cargoLock = { lockFile = ./Cargo.lock; };
+            buildInputs = with pkgs; lib.optionals stdenv.hostPlatform.isAarch64 [ rust-jemalloc-sys ]; # revisit once https://github.com/NixOS/nix/issues/12426 is solved
             nativeBuildInputs = with pkgs; [ git ];
           };
 
