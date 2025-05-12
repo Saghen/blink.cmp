@@ -2,6 +2,7 @@ use crate::error::Error;
 use crate::frecency::FrecencyTracker;
 use crate::fuzzy::FuzzyOptions;
 use crate::lsp_item::LspItem;
+use lsp_item::CompletionItemKind;
 use mlua::prelude::*;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -127,6 +128,18 @@ pub fn guess_edit_range(
             keyword::guess_keyword_range_from_item(insert_text, &line_str, cursor_col, match_suffix)
         })
         .unwrap_or(filter_text_edit_range);
+
+    // Prefer the insert text, then filter text, then label ranges for non-snippets
+    if item.kind != CompletionItemKind::Snippet as u32 {
+        return Ok(insert_text_edit_range);
+    }
+
+    // HACK: In the lazydev.nvim case, the label is the whole module like `blink.cmp.fuzzy`
+    // but the `insertText` is just `fuzzy` when you've already typed `blink.cmp.`.
+    // But in the snippets case, the label could be completed unrelated to the insertText so we
+    // should use the label range.
+    //
+    // TODO: What about using the filterText range and ignoring label?
 
     // Take the max range prioritizing the start index first and the end index second
     // When comparing tuples (start, end), Rust compares the first element first,
