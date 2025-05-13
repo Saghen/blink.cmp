@@ -76,23 +76,6 @@ local sources = {
       buffer = {
         module = 'blink.cmp.sources.buffer',
         score_offset = -3,
-        enabled = function()
-          local cmdtype = vim.fn.getcmdtype()
-          -- Enable in regular buffer
-          if cmdtype == '' then return true end
-          -- Enable in search mode
-          if cmdtype == '/' or cmdtype == '?' then return true end
-          -- Enable for substitutions and global commands in ex mode
-          if cmdtype == ':' then
-            local cmdline = vim.fn.getcmdline()
-            -- Substitution commands: :s/, :%s/, :3,5s/, :.s/, :'<,'>s/, .,$s/
-            local subst_pattern = "^%s*:?[%d%.,'$%%<>]*s[/?]"
-            -- Global commands: :g, :v, :G, :global, :vglobal
-            local global_pattern = "^%s*:?[%d%.,'$%%<>]*[gGv][lL]?[oO]?[bB]?[aA]?[lL]?%s*[/?]"
-            if cmdline:match(subst_pattern) or cmdline:match(global_pattern) then return true end
-          end
-          return false
-        end,
       },
       cmdline = {
         module = 'blink.cmp.sources.cmdline',
