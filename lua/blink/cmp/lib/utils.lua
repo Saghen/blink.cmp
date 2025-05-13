@@ -182,11 +182,13 @@ function utils.notify(msg, lvl)
   table.insert(msg, 1, { ' blink.cmp ', header_hl })
   table.insert(msg, 2, { ' ' })
 
+  local echo_opts = { verbose = false }
+  if vim.fn.has('nvim-0.11') == 1 then echo_opts.err = true end
   if _ui_entered then
-    vim.schedule(function() vim.api.nvim_echo(msg, true, { err = true, verbose = false }) end)
+    vim.schedule(function() vim.api.nvim_echo(msg, true, echo_opts) end)
   else
     -- Queue notification for the UIEnter event.
-    table.insert(_notification_queue, function() vim.api.nvim_echo(msg, true, { verbose = false }) end)
+    table.insert(_notification_queue, function() vim.api.nvim_echo(msg, true, echo_opts) end)
   end
 end
 
