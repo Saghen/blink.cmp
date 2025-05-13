@@ -17,7 +17,9 @@ function cmdline.new()
   return self
 end
 
-function cmdline:enabled() return vim.api.nvim_get_mode().mode == 'c' end
+function cmdline:enabled()
+  return vim.api.nvim_get_mode().mode == 'c' and vim.tbl_contains({ ':', '@' }, vim.fn.getcmdtype())
+end
 
 ---@param name string
 ---@return boolean?
