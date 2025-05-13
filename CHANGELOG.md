@@ -1,3 +1,21 @@
+## [1.3.0](https://github.com/Saghen/blink.cmp/compare/v1.2.0...v1.3.0) (2025-05-13)
+
+### Features
+
+* add `signature.trigger.show_on_accept/show_on_accept_on_trigger_character` ([6770a4a](https://github.com/Saghen/blink.cmp/commit/6770a4a888b1a5351aa3475dd0fe80db7663146b)), closes [#1722](https://github.com/Saghen/blink.cmp/issues/1722)
+* add extmarks at the start of terminal commands as a utility for creating shell completions ([#1747](https://github.com/Saghen/blink.cmp/issues/1747)) ([584e280](https://github.com/Saghen/blink.cmp/commit/584e2806472c7bb94e9070df62cdf5920ceceae0))
+* add message on prebuilt binary download completion ([0a36e07](https://github.com/Saghen/blink.cmp/commit/0a36e07a90dca1fb9717d2aceeba91b3d72c093e))
+
+### Bug Fixes
+
+* get up to date cursor in luasnip execute ([3077615](https://github.com/Saghen/blink.cmp/commit/307761556c48a6b4db62674ae4df42e01317d8b7)), closes [#1740](https://github.com/Saghen/blink.cmp/issues/1740)
+* guard against nil triples ([cdbe943](https://github.com/Saghen/blink.cmp/commit/cdbe9436b29788edcecb309a340e905b6b4bbbcb)), closes [#1730](https://github.com/Saghen/blink.cmp/issues/1730)
+* lua implementation not respecting `match_suffix` option ([091d09e](https://github.com/Saghen/blink.cmp/commit/091d09e324b05d2a1c84ca51059a62a6703595d2))
+* nvim 0.10 compatibility for `nvim_echo` ([#1760](https://github.com/Saghen/blink.cmp/issues/1760)) ([834e419](https://github.com/Saghen/blink.cmp/commit/834e4194e38dd50a801ef4c88d0afc1f0c6dc5a0))
+* only use largest range when item is a snippet ([59507fd](https://github.com/Saghen/blink.cmp/commit/59507fd789564365301a9182b1c91982b7a39607))
+* treat dash as keyword in lua implementation ([45fcabc](https://github.com/Saghen/blink.cmp/commit/45fcabc4bbd8fb6aa41c25eeb682a66467498fd7)), closes [#1756](https://github.com/Saghen/blink.cmp/issues/1756)
+* use `string.buffer` for frecency access ([6dc82a0](https://github.com/Saghen/blink.cmp/commit/6dc82a023ccc3e59112241fa46ba4de4f25b8ee9)), closes [#1627](https://github.com/Saghen/blink.cmp/issues/1627)
+
 ## [1.2.0](https://github.com/Saghen/blink.cmp/compare/v1.1.1...v1.2.0) (2025-05-02)
 
 - Fuzzy matcher performance and correctness improvements ([v0.3.0..v0.4.2](https://github.com/Saghen/frizbee/compare/789d5e1...1802a51))
