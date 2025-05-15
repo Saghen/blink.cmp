@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/Saghen/blink.cmp/compare/v1.3.0...v1.3.1) (2025-05-14)
+
+### Bug Fixes
+
+* **flake:** aarch64 build on nix fails because of jemalloc ([#1759](https://github.com/Saghen/blink.cmp/issues/1759)) ([ef037d0](https://github.com/Saghen/blink.cmp/commit/ef037d0cd90e038c19877b110742cd606b5eeb34))
+* only set error notifications to `err` in `nvim_echo` ([#1763](https://github.com/Saghen/blink.cmp/issues/1763)) ([12a530f](https://github.com/Saghen/blink.cmp/commit/12a530f82e2a8f053bd84617267eaa3dc229de0f))
+
 ## [1.3.0](https://github.com/Saghen/blink.cmp/compare/v1.2.0...v1.3.0) (2025-05-13)
 
 ### Features
