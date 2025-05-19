@@ -320,6 +320,7 @@ vim.api.nvim_set_keymap('n', dot_repeat_hack_name, '', opts)
 vim.api.nvim_set_keymap('s', dot_repeat_hack_name, '', opts)
 vim.api.nvim_set_keymap('v', dot_repeat_hack_name, '', opts)
 vim.api.nvim_set_keymap('c', dot_repeat_hack_name, '', opts)
+vim.api.nvim_set_keymap('t', dot_repeat_hack_name, '', opts)
 
 local dot_repeat_buffer = nil
 local function get_dot_repeat_buffer()
