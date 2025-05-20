@@ -113,24 +113,37 @@ end
 --- @class blink.cmp.BufferOpts
 --- @field get_bufnrs fun(): integer[]
 --- @field get_search_bufnrs fun(): integer[]
+--- @field max_sync_buffer_size integer Maximum buffer text size for sync processing
+--- @field max_async_buffer_size integer Maximum buffer text size for async processing
 
 --- Public API
 
 local buffer = {}
 
 function buffer.new(opts)
-  --- @cast opts blink.cmp.BufferOpts
-
   local self = setmetatable({}, { __index = buffer })
-  self.get_bufnrs = opts.get_bufnrs
-    or function()
+
+  --- @type blink.cmp.BufferOpts
+  opts = vim.tbl_deep_extend('keep', opts or {}, {
+    get_bufnrs = function()
       return vim
         .iter(vim.api.nvim_list_wins())
         :map(function(win) return vim.api.nvim_win_get_buf(win) end)
         :filter(function(buf) return vim.bo[buf].buftype ~= 'nofile' end)
         :totable()
-    end
-  self.get_search_bufnrs = opts.get_search_bufnrs or function() return { vim.api.nvim_get_current_buf() } end
+    end,
+    get_search_bufnrs = function() return { vim.api.nvim_get_current_buf() } end,
+    max_sync_buffer_size = 20000,
+    max_async_buffer_size = 500000,
+  })
+  require('blink.cmp.config.utils').validate('sources.providers.buffer', {
+    get_bufnrs = { opts.get_bufnrs, 'function' },
+    get_search_bufnrs = { opts.get_search_bufnrs, 'function' },
+    max_sync_buffer_size = { opts.max_sync_buffer_size, 'number' },
+    max_async_buffer_size = { opts.max_async_buffer_size, 'number' },
+  }, opts)
+
+  self.opts = opts
   return self
 end
 
@@ -141,7 +154,7 @@ function buffer:get_completions(_, callback)
 
   vim.schedule(function()
     local is_search = vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype())
-    local get_bufnrs = is_search and self.get_search_bufnrs or self.get_bufnrs
+    local get_bufnrs = is_search and self.opts.get_search_bufnrs or self.opts.get_bufnrs
     local bufnrs = require('blink.cmp.lib.utils').deduplicate(get_bufnrs())
 
     local buf_texts = {}
@@ -151,10 +164,10 @@ function buffer:get_completions(_, callback)
     local buf_text = table.concat(buf_texts, '\n')
 
     -- should take less than 2ms
-    if #buf_text < 20000 then
+    if #buf_text < self.opts.max_sync_buffer_size then
       run_sync(buf_text, transformed_callback)
     -- should take less than 10ms
-    elseif #buf_text < 500000 then
+    elseif #buf_text < self.opts.max_async_buffer_size then
       if fuzzy.implementation_type == 'rust' then
         return run_async_rust(buf_text, transformed_callback)
       else
