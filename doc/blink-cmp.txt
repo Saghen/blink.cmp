@@ -2427,7 +2427,7 @@ PROVIDERS
           ignored_filetypes = {},
           get_filetype = function(context)
             return vim.bo.filetype
-          end
+          end,
           -- Set to '+' to use the system clipboard, or '"' to use the unnamed register
           clipboard_register = nil,
         }
@@ -2438,6 +2438,8 @@ PROVIDERS
           use_show_condition = true,
           -- Whether to show autosnippets in the completion list
           show_autosnippets = true,
+          -- Whether to prefer docTrig placeholders over trig when expanding regTrig snippets
+          prefer_doc_trig = false,
         }
     
         -- For `snippets.preset == 'mini_snippets'`
@@ -2462,9 +2464,9 @@ PROVIDERS
           -- buffers when searching with `/` or `?`
           get_search_bufnrs = function() return { vim.api.nvim_get_current_buf() } end,
           -- Maximum total number of characters (across all selected buffers) for which buffer completion runs synchronously. Above this, asynchronous processing is used.
-          max_sync_buffer_size = 20000    
+          max_sync_buffer_size = 20000,
           -- Maximum total number of characters (across all selected buffers) for which buffer completion runs asynchronously. Above this, buffer completions are skipped to avoid performance issues.
-          max_async_buffer_size = 500000 
+          max_async_buffer_size = 500000,
         }
       },
     
@@ -2576,7 +2578,7 @@ CMDLINE
         -- Whether to automatically show the window when new completion items are available
         menu = { auto_show = false },
         -- Displays a preview of the selected item on the current line
-        ghost_text = { enabled = true }
+        ghost_text = { enabled = true },
       }
     }
 <
@@ -2596,7 +2598,7 @@ list preselect = nil, -- When`true`, inserts the completion item automatically
 when selecting it auto_insert = nil, }, }, – Whether to automatically show
 the window when new completion items are available menu = { auto_show = nil },
 – Displays a preview of the selected item on the current line ghost_text = {
-enabled = nil } } }
+enabled = nil }, } }
 
 
 ==============================================================================
