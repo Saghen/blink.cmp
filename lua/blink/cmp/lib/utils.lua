@@ -192,6 +192,21 @@ function utils.notify(msg, lvl)
   end
 end
 
+--- Split a string into a table at the given separator string
+--- (copied from codybuell/cmp-lbdb:lua/cmp_lbdb/utils.lua (MIT licenced))
+--- @param input string
+--- @param sep string
+--- @return string[]
+function utils.split(input, sep)
+  local fields = {}
+
+  local lsep = sep or ' '
+  local pattern = string.format('([^%s]+)', lsep)
+  local _ = string.gsub(input, pattern, function(c) fields[#fields + 1] = c end)
+
+  return fields
+end
+
 vim.api.nvim_create_autocmd('UIEnter', {
   callback = function()
     _ui_entered = true
