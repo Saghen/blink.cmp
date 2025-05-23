@@ -153,14 +153,11 @@ function buffer:enabled()
   if cmdtype == '' then return true end
   -- Enable in search mode
   if cmdtype == '/' or cmdtype == '?' then return true end
-  -- Enable for substitutions and global commands in ex mode
+  -- Enable for substitute and global commands in ex mode
   if cmdtype == ':' then
-    local cmdline = vim.fn.getcmdline()
-    -- Substitution commands: :s/, :%s/, :3,5s/, :.s/, :'<,'>s/, .,$s/
-    local subst_pattern = "^%s*:?[%d%.,'$%%<>]*s[/?]"
-    -- Global commands: :g, :v, :G, :global, :vglobal
-    local global_pattern = "^%s*:?[%d%.,'$%%<>]*[gGv][lL]?[oO]?[bB]?[aA]?[lL]?%s*[/?]"
-    if cmdline:match(subst_pattern) or cmdline:match(global_pattern) then return true end
+    local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, vim.fn.getcmdline(), {})
+    local cmd = (valid_cmd and parsed.cmd) or ''
+    if vim.tbl_contains({ 'substitute', 'global', 'vglobal' }, cmd) then return true end
   end
   return false
 end
