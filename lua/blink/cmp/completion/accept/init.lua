@@ -87,6 +87,7 @@ end
 --- @param callback fun()
 local function accept(ctx, item, callback)
   local sources = require('blink.cmp.sources.lib')
+  require('blink.cmp.completion.trigger').set_accept()
   require('blink.cmp.completion.trigger').hide()
 
   -- Start the resolve immediately since text changes can invalidate the item

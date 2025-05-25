@@ -54,12 +54,15 @@ completion.trigger = {
   -- When false, will not show the completion window automatically when in a snippet
   show_in_snippet = true,
 
+  -- When true, will show the completion window after backspacing into keywords and
+  show_on_backspace = false,
+
   -- When true, will show the completion window after typing any of alphanumerics, `-` or `_`
   show_on_keyword = true,
 
   -- When true, will show the completion window after typing a trigger character
   show_on_trigger_character = true,
-  
+
   -- LSPs can indicate when to show the completion window via trigger characters
   -- however, some LSPs (i.e. tsserver) return characters that would essentially
   -- always show the window. We block these by default.
@@ -99,7 +102,7 @@ completion.list = {
     -- preselect = function(ctx) return vim.bo.filetype ~= 'markdown' end,
 
     -- When `true`, inserts the completion item automatically when selecting it
-    -- You may want to bind a key to the `cancel` command (default <C-e>) when using this option, 
+    -- You may want to bind a key to the `cancel` command (default <C-e>) when using this option,
     -- which will both undo the selection and hide the completion menu
     auto_insert = true,
     -- auto_insert = function(ctx) return vim.bo.filetype ~= 'markdown' end
@@ -447,7 +450,7 @@ See the [mode specific configurations](#mode-specific) for setting sources for `
 sources = {
   -- Static list of providers to enable, or a function to dynamically enable/disable providers based on the context
   default = { 'lsp', 'path', 'snippets', 'buffer' },
-  
+
   -- You may also define providers per filetype
   per_filetype = {
     -- optionally inherit from the `default` sources
