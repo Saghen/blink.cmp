@@ -72,7 +72,7 @@ function sources.get_enabled_provider_ids(mode)
   -- Filetype-specific sources
   local providers = {}
   local inherit_defaults = false
-  for _, filetype in pairs(vim.split(vim.bo.filetype, '.', { trimempty = true })) do
+  for _, filetype in pairs(vim.split(vim.bo.filetype, '.', { plain = true, trimempty = true })) do
     if config.sources.per_filetype[filetype] ~= nil then
       local filetype_providers = config.sources.per_filetype[filetype]
       if type(filetype_providers) == 'function' then filetype_providers = filetype_providers() end
