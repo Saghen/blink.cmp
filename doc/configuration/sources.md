@@ -118,3 +118,4 @@ See [blink.compat](https://github.com/Saghen/blink.compat) for using `nvim-cmp` 
 - [blink-cmp-agda-symbols](https://github.com/4e554c4c/blink-cmp-agda-symbols): Completion for [Agda](https://wiki.portal.chalmers.se/agda/pmwiki.php)
 - [blink-cmp-latex](https://github.com/erooke/blink-cmp-latex): Completion for unicode symbols via latex macros
 - [blink-cmp-npm](https://github.com/alexandre-abrioux/blink-cmp-npm.nvim): Completion for NPM package names and versions
+- [blink-cmp-kitty](https://github.com/garyhurtz/blink_cmp_kitty): Kitty terminal completion source
