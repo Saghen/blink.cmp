@@ -88,7 +88,7 @@ function sources.get_enabled_provider_ids(mode)
   end
   if inherit_defaults then
     vim.list_extend(providers, default_providers)
-  elseif not providers then
+  elseif vim.tbl_isempty(providers) then
     providers = default_providers
   end
 
