@@ -9,7 +9,6 @@
 --- @field term_events blink.cmp.TermEvents
 --- @field current_context_id number
 --- @field context? blink.cmp.Context
---- @field just_accepted? boolean
 --- @field show_emitter blink.cmp.EventEmitter<{ context: blink.cmp.Context }>
 --- @field hide_emitter blink.cmp.EventEmitter<{}>
 ---
@@ -18,7 +17,6 @@
 --- @field is_trigger_character fun(char: string, is_show_on_x?: boolean): boolean
 --- @field suppress_events_for_callback fun(cb: fun())
 --- @field show_if_on_trigger_character fun(opts?: { is_accept?: boolean })
---- @field set_accept fun()
 --- @field show fun(opts?: blink.cmp.CompletionTriggerShowOptions): blink.cmp.Context?
 --- @field hide fun()
 --- @field within_query_bounds fun(cursor: number[]): boolean
@@ -41,7 +39,6 @@ local fuzzy = require('blink.cmp.fuzzy')
 --- @type blink.cmp.CompletionTrigger
 --- @diagnostic disable-next-line: missing-fields
 local trigger = {
-  just_accepted = false,
   current_context_id = -1,
   show_emitter = require('blink.cmp.lib.event_emitter').new('show'),
   hide_emitter = require('blink.cmp.lib.event_emitter').new('hide'),
@@ -71,7 +68,7 @@ local function on_char_added(char, is_ignored)
   end
 end
 
-local function on_cursor_moved(event, is_ignored)
+local function on_cursor_moved(event, is_ignored, is_backspace)
   local is_enter_event = event == 'InsertEnter' or event == 'TermEnter'
 
   local cursor = context.get_cursor()
@@ -123,17 +120,13 @@ local function on_cursor_moved(event, is_ignored)
   -- prefetch completions without opening window on InsertEnter
   elseif is_enter_event and config.prefetch_on_insert then
     trigger.show({ trigger_kind = 'prefetch' })
-  elseif
-    config.show_on_backspace and not trigger.just_accepted and (is_keyword and trigger.context == nil)
-    or (trigger.context ~= nil and char_under_cursor ~= ' ' and cursor_col ~= 0)
-  then
+  -- show after backspacing onto a keyword
+  elseif config.show_on_backspace and is_backspace and is_keyword then
     trigger.show({ trigger_kind = 'keyword' })
   -- otherwise hide
   else
     trigger.hide()
   end
-
-  trigger.just_accepted = false
 end
 
 function trigger.activate()
@@ -225,8 +218,6 @@ function trigger.show_if_on_trigger_character(opts)
     trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
   end
 end
-
-function trigger.set_accept() trigger.just_accepted = true end
 
 function trigger.show(opts)
   if not require('blink.cmp.config').enabled() then return trigger.hide() end
