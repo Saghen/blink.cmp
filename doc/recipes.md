@@ -166,18 +166,6 @@ sources.providers.lsp.override.get_trigger_characters = function(self)
 end
 ```
 
-### Show on entering insert mode
-
-The following `autocmd` will pop-up the completion menu when entering insert mode:
-
-```lua
-vim.api.nvim_create_autocmd({ "InsertEnter" }, {
-  callback = function()
-    require("blink.cmp").show()
-  end,
-})
-```
-
 ## Fuzzy (sorting/filtering)
 
 [See the full docs](./configuration/fuzzy.md)
