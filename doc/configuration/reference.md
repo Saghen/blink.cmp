@@ -59,6 +59,9 @@ completion.trigger = {
 
   -- When true, will show the completion window after typing a trigger character
   show_on_trigger_character = true,
+
+  -- When true, will show the completion window after entering insert mode
+  show_on_insert = false,
   
   -- LSPs can indicate when to show the completion window via trigger characters
   -- however, some LSPs (i.e. tsserver) return characters that would essentially
