@@ -1,4 +1,4 @@
-*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 27
+*blink-cmp.txt*            For NVIM v0.10.0           Last change: 2025 May 28
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1884,6 +1884,7 @@ sources
 - blink-cmp-npm <https://github.com/alexandre-abrioux/blink-cmp-npm.nvim>: Completion for NPM package names and versions
 - blink-cmp-kitty <https://github.com/garyhurtz/blink_cmp_kitty>: Kitty terminal completion source
 - blink-cmp-yanky <https://github.com/marcoSven/blink-cmp-yanky>: Completion for yanky.nvim <https://github.com/gbprod/yanky.nvim>
+- blink-cmp-register <https://github.com/phanen/blink-cmp-register>
 
 
 REFERENCE                                         *blink-cmp-config-reference*
