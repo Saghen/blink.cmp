@@ -120,3 +120,4 @@ See [blink.compat](https://github.com/Saghen/blink.compat) for using `nvim-cmp` 
 - [blink-cmp-npm](https://github.com/alexandre-abrioux/blink-cmp-npm.nvim): Completion for NPM package names and versions
 - [blink-cmp-kitty](https://github.com/garyhurtz/blink_cmp_kitty): Kitty terminal completion source
 - [blink-cmp-yanky](https://github.com/marcoSven/blink-cmp-yanky): Completion for [yanky.nvim](https://github.com/gbprod/yanky.nvim)
+- [blink-cmp-register](https://github.com/phanen/blink-cmp-register)
