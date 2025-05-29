@@ -1,6 +1,9 @@
 local config = require('blink.cmp.config').completion.accept
 local text_edits_lib = require('blink.cmp.lib.text_edits')
 local brackets_lib = require('blink.cmp.completion.brackets')
+local list = require('blink.cmp.completion.list')
+local state = require('blink.cmp.lib.state')
+local cfg = require('blink.cmp.config')
 
 --- @param ctx blink.cmp.Context
 --- @param item blink.cmp.CompletionItem
@@ -116,5 +119,7 @@ local function accept(ctx, item, callback)
     end)
     :catch(function(err) vim.notify(err, vim.log.levels.ERROR, { title = 'blink.cmp' }) end)
 end
+
+if cfg.enabled then list.accept_emitter:on(function(ev) state.set(ev.context.bufnr, 'accept') end) end
 
 return accept

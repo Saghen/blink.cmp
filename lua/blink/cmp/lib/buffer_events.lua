@@ -2,6 +2,8 @@
 --- Notably, when "char added" is fired, the "cursor moved" event will not be fired.
 --- Unlike in regular neovim, ctrl + c and buffer switching will trigger "insert leave"
 
+local state = require('blink.cmp.lib.state')
+
 --- @class blink.cmp.BufferEvents
 --- @field has_context fun(): boolean
 --- @field show_in_snippet boolean
@@ -21,7 +23,7 @@
 
 --- @class blink.cmp.BufferEventsListener
 --- @field on_char_added fun(char: string, is_ignored: boolean)
---- @field on_cursor_moved fun(event: 'CursorMoved' | 'InsertEnter', is_ignored: boolean, is_backspace: boolean)
+--- @field on_cursor_moved fun(event: 'CursorMoved' | 'InsertEnter', is_ignored: boolean, is_backspace: boolean, last_event: string)
 --- @field on_insert_leave fun()
 
 --- @type blink.cmp.BufferEvents
@@ -71,12 +73,23 @@ local function make_cursor_moved(self, snippet, on_cursor_moved)
     end
 
     local is_cursor_moved = ev.event == 'CursorMoved' or ev.event == 'CursorMovedI'
-
     local is_ignored = is_cursor_moved and self.ignore_next_cursor_moved
     if is_cursor_moved then self.ignore_next_cursor_moved = false end
 
     local is_backspace = did_backspace and is_cursor_moved
     did_backspace = false
+
+    local last_event = nil
+    if ev.event == 'InsertEnter' then
+      state.set(ev.buf, 'enter')
+    elseif is_backspace then
+      last_event = state.get(ev.buf)
+      state.clear(ev.buf)
+    elseif not is_backspace then
+      if not ev.event == 'CursorMovedI' or not state.get(ev.buf) == 'accept' then state.clear(ev.buf) end
+    else
+      state.clear(ev.buf)
+    end
 
     -- characters added so let textchanged handle it
     if self.last_char ~= '' then return end
@@ -84,7 +97,7 @@ local function make_cursor_moved(self, snippet, on_cursor_moved)
     if not require('blink.cmp.config').enabled() then return end
     if not self.show_in_snippet and not self.has_context() and snippet.active() then return end
 
-    on_cursor_moved(is_cursor_moved and 'CursorMoved' or ev.event, is_ignored, is_backspace)
+    on_cursor_moved(is_cursor_moved and 'CursorMoved' or ev.event, is_ignored, is_backspace, last_event)
   end
 end
 

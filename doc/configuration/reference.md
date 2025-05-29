@@ -54,8 +54,11 @@ completion.trigger = {
   -- When false, will not show the completion window automatically when in a snippet
   show_in_snippet = true,
 
-  -- When true, will show the completion window after backspacing into keywords and
-  show_on_backspace = false,
+  -- When true, will show the completion window after accepting a completion and then backspacing into a keyword
+  show_on_backspace_after_accept = true,
+
+  -- When true, will show the completion window after entering insert mode and backspacing into keyword
+  show_on_backspace_after_insert_enter = true,
 
   -- When true, will show the completion window after typing any of alphanumerics, `-` or `_`
   show_on_keyword = true,
@@ -714,3 +717,4 @@ term = {
     ghost_text = { enabled = nil },
   }
 }
+```
