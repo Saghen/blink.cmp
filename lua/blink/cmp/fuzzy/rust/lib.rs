@@ -112,21 +112,17 @@ pub fn guess_edit_range(
 ) -> LuaResult<(usize, usize)> {
     let line_str = line.to_string_lossy();
 
-    let label_edit_range =
-        keyword::guess_keyword_range_from_item(&item.label, &line_str, cursor_col, match_suffix);
+    let keyword_range = keyword::get_keyword_range(&line_str, cursor_col, match_suffix);
+    let label_edit_range = keyword::guess_keyword_range(keyword_range, &item.label, &line_str);
     let filter_text_edit_range = item
         .filter_text
         .as_ref()
-        .map(|filter_text| {
-            keyword::guess_keyword_range_from_item(filter_text, &line_str, cursor_col, match_suffix)
-        })
+        .map(|filter_text| keyword::guess_keyword_range(keyword_range, filter_text, &line_str))
         .unwrap_or(label_edit_range);
     let insert_text_edit_range = item
         .insert_text
         .as_ref()
-        .map(|insert_text| {
-            keyword::guess_keyword_range_from_item(insert_text, &line_str, cursor_col, match_suffix)
-        })
+        .map(|insert_text| keyword::guess_keyword_range(keyword_range, insert_text, &line_str))
         .unwrap_or(filter_text_edit_range);
 
     // Prefer the insert text, then filter text, then label ranges for non-snippets

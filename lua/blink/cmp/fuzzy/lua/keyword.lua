@@ -1,3 +1,5 @@
+local char_lib = require('blink.cmp.fuzzy.lua.char')
+
 local keyword = {}
 
 local BACKWARD_REGEX = vim.regex([[\k*$]])
@@ -35,19 +37,53 @@ function keyword.get_keyword_range(line, col, match_suffix)
   end)
 end
 
-function keyword.guess_keyword_range_from_item(item_text, line, cursor_col, match_suffix)
-  local line_range_start, line_range_end = keyword.get_keyword_range(line, cursor_col, match_suffix)
-  local text_range_start, _ = keyword.get_keyword_range(item_text, #item_text, false)
+--- @param keyword_start number
+--- @param keyword_end number
+--- @param word string
+--- @param line string
+--- @return number, number
+function keyword.guess_keyword_range(keyword_start, keyword_end, word, line)
+  keyword_start = keyword_start + 1
+  local og_keyword_start = keyword_start
 
-  local line_prefix = line:sub(1, line_range_start)
-  local text_prefix = item_text:sub(1, text_range_start)
-  if line_prefix:sub(-#text_prefix) == text_prefix then return line_range_start - #text_prefix, line_range_end end
+  -- No special logic needed if the whole word matches the keyword regex or if we can't go
+  -- backwards
+  if og_keyword_start <= 0 then return og_keyword_start, keyword_end end
 
-  return line_range_start, line_range_end
+  -- Calculate the range to search backwards (don't go below 1)
+  local search_start = math.max(1, og_keyword_start - #word)
+
+  -- Search backwards from just before the keyword start
+  for idx = og_keyword_start - 1, search_start, -1 do
+    -- Check if this position could be a valid word boundary
+    if char_lib.is_valid_word_boundary(line, idx) then
+      -- Abort if we hit whitespace (word boundary)
+      local c = string.sub(line, idx, idx)
+      if string.match(c, '%s') then break end
+
+      -- Try to match the completion word starting from this position
+      local match_len = og_keyword_start - idx
+
+      -- Don't try to match more characters than we have in either string
+      if match_len <= #word and idx + match_len - 1 <= #line then
+        local line_substr = string.sub(line, idx, idx + match_len - 1)
+        local word_substr = string.sub(word, 1, match_len)
+
+        if line_substr == word_substr then keyword_start = math.min(keyword_start, idx) end
+      end
+    end
+  end
+
+  return keyword_start - 1, keyword_end
 end
 
-function keyword.guess_keyword_from_item(item_text, line, cursor_col, match_suffix)
-  local start, finish = keyword.guess_keyword_range_from_item(item_text, line, cursor_col, match_suffix)
+--- @param keyword_start number
+--- @param keyword_end number
+--- @param word string
+--- @param line string
+--- @return string
+function keyword.guess_keyword(keyword_start, keyword_end, word, line)
+  local start, finish = keyword.guess_keyword_range(keyword_start, keyword_end, word, line)
   return line:sub(start + 1, finish)
 end
 
