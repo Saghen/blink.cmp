@@ -14,6 +14,7 @@ function sort.sort(list, funcs)
       if result ~= nil then return result end
     end
   end)
+
   return list
 end
 
