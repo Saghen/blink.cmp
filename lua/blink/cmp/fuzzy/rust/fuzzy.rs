@@ -150,6 +150,10 @@ pub fn fuzzy(
     if let Some(sorts) = opts.sorts {
         matches.sort_by(|a, b| {
             sorts.iter().fold(Ordering::Equal, |acc, sort| {
+                if acc != Ordering::Equal {
+                    return acc;
+                }
+
                 let item_a = &haystack[a.index_in_haystack as usize];
                 let item_b = &haystack[b.index_in_haystack as usize];
                 match sort {
