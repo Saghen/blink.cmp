@@ -39,6 +39,8 @@ end
 function fuzzy.set_provider_items(provider_id, items) fuzzy.provider_items[provider_id] = items end
 
 function fuzzy.fuzzy(line, cursor_col, provider_id, opts)
+  assert(opts.sorts == nil, 'Sorting is not supported in the Lua implementation')
+
   local keyword_start, keyword_end = get_keyword_range(line, cursor_col, opts.match_suffix)
   local keyword = line:sub(keyword_start + 1, keyword_end)
 
