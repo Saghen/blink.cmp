@@ -115,6 +115,7 @@ end
 --- @field get_search_bufnrs fun(): integer[]
 --- @field max_sync_buffer_size integer Maximum buffer text size for sync processing
 --- @field max_async_buffer_size integer Maximum buffer text size for async processing
+--- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s) and global (:g) commands
 
 --- Public API
 
@@ -135,16 +136,33 @@ function buffer.new(opts)
     get_search_bufnrs = function() return { vim.api.nvim_get_current_buf() } end,
     max_sync_buffer_size = 20000,
     max_async_buffer_size = 500000,
+    enable_in_ex_commands = false,
   })
   require('blink.cmp.config.utils').validate('sources.providers.buffer', {
     get_bufnrs = { opts.get_bufnrs, 'function' },
     get_search_bufnrs = { opts.get_search_bufnrs, 'function' },
     max_sync_buffer_size = { opts.max_sync_buffer_size, 'number' },
     max_async_buffer_size = { opts.max_async_buffer_size, 'number' },
+    enable_in_ex_commands = { opts.enable_in_ex_commands, 'boolean' },
   }, opts)
 
   self.opts = opts
   return self
+end
+
+function buffer:enabled()
+  local cmdtype = vim.fn.getcmdtype()
+  -- Enable in regular buffer
+  if cmdtype == '' then return true end
+  -- Enable in search mode
+  if cmdtype == '/' or cmdtype == '?' then return true end
+  -- Enable for substitute and global commands in ex mode
+  if cmdtype == ':' and self.opts.enable_in_ex_commands then
+    local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, vim.fn.getcmdline(), {})
+    local cmd = (valid_cmd and parsed.cmd) or ''
+    if vim.tbl_contains({ 'substitute', 'global', 'vglobal' }, cmd) then return true end
+  end
+  return false
 end
 
 function buffer:get_completions(_, callback)
