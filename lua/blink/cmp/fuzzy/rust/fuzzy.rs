@@ -3,13 +3,15 @@
 use crate::frecency::FrecencyTracker;
 use crate::keyword;
 use crate::lsp_item::LspItem;
+use crate::sort::Sort;
 use mlua::prelude::*;
 use mlua::FromLua;
 use mlua::Lua;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-#[derive(Clone, Hash)]
+#[derive(Clone)]
 pub struct FuzzyOptions {
     match_suffix: bool,
     max_typos: u16,
@@ -17,6 +19,7 @@ pub struct FuzzyOptions {
     use_proximity: bool,
     nearby_words: Option<Vec<String>>,
     snippet_score_offset: i32,
+    sorts: Option<Vec<Sort>>,
 }
 
 impl FromLua for FuzzyOptions {
@@ -28,6 +31,15 @@ impl FromLua for FuzzyOptions {
             let use_proximity: bool = tab.get("use_proximity").unwrap_or_default();
             let nearby_words: Option<Vec<String>> = tab.get("nearby_words").ok();
             let snippet_score_offset: i32 = tab.get("snippet_score_offset").unwrap_or_default();
+            let sorts: Option<Vec<String>> = tab.get("sorts").ok();
+            let sorts = sorts
+                .map(|sorts| {
+                    sorts
+                        .iter()
+                        .map(|s| s.try_into())
+                        .collect::<Result<Vec<_>, _>>()
+                })
+                .transpose()?;
 
             Ok(FuzzyOptions {
                 match_suffix,
@@ -36,6 +48,7 @@ impl FromLua for FuzzyOptions {
                 use_proximity,
                 nearby_words,
                 snippet_score_offset,
+                sorts,
             })
         } else {
             Err(mlua::Error::FromLuaConversionError {
@@ -100,8 +113,6 @@ pub fn fuzzy(
         })
         .collect::<Vec<_>>();
 
-    matches.sort_by_key(|mtch| mtch.index_in_haystack);
-
     // Get the score for each match, adding score_offset, frecency and proximity bonus
     let nearby_words: HashSet<String> = HashSet::from_iter(opts.nearby_words.unwrap_or_default());
     let match_scores = matches
@@ -127,13 +138,49 @@ pub fn fuzzy(
                 score_offset += opts.snippet_score_offset;
             }
 
-            (mtch.score as i32) + frecency_score + nearby_words_score + score_offset
+            (
+                mtch.index_in_haystack,
+                (mtch.score as i32) + frecency_score + nearby_words_score + score_offset,
+            )
         })
-        .collect::<Vec<_>>();
+        .collect::<HashMap<_, _>>();
+
+    // Sort by index in haystack
+    matches.sort_by_key(|mtch| mtch.index_in_haystack);
+    // Sort by user-defined sorts
+    if let Some(sorts) = opts.sorts {
+        matches.sort_by(|a, b| {
+            sorts.iter().fold(Ordering::Equal, |acc, sort| {
+                if acc != Ordering::Equal {
+                    return acc;
+                }
+
+                let item_a = &haystack[a.index_in_haystack as usize];
+                let item_b = &haystack[b.index_in_haystack as usize];
+                match sort {
+                    // Reverse ordering
+                    Sort::Exact => acc.then(b.exact.cmp(&a.exact)),
+                    Sort::Score => acc.then(
+                        match_scores[&b.index_in_haystack].cmp(&match_scores[&a.index_in_haystack]),
+                    ),
+                    // Regular ordering
+                    Sort::Kind => acc.then(item_a.kind.cmp(&item_b.kind)),
+                    Sort::SortText => acc.then(match (&item_a.sort_text, &item_b.sort_text) {
+                        (None, _) | (_, None) => Ordering::Equal,
+                        (Some(a), Some(b)) => a.cmp(b),
+                    }),
+                    Sort::Label => acc.then(Sort::label(item_a, item_b)),
+                }
+            })
+        })
+    }
 
     // Return scores, indices and whether the match is exact
     (
-        match_scores,
+        matches
+            .iter()
+            .map(|mtch| match_scores[&mtch.index_in_haystack])
+            .collect::<Vec<_>>(),
         matches
             .iter()
             .map(|mtch| mtch.index_in_haystack)

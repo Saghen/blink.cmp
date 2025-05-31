@@ -16,3 +16,4 @@
 --- @field use_proximity boolean
 --- @field nearby_words string[]
 --- @field snippet_score_offset number
+--- @field sorts? blink.cmp.Sort[]

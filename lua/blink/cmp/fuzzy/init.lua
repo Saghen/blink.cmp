@@ -93,6 +93,10 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
   local keyword_length = keyword_end_col - keyword_start_col
   local keyword = line:sub(keyword_start_col, keyword_end_col)
 
+  -- Sort in rust if none of the sort functions are lua functions
+  local sort_in_rust = fuzzy.implementation_type == 'rust'
+    and #vim.tbl_filter(function(v) return type(v) ~= 'function' end, config.fuzzy.sorts) == #config.fuzzy.sorts
+
   local filtered_items = {}
   for provider_id, haystack in pairs(haystacks_by_provider) do
     -- perform fuzzy search
@@ -104,6 +108,7 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
       nearby_words = nearby_words,
       match_suffix = range == 'full',
       snippet_score_offset = config.snippets.score_offset,
+      sorts = sort_in_rust and config.fuzzy.sorts or nil,
     })
 
     for idx, item_index in ipairs(matched_indices) do
@@ -115,6 +120,7 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
     end
   end
 
+  if sort_in_rust then return filtered_items end
   return require('blink.cmp.fuzzy.sort').sort(filtered_items, config.fuzzy.sorts)
 end
 

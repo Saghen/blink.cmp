@@ -13,6 +13,7 @@ mod frecency;
 mod fuzzy;
 mod keyword;
 mod lsp_item;
+mod sort;
 
 static REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"[\p{L}_][\p{L}0-9_\\-]{2,}").unwrap());
