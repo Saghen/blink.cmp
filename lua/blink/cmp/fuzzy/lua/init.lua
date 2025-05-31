@@ -1,7 +1,7 @@
 local match = require('blink.cmp.fuzzy.lua.match')
 local match_indices = require('blink.cmp.fuzzy.lua.match_indices')
 local get_keyword_range = require('blink.cmp.fuzzy.lua.keyword').get_keyword_range
-local guess_keyword_range_from_item = require('blink.cmp.fuzzy.lua.keyword').guess_keyword_range_from_item
+local guess_keyword_range = require('blink.cmp.fuzzy.lua.keyword').guess_keyword_range
 
 --- @type blink.cmp.FuzzyImplementation
 --- @diagnostic disable-next-line: missing-fields
@@ -67,7 +67,28 @@ end
 function fuzzy.get_keyword_range(line, col, match_suffix) return get_keyword_range(line, col, match_suffix) end
 
 function fuzzy.guess_edit_range(item, line, col, match_suffix)
-  return guess_keyword_range_from_item(item.insertText or item.label, line, col, match_suffix)
+  local keyword_start, keyword_end = get_keyword_range(line, col, match_suffix)
+
+  -- Prefer the insert text, then filter text, then label ranges for non-snippets
+  if item.kind ~= require('blink.cmp.types').CompletionItemKind.Snippet then
+    return guess_keyword_range(keyword_start, keyword_end, item.insertText or item.filterText or item.label, line)
+  end
+
+  -- Take the max range prioritizing the start index first and the end index second
+  local label_range = { guess_keyword_range(keyword_start, keyword_end, item.label, line) }
+  local filter_text_range = item.filterText
+      and { guess_keyword_range(keyword_start, keyword_end, item.filterText, line) }
+    or label_range
+  local insert_text_range = item.insertText
+      and { guess_keyword_range(keyword_start, keyword_end, item.insertText, line) }
+    or label_range
+
+  local ranges = { label_range, filter_text_range, insert_text_range }
+  table.sort(ranges, function(a, b)
+    if a[1] ~= b[1] then return a[1] < b[1] end
+    return a[2] > b[2]
+  end)
+  return ranges[1][1], ranges[1][2]
 end
 
 return fuzzy

@@ -1,5 +1,6 @@
 local async = require('blink.cmp.lib.async')
 local config = require('blink.cmp.config')
+local utils = require('blink.cmp.lib.utils')
 
 --- @class blink.cmp.Sources
 --- @field completions_queue blink.cmp.SourcesQueue | nil
@@ -69,21 +70,29 @@ function sources.get_enabled_provider_ids(mode)
   --- @cast default_providers string[]
 
   -- Filetype-specific sources
-  local providers = {}
-  if config.sources.per_filetype[vim.bo.filetype] ~= nil then
-    local filetype_providers = config.sources.per_filetype[vim.bo.filetype]
-    if type(filetype_providers) == 'function' then filetype_providers = filetype_providers() end
+  local providers = nil
+  local inherit_defaults = false
+  for _, filetype in pairs(vim.split(vim.bo.filetype, '.', { plain = true, trimempty = true })) do
+    if config.sources.per_filetype[filetype] ~= nil then
+      local filetype_providers = config.sources.per_filetype[filetype]
+      if type(filetype_providers) == 'function' then filetype_providers = filetype_providers() end
 
-    vim.list_extend(providers, filetype_providers)
+      if providers == nil then providers = {} end
+      vim.list_extend(providers, filetype_providers)
 
-    if filetype_providers.inherit_defaults then vim.list_extend(providers, default_providers) end
-  else
-    providers = default_providers
+      inherit_defaults = inherit_defaults or filetype_providers.inherit_defaults or false
+    end
+    -- Dynamically injected sources
+    if sources.per_filetype_provider_ids[filetype] ~= nil then
+      if providers == nil then providers = {} end
+      vim.list_extend(providers, sources.per_filetype_provider_ids[filetype])
+    end
   end
-
-  -- Dynamically injected sources
-  if sources.per_filetype_provider_ids[vim.bo.filetype] ~= nil then
-    vim.list_extend(providers, sources.per_filetype_provider_ids[vim.bo.filetype])
+  if inherit_defaults then
+    if providers == nil then providers = {} end
+    vim.list_extend(providers, default_providers)
+  elseif providers == nil then
+    providers = default_providers
   end
 
   return deduplicate(providers)

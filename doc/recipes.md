@@ -166,7 +166,6 @@ sources.providers.lsp.override.get_trigger_characters = function(self)
 end
 ```
 
-
 ## Fuzzy (sorting/filtering)
 
 [See the full docs](./configuration/fuzzy.md)

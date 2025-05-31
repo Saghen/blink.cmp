@@ -117,7 +117,11 @@ local function on_cursor_moved(event, is_ignored, is_backspace, last_event)
     trigger.context = nil
     trigger.show({ trigger_kind = 'keyword' })
 
-  -- prefetch completions without opening window on InsertEnter
+  -- show after entering insert mode
+  elseif is_enter_event and config.show_on_insert then
+    trigger.show({ trigger_kind = 'keyword' })
+
+  -- prefetch completions without opening window after entering insert mode
   elseif is_enter_event and config.prefetch_on_insert then
     trigger.show({ trigger_kind = 'prefetch' })
 
