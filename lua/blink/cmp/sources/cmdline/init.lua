@@ -87,6 +87,7 @@ function cmdline:get_completions(context, callback)
           -- TODO: handle `custom` type
           local compl_type = not vim.startswith(completion_type, 'custom') and vim.fn.getcmdcompltype() or 'cmdline'
           if compl_type ~= '' then
+            query = compl_type == 'file' and current_arg_prefix or query
             completions = vim.fn.getcompletion(query, compl_type)
             if type(completions) ~= 'table' then completions = {} end
           end
