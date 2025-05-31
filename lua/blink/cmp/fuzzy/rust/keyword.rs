@@ -61,6 +61,9 @@ pub fn guess_keyword_range(
         return (og_keyword_start, keyword_end);
     }
 
+    let word = word.as_bytes();
+    let line = line.as_bytes();
+
     // Use the keyword regex as the "typical" keyword range
     let mut keyword_start = og_keyword_start;
 
@@ -75,10 +78,8 @@ pub fn guess_keyword_range(
         }
 
         // Abort if we hit whitespace (word boundary)
-        if let Some(c) = line.chars().nth(idx) {
-            if c.is_whitespace() {
-                break;
-            }
+        if line[idx].is_ascii_whitespace() {
+            break;
         }
 
         // Try to match the completion word starting from this position
@@ -105,19 +106,18 @@ pub fn guess_keyword(keyword_range: (usize, usize), word: &str, line: &str) -> S
 
 /// Logic taken directly from nvim-cmp
 /// https://github.com/hrsh7th/nvim-cmp/blob/b5311ab3ed9c846b585c0c15b7559be131ec4be9/lua/cmp/utils/char.lua#L70
-fn is_valid_word_boundary(text: &str, index: usize) -> bool {
+fn is_valid_word_boundary(text: &[u8], index: usize) -> bool {
     if index == 0 {
         return true;
     }
 
-    let bytes = text.as_bytes();
-    if index >= bytes.len() {
+    if index >= text.len() {
         return false;
     }
 
     // Check various semantic boundary conditions
-    let prev = bytes[index - 1];
-    let curr = bytes[index];
+    let prev = text[index - 1];
+    let curr = text[index];
     return (!prev.is_ascii_uppercase() && curr.is_ascii_uppercase())
         || !curr.is_ascii_alphanumeric()
         || (!prev.is_ascii_alphabetic() && curr.is_ascii_alphabetic())
