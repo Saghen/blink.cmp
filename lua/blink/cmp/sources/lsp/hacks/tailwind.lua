@@ -27,7 +27,7 @@ function tailwind.get_hex_color(item)
   local doc = item.documentation
   if item.kind ~= kinds.Color or not doc then return end
   local content = type(doc) == 'string' and doc or doc.value
-  if content and content:match('^#%x%x%x%x%x%x$') then return content end
+  if content and #content == 7 and content:match('^#%x%x%x%x%x%x$') then return content end
 end
 
 --- @type table<string, boolean>
