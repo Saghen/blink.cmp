@@ -146,6 +146,18 @@ function buffer.new(opts)
     enable_in_ex_commands = { opts.enable_in_ex_commands, 'boolean' },
   }, opts)
 
+  -- HACK: When using buffer completion sources in ex commands
+  -- while 'inccommand' is active, Neovim's UI redraw is delayed by one frame.
+  -- This causes completion popups to appear out of sync with user input,
+  -- due to a known Neovim limitation (see neovim/neovim#9783).
+  -- To work around this, temporarily disable 'inccommand'.
+  -- This sacrifice live substitution previews, but restores correct redraw.
+  if opts.enable_in_ex_commands then
+    vim.on_key(function()
+      if vim.fn.getcmdtype() == ':' and vim.o.inccommand ~= '' then vim.o.inccommand = '' end
+    end)
+  end
+
   self.opts = opts
   return self
 end

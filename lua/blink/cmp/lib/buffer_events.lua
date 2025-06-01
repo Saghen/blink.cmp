@@ -121,18 +121,9 @@ function buffer_events:listen(opts)
     callback = make_insert_leave(self, opts.on_insert_leave),
   })
 
+  -- ctrl+c doesn't trigger InsertLeave so handle it separately
   local ctrl_c = vim.api.nvim_replace_termcodes('<C-c>', true, true, true)
-
   vim.on_key(function(key)
-    -- HACK: When using buffer completion sources in ex commands
-    -- while 'inccommand' is active, Neovim's UI redraw is delayed by one frame.
-    -- This causes completion popups to appear out of sync with user input,
-    -- due to a known Neovim limitation (see neovim/neovim#9783).
-    -- To work around this, temporarily disable 'inccommand'.
-    -- This sacrifice live substitution previews, but restores correct redraw.
-    if vim.fn.getcmdtype() == ':' and vim.o.inccommand ~= '' then vim.o.inccommand = '' end
-
-    -- ctrl+c doesn't trigger InsertLeave so handle it separately
     if key == ctrl_c then
       vim.schedule(function()
         local mode = vim.api.nvim_get_mode().mode
