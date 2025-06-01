@@ -19,7 +19,8 @@ function cmdline.new()
 end
 
 function cmdline:enabled()
-  return vim.api.nvim_get_mode().mode == 'c' and vim.tbl_contains({ ':', '@' }, vim.fn.getcmdtype())
+  return vim.bo.ft == 'vim'
+    or vim.api.nvim_get_mode().mode == 'c' and vim.tbl_contains({ ':', '@' }, vim.fn.getcmdtype())
 end
 
 ---@param name string
@@ -36,6 +37,7 @@ function cmdline:get_completions(context, callback)
 
   local is_path_completion = vim.tbl_contains(constants.completion_types.path, completion_type)
   local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
+  local is_cmdline = vim.api.nvim_get_mode().mode == 'c'
 
   local context_line, arguments = self:smart_split(context, is_path_completion or is_buffer_completion)
   local cmd = arguments[1]
@@ -200,6 +202,19 @@ function cmdline:get_completions(context, callback)
           start_pos = start_pos + #prefix
         end
 
+        -- Adjust start position for Lua expressions entered without space
+        -- `=vim.api` which are valid expressions
+        if is_first_arg and not is_cmdline then
+          local prefix = current_arg_prefix:match('^=([^%s].*)')
+          if prefix then start_pos = start_pos + #prefix end
+        end
+
+        -- Calculate line and column values based on context
+        local line = is_cmdline and 0 or (context.cursor[1] - 1)
+        local insert_end_char = is_cmdline and (vim.fn.getcmdpos() - 1) or context.cursor[2]
+        local replace_end_char =
+          math.min(start_pos + #current_arg, context.bounds.start_col + context.bounds.length - 1)
+
         local item = {
           label = label or filter_text,
           filterText = filter_text,
@@ -209,15 +224,12 @@ function cmdline:get_completions(context, callback)
           textEdit = {
             newText = new_text,
             insert = {
-              start = { line = 0, character = start_pos },
-              ['end'] = { line = 0, character = vim.fn.getcmdpos() - 1 },
+              start = { line = line, character = start_pos },
+              ['end'] = { line = line, character = insert_end_char },
             },
             replace = {
-              start = { line = 0, character = start_pos },
-              ['end'] = {
-                line = 0,
-                character = math.min(start_pos + #current_arg, context.bounds.start_col + context.bounds.length - 1),
-              },
+              start = { line = line, character = start_pos },
+              ['end'] = { line = line, character = replace_end_char },
             },
           },
           kind = require('blink.cmp.types').CompletionItemKind.Property,
