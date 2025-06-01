@@ -20,12 +20,16 @@ require('lazy.minit').repro({
       opts = {},
     },
     {
-      'neovim/nvim-lspconfig',
-      config = function()
-        require('lspconfig').lua_ls.setup({
-          capabilities = require('blink.cmp').get_lsp_capabilities(),
-        })
-      end,
+      'mason-org/mason.nvim',
+      build = ':MasonUpdate',
+      opts = {},
+    },
+    {
+      'mason-org/mason-lspconfig.nvim',
+      dependencies = { 'mason-org/mason.nvim', 'neovim/nvim-lspconfig' },
+      opts = {
+        ensure_installed = { 'lua_ls' },
+      },
     },
   },
 })
