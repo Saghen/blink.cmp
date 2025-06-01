@@ -183,7 +183,7 @@ function buffer:get_completions(_, callback)
   end
 
   vim.schedule(function()
-    local is_search = vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype())
+    local is_search = vim.tbl_contains({ '/', '?', ':' }, vim.fn.getcmdtype())
     local get_bufnrs = is_search and self.opts.get_search_bufnrs or self.opts.get_bufnrs
     local bufnrs = require('blink.cmp.lib.utils').deduplicate(get_bufnrs())
 
