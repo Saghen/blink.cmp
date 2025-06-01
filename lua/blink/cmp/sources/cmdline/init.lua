@@ -17,10 +17,6 @@ function cmdline.new()
   return self
 end
 
-function cmdline:enabled()
-  return vim.api.nvim_get_mode().mode == 'c' and vim.tbl_contains({ ':', '@' }, vim.fn.getcmdtype())
-end
-
 ---@param name string
 ---@return boolean?
 function cmdline:is_boolean_option(name)
@@ -173,6 +169,13 @@ function cmdline:get_completions(context, callback)
           start_pos = start_pos + #prefix
         end
 
+        -- Calculate line and column values based on context
+        local is_cmdline = vim.api.nvim_get_mode().mode == 'c'
+        local line = is_cmdline and 0 or (context.cursor[1] - 1)
+        local insert_end_char = is_cmdline and (vim.fn.getcmdpos() - 1) or context.cursor[2]
+        local replace_end_char =
+          math.min(start_pos + #current_arg, context.bounds.start_col + context.bounds.length - 1)
+
         local item = {
           label = filter_text,
           filterText = filter_text,
@@ -181,15 +184,12 @@ function cmdline:get_completions(context, callback)
           textEdit = {
             newText = new_text,
             insert = {
-              start = { line = 0, character = start_pos },
-              ['end'] = { line = 0, character = vim.fn.getcmdpos() - 1 },
+              start = { line = line, character = start_pos },
+              ['end'] = { line = line, character = insert_end_char },
             },
             replace = {
-              start = { line = 0, character = start_pos },
-              ['end'] = {
-                line = 0,
-                character = math.min(start_pos + #current_arg, context.bounds.start_col + context.bounds.length - 1),
-              },
+              start = { line = line, character = start_pos },
+              ['end'] = { line = line, character = replace_end_char },
             },
           },
           kind = require('blink.cmp.types').CompletionItemKind.Property,
