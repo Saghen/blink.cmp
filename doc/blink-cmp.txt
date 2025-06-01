@@ -2891,12 +2891,12 @@ when pointing to a directory):
       'saghen/blink.cmp',
       opts = {
         sources = {
-          default = { 'your-source' },
+          default = { 'foo' },
           providers = {
-            your_provider = {
+            foo = {
               name = 'Foo',
               module = 'your-source', -- blink.cmp will call `require('your-source').new(...)`
-              opts = { some_option = 'some value' }, -- optional
+              opts = { some_option = 'some value' }, -- passed to `source.new(opts)`
           }
         }
       }
@@ -2912,8 +2912,8 @@ when pointing to a directory):
     -- You may also accept a second argument `config`, to get the full
     -- `sources.providers.your_provider` table
     function source.new(opts)
-      vim.validate('your_source.opts.some_option', opts.some_option, { 'string' })
-      vim.validate('your_source.opts.optional_option', opts.optional_option, { 'string' }, true)
+      vim.validate('your-source.opts.some_option', opts.some_option, { 'string' })
+      vim.validate('your-source.opts.optional_option', opts.optional_option, { 'string' }, true)
     
       local self = setmetatable({}, { __index = source })
       self.opts = opts
@@ -2932,6 +2932,7 @@ when pointing to a directory):
       -- You should never filter items based on the keyword, since blink.cmp will
       -- do this for you
     
+      -- https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#completionItem
       --- @type lsp.CompletionItem[]
       local items = {}
       for i = 1, 10 do
@@ -2955,7 +2956,7 @@ when pointing to a directory):
           textEdit = {
             newText = 'item ' .. i,
             range = {
-              -- 0-indexed line and character
+              -- 0-indexed line and character, end-exclusive
               start = { line = 0, character = 0 },
               ['end'] = { line = 0, character = 0 },
             },
@@ -2966,7 +2967,8 @@ when pointing to a directory):
           -- result you're expecting
           -- Note that blink.cmp will use `label` when omitting both `insertText` and `textEdit`
           insertText = 'foo',
-          -- May be Snippet or PlainText
+          -- May be Snippet or PlainText. Works with both `textEdit` and `insertText`
+          -- https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#snippet_syntax
           insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
     
           -- There are some other fields you may want to explore which are blink.cmp
@@ -2999,6 +3001,9 @@ when pointing to a directory):
     
     -- (Optional) Before accepting the item or showing documentation, blink.cmp will call this function
     -- so you may avoid calculating expensive fields (i.e. documentation) for only when they're actually needed
+    -- Note only some fields may be resolved lazily. You may check the LSP capabilities for a complete list:
+    -- `textDocument.completion.completionItem.resolveSupport`
+    -- At the time of writing: 'documentation', 'detail', 'additionalTextEdits', 'command', 'data'
     function source:resolve(item, callback)
       item = vim.deepcopy(item)
     
@@ -3022,10 +3027,12 @@ when pointing to a directory):
       callback(item)
     end
     
-    -- Called immediately after applying the item's textEdit/insertText
+    -- (Optional) Called immediately after applying the item's textEdit/insertText
+    -- Only useful when you want to customize how items are acccepted,
+    -- beyond what's possible with `textEdit` and `additionalTextEdits`
     function source:execute(ctx, item, callback, default_implementation)
-      -- By default, your source must handle the execution of the item itself,
-      -- but you may use the default implementation at any time
+      -- When you provide an `execute` function, your source must handle the execution
+      -- of the item itself, but you may use the default implementation at any time
       default_implementation()
     
       -- The callback _MUST_ be called once
