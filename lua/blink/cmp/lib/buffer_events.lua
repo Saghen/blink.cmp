@@ -2,8 +2,6 @@
 --- Notably, when "char added" is fired, the "cursor moved" event will not be fired.
 --- Unlike in regular neovim, ctrl + c and buffer switching will trigger "insert leave"
 
-local state = require('blink.cmp.lib.state')
-
 --- @class blink.cmp.BufferEvents
 --- @field has_context fun(): boolean
 --- @field show_in_snippet boolean
@@ -62,6 +60,14 @@ local function make_cursor_moved(self, snippet, on_cursor_moved)
   local did_backspace = false
   vim.on_key(function(key) did_backspace = key == vim.api.nvim_replace_termcodes('<BS>', true, true, true) end)
 
+  -- HACK: accepting will immediately fire a CursorMovedI event,
+  -- so we ignore the first CursorMovedI event after accepting
+  local did_accept = false
+  require('blink.cmp.completion.list').accept_emitter:on(function() did_accept = true end)
+
+  --- @type 'accept' | 'enter' | nil
+  local last_event = nil
+
   return function(ev)
     -- only fire a CursorMoved event (notable not CursorMovedI)
     -- when jumping between tab stops in a snippet while showing the menu
@@ -79,16 +85,15 @@ local function make_cursor_moved(self, snippet, on_cursor_moved)
     local is_backspace = did_backspace and is_cursor_moved
     did_backspace = false
 
-    local last_event = nil
-    if ev.event == 'InsertEnter' then
-      state.set(ev.buf, 'enter')
-    elseif is_backspace then
-      last_event = state.get(ev.buf)
-      state.clear(ev.buf)
-    elseif not is_backspace then
-      if not ev.event == 'CursorMovedI' or not state.get(ev.buf) == 'accept' then state.clear(ev.buf) end
+    -- last event tracking
+    local tmp_last_event = last_event
+    if did_accept then
+      last_event = 'accept'
+      did_accept = false
+    elseif ev.event == 'InsertEnter' then
+      last_event = 'enter'
     else
-      state.clear(ev.buf)
+      last_event = nil
     end
 
     -- characters added so let textchanged handle it
@@ -97,7 +102,7 @@ local function make_cursor_moved(self, snippet, on_cursor_moved)
     if not require('blink.cmp.config').enabled() then return end
     if not self.show_in_snippet and not self.has_context() and snippet.active() then return end
 
-    on_cursor_moved(is_cursor_moved and 'CursorMoved' or ev.event, is_ignored, is_backspace, last_event)
+    on_cursor_moved(is_cursor_moved and 'CursorMoved' or ev.event, is_ignored, is_backspace, tmp_last_event)
   end
 end
 
