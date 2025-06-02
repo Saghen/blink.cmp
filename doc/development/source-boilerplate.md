@@ -146,7 +146,7 @@ function source:resolve(item, callback)
 end
 
 -- (Optional) Called immediately after applying the item's textEdit/insertText
--- Only useful when you want to customize how items are acccepted,
+-- Only useful when you want to customize how items are accepted,
 -- beyond what's possible with `textEdit` and `additionalTextEdits`
 function source:execute(ctx, item, callback, default_implementation)
   -- When you provide an `execute` function, your source must handle the execution
