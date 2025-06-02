@@ -159,17 +159,18 @@ pub fn fuzzy(
                 let item_b = &haystack[b.index_in_haystack as usize];
                 match sort {
                     // Reverse ordering
-                    Sort::Exact => acc.then(b.exact.cmp(&a.exact)),
-                    Sort::Score => acc.then(
-                        match_scores[&b.index_in_haystack].cmp(&match_scores[&a.index_in_haystack]),
-                    ),
+                    Sort::Exact => b.exact.cmp(&a.exact),
+                    Sort::Score => {
+                        match_scores[&b.index_in_haystack].cmp(&match_scores[&a.index_in_haystack])
+                    }
+
                     // Regular ordering
-                    Sort::Kind => acc.then(item_a.kind.cmp(&item_b.kind)),
-                    Sort::SortText => acc.then(match (&item_a.sort_text, &item_b.sort_text) {
+                    Sort::Kind => item_a.kind.cmp(&item_b.kind),
+                    Sort::SortText => match (&item_a.sort_text, &item_b.sort_text) {
                         (None, _) | (_, None) => Ordering::Equal,
                         (Some(a), Some(b)) => a.cmp(b),
-                    }),
-                    Sort::Label => acc.then(Sort::label(item_a, item_b)),
+                    },
+                    Sort::Label => Sort::label(item_a, item_b),
                 }
             })
         })
