@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 02
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 03
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1945,6 +1945,18 @@ COMPLETION TRIGGER
       -- When false, will not show the completion window automatically when in a snippet
       show_in_snippet = true,
     
+      -- When true, will show completion window after backspacing
+      show_on_backspace = false,
+    
+      -- When true, will show completion window after backspacing into a keyword
+      show_on_backspace_in_keyword = false,
+    
+      -- When true, will show the completion window after accepting a completion and then backspacing into a keyword
+      show_on_backspace_after_accept = true,
+    
+      -- When true, will show the completion window after entering insert mode and backspacing into keyword
+      show_on_backspace_after_insert_enter = true,
+    
       -- When true, will show the completion window after typing any of alphanumerics, `-` or `_`
       show_on_keyword = true,
     
@@ -1994,7 +2006,7 @@ COMPLETION LIST
         -- preselect = function(ctx) return vim.bo.filetype ~= 'markdown' end,
     
         -- When `true`, inserts the completion item automatically when selecting it
-        -- You may want to bind a key to the `cancel` command (default <C-e>) when using this option, 
+        -- You may want to bind a key to the `cancel` command (default <C-e>) when using this option,
         -- which will both undo the selection and hide the completion menu
         auto_insert = true,
         -- auto_insert = function(ctx) return vim.bo.filetype ~= 'markdown' end
@@ -2351,7 +2363,7 @@ See the |blink-cmp-mode-specific-configurations| for setting sources for
     sources = {
       -- Static list of providers to enable, or a function to dynamically enable/disable providers based on the context
       default = { 'lsp', 'path', 'snippets', 'buffer' },
-      
+    
       -- You may also define providers per filetype
       per_filetype = {
         -- optionally inherit from the `default` sources
@@ -2608,18 +2620,32 @@ CMDLINE
 TERMINAL
 
 
-```lua term = { enabled = false, keymap = { preset = 'inherit' }, -- Inherits
-from top level`keymap`config when not set sources = {}, completion = { trigger
-= { show_on_blocked_trigger_characters = {},
-show_on_x_blocked_trigger_characters = nil, -- Inherits from top
-level`completion.trigger.show_on_blocked_trigger_characters`config when not set
-}, -- Inherits from top level config options when not set list = { selection =
-{ -- When`true`, will automatically select the first item in the completion
-list preselect = nil, -- When`true`, inserts the completion item automatically
-when selecting it auto_insert = nil, }, }, – Whether to automatically show
-the window when new completion items are available menu = { auto_show = nil },
-– Displays a preview of the selected item on the current line ghost_text = {
-enabled = nil }, } }
+>lua
+    term = {
+      enabled = false,
+      keymap = { preset = 'inherit' }, -- Inherits from top level `keymap` config when not set
+      sources = {},
+      completion = {
+        trigger = {
+          show_on_blocked_trigger_characters = {},
+          show_on_x_blocked_trigger_characters = nil, -- Inherits from top level `completion.trigger.show_on_blocked_trigger_characters` config when not set
+        },
+        -- Inherits from top level config options when not set
+        list = {
+          selection = {
+            -- When `true`, will automatically select the first item in the completion list
+            preselect = nil,
+            -- When `true`, inserts the completion item automatically when selecting it
+            auto_insert = nil,
+          },
+        },
+        -- Whether to automatically show the window when new completion items are available
+        menu = { auto_show = nil },
+        -- Displays a preview of the selected item on the current line
+        ghost_text = { enabled = nil },
+      }
+    }
+<
 
 
 ==============================================================================
