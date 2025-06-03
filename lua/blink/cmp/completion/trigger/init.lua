@@ -125,7 +125,15 @@ local function on_cursor_moved(event, is_ignored, is_backspace, last_event)
   elseif is_enter_event and config.prefetch_on_insert then
     trigger.show({ trigger_kind = 'prefetch' })
 
-  -- show after entering insert or term and backspacing into keyword
+  -- show after backspacing
+  elseif config.show_on_backspace and is_backspace then
+    trigger.show({ trigger_kind = 'keyword' })
+
+  -- show after backspacing into a keyword
+  elseif config.show_on_backspace_in_keyword and is_backspace and is_keyword then
+    trigger.show({ trigger_kind = 'keyword' })
+
+  -- show after entering insert or term mode and backspacing into a keyword
   elseif config.show_on_backspace_after_insert_enter and is_backspace and last_event == 'enter' and is_keyword then
     trigger.show({ trigger_kind = 'keyword' })
 

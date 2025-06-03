@@ -57,16 +57,25 @@ local function make_char_added(self, snippet, on_char_added)
 end
 
 local function make_cursor_moved(self, snippet, on_cursor_moved)
+  --- @type 'accept' | 'enter' | nil
+  local last_event = nil
+
+  -- track whether the event was triggered by backspacing
   local did_backspace = false
   vim.on_key(function(key) did_backspace = key == vim.api.nvim_replace_termcodes('<BS>', true, true, true) end)
 
-  -- HACK: accepting will immediately fire a CursorMovedI event,
-  -- so we ignore the first CursorMovedI event after accepting
+  -- track whether the event was triggered by accepting
   local did_accept = false
   require('blink.cmp.completion.list').accept_emitter:on(function() did_accept = true end)
 
-  --- @type 'accept' | 'enter' | nil
-  local last_event = nil
+  -- clear state on insert leave
+  vim.api.nvim_create_autocmd('InsertLeave', {
+    callback = function()
+      did_backspace = false
+      did_accept = false
+      last_event = nil
+    end,
+  })
 
   return function(ev)
     -- only fire a CursorMoved event (notable not CursorMovedI)
@@ -87,6 +96,8 @@ local function make_cursor_moved(self, snippet, on_cursor_moved)
 
     -- last event tracking
     local tmp_last_event = last_event
+    -- HACK: accepting will immediately fire a CursorMovedI event,
+    -- so we ignore the first CursorMovedI event after accepting
     if did_accept then
       last_event = 'accept'
       did_accept = false
