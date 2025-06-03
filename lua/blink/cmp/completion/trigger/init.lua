@@ -68,7 +68,7 @@ local function on_char_added(char, is_ignored)
   end
 end
 
-local function on_cursor_moved(event, is_ignored)
+local function on_cursor_moved(event, is_ignored, is_backspace, last_event)
   local is_enter_event = event == 'InsertEnter' or event == 'TermEnter'
 
   local cursor = context.get_cursor()
@@ -124,6 +124,22 @@ local function on_cursor_moved(event, is_ignored)
   -- prefetch completions without opening window after entering insert mode
   elseif is_enter_event and config.prefetch_on_insert then
     trigger.show({ trigger_kind = 'prefetch' })
+
+  -- show after backspacing
+  elseif config.show_on_backspace and is_backspace then
+    trigger.show({ trigger_kind = 'keyword' })
+
+  -- show after backspacing into a keyword
+  elseif config.show_on_backspace_in_keyword and is_backspace and is_keyword then
+    trigger.show({ trigger_kind = 'keyword' })
+
+  -- show after entering insert or term mode and backspacing into a keyword
+  elseif config.show_on_backspace_after_insert_enter and is_backspace and last_event == 'enter' and is_keyword then
+    trigger.show({ trigger_kind = 'keyword' })
+
+  -- show after accepting a completion and then backspacing into a keyword
+  elseif config.show_on_backspace_after_accept and is_backspace and last_event == 'accept' and is_keyword then
+    trigger.show({ trigger_kind = 'keyword' })
 
   -- otherwise hide
   else

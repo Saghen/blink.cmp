@@ -21,7 +21,7 @@
 
 --- @class blink.cmp.BufferEventsListener
 --- @field on_char_added fun(char: string, is_ignored: boolean)
---- @field on_cursor_moved fun(event: 'CursorMoved' | 'InsertEnter', is_ignored: boolean)
+--- @field on_cursor_moved fun(event: 'CursorMoved' | 'InsertEnter', is_ignored: boolean, is_backspace: boolean, last_event: string)
 --- @field on_insert_leave fun()
 
 --- @type blink.cmp.BufferEvents
@@ -57,6 +57,26 @@ local function make_char_added(self, snippet, on_char_added)
 end
 
 local function make_cursor_moved(self, snippet, on_cursor_moved)
+  --- @type 'accept' | 'enter' | nil
+  local last_event = nil
+
+  -- track whether the event was triggered by backspacing
+  local did_backspace = false
+  vim.on_key(function(key) did_backspace = key == vim.api.nvim_replace_termcodes('<BS>', true, true, true) end)
+
+  -- track whether the event was triggered by accepting
+  local did_accept = false
+  require('blink.cmp.completion.list').accept_emitter:on(function() did_accept = true end)
+
+  -- clear state on insert leave
+  vim.api.nvim_create_autocmd('InsertLeave', {
+    callback = function()
+      did_backspace = false
+      did_accept = false
+      last_event = nil
+    end,
+  })
+
   return function(ev)
     -- only fire a CursorMoved event (notable not CursorMovedI)
     -- when jumping between tab stops in a snippet while showing the menu
@@ -68,9 +88,24 @@ local function make_cursor_moved(self, snippet, on_cursor_moved)
     end
 
     local is_cursor_moved = ev.event == 'CursorMoved' or ev.event == 'CursorMovedI'
-
     local is_ignored = is_cursor_moved and self.ignore_next_cursor_moved
     if is_cursor_moved then self.ignore_next_cursor_moved = false end
+
+    local is_backspace = did_backspace and is_cursor_moved
+    did_backspace = false
+
+    -- last event tracking
+    local tmp_last_event = last_event
+    -- HACK: accepting will immediately fire a CursorMovedI event,
+    -- so we ignore the first CursorMovedI event after accepting
+    if did_accept then
+      last_event = 'accept'
+      did_accept = false
+    elseif ev.event == 'InsertEnter' then
+      last_event = 'enter'
+    else
+      last_event = nil
+    end
 
     -- characters added so let textchanged handle it
     if self.last_char ~= '' then return end
@@ -78,7 +113,7 @@ local function make_cursor_moved(self, snippet, on_cursor_moved)
     if not require('blink.cmp.config').enabled() then return end
     if not self.show_in_snippet and not self.has_context() and snippet.active() then return end
 
-    on_cursor_moved(is_cursor_moved and 'CursorMoved' or ev.event, is_ignored)
+    on_cursor_moved(is_cursor_moved and 'CursorMoved' or ev.event, is_ignored, is_backspace, tmp_last_event)
   end
 end
 
