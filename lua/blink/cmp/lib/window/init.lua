@@ -276,8 +276,21 @@ function win.get_cursor_screen_position()
 
   -- default
   local cursor_line, cursor_column = unpack(vim.api.nvim_win_get_cursor(0))
-  -- todo: convert cursor_column to byte index
-  local pos = vim.fn.screenpos(vim.api.nvim_win_get_number(0), cursor_line, cursor_column)
+  local line = vim.api.nvim_buf_get_lines(0, cursor_line - 1, cursor_line, false)[1] or ''
+  local ok, pos = pcall(
+    vim.fn.screenpos,
+    vim.api.nvim_win_get_number(0),
+    cursor_line,
+    vim.fn.strdisplaywidth(line:sub(1, cursor_column)) + 1
+  )
+  if not ok or not pos or not pos.row or not pos.col then
+    return {
+      distance_from_top = 0,
+      distance_from_bottom = 0,
+      distance_from_left = 0,
+      distance_from_right = 0,
+    }
+  end
 
   return {
     distance_from_top = pos.row - 1,
