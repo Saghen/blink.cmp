@@ -1,9 +1,9 @@
 local keymap = {}
 
 --- Lowercases all keys in the mappings table
---- @param existing_mappings table<string, blink.cmp.KeymapCommand[]>
---- @param new_mappings table<string, blink.cmp.KeymapCommand[]>
---- @return table<string, blink.cmp.KeymapCommand[]>
+--- @param existing_mappings table<string, blink.cmp.KeymapCommand[]|false>
+--- @param new_mappings table<string, blink.cmp.KeymapCommand[]|false>
+--- @return table<string, blink.cmp.KeymapCommand[]|false>
 function keymap.merge_mappings(existing_mappings, new_mappings)
   local merged_mappings = vim.deepcopy(existing_mappings)
   for new_key, new_mapping in pairs(new_mappings) do
@@ -31,10 +31,14 @@ end
 function keymap.get_mappings(keymap_config, mode)
   local mappings = vim.deepcopy(keymap_config)
 
-  -- Remove unused keys
+  -- Remove unused keys, but keep keys set to false (to disable them)
   if mode ~= 'default' then
     for key, commands in pairs(mappings) do
-      if key ~= 'preset' and not require('blink.cmp.keymap.apply').has_insert_command(commands) then
+      if
+        key ~= 'preset'
+        and commands ~= false
+        and not require('blink.cmp.keymap.apply').has_insert_command(commands)
+      then
         mappings[key] = nil
       end
     end
@@ -51,6 +55,12 @@ function keymap.get_mappings(keymap_config, mode)
     -- User-defined keymaps overwrite the preset keymaps
     mappings = keymap.merge_mappings(preset_keymap, mappings)
   end
+
+  -- Remove keys explicitly disabled by user (set to false)
+  for key, commands in pairs(mappings) do
+    if commands == false then mappings[key] = nil end
+  end
+
   return mappings
 end
 
