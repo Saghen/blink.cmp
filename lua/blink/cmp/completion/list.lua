@@ -129,7 +129,10 @@ function list.fuzzy(context, items_by_source)
   return require('blink.cmp.lib.utils').slice(filtered_items, 1, list.config.max_items)
 end
 
-function list.hide() list.hide_emitter:emit({ context = list.context }) end
+function list.hide()
+  list.selected_item_idx = nil
+  list.hide_emitter:emit({ context = list.context })
+end
 
 ---------- Selection ----------
 
