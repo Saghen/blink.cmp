@@ -37,6 +37,7 @@ function cmdline:get_completions(context, callback)
   local _, args_before_cursor = self:smart_split({ line = before_cursor })
   local arg_number = #args_before_cursor
 
+  local leading_spaces = context.line:match('^(%s*)') -- take into account the leading spaces in original query
   local text_before_argument = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
     .. (arg_number > 1 and ' ' or '')
 
@@ -172,7 +173,7 @@ function cmdline:get_completions(context, callback)
           if not has_prefix then new_text = current_arg_prefix .. completion end
         end
 
-        local start_pos = #text_before_argument
+        local start_pos = #text_before_argument + #leading_spaces
 
         -- exclude range on the first argument
         if is_first_arg and not is_lua_expr then
@@ -240,7 +241,7 @@ end
 function cmdline:is_path_completion() return vim.tbl_contains(constants.completion_types.path, vim.fn.getcmdcompltype()) end
 
 --- Split the command line into arguments, handling path escaping and trailing spaces.
---- For path completions, escapes spaces if needed and returns {cmd, rest}.
+--- For path completions, escapes spaces if needed and returns {cmd, path}.
 --- For non-path completions, splits by spaces and preserves trailing empty arguments.
 ---@param context table
 ---@return string, table
@@ -248,21 +249,20 @@ function cmdline:smart_split(context)
   local line = context.line
 
   if self:is_path_completion() then
-    -- treat everything after the first space as the argument
-    local cmd, rest = line:match('^(%S+)%s*(.*)$')
-    if rest ~= nil then
-      -- Escape path if needed
-      -- eg. :view returns non-escaped path while :edit does
-      if rest:find(' ') and not rest:find('\\ ') then
-        rest = path_lib.escape_path(rest)
-        line = cmd .. ' ' .. rest
-      end
-      return line, { cmd, rest }
+    -- Treat everything after the first space as the argument
+    local cmd, path = line:gsub('^%s+', ''):match('^(%S+)%s*(.*)$')
+    if path == nil then return line, { cmd } end
+    -- Normalize path if needed
+    -- eg. :view returns non-escaped path while :edit does
+    if path:find(' ') and not path:find('\\ ') then
+      path = path_lib.escape_path(path)
+      line = cmd .. ' ' .. path
     end
-    return line, { cmd }
-  else
-    return line, vim.split(line, ' ', { plain = true })
+
+    return line, { cmd, path }
   end
+
+  return line, vim.split(line:gsub('^%s+', ''), ' ', { plain = true })
 end
 
 return cmdline
