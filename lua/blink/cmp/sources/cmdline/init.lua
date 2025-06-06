@@ -4,6 +4,7 @@
 
 local async = require('blink.cmp.lib.async')
 local constants = require('blink.cmp.sources.cmdline.constants')
+local path_lib = require('blink.cmp.sources.path.lib')
 
 --- @class blink.cmp.Source
 local cmdline = {}
@@ -31,9 +32,11 @@ end
 function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':', '!' } end
 
 function cmdline:get_completions(context, callback)
-  -- TODO: split doesn't handle escaped spaces
-  local arguments = vim.split(context.line, ' ', { plain = true })
-  local arg_number = #vim.split(context.line:sub(1, context.cursor[2]), ' ', { plain = true })
+  local context_line, arguments = self:smart_split(context)
+  local before_cursor = context_line:sub(1, context.cursor[2])
+  local _, args_before_cursor = self:smart_split({ line = before_cursor })
+  local arg_number = #args_before_cursor
+
   local text_before_argument = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
     .. (arg_number > 1 and ' ' or '')
 
@@ -44,7 +47,7 @@ function cmdline:get_completions(context, callback)
 
   -- Parse the command to ignore modifiers like :vert help
   -- Fails in some cases, like context.line = ':vert' so we fallback to the first argument
-  local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, context.line, {})
+  local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, context_line, {})
   local cmd = (valid_cmd and parsed.cmd) or arguments[1] or ''
 
   local is_help_command = constants.help_commands[cmd] and arg_number > 1
@@ -120,7 +123,8 @@ function cmdline:get_completions(context, callback)
       -- For simplicity, excluding the first argument, we always replace the entire command argument,
       -- so we want to ensure the prefix is always in the new_text.
       --
-      -- In the case of file/buffer completion, we can be sure that the prefix is included
+      -- In the case of file/buffer completion, we use the basename for display
+      -- but insert the full path for insertion.
       -- In all other cases, we want to check for the prefix and remove it from the filter text
       -- and add it to the newText
 
@@ -135,27 +139,37 @@ function cmdline:get_completions(context, callback)
       end
 
       local completion_type = vim.fn.getcmdcompltype()
-      local is_file_completion = completion_type == 'file'
-        or completion_type == 'file_in_path'
-        or completion_type == 'buffer'
+      local is_path_completion = self:is_path_completion()
+      local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
       local is_first_arg = arg_number == 1
       local is_lua_expr = completion_type == 'lua' and cmd == '='
 
       local items = {}
       for _, completion in ipairs(completions) do
-        local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
-
         local filter_text = completion
         local new_text = completion
-        if not is_first_arg and not is_file_completion then
-          -- remove prefix from the filter text
-          if has_prefix then filter_text = completion:sub(#current_arg_prefix + 1) end
 
+        -- path completion in commands, e.g. `chdir <path>` and options, e.g. `:set directory=<path>`
+        if is_path_completion then
+          filter_text = path_lib.basename_with_sep(completion)
+          new_text = path_lib.escape_path(completion)
+          if cmd == 'set' then
+            new_text = current_arg_prefix:sub(1, current_arg_prefix:find('=') or #current_arg_prefix) .. new_text
+          end
+
+        -- todo
+        elseif is_buffer_completion then
+
+        -- lua expr, e.g. `:=<expr>`
+        elseif is_lua_expr then
+          new_text = current_arg_prefix:sub(2, -1) .. completion
+
+        -- for other completions, check if the prefix is already present
+        elseif not is_first_arg then
+          local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
+          if has_prefix then filter_text = completion:sub(#current_arg_prefix + 1) end
           -- add prefix to the newText
           if not has_prefix then new_text = current_arg_prefix .. completion end
-        elseif is_lua_expr then
-          -- lua expr, e.g. `:=<expr>`
-          new_text = current_arg_prefix:sub(2, -1) .. completion
         end
 
         local start_pos = #text_before_argument
@@ -219,6 +233,36 @@ function cmdline:get_completions(context, callback)
     end)
 
   return function() task:cancel() end
+end
+
+--- Check if the current completion type is a path (file or dir).
+---@return boolean
+function cmdline:is_path_completion() return vim.tbl_contains(constants.completion_types.path, vim.fn.getcmdcompltype()) end
+
+--- Split the command line into arguments, handling path escaping and trailing spaces.
+--- For path completions, escapes spaces if needed and returns {cmd, rest}.
+--- For non-path completions, splits by spaces and preserves trailing empty arguments.
+---@param context table
+---@return string, table
+function cmdline:smart_split(context)
+  local line = context.line
+
+  if self:is_path_completion() then
+    -- treat everything after the first space as the argument
+    local cmd, rest = line:match('^(%S+)%s*(.*)$')
+    if rest ~= nil then
+      -- Escape path if needed
+      -- eg. :view returns non-escaped path while :edit does
+      if rest:find(' ') and not rest:find('\\ ') then
+        rest = path_lib.escape_path(rest)
+        line = cmd .. ' ' .. rest
+      end
+      return line, { cmd, rest }
+    end
+    return line, { cmd }
+  else
+    return line, vim.split(line, ' ', { plain = true })
+  end
 end
 
 return cmdline

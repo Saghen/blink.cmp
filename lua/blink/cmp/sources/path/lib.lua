@@ -162,4 +162,35 @@ function lib.get_last_path_part(path)
   return start_pos
 end
 
+--- Escape spaces in a path for Vim command-line usage.
+---@param path string
+---@return string
+function lib.escape_path(path)
+  local escaped = path:gsub('([^\\]) ', '%1\\ ')
+  return escaped
+end
+
+--- Check if a path is a directory.
+---@param path string
+---@return boolean
+function lib.is_dir(path)
+  local expand = vim.fn.expand(path)
+  local stat = vim.uv.fs_stat(expand)
+  return stat and stat.type == 'directory' or false
+end
+
+--- Get the basename of a path, preserving trailing separator for directories.
+---@param path string
+---@return string
+function lib.basename_with_sep(path)
+  local sep = package.config:sub(1, 1)
+  local is_dir = lib.is_dir(path)
+  local last_char = path:sub(-1)
+  local has_sep = last_char == '/' or last_char == '\\'
+  if is_dir and has_sep then path = path:sub(1, -2) end
+  local basename = vim.fs.basename(path)
+  if is_dir and has_sep then basename = basename .. sep end
+  return basename
+end
+
 return lib
