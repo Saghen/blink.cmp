@@ -277,18 +277,12 @@ function win.get_cursor_screen_position()
   -- default
   local cursor_line, cursor_column = unpack(vim.api.nvim_win_get_cursor(0))
   local line = vim.api.nvim_buf_get_lines(0, cursor_line - 1, cursor_line, false)[1] or ''
-  local ok, pos = pcall(
-    vim.fn.screenpos,
-    vim.api.nvim_win_get_number(0),
-    cursor_line,
-    vim.fn.strdisplaywidth(line:sub(1, cursor_column)) + 1
-  )
+  local width = vim.fn.strdisplaywidth(line:sub(1, cursor_column)) + 1
+  local ok, pos = pcall(vim.fn.screenpos, vim.api.nvim_win_get_number(0), cursor_line, width)
   if not ok or not pos or not pos.row or not pos.col then
-    return {
-      distance_from_top = 0,
-      distance_from_bottom = 0,
-      distance_from_left = 0,
-      distance_from_right = 0,
+    pos = {
+      row = math.max(1, math.min(screen_height, cursor_line)),
+      col = math.max(1, math.min(screen_width, width)),
     }
   end
 
