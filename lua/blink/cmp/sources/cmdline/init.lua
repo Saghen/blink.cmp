@@ -29,11 +29,41 @@ end
 function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':' } end
 
 function cmdline:get_completions(context, callback)
-  -- TODO: split doesn't handle escaped spaces
-  local arguments = vim.split(context.line, ' ', { plain = true })
-  local arg_number = #vim.split(context.line:sub(1, context.cursor[2]), ' ', { plain = true })
-  local text_before_argument = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
-    .. (arg_number > 1 and ' ' or '')
+  local line = context.line
+  local line_len = #line
+  local cursor_pos = math.min(line_len, context.cursor[2])
+
+  local arg_start = 1
+  local leading_backslash_count = 0
+
+  local arg_number = 1
+  local pos_before_argument = 0
+  local arguments = {}
+
+  -- Iterating 1 past the end to have a chance to add the final argument
+  for i = 1, line_len + 1 do
+    local char = line:sub(i, i)
+
+    if i == cursor_pos + 1 then
+      arg_number = #arguments + 1
+      pos_before_argument = arg_start - 1
+    end
+
+    if (char == ' ' and leading_backslash_count % 2 == 0) or char == '' then
+      local arg = string.sub(line, arg_start, i - 1)
+      -- Ignore leading whitespaces, unless we reached the end with no arguments (empty cmdline)
+      if arg ~= '' or arguments[1] ~= nil or i == line_len + 1 then arguments[#arguments + 1] = arg end
+      arg_start = i + 1
+    end
+
+    if char == '\\' then
+      leading_backslash_count = leading_backslash_count + 1
+    else
+      leading_backslash_count = 0
+    end
+  end
+
+  local text_before_argument = string.sub(line, 1, pos_before_argument)
 
   local current_arg = arguments[arg_number]
   local keyword_config = require('blink.cmp.config').completion.keyword
