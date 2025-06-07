@@ -162,14 +162,6 @@ function lib.get_last_path_part(path)
   return start_pos
 end
 
---- Escape spaces in a path for Vim command-line usage.
----@param path string
----@return string
-function lib.escape_path(path)
-  local escaped = path:gsub('([^\\]) ', '%1\\ ')
-  return escaped
-end
-
 --- Check if a path is a directory.
 ---@param path string
 ---@return boolean
@@ -191,6 +183,29 @@ function lib.basename_with_sep(path)
   local basename = vim.fs.basename(path)
   if is_dir and has_sep then basename = basename .. sep end
   return basename
+end
+
+--- Splits a string on spaces, but only when the space is not escaped by a backslash.
+-- For example: 'foo bar\ baz' -> { 'foo', 'bar\ baz' }
+---@param str string
+---@return table
+function lib:split_unescaped(str)
+  local result, current, escaping = {}, '', false
+  for i = 1, #str do
+    local c = str:sub(i, i)
+    if c == '\\' and not escaping then
+      escaping = true
+      current = current .. c
+    elseif c == ' ' and not escaping then
+      table.insert(result, current)
+      current = ''
+    else
+      current = current .. c
+      escaping = false
+    end
+  end
+  table.insert(result, current)
+  return result
 end
 
 return lib
