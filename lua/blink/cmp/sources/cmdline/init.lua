@@ -160,6 +160,11 @@ function cmdline:get_completions(context, callback)
         elseif is_lua_expr then
           new_text = current_arg_prefix .. completion
 
+        -- env variables
+        elseif completion_type == 'environment' then
+          filter_text = '$' .. completion
+          new_text = '$' .. completion
+
         -- for other completions, check if the prefix is already present
         elseif not is_first_arg then
           local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
@@ -253,7 +258,7 @@ function cmdline:smart_split(context)
       local arg = tokens[i]
       -- Escape argument if it contains unescaped spaces
       -- Some commands may expect escaped paths (:edit), others may not (:view)
-      if arg and arg ~= '' and not arg:find('\\ ') then arg = vim.fn.fnameescape(arg) end
+      if arg and arg ~= '' and not arg:find('\\ ') then arg = path_lib:fnameescape(arg) end
       table.insert(args, arg)
     end
     return line, { cmd, unpack(args) }
