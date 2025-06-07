@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 03
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 07
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1771,7 +1771,7 @@ options.
       default = { 'lsp', 'buffer', 'snippets', 'path' },
     
       per_filetype = {
-        sql = { 'dadbod' }
+        sql = { 'dadbod' },
         -- optionally inherit from the `default` sources
         lua = { inherit_defaults = true, 'lazydev' }
       },
@@ -1792,7 +1792,7 @@ to the source directly, and will vary by source.
     sources.providers.lsp = {
       name = 'LSP',
       module = 'blink.cmp.sources.lsp',
-      opts = {} -- Passed to the source directly, varies by source
+      opts = {}, -- Passed to the source directly, varies by source
     
       --- NOTE: All of these options may be functions to get dynamic behavior
       --- See the type definitions for more information
