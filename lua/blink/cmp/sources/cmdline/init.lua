@@ -183,9 +183,6 @@ function cmdline:get_completions(context, callback)
             '^%s*[%p]+%s*', -- One or more punctuation characters
           })
           start_pos = start_pos + #prefix
-        elseif is_first_arg and is_lua_expr then
-          local prefix = current_arg:match('^=%s*')
-          start_pos = start_pos + #prefix
         end
 
         local item = {
