@@ -49,10 +49,14 @@ local utils = require('blink.cmp.lib.window.utils')
 --- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: ("n" | "s")[], max_height: number): { height: number, direction: 'n' | 's' }?
 --- @field get_direction_with_window_constraints fun(self: blink.cmp.Window, anchor_win: blink.cmp.Window, direction_priority: ("n" | "s" | "e" | "w")[], desired_min_size?: { width: number, height: number }): { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
 --- @field redraw_if_needed fun(self: blink.cmp.Window)
+--- @field instances blink.cmp.Window[] current initialized window(s) (menu, document, signature)
+--- @field complete_changed_autocmd_id? number
 
 --- @type blink.cmp.Window
 --- @diagnostic disable-next-line: missing-fields
 local win = {}
+win.instances = {}
+win.complete_changed_autocmd_id = nil
 
 function win.new(name, config)
   local self = setmetatable({}, { __index = win })
@@ -87,6 +91,21 @@ function win.new(name, config)
     end
 
     self.scrollbar = require('blink.cmp.lib.window.scrollbar').new({ enable_gutter = enable_gutter })
+  end
+
+  table.insert(win.instances, self)
+
+  if not win.complete_changed_autocmd_id then
+    -- Hide initialized window(s) when user query builtin completion
+    win.complete_changed_autocmd_id = vim.api.nvim_create_autocmd('CompleteChanged', {
+      callback = vim.schedule_wrap(function()
+        if vim.fn.pumvisible() == 1 then
+          for _, w in ipairs(win.instances) do
+            if w:is_open() then w:close() end
+          end
+        end
+      end),
+    })
   end
 
   return self
