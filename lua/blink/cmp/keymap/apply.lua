@@ -3,7 +3,7 @@ local apply = {}
 local snippet_commands = { 'snippet_forward', 'snippet_backward', 'show_signature', 'hide_signature' }
 
 --- Applies the keymaps to the current buffer
---- @param keys_to_commands table<string, blink.cmp.KeymapCommand[]>
+--- @param keys_to_commands table<string, blink.cmp.KeymapCommand[]|false>
 function apply.keymap_to_current_buffer(keys_to_commands)
   -- skip if we've already applied the keymaps
   for _, mapping in ipairs(vim.api.nvim_buf_get_keymap(0, 'i')) do
@@ -12,7 +12,7 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
   -- insert mode: uses both snippet and insert commands
   for key, commands in pairs(keys_to_commands) do
-    if #commands == 0 then goto continue end
+    if commands == false or #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('i', key)
     apply.set('i', key, function()
@@ -39,7 +39,7 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
   -- snippet mode: uses only snippet commands
   for key, commands in pairs(keys_to_commands) do
-    if not apply.has_snippet_commands(commands) or #commands == 0 then goto continue end
+    if commands == false or not apply.has_snippet_commands(commands) or #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('s', key)
     apply.set('s', key, function()
