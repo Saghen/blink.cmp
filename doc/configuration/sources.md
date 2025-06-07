@@ -21,7 +21,7 @@ sources = {
   default = { 'lsp', 'buffer', 'snippets', 'path' },
 
   per_filetype = {
-    sql = { 'dadbod' }
+    sql = { 'dadbod' },
     -- optionally inherit from the `default` sources
     lua = { inherit_defaults = true, 'lazydev' }
   },
@@ -40,7 +40,7 @@ All of the fields shown below apply to all sources. The `opts` field is passed t
 sources.providers.lsp = {
   name = 'LSP',
   module = 'blink.cmp.sources.lsp',
-  opts = {} -- Passed to the source directly, varies by source
+  opts = {}, -- Passed to the source directly, varies by source
 
   --- NOTE: All of these options may be functions to get dynamic behavior
   --- See the type definitions for more information
