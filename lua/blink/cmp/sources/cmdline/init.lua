@@ -152,6 +152,9 @@ function cmdline:get_completions(context, callback)
         elseif is_lua_expr then
           -- lua expr, e.g. `:=<expr>`
           new_text = current_arg_prefix:sub(2, -1) .. completion
+        elseif vim.fn.win_gettype() == 'command' then
+          -- strip the leading '=' for lua expression without spaces, e.g. `=vim.api`
+          new_text = current_arg_prefix:gsub('^=', '') .. completion
         end
 
         local start_pos = #text_before_argument
