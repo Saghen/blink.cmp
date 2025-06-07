@@ -162,4 +162,60 @@ function lib.get_last_path_part(path)
   return start_pos
 end
 
+--- Check if a path is a directory.
+---@param path string
+---@return boolean
+function lib.is_dir(path)
+  local expand = vim.fn.expand(path)
+  local stat = vim.uv.fs_stat(expand)
+  return stat and stat.type == 'directory' or false
+end
+
+--- Get the basename of a path, preserving trailing separator for directories.
+---@param path string
+---@return string
+function lib.basename_with_sep(path)
+  local sep = package.config:sub(1, 1)
+  local is_dir = lib.is_dir(path)
+  local last_char = path:sub(-1)
+  local has_sep = last_char == '/' or last_char == '\\'
+  if is_dir and has_sep then path = path:sub(1, -2) end
+  local basename = vim.fs.basename(path)
+  if is_dir and has_sep then basename = basename .. sep end
+  return basename
+end
+
+-- Reverts the escaping of environment variable of vim.fn.fnameescape
+---@param path string
+---@return string
+function lib:fnameescape(path)
+  path = vim.fn.fnameescape(path)
+  path = path:gsub('\\(%$[%w_]+)', '%1')
+  path = path:gsub('\\(%${[%w_]+})', '%1')
+  return path
+end
+
+--- Splits a string on spaces, but only when the space is not escaped by a backslash.
+-- For example: 'foo bar\ baz' -> { 'foo', 'bar\ baz' }
+---@param str string
+---@return table
+function lib:split_unescaped(str)
+  local result, current, escaping = {}, '', false
+  for i = 1, #str do
+    local c = str:sub(i, i)
+    if c == '\\' and not escaping then
+      escaping = true
+      current = current .. c
+    elseif c == ' ' and not escaping then
+      table.insert(result, current)
+      current = ''
+    else
+      current = current .. c
+      escaping = false
+    end
+  end
+  table.insert(result, current)
+  return result
+end
+
 return lib
