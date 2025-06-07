@@ -46,7 +46,9 @@ local sources = {
   --- @type blink.cmp.SourceConfig
   default = {
     default = { 'lsp', 'path', 'snippets', 'buffer' },
-    per_filetype = {},
+    per_filetype = {
+      vim = function() return vim.fn.win_gettype() == 'command' and { 'cmdline' } or {} end,
+    },
 
     transform_items = function(_, items) return items end,
     min_keyword_length = 0,

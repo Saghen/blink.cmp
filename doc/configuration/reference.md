@@ -465,6 +465,7 @@ sources = {
 
   -- You may also define providers per filetype
   per_filetype = {
+    vim = function() return vim.fn.win_gettype() == 'command' and  { 'cmdline' } or {} end,
     -- optionally inherit from the `default` sources
     -- lua = { inherit_defaults = true, 'lsp', 'path' },
   },
