@@ -37,7 +37,7 @@ function cmdline:get_completions(context, callback)
   local _, args_before_cursor = self:smart_split({ line = before_cursor })
   local arg_number = #args_before_cursor
 
-  local leading_spaces = context.line:match('^(%s*)') -- take into account the leading spaces in original query
+  local leading_spaces = context.line:match('^(%s*)') -- leading spaces in the original query
   local text_before_argument = table.concat(require('blink.cmp.lib.utils').slice(arguments, 1, arg_number - 1), ' ')
     .. (arg_number > 1 and ' ' or '')
 
@@ -107,11 +107,6 @@ function cmdline:get_completions(context, callback)
         completions = vim.fn.getcompletion(query, 'cmdline')
       end
 
-      -- Special case for files, escape special characters
-      if constants.file_commands[cmd] then
-        completions = vim.tbl_map(function(completion) return vim.fn.fnameescape(completion) end, completions)
-      end
-
       return completions
     end)
     :schedule()
@@ -153,7 +148,7 @@ function cmdline:get_completions(context, callback)
         -- path completion in commands, e.g. `chdir <path>` and options, e.g. `:set directory=<path>`
         if is_path_completion then
           filter_text = path_lib.basename_with_sep(completion)
-          new_text = path_lib.escape_path(completion)
+          new_text = vim.fn.fnameescape(completion)
           if cmd == 'set' then
             new_text = current_arg_prefix:sub(1, current_arg_prefix:find('=') or #current_arg_prefix) .. new_text
           end
@@ -163,7 +158,7 @@ function cmdline:get_completions(context, callback)
 
         -- lua expr, e.g. `:=<expr>`
         elseif is_lua_expr then
-          new_text = current_arg_prefix:sub(2, -1) .. completion
+          new_text = current_arg_prefix .. completion
 
         -- for other completions, check if the prefix is already present
         elseif not is_first_arg then
@@ -241,25 +236,27 @@ end
 function cmdline:is_path_completion() return vim.tbl_contains(constants.completion_types.path, vim.fn.getcmdcompltype()) end
 
 --- Split the command line into arguments, handling path escaping and trailing spaces.
---- For path completions, escapes spaces if needed and returns {cmd, path}.
---- For non-path completions, splits by spaces and preserves trailing empty arguments.
+--- For path completions, split by paths and normalize each one if needed.
+--- For other completions, splits by spaces and preserves trailing empty arguments.
 ---@param context table
 ---@return string, table
 function cmdline:smart_split(context)
   local line = context.line
 
   if self:is_path_completion() then
-    -- Treat everything after the first space as the argument
-    local cmd, path = line:gsub('^%s+', ''):match('^(%S+)%s*(.*)$')
-    if path == nil then return line, { cmd } end
-    -- Normalize path if needed
-    -- eg. :view returns non-escaped path while :edit does
-    if path:find(' ') and not path:find('\\ ') then
-      path = path_lib.escape_path(path)
-      line = cmd .. ' ' .. path
-    end
+    -- Split the line into tokens, respecting escaped spaces in paths
+    local tokens = path_lib:split_unescaped(line:gsub('^%s+', ''))
+    local cmd = tokens[1]
+    local args = {}
 
-    return line, { cmd, path }
+    for i = 2, #tokens do
+      local arg = tokens[i]
+      -- Escape argument if it contains unescaped spaces
+      -- Some commands may expect escaped paths (:edit), others may not (:view)
+      if arg and arg ~= '' and not arg:find('\\ ') then arg = vim.fn.fnameescape(arg) end
+      table.insert(args, arg)
+    end
+    return line, { cmd, unpack(args) }
   end
 
   return line, vim.split(line:gsub('^%s+', ''), ' ', { plain = true })
