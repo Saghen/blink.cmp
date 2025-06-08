@@ -22,7 +22,7 @@
 --- @field winblend number
 --- @field winhighlight string
 --- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
---- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space, or another window is in the way.
+--- @field direction_priority ("n" | "s")[]| fun(): table Which directions to show the window ,or a function returning such a table, falling back to the next direction when there's not enough space, or another window is in the way.
 --- @field treesitter_highlighting boolean Disable if you run into performance issues
 --- @field show_documentation boolean
 
@@ -82,7 +82,17 @@ function signature.validate(config)
     winblend = { config.window.winblend, 'number' },
     winhighlight = { config.window.winhighlight, 'string' },
     scrollbar = { config.window.scrollbar, 'boolean' },
-    direction_priority = { config.window.direction_priority, 'table' },
+    direction_priority = {
+      config.window.direction_priority,
+      function(direction_priority)
+        if type(direction_priority) == 'function' then direction_priority = direction_priority() end
+        for _, direction in ipairs(direction_priority) do
+          if not vim.tbl_contains({ 'n', 's' }, direction) then return false end
+        end
+        return true
+      end,
+      'one of: "n", "s", or a function returning such a table',
+    },
     treesitter_highlighting = { config.window.treesitter_highlighting, 'boolean' },
     show_documentation = { config.window.show_documentation, 'boolean' },
   }, config.window)

@@ -183,6 +183,11 @@ completion.menu = {
   -- Which directions to show the window,
   -- falling back to the next direction when there's not enough space
   direction_priority = { 's', 'n' },
+  -- Can accept a function if you need more control
+  -- direction_priority = function()
+  --   if condition then return { 'n', 's' } end
+  --   return { 's', 'n' }
+  -- end,
 
   -- Whether to automatically show the window when new completion items are available
   auto_show = true,
@@ -365,6 +370,12 @@ signature = {
     -- falling back to the next direction when there's not enough space,
     -- or another window is in the way
     direction_priority = { 'n', 's' },
+    -- Can accept a function if you need more control
+    -- direction_priority = function()
+    --   if condition then return { 'n', 's' } end
+    --   return { 's', 'n' }
+    -- end,
+
     -- Disable if you run into performance issues
     treesitter_highlighting = true,
     show_documentation = true,

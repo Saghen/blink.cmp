@@ -46,9 +46,11 @@ local utils = require('blink.cmp.lib.window.utils')
 --- @field set_height fun(self: blink.cmp.Window, height: number)
 --- @field set_width fun(self: blink.cmp.Window, width: number)
 --- @field set_win_config fun(self: blink.cmp.Window, config: table)
---- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: ("n" | "s")[], max_height: number): { height: number, direction: 'n' | 's' }?
+--- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: blink.cmp.WindowDirectionPriority, max_height: number): { height: number, direction: 'n' | 's' }?
 --- @field get_direction_with_window_constraints fun(self: blink.cmp.Window, anchor_win: blink.cmp.Window, direction_priority: ("n" | "s" | "e" | "w")[], desired_min_size?: { width: number, height: number }): { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
 --- @field redraw_if_needed fun(self: blink.cmp.Window)
+
+--- @alias blink.cmp.WindowDirectionPriority ("n"|"s")[] | fun(): ("n"|"s")[]
 
 --- @type blink.cmp.Window
 --- @diagnostic disable-next-line: missing-fields
@@ -330,6 +332,7 @@ end
 --- Gets the direction with the most space available, prioritizing the directions in the order of the
 --- direction_priority list
 function win:get_vertical_direction_and_height(direction_priority, max_height)
+  if type(direction_priority) == 'function' then direction_priority = direction_priority() end
   local constraints = self.get_cursor_screen_position()
   local border_size = self:get_border_size()
   local function get_distance(direction)
