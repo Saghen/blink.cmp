@@ -4,7 +4,7 @@
 --- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item. Note, this does not apply when using the Lua implementation.
 --- @field use_proximity boolean Boosts the score of items matching nearby words. Note, this does not apply when using the Lua implementation.
 --- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux). Note, this does not apply when using the Lua implementation.
---- @field sorts blink.cmp.Sort[] Controls which sorts to use and in which order, these three are currently the only allowed options
+--- @field sorts blink.cmp.Sort[] Controls which sorts to use and in which order.
 --- @field prebuilt_binaries blink.cmp.PrebuiltBinariesConfig
 
 --- @class (exact) blink.cmp.PrebuiltBinariesConfig
