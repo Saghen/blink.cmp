@@ -153,7 +153,7 @@
 --- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
 --- @class (exact) blink.cmp.KeymapConfig
 --- @field preset? blink.cmp.KeymapPreset
---- @field [string] blink.cmp.KeymapCommand[]|false Table of keys => commands[] or false to disable
+--- @field [string] blink.cmp.KeymapCommand[] | false Table of keys => commands[] or false to disable
 
 local keymap = {
   --- @type blink.cmp.KeymapConfig

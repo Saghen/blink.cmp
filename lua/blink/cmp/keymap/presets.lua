@@ -1,6 +1,6 @@
 local presets = {}
 
---- @type table<string, table<string, blink.cmp.KeymapCommand[]|false>>
+--- @type table<string, table<string, blink.cmp.KeymapCommand[] | false>>
 local presets_keymaps = {
   none = {},
 
@@ -88,7 +88,7 @@ local presets_keymaps = {
 
 --- Gets the preset keymap for the given preset name
 --- @param name string
---- @return table<string, blink.cmp.KeymapCommand[]|false>
+--- @return table<string, blink.cmp.KeymapCommand[] | false>
 function presets.get(name)
   local preset = presets_keymaps[name]
   if preset == nil then error('Invalid blink.cmp keymap preset: ' .. name) end
