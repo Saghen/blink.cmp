@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 07
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 09
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1433,7 +1433,7 @@ directly to `require('blink.cmp')[command]()`. If the command/function returns
       ['<Down>'] = { 'select_next', 'fallback' },
     
       -- disable a keymap from the preset
-      ['<C-e>'] = {},
+      ['<C-e>'] = false, -- or {}
       
       -- show with a list of providers
       ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },
