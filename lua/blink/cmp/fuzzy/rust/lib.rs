@@ -117,7 +117,11 @@ pub fn fuzzy(
                     Sort::Kind => a.item.kind.cmp(&b.item.kind),
                     Sort::SortText => match (&a.item.sort_text, &b.item.sort_text) {
                         (Some(a), Some(b)) => a.cmp(b),
-                        _ => Ordering::Equal,
+                        // Consider results with Some value to be greater than those with None
+                        (Some(_), None) => Ordering::Greater,
+                        (None, Some(_)) => Ordering::Less,
+                        // Neither has sort text
+                        (None, None) => Ordering::Equal,
                     },
                     Sort::Label => Sort::label(&a.item, &b.item),
                 }
