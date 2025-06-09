@@ -12,7 +12,7 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
   -- insert mode: uses both snippet and insert commands
   for key, commands in pairs(keys_to_commands) do
-    if commands == false or #commands == 0 then goto continue end
+    if #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('i', key)
     apply.set('i', key, function()
@@ -39,7 +39,7 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
   -- snippet mode: uses only snippet commands
   for key, commands in pairs(keys_to_commands) do
-    if commands == false or not apply.has_snippet_commands(commands) or #commands == 0 then goto continue end
+    if not apply.has_snippet_commands(commands) or #commands == 0 then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('s', key)
     apply.set('s', key, function()
