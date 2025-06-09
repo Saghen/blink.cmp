@@ -23,10 +23,10 @@ pub struct FuzzyOptions {
 }
 
 #[derive(Clone)]
-pub struct FuzzyMatch {
+pub struct FuzzyMatch<'a> {
     pub provider_idx: u16,
     pub mtch: Match,
-    pub item: LspItem,
+    pub item: &'a LspItem,
     pub score: i32,
 }
 
@@ -88,10 +88,10 @@ pub fn fuzzy<'a>(
     provider_idx: u16,
     line: &str,
     cursor_col: usize,
-    haystack: &[LspItem],
+    haystack: &'a [LspItem],
     frecency: &FrecencyTracker,
     opts: FuzzyOptions,
-) -> Vec<FuzzyMatch> {
+) -> Vec<FuzzyMatch<'a>> {
     let haystack_labels = haystack
         .iter()
         .map(|s| s.filter_text.clone().unwrap_or(s.label.clone()))
@@ -149,7 +149,7 @@ pub fn fuzzy<'a>(
 
             FuzzyMatch {
                 provider_idx,
-                item: haystack[mtch.index_in_haystack as usize].clone(),
+                item: &haystack[mtch.index_in_haystack as usize],
                 score: (mtch.score as i32) + frecency_score + nearby_words_score + score_offset,
                 mtch,
             }
