@@ -37,6 +37,7 @@ function keymap.get_mappings(keymap_config, mode)
       if
         key ~= 'preset'
         and commands ~= false
+        and #commands ~= 0
         and not require('blink.cmp.keymap.apply').has_insert_command(commands)
       then
         mappings[key] = nil

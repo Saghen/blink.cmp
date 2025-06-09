@@ -97,12 +97,15 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
   local sort_in_rust = fuzzy.implementation_type == 'rust'
     and #vim.tbl_filter(function(v) return type(v) ~= 'function' end, config.fuzzy.sorts) == #config.fuzzy.sorts
 
+  local max_typos = type(config.fuzzy.max_typos) == 'function' and config.fuzzy.max_typos(keyword)
+    or config.fuzzy.max_typos
+  --- @cast max_typos number
+
   local filtered_items = {}
   for provider_id, haystack in pairs(haystacks_by_provider) do
     -- perform fuzzy search
     local scores, matched_indices, exacts = fuzzy.implementation.fuzzy(line, cursor_col, provider_id, {
-      -- TODO: make this configurable
-      max_typos = config.fuzzy.max_typos(keyword),
+      max_typos = max_typos,
       use_frecency = config.fuzzy.use_frecency and keyword_length > 0,
       use_proximity = config.fuzzy.use_proximity and keyword_length > 0,
       nearby_words = nearby_words,
