@@ -9,7 +9,7 @@ local validate = require('blink.cmp.config.utils').validate
 --- @field winhighlight string
 --- @field scrolloff number Keep the cursor X lines away from the top/bottom of the window
 --- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
---- @field direction_priority ("n" | "s")[] Which directions to show the window, falling back to the next direction when there's not enough space
+--- @field direction_priority ("n" | "s")[]| fun(): table Which directions to show the window, or a function returning such a table, falling back to the next direction when there's not enough space
 --- @field order blink.cmp.CompletionMenuOrderConfig TODO: implement
 --- @field auto_show boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether to automatically show the window when new completion items are available
 --- @field cmdline_position fun(): number[] Screen coordinates (0-indexed) of the command line
@@ -147,12 +147,13 @@ function window.validate(config)
     direction_priority = {
       config.direction_priority,
       function(direction_priority)
+        if type(direction_priority) == 'function' then direction_priority = direction_priority() end
         for _, direction in ipairs(direction_priority) do
           if not vim.tbl_contains({ 'n', 's' }, direction) then return false end
         end
         return true
       end,
-      'one of: "n", "s"',
+      'one of: "n", "s", or a function returning such a table',
     },
     order = { config.order, 'table' },
     auto_show = { config.auto_show, { 'boolean', 'function' } },
