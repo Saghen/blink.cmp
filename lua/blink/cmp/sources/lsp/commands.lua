@@ -1,5 +1,6 @@
 --- LSPs may call "client commands" which must be registered inside of neovim
---- These are non-standard so we'll have to discover and implement them as we find them
+--- I don't know of a standard for these so we'll have to discover and implement them
+--- as we find them
 
 local commands = {}
 

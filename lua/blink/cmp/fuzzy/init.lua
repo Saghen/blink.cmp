@@ -116,7 +116,6 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
 
     for idx, item_index in ipairs(matched_indices) do
       local item = haystack[item_index + 1]
-      -- TODO: maybe we should declare these fields in `blink.cmp.CompletionItem`?
       item.score = scores[idx]
       item.exact = exacts[idx]
       table.insert(filtered_items, item)
