@@ -28,7 +28,7 @@ function cmdline:is_boolean_option(name)
   if ok then return type(opt) == 'boolean' end
 end
 
-function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':' } end
+function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':', '!' } end
 
 function cmdline:get_completions(context, callback)
   -- TODO: split doesn't handle escaped spaces
