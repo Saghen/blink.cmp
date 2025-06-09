@@ -34,7 +34,7 @@ function keymap.get_mappings(keymap_config, mode)
   -- Remove unused keys
   if mode ~= 'default' then
     for key, commands in pairs(mappings) do
-      if key ~= 'preset' and not require('blink.cmp.keymap.apply').has_insert_command(commands) then
+      if key ~= 'preset' and not require('blink.cmp.keymap.apply').has_insert_command(commands) and #commands ~= 0 then
         mappings[key] = nil
       end
     end
