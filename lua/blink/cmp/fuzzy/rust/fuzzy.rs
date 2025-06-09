@@ -4,22 +4,30 @@ use crate::frecency::FrecencyTracker;
 use crate::keyword;
 use crate::lsp_item::LspItem;
 use crate::sort::Sort;
+use frizbee::Match;
 use mlua::prelude::*;
 use mlua::FromLua;
 use mlua::Lua;
-use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::collections::HashSet;
 
 #[derive(Clone)]
 pub struct FuzzyOptions {
-    match_suffix: bool,
-    max_typos: u16,
-    use_frecency: bool,
-    use_proximity: bool,
-    nearby_words: Option<Vec<String>>,
-    snippet_score_offset: i32,
-    sorts: Option<Vec<Sort>>,
+    pub match_suffix: bool,
+    pub max_typos: u16,
+    pub use_frecency: bool,
+    pub use_proximity: bool,
+    pub nearby_words: Option<Vec<String>>,
+    pub snippet_score_offset: i32,
+    pub sorts: Option<Vec<Sort>>,
+}
+
+#[derive(Clone)]
+pub struct FuzzyMatch {
+    pub provider_idx: u16,
+    pub mtch: Match,
+    pub item: LspItem,
+    pub score: i32,
 }
 
 impl FromLua for FuzzyOptions {
@@ -76,13 +84,14 @@ fn group_by_needle(
     items_by_needle
 }
 
-pub fn fuzzy(
+pub fn fuzzy<'a>(
+    provider_idx: u16,
     line: &str,
     cursor_col: usize,
     haystack: &[LspItem],
     frecency: &FrecencyTracker,
     opts: FuzzyOptions,
-) -> (Vec<i32>, Vec<u32>, Vec<bool>) {
+) -> Vec<FuzzyMatch> {
     let haystack_labels = haystack
         .iter()
         .map(|s| s.filter_text.clone().unwrap_or(s.label.clone()))
@@ -94,7 +103,7 @@ pub fn fuzzy(
     };
 
     // Items may have different fuzzy matching ranges, so we split them up by needle
-    let mut matches = group_by_needle(line, cursor_col, &haystack_labels, opts.match_suffix)
+    let matches = group_by_needle(line, cursor_col, &haystack_labels, opts.match_suffix)
         .into_iter()
         // Match on each needle and combine
         .flat_map(|(needle, haystack)| {
@@ -115,8 +124,8 @@ pub fn fuzzy(
 
     // Get the score for each match, adding score_offset, frecency and proximity bonus
     let nearby_words: HashSet<String> = HashSet::from_iter(opts.nearby_words.unwrap_or_default());
-    let match_scores = matches
-        .iter()
+    matches
+        .into_iter()
         .map(|mtch| {
             let frecency_score = if opts.use_frecency {
                 frecency.get_score(&haystack[mtch.index_in_haystack as usize]) as i32
@@ -138,56 +147,14 @@ pub fn fuzzy(
                 score_offset += opts.snippet_score_offset;
             }
 
-            (
-                mtch.index_in_haystack,
-                (mtch.score as i32) + frecency_score + nearby_words_score + score_offset,
-            )
+            FuzzyMatch {
+                provider_idx,
+                item: haystack[mtch.index_in_haystack as usize].clone(),
+                score: (mtch.score as i32) + frecency_score + nearby_words_score + score_offset,
+                mtch,
+            }
         })
-        .collect::<HashMap<_, _>>();
-
-    // Sort by index in haystack
-    matches.sort_by_key(|mtch| mtch.index_in_haystack);
-    // Sort by user-defined sorts
-    if let Some(sorts) = opts.sorts {
-        matches.sort_by(|a, b| {
-            sorts.iter().fold(Ordering::Equal, |acc, sort| {
-                if acc != Ordering::Equal {
-                    return acc;
-                }
-
-                let item_a = &haystack[a.index_in_haystack as usize];
-                let item_b = &haystack[b.index_in_haystack as usize];
-                match sort {
-                    // Reverse ordering
-                    Sort::Exact => b.exact.cmp(&a.exact),
-                    Sort::Score => {
-                        match_scores[&b.index_in_haystack].cmp(&match_scores[&a.index_in_haystack])
-                    }
-
-                    // Regular ordering
-                    Sort::Kind => item_a.kind.cmp(&item_b.kind),
-                    Sort::SortText => match (&item_a.sort_text, &item_b.sort_text) {
-                        (None, _) | (_, None) => Ordering::Equal,
-                        (Some(a), Some(b)) => a.cmp(b),
-                    },
-                    Sort::Label => Sort::label(item_a, item_b),
-                }
-            })
-        })
-    }
-
-    // Return scores, indices and whether the match is exact
-    (
-        matches
-            .iter()
-            .map(|mtch| match_scores[&mtch.index_in_haystack])
-            .collect::<Vec<_>>(),
-        matches
-            .iter()
-            .map(|mtch| mtch.index_in_haystack)
-            .collect::<Vec<_>>(),
-        matches.iter().map(|mtch| mtch.exact).collect::<Vec<_>>(),
-    )
+        .collect::<Vec<_>>()
 }
 
 pub fn fuzzy_matched_indices(

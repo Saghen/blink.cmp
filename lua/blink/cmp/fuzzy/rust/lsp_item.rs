@@ -31,7 +31,7 @@ pub enum CompletionItemKind {
     TypeParameter = 25,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LspItem {
     pub label: String,
     pub filter_text: Option<String>,

@@ -38,25 +38,29 @@ end
 
 function fuzzy.set_provider_items(provider_id, items) fuzzy.provider_items[provider_id] = items end
 
-function fuzzy.fuzzy(line, cursor_col, provider_id, opts)
+function fuzzy.fuzzy(line, cursor_col, provider_ids, opts)
   assert(opts.sorts == nil, 'Sorting is not supported in the Lua implementation')
 
   local keyword_start, keyword_end = get_keyword_range(line, cursor_col, opts.match_suffix)
   local keyword = line:sub(keyword_start + 1, keyword_end)
 
-  local scores = {}
+  local provider_idxs = {}
   local matched_indices = {}
+  local scores = {}
   local exacts = {}
-  for idx, item in ipairs(fuzzy.provider_items[provider_id] or {}) do
-    local score, exact = match(keyword, item.filterText or item.label)
-    if score ~= nil then
-      table.insert(scores, score)
-      table.insert(matched_indices, idx - 1)
-      table.insert(exacts, exact)
+  for provider_idx, provider_id in ipairs(provider_ids) do
+    for idx, item in ipairs(fuzzy.provider_items[provider_id] or {}) do
+      local score, exact = match(keyword, item.filterText or item.label)
+      if score ~= nil then
+        table.insert(provider_idxs, provider_idx - 1)
+        table.insert(matched_indices, idx - 1)
+        table.insert(scores, score)
+        table.insert(exacts, exact)
+      end
     end
   end
 
-  return scores, matched_indices, exacts
+  return provider_idxs, matched_indices, scores, exacts
 end
 
 function fuzzy.fuzzy_matched_indices(line, cursor_col, haystack, match_suffix)
