@@ -23,6 +23,7 @@
 --- @field on_char_added fun(char: string, is_ignored: boolean)
 --- @field on_cursor_moved fun(event: 'CursorMoved' | 'InsertEnter', is_ignored: boolean, is_backspace: boolean, last_event: string)
 --- @field on_insert_leave fun()
+--- @field on_complete_changed fun()
 
 --- @type blink.cmp.BufferEvents
 --- @diagnostic disable-next-line: missing-fields
@@ -169,6 +170,12 @@ function buffer_events:listen(opts)
       end)
     end
   end)
+
+  if opts.on_complete_changed then
+    vim.api.nvim_create_autocmd('CompleteChanged', {
+      callback = vim.schedule_wrap(function() opts.on_complete_changed() end),
+    })
+  end
 end
 
 --- Effectively ensures that our autocmd listeners run last, after other registered listeners

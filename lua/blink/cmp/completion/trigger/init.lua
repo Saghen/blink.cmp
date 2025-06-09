@@ -158,6 +158,9 @@ function trigger.activate()
     on_char_added = on_char_added,
     on_cursor_moved = on_cursor_moved,
     on_insert_leave = function() trigger.hide() end,
+    on_complete_changed = function()
+      if vim.fn.pumvisible() == 1 then trigger.hide() end
+    end,
   })
 
   trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
@@ -238,7 +241,7 @@ function trigger.show_if_on_trigger_character(opts)
 end
 
 function trigger.show(opts)
-  if not require('blink.cmp.config').enabled() then return trigger.hide() end
+  if vim.fn.pumvisible() == 1 or not root_config.enabled() then return trigger.hide() end
 
   opts = opts or {}
 
