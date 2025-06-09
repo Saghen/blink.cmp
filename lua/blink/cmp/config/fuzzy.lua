@@ -1,6 +1,6 @@
 --- @class (exact) blink.cmp.FuzzyConfig
 --- @field implementation blink.cmp.FuzzyImplementationType Controls which implementation to use for the fuzzy matcher. See the documentation for the available values for more information.
---- @field max_typos fun(keyword: string): number Allows for a number of typos relative to the length of the query. Set this to 0 to match the behavior of fzf. Note, this does not apply when using the Lua implementation.
+--- @field max_typos number | fun(keyword: string): number Allows for a number of typos relative to the length of the query. Set this to 0 to match the behavior of fzf. Note, this does not apply when using the Lua implementation.
 --- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item. Note, this does not apply when using the Lua implementation.
 --- @field use_proximity boolean Boosts the score of items matching nearby words. Note, this does not apply when using the Lua implementation.
 --- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux). Note, this does not apply when using the Lua implementation.
@@ -61,7 +61,7 @@ function fuzzy.validate(config)
       end,
       'one of: "prefer_rust", "prefer_rust_with_warning", "rust", "lua"',
     },
-    max_typos = { config.max_typos, 'function' },
+    max_typos = { config.max_typos, { 'number', 'function' } },
     use_frecency = { config.use_frecency, 'boolean' },
     use_proximity = { config.use_proximity, 'boolean' },
     use_unsafe_no_lock = { config.use_unsafe_no_lock, 'boolean' },
