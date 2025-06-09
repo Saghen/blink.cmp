@@ -162,26 +162,16 @@ function lib.get_last_path_part(path)
   return start_pos
 end
 
---- Check if a path is a directory.
----@param path string
----@return boolean
-function lib.is_dir(path)
-  local expand = vim.fn.expand(path)
-  local stat = vim.uv.fs_stat(expand)
-  return stat and stat.type == 'directory' or false
-end
-
 --- Get the basename of a path, preserving trailing separator for directories.
 ---@param path string
 ---@return string
 function lib.basename_with_sep(path)
   local sep = package.config:sub(1, 1)
-  local is_dir = lib.is_dir(path)
   local last_char = path:sub(-1)
-  local has_sep = last_char == '/' or last_char == '\\'
-  if is_dir and has_sep then path = path:sub(1, -2) end
-  local basename = vim.fs.basename(path)
-  if is_dir and has_sep then basename = basename .. sep end
+  -- on Windows, both '/' and '\\' are accepted as path separators
+  local is_dir = last_char == '/' or last_char == '\\'
+  local basename = vim.fs.basename(is_dir and path:sub(1, -2) or path)
+  if is_dir then basename = basename .. sep end
   return basename
 end
 
@@ -215,6 +205,49 @@ function lib:split_unescaped(str)
     end
   end
   table.insert(result, current)
+  return result
+end
+
+--- Given a list of file paths, compute the shortest unique prefix for each.
+---@param paths string[]
+---@return table<string, string>  -- <path, unique_prefix>
+function lib:compute_unique_prefixes(paths)
+  local is_windows = vim.fn.has('win32') == 1
+  local sep = is_windows and '\\' or '/'
+
+  -- Split path into segments
+  local function split(path)
+    if is_windows then path = path:gsub('/', '\\') end
+    return vim.split(path, sep)
+  end
+
+  local n = #paths
+  local segments = {}
+  for i = 1, n do
+    segments[i] = split(paths[i])
+  end
+
+  local unique_prefixes = {}
+  for i = 1, n do
+    local min_len = 1
+    for j = 1, n do
+      if i ~= j then
+        local k = 1
+        while segments[i][#segments[i] - k + 1] == segments[j][#segments[j] - k + 1] do
+          k = k + 1
+          if (#segments[i] - k + 1) < 1 or (#segments[j] - k + 1) < 1 then break end
+        end
+        if k > min_len then min_len = k end
+      end
+    end
+    local start_idx = #segments[i] - min_len + 1
+    unique_prefixes[i] = table.concat(vim.list_slice(segments[i], start_idx), sep)
+  end
+
+  local result = {}
+  for i = 1, n do
+    result[paths[i]] = unique_prefixes[i]
+  end
   return result
 end
 

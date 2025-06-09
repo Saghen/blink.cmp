@@ -60,12 +60,13 @@ function cmdline:get_completions(context, callback)
       if is_help_command then return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix) end
 
       local completions = {}
-      local completion_args = vim.split(vim.fn.getcmdcompltype(), ',', { plain = true })
-      local completion_type = completion_args[1]
-      local completion_func = completion_args[2]
 
       -- Input mode (vim.fn.input())
       if vim.fn.getcmdtype() == '@' then
+        local completion_args = vim.split(vim.fn.getcmdcompltype(), ',', { plain = true })
+        local completion_type = completion_args[1]
+        local completion_func = completion_args[2]
+
         -- Handle custom completions explicitly, since `getcompletion()` will fail when using this type
         -- TODO: we cannot handle v:lua, s:, and <sid> completions. is there a better solution here where we can
         -- get completions in input() mode without calling ourselves?
@@ -134,16 +135,17 @@ function cmdline:get_completions(context, callback)
         return best
       end
 
+      ---@cast completions string[]
       local completion_type = vim.fn.getcmdcompltype()
       local is_path_completion = self:is_path_completion()
-      local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
       local is_first_arg = arg_number == 1
       local is_lua_expr = completion_type == 'lua' and cmd == '='
+      local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
+      local unique_prefixes = is_buffer_completion and path_lib:compute_unique_prefixes(completions) or {}
 
       local items = {}
       for _, completion in ipairs(completions) do
-        local filter_text = completion
-        local new_text = completion
+        local filter_text, new_text
 
         -- path completion in commands, e.g. `chdir <path>` and options, e.g. `:set directory=<path>`
         if is_path_completion then
@@ -153,11 +155,14 @@ function cmdline:get_completions(context, callback)
             new_text = current_arg_prefix:sub(1, current_arg_prefix:find('=') or #current_arg_prefix) .. new_text
           end
 
-        -- todo
+        -- buffer commands
         elseif is_buffer_completion then
+          filter_text = unique_prefixes[completion] or completion
+          new_text = completion
 
         -- lua expr, e.g. `:=<expr>`
         elseif is_lua_expr then
+          filter_text = completion
           new_text = current_arg_prefix .. completion
 
         -- env variables
@@ -168,9 +173,14 @@ function cmdline:get_completions(context, callback)
         -- for other completions, check if the prefix is already present
         elseif not is_first_arg then
           local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
-          if has_prefix then filter_text = completion:sub(#current_arg_prefix + 1) end
-          -- add prefix to the newText
-          if not has_prefix then new_text = current_arg_prefix .. completion end
+
+          filter_text = has_prefix and completion:sub(#current_arg_prefix + 1) or completion
+          new_text = has_prefix and completion or current_arg_prefix .. completion
+
+        -- fallback
+        else
+          filter_text = completion
+          new_text = completion
         end
 
         local start_pos = #text_before_argument + #leading_spaces
