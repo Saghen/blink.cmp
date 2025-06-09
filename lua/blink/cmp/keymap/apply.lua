@@ -12,8 +12,6 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
   -- insert mode: uses both snippet and insert commands
   for key, commands in pairs(keys_to_commands) do
-    if #commands == 0 then goto continue end
-
     local fallback = require('blink.cmp.keymap.fallback').wrap('i', key)
     apply.set('i', key, function()
       if not require('blink.cmp.config').enabled() then return fallback() end
@@ -33,13 +31,11 @@ function apply.keymap_to_current_buffer(keys_to_commands)
         end
       end
     end)
-
-    ::continue::
   end
 
   -- snippet mode: uses only snippet commands
   for key, commands in pairs(keys_to_commands) do
-    if not apply.has_snippet_commands(commands) or #commands == 0 then goto continue end
+    if not apply.has_snippet_commands(commands) then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('s', key)
     apply.set('s', key, function()
@@ -88,7 +84,7 @@ function apply.term_keymaps(keys_to_commands)
 
   -- terminal mode: uses insert commands only
   for key, commands in pairs(keys_to_commands) do
-    if not apply.has_insert_command(commands) or #commands == 0 then goto continue end
+    if not apply.has_insert_command(commands) then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('i', key)
     apply.set('t', key, function()
@@ -120,7 +116,7 @@ function apply.cmdline_keymaps(keys_to_commands)
 
   -- cmdline mode: uses only insert commands
   for key, commands in pairs(keys_to_commands) do
-    if not apply.has_insert_command(commands) or #commands == 0 then goto continue end
+    if not apply.has_insert_command(commands) then goto continue end
 
     local fallback = require('blink.cmp.keymap.fallback').wrap('c', key)
     apply.set('c', key, function()

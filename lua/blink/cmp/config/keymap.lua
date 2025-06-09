@@ -153,7 +153,7 @@
 --- When defining your own keymaps without a preset, no keybinds will be assigned automatically.
 --- @class (exact) blink.cmp.KeymapConfig
 --- @field preset? blink.cmp.KeymapPreset
---- @field [string] blink.cmp.KeymapCommand[] Table of keys => commands[]
+--- @field [string] blink.cmp.KeymapCommand[] | false Table of keys => commands[] or false to disable
 
 local keymap = {
   --- @type blink.cmp.KeymapConfig
@@ -210,12 +210,14 @@ function keymap.validate(config, is_mode)
       validation_schema[key] = {
         value,
         function(key_commands)
+          if key_commands == false then return true end
+          if type(key_commands) ~= 'table' then return false end
           for _, command in ipairs(key_commands) do
             if type(command) ~= 'function' and not vim.tbl_contains(commands, command) then return false end
           end
           return true
         end,
-        'commands must be one of: ' .. table.concat(commands, ', '),
+        'commands must be one of: ' .. table.concat(commands, ', ') .. ' or false to disable',
       }
     end
   end

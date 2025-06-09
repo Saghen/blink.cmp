@@ -21,7 +21,7 @@ keymap = {
   ['<Down>'] = { 'select_next', 'fallback' },
 
   -- disable a keymap from the preset
-  ['<C-e>'] = {},
+  ['<C-e>'] = false, -- or {}
   
   -- show with a list of providers
   ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },
