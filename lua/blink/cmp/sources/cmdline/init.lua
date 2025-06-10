@@ -138,7 +138,7 @@ function cmdline:get_completions(context, callback)
 
       ---@cast completions string[]
       local is_first_arg = arg_number == 1
-      local is_lua_expr = completion_type == 'lua' and cmd == '='
+      local is_lua_expr = completion_type == 'lua'
       local unique_prefixes = is_buffer_completion and path_lib:compute_unique_prefixes(completions) or {}
 
       local items = {}
