@@ -33,10 +33,12 @@ function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/',
 
 function cmdline:get_completions(context, callback)
   local completion_type = vim.fn.getcmdcompltype()
+
   local is_path_completion = vim.tbl_contains(constants.completion_types.path, completion_type)
   local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
 
   local context_line, arguments = self:smart_split(context, is_path_completion or is_buffer_completion)
+  local cmd = arguments[1]
   local before_cursor = context_line:sub(1, context.cursor[2])
   local _, args_before_cursor = self:smart_split({ line = before_cursor }, is_path_completion or is_buffer_completion)
   local arg_number = #args_before_cursor
@@ -50,18 +52,13 @@ function cmdline:get_completions(context, callback)
   local keyword = context.get_bounds(keyword_config.range)
   local current_arg_prefix = current_arg:sub(1, keyword.start_col - #text_before_argument - 1)
 
-  -- Parse the command to ignore modifiers like :vert help
-  -- Fails in some cases, like context.line = ':vert' so we fallback to the first argument
-  local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, context_line, {})
-  local cmd = (valid_cmd and parsed.cmd) or arguments[1] or ''
-
-  local is_help_command = constants.help_commands[cmd] and arg_number > 1
-
   local task = async.task
     .empty()
     :map(function()
       -- Special case for help where we read all the tags ourselves
-      if is_help_command then return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix) end
+      if completion_type == 'help' then
+        return require('blink.cmp.sources.cmdline.help').get_completions(current_arg_prefix)
+      end
 
       local completions = {}
 
@@ -231,7 +228,7 @@ function cmdline:get_completions(context, callback)
       end
 
       callback({
-        is_incomplete_backward = not is_help_command,
+        is_incomplete_backward = completion_type ~= 'help',
         is_incomplete_forward = false,
         items = items,
       })
