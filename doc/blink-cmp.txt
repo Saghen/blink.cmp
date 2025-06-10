@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 09
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 10
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1814,8 +1814,8 @@ to the source directly, and will vary by source.
 
 SHOW BUFFER COMPLETIONS WITH LSP
 
-By default, the buffer source will only show when the LSP source returns no
-items. You may always show the buffer source via:
+By default, the buffer source will only show when the LSP source is disabled or
+returns no items. You may always show the buffer source via:
 
 >lua
     sources = {
