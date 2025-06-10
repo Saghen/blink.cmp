@@ -32,9 +32,13 @@ end
 function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':', '!' } end
 
 function cmdline:get_completions(context, callback)
-  local context_line, arguments = self:smart_split(context)
+  local completion_type = vim.fn.getcmdcompltype()
+  local is_path_completion = vim.tbl_contains(constants.completion_types.path, completion_type)
+  local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
+
+  local context_line, arguments = self:smart_split(context, is_path_completion or is_buffer_completion)
   local before_cursor = context_line:sub(1, context.cursor[2])
-  local _, args_before_cursor = self:smart_split({ line = before_cursor })
+  local _, args_before_cursor = self:smart_split({ line = before_cursor }, is_path_completion or is_buffer_completion)
   local arg_number = #args_before_cursor
 
   local leading_spaces = context.line:match('^(%s*)') -- leading spaces in the original query
@@ -63,7 +67,7 @@ function cmdline:get_completions(context, callback)
 
       -- Input mode (vim.fn.input())
       if vim.fn.getcmdtype() == '@' then
-        local completion_args = vim.split(vim.fn.getcmdcompltype(), ',', { plain = true })
+        local completion_args = vim.split(completion_type, ',', { plain = true })
         local completion_type = completion_args[1]
         local completion_func = completion_args[2]
 
@@ -92,10 +96,10 @@ function cmdline:get_completions(context, callback)
         else
           local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
           -- TODO: handle `custom` type
-          local compl_type = not vim.startswith(completion_type, 'custom') and vim.fn.getcmdcompltype() or 'cmdline'
+          local compl_type = not vim.startswith(completion_type, 'custom') and completion_type or 'cmdline'
           if compl_type ~= '' then
-            -- "file" completions uniquely expect only the current file path
-            query = compl_type == 'file' and current_arg_prefix or query
+            -- path completions uniquely expect only the current path
+            query = is_path_completion and current_arg_prefix or query
 
             completions = vim.fn.getcompletion(query, compl_type)
             if type(completions) ~= 'table' then completions = {} end
@@ -136,11 +140,8 @@ function cmdline:get_completions(context, callback)
       end
 
       ---@cast completions string[]
-      local completion_type = vim.fn.getcmdcompltype()
-      local is_path_completion = self:is_path_completion()
       local is_first_arg = arg_number == 1
       local is_lua_expr = completion_type == 'lua' and cmd == '='
-      local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
       local unique_prefixes = is_buffer_completion and path_lib:compute_unique_prefixes(completions) or {}
 
       local items = {}
@@ -158,7 +159,7 @@ function cmdline:get_completions(context, callback)
         -- buffer commands
         elseif is_buffer_completion then
           filter_text = unique_prefixes[completion] or completion
-          new_text = completion
+          new_text = vim.fn.fnameescape(completion)
 
         -- lua expr, e.g. `:=<expr>`
         elseif is_lua_expr then
@@ -243,19 +244,16 @@ function cmdline:get_completions(context, callback)
   return function() task:cancel() end
 end
 
---- Check if the current completion type is a path (file or dir).
----@return boolean
-function cmdline:is_path_completion() return vim.tbl_contains(constants.completion_types.path, vim.fn.getcmdcompltype()) end
-
 --- Split the command line into arguments, handling path escaping and trailing spaces.
 --- For path completions, split by paths and normalize each one if needed.
 --- For other completions, splits by spaces and preserves trailing empty arguments.
 ---@param context table
+---@param is_path_completion boolean
 ---@return string, table
-function cmdline:smart_split(context)
+function cmdline:smart_split(context, is_path_completion)
   local line = context.line
 
-  if self:is_path_completion() then
+  if is_path_completion then
     -- Split the line into tokens, respecting escaped spaces in paths
     local tokens = path_lib:split_unescaped(line:gsub('^%s+', ''))
     local cmd = tokens[1]
