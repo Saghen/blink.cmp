@@ -2,9 +2,11 @@ use crate::error::Error;
 use crate::frecency::FrecencyTracker;
 use crate::fuzzy::FuzzyOptions;
 use crate::lsp_item::LspItem;
+use crate::sort::Sort;
 use lsp_item::CompletionItemKind;
 use mlua::prelude::*;
 use regex::Regex;
+use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::sync::{LazyLock, RwLock};
 
@@ -60,24 +62,78 @@ pub fn set_provider_items(
 
 pub fn fuzzy(
     _lua: &Lua,
-    (line, cursor_col, provider_id, opts): (mlua::String, usize, String, FuzzyOptions),
-) -> LuaResult<(Vec<i32>, Vec<u32>, Vec<bool>)> {
+    (line, cursor_col, provider_ids, opts): (mlua::String, usize, Vec<String>, FuzzyOptions),
+) -> LuaResult<(Vec<u16>, Vec<u32>, Vec<i32>, Vec<bool>)> {
     let frecency = FRECENCY.read().map_err(|_| Error::AcquireFrecencyLock)?;
     let frecency = frecency.as_ref().ok_or(Error::UseFrecencyBeforeInit)?;
 
     let haystacks_by_provider = HAYSTACKS_BY_PROVIDER
         .read()
         .map_err(|_| Error::AcquireItemLock)?;
-    let haystack = haystacks_by_provider
-        .get(&provider_id)
-        .ok_or(Error::FuzzyBeforeSetItems { provider_id })?;
 
-    Ok(fuzzy::fuzzy(
-        &line.to_string_lossy(),
-        cursor_col,
-        haystack,
-        frecency,
-        opts,
+    let mut matches = provider_ids
+        .iter()
+        .enumerate()
+        .map(|(provider_idx, provider_id)| {
+            let haystack = haystacks_by_provider.get(provider_id).ok_or_else(|| {
+                Error::FuzzyBeforeSetItems {
+                    provider_id: provider_id.to_string(),
+                }
+            })?;
+
+            Ok(fuzzy::fuzzy(
+                (provider_idx).try_into().unwrap(),
+                &line.to_string_lossy(),
+                cursor_col,
+                haystack,
+                frecency,
+                opts.clone(),
+            ))
+        })
+        .try_fold(Vec::new(), |mut acc, result: LuaResult<_>| {
+            result.map(|mut vec| {
+                acc.append(&mut vec);
+                acc
+            })
+        })?;
+
+    // Sort by provider idx then index in haystack
+    matches.sort_by_key(|m| (m.provider_idx, m.mtch.index_in_haystack));
+
+    // Sort by user-defined sorts
+    if let Some(sorts) = opts.sorts {
+        matches.sort_by(|a, b| {
+            sorts.iter().fold(Ordering::Equal, |acc, sort| {
+                if acc != Ordering::Equal {
+                    return acc;
+                }
+
+                match sort {
+                    // Reverse ordering
+                    Sort::Exact => b.mtch.exact.cmp(&a.mtch.exact),
+                    Sort::Score => b.score.cmp(&a.score),
+
+                    // Regular ordering
+                    Sort::Kind => a.item.kind.cmp(&b.item.kind),
+                    Sort::SortText => match (&a.item.sort_text, &b.item.sort_text) {
+                        (Some(a), Some(b)) => a.cmp(b),
+                        // Consider results with Some value to be greater than those with None
+                        (Some(_), None) => Ordering::Greater,
+                        (None, Some(_)) => Ordering::Less,
+                        // Neither has sort text
+                        (None, None) => Ordering::Equal,
+                    },
+                    Sort::Label => Sort::label(&a.item, &b.item),
+                }
+            })
+        })
+    }
+
+    Ok((
+        matches.iter().map(|m| m.provider_idx).collect(),
+        matches.iter().map(|m| m.mtch.index_in_haystack).collect(),
+        matches.iter().map(|m| m.score).collect(),
+        matches.iter().map(|m| m.mtch.exact).collect(),
     ))
 }
 
