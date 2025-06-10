@@ -61,7 +61,7 @@ sources.providers.lsp = {
 
 ### Show Buffer completions with LSP
 
-By default, the buffer source will only show when the LSP source returns no items. You may always show the buffer source via:
+By default, the buffer source will only show when the LSP source is disabled or returns no items. You may always show the buffer source via:
 
 ```lua
 sources = {
