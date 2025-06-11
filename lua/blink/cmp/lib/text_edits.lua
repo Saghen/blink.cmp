@@ -188,18 +188,38 @@ function text_edits.to_utf_8(text_edit, offset_encoding)
   return text_edit
 end
 
+--- Skips Vim regex "character class" prefix (e.g. \v, \c, etc.) in a line, if in cmdline/cmdwin mode.
+--  Returns the adjusted line, adjusted cursor col, and the offset used.
+function text_edits.skip_charclass_prefix(line, cursor)
+  local offset = 1
+  -- TODO: Need to be smarter, we need to detect search mode in:
+  -- cmdline for /, ?, :s and :g
+  -- cmdwin for q/, q?, q: when using substitute or global commands
+  if context.get_mode() == 'cmdline' or vim.fn.win_gettype() == 'command' then
+    while line:sub(offset, offset) == '\\' and line:sub(offset + 1, offset + 1):match('%a') do
+      offset = offset + 2
+    end
+    line = line:sub(offset)
+    cursor = math.max(cursor - (offset - 1), 0)
+  end
+  return line, cursor, offset
+end
+
 --- Uses the keyword_regex to guess the text edit ranges
 --- @param item blink.cmp.CompletionItem
 --- TODO: doesnt work when the item contains characters not included in the context regex
 function text_edits.guess(item)
   local word = item.insertText or item.label
 
-  local start_col, end_col = require('blink.cmp.fuzzy').guess_edit_range(
-    item,
-    context.get_line(),
-    context.get_cursor()[2],
-    config.completion.keyword.range
-  )
+  local line, cursor, offset = text_edits.skip_charclass_prefix(context.get_line(), context.get_cursor()[2])
+
+  local start_col, end_col =
+    require('blink.cmp.fuzzy').guess_edit_range(item, line, cursor, config.completion.keyword.range)
+
+  -- convert back to original line coordinates
+  start_col = start_col + (offset - 1)
+  end_col = end_col + (offset - 1)
+
   local current_line = context.get_cursor()[1]
 
   -- convert to 0-index

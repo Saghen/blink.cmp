@@ -115,12 +115,12 @@ end
 
 function list.fuzzy(context, items_by_source)
   local fuzzy = require('blink.cmp.fuzzy')
-  local filtered_items = fuzzy.fuzzy(
-    context.get_line(),
-    context.get_cursor()[2],
-    items_by_source,
-    require('blink.cmp.config').completion.keyword.range
-  )
+
+  local line, cursor =
+    require('blink.cmp.lib.text_edits').skip_charclass_prefix(context.get_line(), context.get_cursor()[2])
+
+  local filtered_items =
+    fuzzy.fuzzy(line, cursor, items_by_source, require('blink.cmp.config').completion.keyword.range)
 
   -- apply the per source max_items
   filtered_items = require('blink.cmp.sources.lib').apply_max_items_for_completions(context, filtered_items)
