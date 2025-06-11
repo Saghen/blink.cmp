@@ -139,11 +139,14 @@ function cmdline:get_completions(context, callback)
       ---@cast completions string[]
       local is_first_arg = arg_number == 1
       local is_lua_expr = completion_type == 'lua'
-      local unique_prefixes = is_buffer_completion and path_lib:compute_unique_prefixes(completions) or {}
+      local unique_prefixes = is_buffer_completion
+          and #completions < 2000
+          and path_lib:compute_unique_suffixes(completions)
+        or {}
 
       local items = {}
       for _, completion in ipairs(completions) do
-        local filter_text, new_text
+        local filter_text, new_text, label, label_details
 
         -- path completion in commands, e.g. `chdir <path>` and options, e.g. `:set directory=<path>`
         if is_path_completion then
@@ -155,7 +158,11 @@ function cmdline:get_completions(context, callback)
 
         -- buffer commands
         elseif is_buffer_completion then
-          filter_text = unique_prefixes[completion] or completion
+          label = unique_prefixes[completion] or completion
+          if #unique_prefixes[completion] then
+            label_details = { description = completion:sub(1, -#unique_prefixes[completion] - 2) }
+          end
+          filter_text = completion
           new_text = vim.fn.fnameescape(completion)
 
         -- lua expr, e.g. `:=<expr>`
@@ -194,8 +201,9 @@ function cmdline:get_completions(context, callback)
         end
 
         local item = {
-          label = filter_text,
+          label = label or filter_text,
           filterText = filter_text,
+          labelDetails = label_details,
           -- move items starting with special characters to the end of the list
           sortText = filter_text:lower():gsub('^([!-@\\[-`])', '~%1'),
           textEdit = {

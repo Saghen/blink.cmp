@@ -208,46 +208,90 @@ function lib:split_unescaped(str)
   return result
 end
 
---- Given a list of file paths, compute the shortest unique prefix for each.
----@param paths string[]
----@return table<string, string>  -- <path, unique_prefix>
-function lib:compute_unique_prefixes(paths)
+--- Given a list of file paths, compute the shortest unique suffix for each
+--- For example: 'foo/src/mod.rs', 'foo/test/mod.rs', 'foo/src/bar.rs'
+--- Returns:     'src/mod.rs',     'test/mod.rs',     'bar.rs'
+--- @param paths string[]
+--- @return table<string, string> -- <path, unique_prefix>
+function lib:compute_unique_suffixes(paths)
   local is_windows = vim.fn.has('win32') == 1
   local sep = is_windows and '\\' or '/'
+  if is_windows then paths = vim.tbl_map(function(path) return path:gsub('/', '\\') end, paths) end
 
-  -- Split path into segments
-  local function split(path)
-    if is_windows then path = path:gsub('/', '\\') end
-    return vim.split(path, sep)
-  end
-
+  -- if not enough paths, return as is
   local n = #paths
-  local segments = {}
-  for i = 1, n do
-    segments[i] = split(paths[i])
+  if n <= 1 then
+    local result = {}
+    if n == 1 then result[paths[1]] = paths[1] end
+    return result
   end
 
-  local unique_prefixes = {}
+  -- reverse the paths and sort so that similar suffixes are adjacent
+  local reversed_paths = {}
+  local original_to_reversed = {}
   for i = 1, n do
-    local min_len = 1
-    for j = 1, n do
-      if i ~= j then
-        local k = 1
-        while segments[i][#segments[i] - k + 1] == segments[j][#segments[j] - k + 1] do
-          k = k + 1
-          if (#segments[i] - k + 1) < 1 or (#segments[j] - k + 1) < 1 then break end
-        end
-        if k > min_len then min_len = k end
+    local path = paths[i]
+    local rev = path:reverse()
+    table.insert(reversed_paths, rev)
+    original_to_reversed[path] = rev
+  end
+  table.sort(reversed_paths)
+
+  -- find minimum suffix length for each path
+  local min_lengths = {}
+  for i = 1, n do
+    local rev = reversed_paths[i]
+    local max_common = 0
+
+    -- check previous neighbor
+    if i > 1 then
+      local prev = reversed_paths[i - 1]
+      local common = 0
+      local min_len = math.min(#rev, #prev)
+      while common < min_len and rev:byte(common + 1) == prev:byte(common + 1) do
+        common = common + 1
+      end
+      max_common = math.max(max_common, common)
+    end
+
+    -- check next neighbor
+    if i < n then
+      local next = reversed_paths[i + 1]
+      local common = 0
+      local min_len = math.min(#rev, #next)
+      while common < min_len and rev:byte(common + 1) == next:byte(common + 1) do
+        common = common + 1
+      end
+      max_common = math.max(max_common, common)
+    end
+
+    -- find the next separator after the common part
+    local suffix_start = max_common + 1
+    while suffix_start < #rev do
+      suffix_start = suffix_start + 1
+      if rev:byte(suffix_start) == sep:byte() then
+        suffix_start = suffix_start - 1
+        break
       end
     end
-    local start_idx = #segments[i] - min_len + 1
-    unique_prefixes[i] = table.concat(vim.list_slice(segments[i], start_idx), sep)
+
+    min_lengths[rev] = suffix_start
   end
 
+  -- build mapping of original_str -> unique_suffix_str
   local result = {}
   for i = 1, n do
-    result[paths[i]] = unique_prefixes[i]
+    local path = paths[i]
+    local rev = original_to_reversed[path]
+
+    local suffix_len = min_lengths[rev]
+    if suffix_len > #path then
+      result[path] = path
+    else
+      result[path] = path:sub(#path - suffix_len + 1)
+    end
   end
+
   return result
 end
 
