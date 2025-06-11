@@ -1,14 +1,15 @@
-local MATCH_SCORE = 7
-local GAP_PENALTY = -1
+local MATCH_SCORE = 12
+local GAP_OPEN_PENALTY = -5
+local GAP_EXTEND_PENALTY = -1
 
 -- bonus for matching the first character of the haystack
-local PREFIX_BONUS = 6
+local PREFIX_BONUS = 12
 -- bonus for matching character after a delimiter in the haystack (e.g. space, comma, underscore, slash, etc)
 local DELIMITER_BONUS = 4
 -- bonus for haystack == needle
 local EXACT_MATCH_BONUS = 4
 -- bonus for matching the case (upper or lower) of the haystack
-local MATCHING_CASE_BONUS = 1
+local MATCHING_CASE_BONUS = 4
 
 local DELIMITERS = {
   [string.byte(' ', 1)] = true,
@@ -43,7 +44,10 @@ local function match(needle, haystack)
         score = score + MATCH_SCORE
 
         -- gap penalty
-        if needle_idx ~= 1 then score = score + GAP_PENALTY * (haystack_idx - haystack_start_idx) end
+        if needle_idx ~= 1 then
+          local gap_length = haystack_idx - haystack_start_idx
+          if gap_length > 0 then score = score + GAP_OPEN_PENALTY + GAP_EXTEND_PENALTY * (gap_length - 1) end
+        end
 
         -- bonuses
         if needle_char == haystack_char then score = score + MATCHING_CASE_BONUS end
