@@ -116,7 +116,10 @@ function renderer:draw(context, bufnr, items)
 
     table.insert(lines, line)
   end
+
+  vim.api.nvim_set_option_value('modifiable', true, { buf = bufnr })
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  vim.api.nvim_set_option_value('modifiable', false, { buf = bufnr })
   vim.api.nvim_set_option_value('modified', false, { buf = bufnr })
 
   self.columns = columns
