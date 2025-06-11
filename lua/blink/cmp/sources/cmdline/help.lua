@@ -1,40 +1,24 @@
 local async = require('blink.cmp.lib.async')
+local fs = require('blink.cmp.sources.path.fs')
+local help_file_byte_limit = 1024 * 1024 -- 1MB, more than enough for any help file
 
 local help = {}
 
 --- Processes a help file and returns a list of tags asynchronously
 --- @param file string
 --- @return blink.cmp.Task
---- TODO: rewrite using async lib, shared as a library in lib/fs.lua
 local function read_tags_from_file(file)
-  return async.task.new(function(resolve)
-    vim.uv.fs_open(file, 'r', 438, function(err, fd)
-      if err or fd == nil then return resolve({}) end
-
-      -- Read file content
-      vim.uv.fs_fstat(fd, function(stat_err, stat)
-        if stat_err or stat == nil then
-          vim.uv.fs_close(fd)
-          return resolve({})
-        end
-
-        vim.uv.fs_read(fd, stat.size, 0, function(read_err, data)
-          vim.uv.fs_close(fd)
-
-          if read_err or data == nil then return resolve({}) end
-
-          -- Process the file content
-          local tags = {}
-          for line in data:gmatch('[^\r\n]+') do
-            local tag = line:match('^([^\t]+)')
-            if tag then table.insert(tags, tag) end
-          end
-
-          resolve(tags)
-        end)
-      end)
+  return fs.read_file(file, help_file_byte_limit)
+    :map(function(data)
+      if not data then return {} end
+      local tags = {}
+      for line in data:gmatch('[^\r\n]+') do
+        local tag = line:match('^([^\t]+)')
+        if tag then table.insert(tags, tag) end
+      end
+      return tags
     end)
-  end)
+    :catch(function() return {} end)
 end
 
 --- @param arg_prefix string

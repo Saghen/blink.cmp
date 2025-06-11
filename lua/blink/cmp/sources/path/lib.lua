@@ -162,4 +162,137 @@ function lib.get_last_path_part(path)
   return start_pos
 end
 
+--- Get the basename of a path, preserving trailing separator for directories.
+---@param path string
+---@return string
+function lib.basename_with_sep(path)
+  local sep = package.config:sub(1, 1)
+  local last_char = path:sub(-1)
+  -- on Windows, both '/' and '\\' are accepted as path separators
+  local is_dir = last_char == '/' or last_char == '\\'
+  local basename = vim.fs.basename(is_dir and path:sub(1, -2) or path)
+  if is_dir then basename = basename .. sep end
+  return basename
+end
+
+-- Reverts the escaping of environment variable of vim.fn.fnameescape
+---@param path string
+---@return string
+function lib:fnameescape(path)
+  path = vim.fn.fnameescape(path)
+  path = path:gsub('\\(%$[%w_]+)', '%1')
+  path = path:gsub('\\(%${[%w_]+})', '%1')
+  return path
+end
+
+--- Splits a string on spaces, but only when the space is not escaped by a backslash.
+-- For example: 'foo bar\ baz' -> { 'foo', 'bar\ baz' }
+---@param str string
+---@return table
+function lib:split_unescaped(str)
+  local result, current, escaping = {}, '', false
+  for i = 1, #str do
+    local c = str:sub(i, i)
+    if c == '\\' and not escaping then
+      escaping = true
+      current = current .. c
+    elseif c == ' ' and not escaping then
+      table.insert(result, current)
+      current = ''
+    else
+      current = current .. c
+      escaping = false
+    end
+  end
+  table.insert(result, current)
+  return result
+end
+
+--- Given a list of file paths, compute the shortest unique suffix for each
+--- For example: 'foo/src/mod.rs', 'foo/test/mod.rs', 'foo/src/bar.rs'
+--- Returns:     'src/mod.rs',     'test/mod.rs',     'bar.rs'
+--- @param paths string[]
+--- @return table<string, string> -- <path, unique_prefix>
+function lib:compute_unique_suffixes(paths)
+  local is_windows = vim.fn.has('win32') == 1
+  local sep = is_windows and '\\' or '/'
+  if is_windows then paths = vim.tbl_map(function(path) return path:gsub('/', '\\') end, paths) end
+
+  -- if not enough paths, return as is
+  local n = #paths
+  if n <= 1 then
+    local result = {}
+    if n == 1 then result[paths[1]] = paths[1] end
+    return result
+  end
+
+  -- reverse the paths and sort so that similar suffixes are adjacent
+  local reversed_paths = {}
+  local original_to_reversed = {}
+  for i = 1, n do
+    local path = paths[i]
+    local rev = path:reverse()
+    table.insert(reversed_paths, rev)
+    original_to_reversed[path] = rev
+  end
+  table.sort(reversed_paths)
+
+  -- find minimum suffix length for each path
+  local min_lengths = {}
+  for i = 1, n do
+    local rev = reversed_paths[i]
+    local max_common = 0
+
+    -- check previous neighbor
+    if i > 1 then
+      local prev = reversed_paths[i - 1]
+      local common = 0
+      local min_len = math.min(#rev, #prev)
+      while common < min_len and rev:byte(common + 1) == prev:byte(common + 1) do
+        common = common + 1
+      end
+      max_common = math.max(max_common, common)
+    end
+
+    -- check next neighbor
+    if i < n then
+      local next = reversed_paths[i + 1]
+      local common = 0
+      local min_len = math.min(#rev, #next)
+      while common < min_len and rev:byte(common + 1) == next:byte(common + 1) do
+        common = common + 1
+      end
+      max_common = math.max(max_common, common)
+    end
+
+    -- find the next separator after the common part
+    local suffix_start = max_common + 1
+    while suffix_start < #rev do
+      suffix_start = suffix_start + 1
+      if rev:byte(suffix_start) == sep:byte() then
+        suffix_start = suffix_start - 1
+        break
+      end
+    end
+
+    min_lengths[rev] = suffix_start
+  end
+
+  -- build mapping of original_str -> unique_suffix_str
+  local result = {}
+  for i = 1, n do
+    local path = paths[i]
+    local rev = original_to_reversed[path]
+
+    local suffix_len = min_lengths[rev]
+    if suffix_len > #path then
+      result[path] = path
+    else
+      result[path] = path:sub(#path - suffix_len + 1)
+    end
+  end
+
+  return result
+end
+
 return lib
