@@ -163,6 +163,30 @@ function utils.with_no_autocmds(cb)
   return result_or_err
 end
 
+--- Disable redraw in neovide for the duration of the callback
+--- Useful for preventing the cursor from jumping to the top left during `vim.fn.complete`
+--- @generic T
+--- @param fn fun(): T
+--- @return T
+function utils.defer_neovide_redraw(fn)
+  if _G.neovide and neovide.enable_redraw and neovide.disable_redraw then
+    neovide.disable_redraw()
+
+    local success, result = pcall(fn)
+
+    -- make sure that the screen is updated and the mouse cursor returned to the right position before re-enabling redrawing
+    pcall(vim.api.nvim__redraw, { cursor = true, flush = true })
+
+    neovide.enable_redraw()
+
+    if not success then error(result) end
+    return result
+  else
+    -- don't do anything special when not running inside neovide
+    return fn()
+  end
+end
+
 ---@type boolean Have we passed UIEnter?
 local _ui_entered = vim.v.vim_did_enter == 1 -- technically for VimEnter, but should be good enough for when we're lazy loaded
 ---@type function[] List of notifications.

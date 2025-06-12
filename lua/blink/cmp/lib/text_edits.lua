@@ -394,25 +394,6 @@ function text_edits.write_to_dot_repeat(text_edit)
   end)
 end
 
---- Disable redraw in neovide for the duration of the callback
---- Useful for preventing the cursor from jumping to the top left during `vim.fn.complete`
---- @generic T
---- @param fn fun(): T
---- @return T
-function utils.defer_neovide_redraw(fn)
-  if neovide and neovide.disable_redraw then neovide.disable_redraw() end
-
-  local success, result = pcall(fn)
-
-  -- make sure that the screen is updated and the mouse cursor returned to the right position before re-enabling redrawing
-  pcall(vim.api.nvim__redraw, { cursor = true, flush = true })
-
-  if neovide and neovide.enable_redraw then neovide.enable_redraw() end
-
-  if not success then error(result) end
-  return result
-end
-
 --- Moves the cursor while preserving dot repeat
 --- @param amount number Number of characters to move the cursor by, can be negative to move left
 function text_edits.move_cursor_in_dot_repeat(amount)
