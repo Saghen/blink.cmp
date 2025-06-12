@@ -103,10 +103,6 @@ local sources = {
 }
 
 function sources.validate(config)
-  assert(
-    config.completion == nil,
-    '`sources.completion.enabled_providers` has been replaced with `sources.default`. !!Note!! Be sure to update `opts_extend` as well if you have it set'
-  )
   assert(config.cmdline == nil, '`sources.cmdline` has been replaced with `cmdline.sources`')
   assert(config.term == nil, '`sources.term` has been replaced with `term.sources`')
   assert(
