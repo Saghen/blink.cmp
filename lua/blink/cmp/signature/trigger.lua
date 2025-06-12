@@ -80,9 +80,7 @@ function trigger.activate()
       end
     end,
     on_insert_leave = function() trigger.hide() end,
-    on_complete_changed = function()
-      if vim.fn.pumvisible() == 1 then trigger.hide() end
-    end,
+    on_complete_changed = function() end,
   })
 
   if config.show_on_accept then
@@ -122,7 +120,7 @@ function trigger.show_if_on_trigger_character()
 end
 
 function trigger.show(opts)
-  if vim.fn.pumvisible() == 1 or not config.enabled then return end
+  if not config.enabled then return end
 
   opts = opts or {}
 
