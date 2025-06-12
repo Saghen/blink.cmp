@@ -77,7 +77,12 @@ local function apply_item(ctx, item)
 
   -- Check semantic tokens for brackets, if needed, asynchronously
   if brackets_status == 'check_semantic_token' then
-    brackets_lib.add_brackets_via_semantic_token(ctx, vim.bo.filetype, item)
+    brackets_lib.add_brackets_via_semantic_token(ctx, vim.bo.filetype, item):map(function(added_brackets)
+      if added_brackets then
+        require('blink.cmp.completion.trigger').show_if_on_trigger_character({ is_accept = true })
+        require('blink.cmp.signature.trigger').show_if_on_trigger_character()
+      end
+    end)
   end
 end
 

@@ -6,7 +6,7 @@ local utils = require('blink.cmp.completion.brackets.utils')
 --- @field cursor integer[]
 --- @field item blink.cmp.CompletionItem
 --- @field filetype string
---- @field callback fun()
+--- @field callback fun(added: boolean)
 
 local semantic = {
   --- @type uv_timer_t
@@ -21,7 +21,7 @@ vim.api.nvim_create_autocmd('LspTokenUpdate', {
 
 function semantic.finish_request()
   if semantic.request == nil then return end
-  semantic.request.callback()
+  semantic.request.callback(true)
   semantic.request = nil
   semantic.timer:stop()
 end
@@ -70,7 +70,7 @@ end
 --- @return blink.cmp.Task
 function semantic.add_brackets_via_semantic_token(ctx, filetype, item)
   return async.task.new(function(resolve)
-    if not utils.should_run_resolution(ctx, filetype, 'semantic_token') then return resolve() end
+    if not utils.should_run_resolution(ctx, filetype, 'semantic_token') then return resolve(false) end
 
     assert(item.textEdit ~= nil, 'Got nil text edit while adding brackets via semantic tokens')
     local client = vim.lsp.get_client_by_id(item.client_id)
@@ -78,11 +78,11 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item)
 
     local capabilities = client.server_capabilities.semanticTokensProvider
     if not capabilities or not capabilities.legend or (not capabilities.range and not capabilities.full) then
-      return resolve()
+      return resolve(false)
     end
 
     local highlighter = vim.lsp.semantic_tokens.__STHighlighter.active[ctx.bufnr]
-    if highlighter == nil then return resolve() end
+    if highlighter == nil then return resolve(false) end
 
     semantic.timer:stop()
     local cursor = vim.api.nvim_win_get_cursor(0)
@@ -102,7 +102,7 @@ function semantic.add_brackets_via_semantic_token(ctx, filetype, item)
     if tokens ~= nil then semantic.process_request(tokens) end
     if semantic.request == nil then
       -- a matching token exists, and brackets were added
-      return resolve()
+      return resolve(true)
     end
 
     -- listen for LspTokenUpdate events until timeout
