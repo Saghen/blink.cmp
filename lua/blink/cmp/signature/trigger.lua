@@ -80,7 +80,7 @@ function trigger.activate()
       end
     end,
     on_insert_leave = function() trigger.hide() end,
-    on_complete_changed = function() end,
+    on_complete_changed = function() require('blink.cmp.signature.window').update_position() end,
   })
 
   if config.show_on_accept then

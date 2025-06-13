@@ -130,6 +130,14 @@ function signature.update_position()
     direction_priority = menu_win_is_up and { 's' } or { 'n' }
   end
 
+  -- same for popupmenu, we want to place the signature window on the opposite side
+  local popupmenu_pos = vim.fn.pum_getpos()
+  if popupmenu_pos.row ~= nil then
+    local cursor_screen_row = vim.fn.winline()
+    local popupmenu_is_up = popupmenu_pos.row - cursor_screen_row < 0
+    direction_priority = popupmenu_is_up and { 's' } or { 'n' }
+  end
+
   local pos = win:get_vertical_direction_and_height(direction_priority, config.max_height)
 
   -- couldn't find anywhere to place the window
