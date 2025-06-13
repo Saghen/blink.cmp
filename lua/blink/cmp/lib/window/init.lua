@@ -277,7 +277,7 @@ function win.get_cursor_screen_position()
   -- default
   local cursor_line, cursor_column = unpack(vim.api.nvim_win_get_cursor(0))
   -- todo: convert cursor_column to byte index
-  local pos = vim.fn.screenpos(vim.fn.win_getid(), cursor_line, cursor_column)
+  local pos = vim.fn.screenpos(0, cursor_line, cursor_column)
 
   return {
     distance_from_top = pos.row - 1,
