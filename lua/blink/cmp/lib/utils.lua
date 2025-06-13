@@ -169,22 +169,20 @@ end
 --- @param fn fun(): T
 --- @return T
 function utils.defer_neovide_redraw(fn)
-  if _G.neovide and neovide.enable_redraw and neovide.disable_redraw then
-    neovide.disable_redraw()
+  -- don't do anything special when not running inside neovide
+  if not _G.neovide or not neovide.enable_redraw or not neovide.disable_redraw then return fn() end
 
-    local success, result = pcall(fn)
+  neovide.disable_redraw()
 
-    -- make sure that the screen is updated and the mouse cursor returned to the right position before re-enabling redrawing
-    pcall(vim.api.nvim__redraw, { cursor = true, flush = true })
+  local success, result = pcall(fn)
 
-    neovide.enable_redraw()
+  -- make sure that the screen is updated and the mouse cursor returned to the right position before re-enabling redrawing
+  pcall(vim.api.nvim__redraw, { cursor = true, flush = true })
 
-    if not success then error(result) end
-    return result
-  else
-    -- don't do anything special when not running inside neovide
-    return fn()
-  end
+  neovide.enable_redraw()
+
+  if not success then error(result) end
+  return result
 end
 
 ---@type boolean Have we passed UIEnter?
