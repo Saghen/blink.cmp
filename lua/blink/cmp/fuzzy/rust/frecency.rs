@@ -26,7 +26,7 @@ impl From<&LspItem> for CompletionItemKey {
 #[derive(Debug)]
 pub struct FrecencyTracker {
     env: Env,
-    db: Database<SerdeBincode<CompletionItemKey>, SerdeBincode<Vec<u64>>>,
+    db: Database<Bytes, SerdeBincode<Vec<u64>>>,
     access_thresholds: Vec<(f64, u64)>,
 }
 
@@ -66,8 +66,9 @@ impl FrecencyTracker {
 
     fn get_accesses(&self, item: &LspItem) -> Result<Option<Vec<u64>>, Error> {
         let rtxn = self.env.read_txn().map_err(Error::DbStartReadTxn)?;
+        let key_hash = Self::key_to_hash_bytes(item);
         self.db
-            .get(&rtxn, &CompletionItemKey::from(item))
+            .get(&rtxn, &key_hash)
             .map_err(Error::DbRead)
     }
 
@@ -78,14 +79,21 @@ impl FrecencyTracker {
             .as_secs()
     }
 
+    fn key_to_hash_bytes(item: &LspItem) -> [u8; 32] {
+        let key = CompletionItemKey::from(item);
+        let encoded = bincode::serialize(&key).expect("serialization failed");
+        *blake3::hash(&encoded).as_bytes()
+    }
+
     pub fn access(&self, item: &LspItem) -> Result<(), Error> {
         let mut wtxn = self.env.write_txn().map_err(Error::DbStartWriteTxn)?;
 
+        let key_hash = Self::key_to_hash_bytes(item);
         let mut accesses = self.get_accesses(item)?.unwrap_or_default();
         accesses.push(self.get_now());
 
         self.db
-            .put(&mut wtxn, &CompletionItemKey::from(item), &accesses)
+            .put(&mut wtxn, &key_hash, &accesses)
             .map_err(Error::DbWrite)?;
 
         wtxn.commit().map_err(Error::DbCommit)?;
