@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 regex = "1.11.1"
-frizbee = "0.4.1"
+frizbee = "0.4.3"
 serde = { version = "1.0.216", features = ["derive"] }
 heed = "0.21.0"
 mlua = { version = "0.10.2", features = ["module", "luajit"] }
