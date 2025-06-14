@@ -45,9 +45,8 @@ local validate = require('blink.cmp.config.utils').validate
 local sources = {
   --- @type blink.cmp.SourceConfig
   default = {
-    default = { 'lsp', 'path', 'snippets', 'buffer' },
+    default = { 'cmdline', 'lsp', 'path', 'snippets', 'buffer' },
     per_filetype = {},
-
     transform_items = function(_, items) return items end,
     min_keyword_length = 0,
 

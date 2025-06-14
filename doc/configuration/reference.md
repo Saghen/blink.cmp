@@ -472,8 +472,8 @@ See the [mode specific configurations](#mode-specific) for setting sources for `
 ```lua
 sources = {
   -- Static list of providers to enable, or a function to dynamically enable/disable providers based on the context
-  default = { 'lsp', 'path', 'snippets', 'buffer' },
-
+  default = { 'cmdline', 'lsp', 'path', 'snippets', 'buffer' },
+  
   -- You may also define providers per filetype
   per_filetype = {
     -- optionally inherit from the `default` sources
