@@ -6,6 +6,54 @@ local async = require('blink.cmp.lib.async')
 local constants = require('blink.cmp.sources.cmdline.constants')
 local path_lib = require('blink.cmp.sources.path.lib')
 
+--- Split the command line into arguments, handling path escaping and trailing spaces.
+--- For path completions, split by paths and normalize each one if needed.
+--- For other completions, splits by spaces and preserves trailing empty arguments.
+---@param context table
+---@param is_path_completion boolean
+---@return string, table
+local function smart_split(context, is_path_completion)
+  local line = context.line
+
+  if is_path_completion then
+    -- Split the line into tokens, respecting escaped spaces in paths
+    local tokens = path_lib:split_unescaped(line:gsub('^%s+', ''))
+    local cmd = tokens[1]
+    local args = {}
+
+    for i = 2, #tokens do
+      local arg = tokens[i]
+      -- Escape argument if it contains unescaped spaces
+      -- Some commands may expect escaped paths (:edit), others may not (:view)
+      if arg and arg ~= '' and not arg:find('\\ ') then arg = path_lib:fnameescape(arg) end
+      table.insert(args, arg)
+    end
+    return line, { cmd, unpack(args) }
+  end
+
+  return line, vim.split(line:gsub('^%s+', ''), ' ', { plain = true })
+end
+
+-- Find the longest match for a given set of patterns
+---@param str string
+---@param patterns table
+---@return string
+local function longest_match(str, patterns)
+  local best = ''
+  for _, pat in ipairs(patterns) do
+    local m = str:match(pat)
+    if m and #m > #best then best = m end
+  end
+  return best
+end
+
+---@param name string
+---@return boolean?
+local function is_boolean_option(name)
+  local ok, opt = pcall(function() return vim.opt[name]:get() end)
+  if ok then return type(opt) == 'boolean' end
+end
+
 --- @class blink.cmp.Source
 local cmdline = {}
 
@@ -15,32 +63,30 @@ function cmdline.new()
   self.offset = -1
   self.ctype = ''
   self.items = {}
-  return self
+  return self --[[@as blink.cmp.Source]]
 end
 
+---@return boolean
 function cmdline:enabled()
   return vim.api.nvim_get_mode().mode == 'c' and vim.tbl_contains({ ':', '@' }, vim.fn.getcmdtype())
 end
 
----@param name string
----@return boolean?
-function cmdline:is_boolean_option(name)
-  local ok, opt = pcall(function() return vim.opt[name]:get() end)
-  if ok then return type(opt) == 'boolean' end
-end
-
+---@return table
 function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':', '!' } end
 
+---@param context blink.cmp.Context
+---@param callback fun(result?: blink.cmp.CompletionResponse)
+---@return fun()
 function cmdline:get_completions(context, callback)
   local completion_type = vim.fn.getcmdcompltype()
 
   local is_path_completion = vim.tbl_contains(constants.completion_types.path, completion_type)
   local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
 
-  local context_line, arguments = self:smart_split(context, is_path_completion or is_buffer_completion)
+  local context_line, arguments = smart_split(context, is_path_completion or is_buffer_completion)
   local cmd = arguments[1]
   local before_cursor = context_line:sub(1, context.cursor[2])
-  local _, args_before_cursor = self:smart_split({ line = before_cursor }, is_path_completion or is_buffer_completion)
+  local _, args_before_cursor = smart_split({ line = before_cursor }, is_path_completion or is_buffer_completion)
   local arg_number = #args_before_cursor
 
   local leading_spaces = context.line:match('^(%s*)') -- leading spaces in the original query
@@ -126,27 +172,17 @@ function cmdline:get_completions(context, callback)
       -- In all other cases, we want to check for the prefix and remove it from the filter text
       -- and add it to the newText
 
-      -- Helper function: find the longest match for a given set of patterns
-      local function longest_match(str, patterns)
-        local best = ''
-        for _, pat in ipairs(patterns) do
-          local m = str:match(pat)
-          if m and #m > #best then best = m end
-        end
-        return best
-      end
-
       ---@cast completions string[]
-      local is_first_arg = arg_number == 1
-      local is_lua_expr = completion_type == 'lua'
       local unique_prefixes = is_buffer_completion
           and #completions < 2000
           and path_lib:compute_unique_suffixes(completions)
         or {}
 
+      ---@type blink.cmp.CompletionItem[]
       local items = {}
       for _, completion in ipairs(completions) do
-        local filter_text, new_text, label, label_details
+        local filter_text, new_text = completion, completion
+        local label, label_details
 
         -- path completion in commands, e.g. `chdir <path>` and options, e.g. `:set directory=<path>`
         if is_path_completion then
@@ -162,36 +198,22 @@ function cmdline:get_completions(context, callback)
           if #unique_prefixes[completion] then
             label_details = { description = completion:sub(1, -#unique_prefixes[completion] - 2) }
           end
-          filter_text = completion
           new_text = vim.fn.fnameescape(completion)
-
-        -- lua expr, e.g. `:=<expr>`
-        elseif is_lua_expr then
-          filter_text = completion
-          new_text = current_arg_prefix .. completion
 
         -- env variables
         elseif completion_type == 'environment' then
           filter_text = '$' .. completion
           new_text = '$' .. completion
 
-        -- for other completions, check if the prefix is already present
-        elseif not is_first_arg then
-          local has_prefix = string.find(completion, current_arg_prefix, 1, true) == 1
-
-          filter_text = has_prefix and completion:sub(#current_arg_prefix + 1) or completion
-          new_text = has_prefix and completion or current_arg_prefix .. completion
-
-        -- fallback
-        else
-          filter_text = completion
-          new_text = completion
+        -- for other completions, prepend the prefix
+        elseif vim.tbl_contains({ 'lua', '' }, completion_type) then
+          new_text = current_arg_prefix .. completion
         end
 
         local start_pos = #text_before_argument + #leading_spaces
 
-        -- exclude range on the first argument
-        if is_first_arg and not is_lua_expr then
+        -- exclude range for commands on the first argument
+        if arg_number == 1 and completion_type == 'command' then
           local prefix = longest_match(current_arg, {
             "^%s*'<%s*,%s*'>%s*", -- Visual range, e.g., '<,>'
             '^%s*%d+%s*,%s*%d+%s*', -- Numeric range, e.g., 3,5
@@ -200,6 +222,7 @@ function cmdline:get_completions(context, callback)
           start_pos = start_pos + #prefix
         end
 
+        ---@type blink.cmp.CompletionItem
         local item = {
           label = label or filter_text,
           filterText = filter_text,
@@ -224,14 +247,14 @@ function cmdline:get_completions(context, callback)
         }
         items[#items + 1] = item
 
-        if completion_type == 'option' and cmdline:is_boolean_option(filter_text) then
+        if completion_type == 'option' and is_boolean_option(filter_text) then
           filter_text = 'no' .. filter_text
           items[#items + 1] = vim.tbl_deep_extend('force', {}, item, {
             label = filter_text,
             filterText = filter_text,
             sortText = filter_text,
             textEdit = { newText = 'no' .. new_text },
-          })
+          }) --[[@as blink.cmp.CompletionItem]]
         end
       end
 
@@ -239,42 +262,16 @@ function cmdline:get_completions(context, callback)
         is_incomplete_backward = completion_type ~= 'help',
         is_incomplete_forward = false,
         items = items,
+        ---@diagnostic disable-next-line: missing-return
       })
     end)
     :catch(function(err)
       vim.notify('Error while fetching completions: ' .. err, vim.log.levels.ERROR, { title = 'blink.cmp' })
+      ---@diagnostic disable-next-line: missing-return
       callback({ is_incomplete_backward = false, is_incomplete_forward = false, items = {} })
     end)
 
   return function() task:cancel() end
-end
-
---- Split the command line into arguments, handling path escaping and trailing spaces.
---- For path completions, split by paths and normalize each one if needed.
---- For other completions, splits by spaces and preserves trailing empty arguments.
----@param context table
----@param is_path_completion boolean
----@return string, table
-function cmdline:smart_split(context, is_path_completion)
-  local line = context.line
-
-  if is_path_completion then
-    -- Split the line into tokens, respecting escaped spaces in paths
-    local tokens = path_lib:split_unescaped(line:gsub('^%s+', ''))
-    local cmd = tokens[1]
-    local args = {}
-
-    for i = 2, #tokens do
-      local arg = tokens[i]
-      -- Escape argument if it contains unescaped spaces
-      -- Some commands may expect escaped paths (:edit), others may not (:view)
-      if arg and arg ~= '' and not arg:find('\\ ') then arg = path_lib:fnameescape(arg) end
-      table.insert(args, arg)
-    end
-    return line, { cmd, unpack(args) }
-  end
-
-  return line, vim.split(line:gsub('^%s+', ''), ' ', { plain = true })
 end
 
 return cmdline
