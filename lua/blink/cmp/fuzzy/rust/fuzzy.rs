@@ -178,8 +178,8 @@ pub fn fuzzy_matched_indices(
                     (
                         idx,
                         frizbee::match_indices(needle, haystack, options)
-                            .unwrap()
-                            .indices,
+                            .map(|m| m.indices)
+                            .unwrap_or_else(|| vec![]),
                     )
                 })
                 .collect::<Vec<_>>()
