@@ -266,7 +266,10 @@ function cmdline:get_completions(context, callback)
       })
     end)
     :catch(function(err)
-      vim.notify('Error while fetching completions: ' .. err, vim.log.levels.ERROR, { title = 'blink.cmp' })
+      -- TODO: is there a way to avoid throwing this error?
+      if type(err) ~= 'string' or not err:match('Vim:E433: No tags file') then
+        vim.notify('Error while fetching completions: ' .. err, vim.log.levels.ERROR, { title = 'blink.cmp' })
+      end
       ---@diagnostic disable-next-line: missing-return
       callback({ is_incomplete_backward = false, is_incomplete_forward = false, items = {} })
     end)
