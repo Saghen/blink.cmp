@@ -1,3 +1,74 @@
+## [1.4.0](https://github.com/Saghen/blink.cmp/compare/v1.3.1...v1.4.0) (2025-06-15)
+
+### Highlights
+
+- Improved edit range guessing ([#923](https://github.com/Saghen/blink.cmp/issues/923))
+  - Clojure and other LSPs which don't send edit ranges should no longer insert the prefix
+- Sort in rust when no lua sorts provided (in `fuzzy.sorts` table)
+  - Improves performance by ~40% on long lists (i.e. from tailwind)
+- Resolved neovim crash on large completions, i.e. from copilot (thank you @otakenz!)
+- Major cmdline work by @siofou:
+  - Paths no longer contain their prefix (such as in `:e`) and fuzzy match correctly
+    - Escaped spaces in paths now work as expcted
+  - Shows shortest unique prefix for `:buffer` items
+  - Buffer completion on `:s/foo/bar/` and `:g`
+    - Due to [an upstream issue](https://github.com/neovim/neovim/pull/9783), requires `providers.buffer.opts.enable_in_ex_commands = true`)
+    - Note that this option disables `inccommand`
+
+### Features
+
+* add `!` as cmdline trigger character ([59a58b5](https://github.com/Saghen/blink.cmp/commit/59a58b55eea0255c031a09017341f4917ebd998e))
+* add `completion.trigger.show_on_insert` option ([#1796](https://github.com/Saghen/blink.cmp/issues/1796)) ([03c5fea](https://github.com/Saghen/blink.cmp/commit/03c5fea5be494383ca730de30cbb23e40be256b6))
+* **buffer:** add configurable sync/async buffer size thresholds ([#1795](https://github.com/Saghen/blink.cmp/issues/1795)) ([d324508](https://github.com/Saghen/blink.cmp/commit/d32450851da0301bee7a063483d20316765aa48d)), closes [#1789](https://github.com/Saghen/blink.cmp/issues/1789)
+* **cmdline:** add buffer completion for `:s` and `:g` commands ([#1734](https://github.com/Saghen/blink.cmp/issues/1734)) ([75c9117](https://github.com/Saghen/blink.cmp/commit/75c911751fe97bd3802a1d8ab84801d8678ba179)), closes [#1625](https://github.com/Saghen/blink.cmp/issues/1625)
+* **completion.trigger:** add `show_on_backspace_*` options ([#1813](https://github.com/Saghen/blink.cmp/issues/1813)) ([0289534](https://github.com/Saghen/blink.cmp/commit/02895348df97a16274307b71289aeee94f1760b8))
+* don't disable signature help when pumvisible ([396f19a](https://github.com/Saghen/blink.cmp/commit/396f19a5e3fc81cf1eacd9e742b7bffe7b14023c))
+* **frecency:** use blake3 hash as db key for accesses ([#1908](https://github.com/Saghen/blink.cmp/issues/1908)) ([9c007ae](https://github.com/Saghen/blink.cmp/commit/9c007aeb3d091d332f1a23449760738f0efde039))
+* handle multiple filetypes in per_filetype table ([#1798](https://github.com/Saghen/blink.cmp/issues/1798)) ([becda04](https://github.com/Saghen/blink.cmp/commit/becda042731602b8342c261a0cec4176c6959ac3))
+* improved edit range guess logic ([5cf9a78](https://github.com/Saghen/blink.cmp/commit/5cf9a786622764f4a8b90735c44e12009ae2e9fc)), closes [#923](https://github.com/Saghen/blink.cmp/issues/923)
+* make max_typos optionally a number ([980b09c](https://github.com/Saghen/blink.cmp/commit/980b09c43851245cbcc113ffab89aefdd139c02d))
+* sort in rust when no lua sorts provided ([#1830](https://github.com/Saghen/blink.cmp/issues/1830)) ([faee548](https://github.com/Saghen/blink.cmp/commit/faee548ce85c00cc35299fd0dcdac54f5bc5578e)), closes [#1752](https://github.com/Saghen/blink.cmp/issues/1752)
+* space instead of autobrackets for lean ([#1825](https://github.com/Saghen/blink.cmp/issues/1825)) ([cd83fee](https://github.com/Saghen/blink.cmp/commit/cd83feedb6f61e84ac7c8c3f1ebd53809faf8ec7))
+* update repro.lua with mason ([3e7b05e](https://github.com/Saghen/blink.cmp/commit/3e7b05e89e6a9f4648eb4e0b0d4e0d0446539e5b))
+* **window:** support function for `direction_priority` in menu and signature ([#1873](https://github.com/Saghen/blink.cmp/issues/1873)) ([d59d55d](https://github.com/Saghen/blink.cmp/commit/d59d55de59a0a13709b1dc0cbac23f80d4c2c459)), closes [#1801](https://github.com/Saghen/blink.cmp/issues/1801)
+
+### Bug Fixes
+
+* add `fennel` and `jannet` to blocked auto bracket filetypes ([#1804](https://github.com/Saghen/blink.cmp/issues/1804)) ([a434b7b](https://github.com/Saghen/blink.cmp/commit/a434b7b68d30eebe2110a695d1abe3dd7f8e37fb))
+* add `ps1` (powershell) to blocked auto bracket filetypes ([#1816](https://github.com/Saghen/blink.cmp/issues/1816)) ([992644b](https://github.com/Saghen/blink.cmp/commit/992644bfaa06ba89baec78672ec199996e21dbaf))
+* add dot-repeat hack to terminal mode ([#1788](https://github.com/Saghen/blink.cmp/issues/1788)) ([9873411](https://github.com/Saghen/blink.cmp/commit/98734112c31541410f64473ac1aaa2b1e04933e8))
+* add missing comma in configuration examples ([#1867](https://github.com/Saghen/blink.cmp/issues/1867)) ([7370740](https://github.com/Saghen/blink.cmp/commit/737074076292442ac48b2b303bbae6dfbe8f6f4a))
+* avoid overlapping signature window with popupmenu ([0fc23d2](https://github.com/Saghen/blink.cmp/commit/0fc23d278ef32b89aa9f3f18f3125ef403e23bae))
+* **buffer:** deduplicate words globally ([#1790](https://github.com/Saghen/blink.cmp/issues/1790)) ([c2bac7f](https://github.com/Saghen/blink.cmp/commit/c2bac7fba61e66dfc513cf63daa98546c86a617c)), closes [#1789](https://github.com/Saghen/blink.cmp/issues/1789)
+* check for trigger character after semantic token auto brackets ([755bc7e](https://github.com/Saghen/blink.cmp/commit/755bc7eba29ea1e58558d27ec02f5ce6d2c5a386))
+* **cmdline:** use current argument for 'file' completion in `input()` prompts ([#1821](https://github.com/Saghen/blink.cmp/issues/1821)) ([92029d3](https://github.com/Saghen/blink.cmp/commit/92029d3c99069d042cf04229dfc1462f13f03d7d)), closes [#1817](https://github.com/Saghen/blink.cmp/issues/1817)
+* **completion:** reset `selected_item_idx` on hide to prevent stale selection ([#1860](https://github.com/Saghen/blink.cmp/issues/1860)) ([8cab663](https://github.com/Saghen/blink.cmp/commit/8cab663a36d474634b1b1d3e72118a718a143fcd)), closes [#1856](https://github.com/Saghen/blink.cmp/issues/1856)
+* default providers used when filetype specific sources are empty ([3e4a237](https://github.com/Saghen/blink.cmp/commit/3e4a237d63ae7aa2b066c1ed92f1971ca9958c62))
+* disable `completion.trigger.show_on_insert`, add to reference ([084439e](https://github.com/Saghen/blink.cmp/commit/084439ea63d3c35d28f4e7938b1bd9214452ad49))
+* disabling keymaps in cmdline/term mode not working ([94000bd](https://github.com/Saghen/blink.cmp/commit/94000bd4a18260a37136e012512ae69f57e13c26)), closes [#1855](https://github.com/Saghen/blink.cmp/issues/1855)
+* handle delay on `:ts xx` No tags file error ([#1814](https://github.com/Saghen/blink.cmp/issues/1814)) ([fd6e9c6](https://github.com/Saghen/blink.cmp/commit/fd6e9c6b966d7a86ed40db80b6f37994b56326e9))
+* **keymap:** disable preset keymaps with `false` ([#1859](https://github.com/Saghen/blink.cmp/issues/1859)) ([0d9a7e4](https://github.com/Saghen/blink.cmp/commit/0d9a7e43e032b4754b97ea35d175a9aa8f0f0bf2)), closes [#1855](https://github.com/Saghen/blink.cmp/issues/1855)
+* panic on no matched indices ([bf612a5](https://github.com/Saghen/blink.cmp/commit/bf612a5d221c79843a29e72142261419a5349878)), closes [#1902](https://github.com/Saghen/blink.cmp/issues/1902)
+* perform keyword range checks on bytes instead of chars ([30f0a7b](https://github.com/Saghen/blink.cmp/commit/30f0a7b5bfed80c1e4b1f7ba065f5c36db0ce025)), closes [#1834](https://github.com/Saghen/blink.cmp/issues/1834)
+* put output values of guess_keyword_range into a table ([#1833](https://github.com/Saghen/blink.cmp/issues/1833)) ([f03e488](https://github.com/Saghen/blink.cmp/commit/f03e488b37b7581c1ab1c642710ccb2beeb194c1))
+* rust sorting provider order ([#1880](https://github.com/Saghen/blink.cmp/issues/1880)) ([8d0b89b](https://github.com/Saghen/blink.cmp/commit/8d0b89b60c9f3cd3eac7b48c7da8705fbe99173f)), closes [#1876](https://github.com/Saghen/blink.cmp/issues/1876) [#1846](https://github.com/Saghen/blink.cmp/issues/1846)
+* screenpos in floating window due to incorrect winid ([#1853](https://github.com/Saghen/blink.cmp/issues/1853)) ([fe44a7d](https://github.com/Saghen/blink.cmp/commit/fe44a7dade1a975957bc4e1c03abddd4fc2fa603))
+* skip useless redraws when not running in Neovide ([#1903](https://github.com/Saghen/blink.cmp/issues/1903)) ([feb34a9](https://github.com/Saghen/blink.cmp/commit/feb34a93a2b36afdebc011b8d15a52288beeed98))
+* snippet edit range with lua implementation ([29c8d72](https://github.com/Saghen/blink.cmp/commit/29c8d7267dd73f9b88ae50b169edacf98911f0f6)), closes [#1340](https://github.com/Saghen/blink.cmp/issues/1340)
+* use vim.tbl_isempty to check for empty providers table ([7c76cf5](https://github.com/Saghen/blink.cmp/commit/7c76cf55214f838845444637dfdafd2d5f227484))
+* **window:** ensure completion buffer is modifiable before rendering ([#1891](https://github.com/Saghen/blink.cmp/issues/1891)) ([024727a](https://github.com/Saghen/blink.cmp/commit/024727a8123dc06e101b0e2323a1a50cb74ecb66)), closes [#1889](https://github.com/Saghen/blink.cmp/issues/1889)
+* **window:** hide all blink windows when another completion menu is triggered ([#1852](https://github.com/Saghen/blink.cmp/issues/1852)) ([e7dcfe4](https://github.com/Saghen/blink.cmp/commit/e7dcfe43ac211cca998c734a1a3db53bd0d39ca4)), closes [#1806](https://github.com/Saghen/blink.cmp/issues/1806)
+
+### Performance Improvements
+
+* only check for tailwind colors when doc length = 7 ([02d5e15](https://github.com/Saghen/blink.cmp/commit/02d5e15a5fe3d1ea505052a782dc6f1f0671f5ec)), closes [#1752](https://github.com/Saghen/blink.cmp/issues/1752)
+
+## [1.3.1](https://github.com/Saghen/blink.cmp/compare/v1.3.0...v1.3.1) (2025-05-15)
+
+### Bug Fixes
+
+* **flake:** aarch64 build on nix fails because of jemalloc ([#1759](https://github.com/Saghen/blink.cmp/issues/1759)) ([ef037d0](https://github.com/Saghen/blink.cmp/commit/ef037d0cd90e038c19877b110742cd606b5eeb34))
+* only set error notifications to `err` in `nvim_echo` ([#1763](https://github.com/Saghen/blink.cmp/issues/1763)) ([12a530f](https://github.com/Saghen/blink.cmp/commit/12a530f82e2a8f053bd84617267eaa3dc229de0f))
 ## [1.3.1](https://github.com/Saghen/blink.cmp/compare/v1.3.0...v1.3.1) (2025-05-14)
 
 ### Bug Fixes
@@ -24,6 +95,8 @@
 * use `string.buffer` for frecency access ([6dc82a0](https://github.com/Saghen/blink.cmp/commit/6dc82a023ccc3e59112241fa46ba4de4f25b8ee9)), closes [#1627](https://github.com/Saghen/blink.cmp/issues/1627)
 
 ## [1.2.0](https://github.com/Saghen/blink.cmp/compare/v1.1.1...v1.2.0) (2025-05-02)
+
+### Highlights
 
 - Fuzzy matcher performance and correctness improvements ([v0.3.0..v0.4.2](https://github.com/Saghen/frizbee/compare/789d5e1...1802a51))
 - `sources.per_filetype.*.inherit_defaults` for inheriting from the `default` sources ([docs]())
