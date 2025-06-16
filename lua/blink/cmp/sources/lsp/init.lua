@@ -57,11 +57,8 @@ end
 
 function lsp:get_completions(context, callback)
   local completion_lib = require('blink.cmp.sources.lsp.completion')
-  -- HACK: filter out htmx-lsp because it never responds
   local clients = vim.tbl_filter(
-    function(client)
-      return client.server_capabilities and client.server_capabilities.completionProvider and client.name ~= 'htmx'
-    end,
+    function(client) return client.server_capabilities and client.server_capabilities.completionProvider end,
     vim.lsp.get_clients({ bufnr = 0, method = 'textDocument/completion' })
   )
   clients = vim.tbl_map(wrap_client, clients)
