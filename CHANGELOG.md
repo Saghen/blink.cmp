@@ -7,7 +7,7 @@
 - Sort in rust when no lua sorts provided (in `fuzzy.sorts` table)
   - Improves performance by ~40% on long lists (i.e. from tailwind)
 - Resolved neovim crash on large completions, i.e. from copilot (thank you @otakenz!)
-- Major cmdline work by @siofou:
+- Major cmdline work by @soifou:
   - Paths no longer contain their prefix (such as in `:e`) and fuzzy match correctly
     - Escaped spaces in paths now work as expcted
   - Shows shortest unique prefix for `:buffer` items
