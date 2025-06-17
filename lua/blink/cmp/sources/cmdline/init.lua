@@ -266,11 +266,10 @@ function cmdline:get_completions(context, callback)
 
         if option_info and option_info.type == 'boolean' then
           filter_text = 'no' .. filter_text
-          label_details.description = 'no' .. label_details.description
           items[#items + 1] = vim.tbl_deep_extend('force', {}, item, {
             label = filter_text,
             filterText = filter_text,
-            labelDetails = label_details,
+            labelDetails = { description = 'no' .. label_details.description },
             sortText = filter_text,
             textEdit = { newText = 'no' .. new_text },
           }) --[[@as blink.cmp.CompletionItem]]
