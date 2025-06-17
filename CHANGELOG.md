@@ -1,3 +1,15 @@
+## [1.4.1](https://github.com/Saghen/blink.cmp/compare/v1.4.0...v1.4.1) (2025-06-17)
+
+### Features
+
+* revert ignore htmx-lsp client ([#1913](https://github.com/Saghen/blink.cmp/issues/1913)) ([2ce8b3e](https://github.com/Saghen/blink.cmp/commit/2ce8b3e821b2e0b263410929322adeb7dc8684aa))
+
+### Bug Fixes
+
+* `!` prefix completion ([#1912](https://github.com/Saghen/blink.cmp/issues/1912)) ([9c5d823](https://github.com/Saghen/blink.cmp/commit/9c5d82370cf2e5f28c27437f4a88d315ace1844f))
+* **cmdline:** correctly handle filetype completions ([c9de9dd](https://github.com/Saghen/blink.cmp/commit/c9de9dd53ec5817138e08c746b9a7a8db403ca24))
+* **cmdline:** skip path completion handler when using vim expressions ([9da629b](https://github.com/Saghen/blink.cmp/commit/9da629bd69f79f9c0a79fb38eaad4c86e2527cdc)), closes [#1922](https://github.com/Saghen/blink.cmp/issues/1922)
+
 ## [1.4.0](https://github.com/Saghen/blink.cmp/compare/v1.3.1...v1.4.0) (2025-06-15)
 
 ### Highlights
