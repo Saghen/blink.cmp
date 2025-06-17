@@ -52,15 +52,20 @@ local function longest_match(str, patterns)
   return best
 end
 
----@param name string
----@return boolean?
-local function is_boolean_option(name)
-  local ok, opt = pcall(function() return vim.opt[name]:get() end)
-  if ok then return type(opt) == 'boolean' end
-end
-
 --- @class blink.cmp.Source
-local cmdline = {}
+local cmdline = {
+  ---@type table<string, vim.api.keyset.get_option_info?>
+  options = setmetatable({}, {
+    __index = function(tbl, key)
+      -- Skip 'all' since it's not a real option but a special argument
+      -- used to display all options. Attempting to query it as an option fails.
+      if key == 'all' then return nil end
+      local info = vim.api.nvim_get_option_info2(key, {})
+      rawset(tbl, key, info)
+      return info
+    end,
+  }),
+}
 
 function cmdline.new()
   local self = setmetatable({}, { __index = cmdline })
@@ -188,6 +193,7 @@ function cmdline:get_completions(context, callback)
       for _, completion in ipairs(completions) do
         local filter_text, new_text = completion, completion
         local label, label_details
+        local option_info
 
         -- path completion in commands, e.g. `chdir <path>` and options, e.g. `:set directory=<path>`
         if is_path_completion then
@@ -204,6 +210,12 @@ function cmdline:get_completions(context, callback)
             label_details = { description = completion:sub(1, -#unique_prefixes[completion] - 2) }
           end
           new_text = vim.fn.fnameescape(completion)
+
+        -- options
+        elseif completion_type == 'option' then
+          new_text = current_arg_prefix .. completion
+          option_info = self.options[completion]
+          if option_info then label_details = { description = option_info.shortname } end
 
         -- env variables
         elseif completion_type == 'environment' then
@@ -252,11 +264,13 @@ function cmdline:get_completions(context, callback)
         }
         items[#items + 1] = item
 
-        if completion_type == 'option' and is_boolean_option(filter_text) then
+        if option_info and option_info.type == 'boolean' then
           filter_text = 'no' .. filter_text
+          label_details.description = 'no' .. label_details.description
           items[#items + 1] = vim.tbl_deep_extend('force', {}, item, {
             label = filter_text,
             filterText = filter_text,
+            labelDetails = label_details,
             sortText = filter_text,
             textEdit = { newText = 'no' .. new_text },
           }) --[[@as blink.cmp.CompletionItem]]
