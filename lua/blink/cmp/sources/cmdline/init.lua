@@ -206,7 +206,7 @@ function cmdline:get_completions(context, callback)
           new_text = '$' .. completion
 
         -- for other completions, prepend the prefix
-        elseif vim.tbl_contains({ 'lua', '' }, completion_type) then
+        elseif vim.tbl_contains({ 'lua', 'shellcmd', '' }, completion_type) then
           new_text = current_arg_prefix .. completion
         end
 
