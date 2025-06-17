@@ -15,7 +15,12 @@ local path_lib = require('blink.cmp.sources.path.lib')
 local function smart_split(context, is_path_completion)
   local line = context.line
 
-  if is_path_completion then
+  local function contains_vim_expr(line)
+    -- Checks for common Vim expressions: %, #, %:h, %:p, etc.
+    return line:find('%%[:#]') or line:find('%% ') or line:find('#')
+  end
+
+  if is_path_completion and not contains_vim_expr(line) then
     -- Split the line into tokens, respecting escaped spaces in paths
     local tokens = path_lib:split_unescaped(line:gsub('^%s+', ''))
     local cmd = tokens[1]
