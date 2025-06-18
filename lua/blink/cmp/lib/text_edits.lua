@@ -11,12 +11,14 @@ function text_edits.apply(text_edit, additional_text_edits)
   additional_text_edits = additional_text_edits or {}
 
   local mode = context.get_mode()
-  assert(mode == 'default' or mode == 'cmdline' or mode == 'term', 'Unsupported mode for text edits: ' .. mode)
+  assert(
+    vim.tbl_contains({ 'default', 'cmdline', 'cmdwin', 'term' }, mode),
+    'Unsupported mode for text edits: ' .. mode
+  )
 
-  if mode == 'default' then
-    -- writing to dot repeat may fail in cases like `q:`, which aren't easy to detect
-    -- so we ignore the error
-    if config.completion.accept.dot_repeat then pcall(text_edits.write_to_dot_repeat, text_edit) end
+  if mode == 'default' or mode == 'cmdwin' then
+    -- writing to dot repeat may fail in command-line window
+    if mode == 'default' and config.completion.accept.dot_repeat then text_edits.write_to_dot_repeat(text_edit) end
 
     local all_edits = utils.shallow_copy(additional_text_edits)
     table.insert(all_edits, text_edit)
