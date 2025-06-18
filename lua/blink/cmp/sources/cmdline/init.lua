@@ -55,16 +55,7 @@ end
 --- @class blink.cmp.Source
 local cmdline = {
   ---@type table<string, vim.api.keyset.get_option_info?>
-  options = setmetatable({}, {
-    __index = function(tbl, key)
-      -- Skip 'all' since it's not a real option but a special argument
-      -- used to display all options. Attempting to query it as an option fails.
-      if key == 'all' then return nil end
-      local info = vim.api.nvim_get_option_info2(key, {})
-      rawset(tbl, key, info)
-      return info
-    end,
-  }),
+  options = vim.api.nvim_get_all_options_info(),
 }
 
 function cmdline.new()
