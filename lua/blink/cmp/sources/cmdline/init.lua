@@ -223,8 +223,20 @@ function cmdline:get_completions(context, callback)
           new_text = '$' .. completion
 
         -- for other completions, prepend the prefix
-        elseif vim.tbl_contains({ 'filetype', 'lua', 'shellcmd', '' }, completion_type) then
+        elseif vim.tbl_contains({ 'filetype', 'lua', 'shellcmd' }, completion_type) then
           new_text = current_arg_prefix .. completion
+
+        -- empty completion '' is a special case, this can be:
+        -- args (usually from user-defined commands): :Cmd [arg=]value
+        -- values (from vim/user-defined commands), :set option=[value], :Cmd arg=[value]
+        elseif completion_type == '' then
+          if completion:sub(1, #current_arg_prefix) == current_arg_prefix then
+            -- same prefix, only need to sanitize the value for filtering
+            filter_text = completion:sub(#current_arg_prefix + 1)
+          else
+            -- different, prepend the prefix for new_text
+            new_text = current_arg_prefix .. completion
+          end
         end
 
         local start_pos = #text_before_argument + #leading_spaces
