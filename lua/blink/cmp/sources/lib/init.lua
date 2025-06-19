@@ -56,7 +56,7 @@ end
 function sources.get_enabled_provider_ids(mode)
   -- Mode-specific sources
   if vim.tbl_contains({ 'cmdline', 'cmdwin', 'term' }, mode) then
-    -- Consider 'cmdwin' as part of the 'cmdline' config
+    -- 'cmdwin' use the 'cmdline' source provider
     if mode == 'cmdwin' then mode = 'cmdline' end
 
     if not config[mode].enabled then return {} end
