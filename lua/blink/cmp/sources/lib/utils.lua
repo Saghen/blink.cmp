@@ -59,4 +59,22 @@ function utils.is_ex_substitute()
   return vim.tbl_contains({ 'substitute', 'global', 'vglobal' }, cmd)
 end
 
+---Get the current command-line completion type.
+---@return string completion_type The detected completion type, or an empty string if unknown.
+function utils.getcmdcompltype()
+  -- FIXME: AFAIK Neovim does not provide an API to know which completion type we
+  -- are in so we attempt to parse the command and map it to a known completion
+  -- type using a constants mapping table.
+  if vim.fn.win_gettype() == 'command' then
+    local line = vim.api.nvim_get_current_line()
+    local parse_cmd = vim.api.nvim_parse_cmd(line, {})
+    if #parse_cmd.args > 0 then
+      local constants = require('blink.cmp.sources.cmdline.constants')
+      return constants.commands_type[parse_cmd.cmd] or ''
+    end
+  end
+
+  return vim.fn.getcmdcompltype()
+end
+
 return utils
