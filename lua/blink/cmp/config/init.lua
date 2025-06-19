@@ -95,7 +95,9 @@ function M.apply_mode_specific(cfg)
 
     set_at_path(path, function(...)
       local mode = vim.api.nvim_get_mode().mode
-      if mode == 'c' and cmdline ~= nil then return call_or_return(cmdline, ...) end
+      if (mode == 'c' or vim.fn.win_gettype() == 'command') and cmdline ~= nil then
+        return call_or_return(cmdline, ...)
+      end
       if mode == 't' and term ~= nil then return call_or_return(term, ...) end
       return call_or_return(default, ...)
     end)
@@ -120,7 +122,7 @@ end
 --- Overrides
 
 function M.enabled()
-  if vim.api.nvim_get_mode().mode == 'c' then return config.cmdline.enabled end
+  if vim.api.nvim_get_mode().mode == 'c' or vim.fn.win_gettype() == 'command' then return config.cmdline.enabled end
   if vim.api.nvim_get_mode().mode == 't' then return config.term.enabled end
 
   local user_enabled = config.enabled()
