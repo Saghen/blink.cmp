@@ -41,7 +41,7 @@ local sources = {
   completions_queue = nil,
   providers = {},
   per_filetype_provider_ids = {},
-  completions_emitter = require('blink.cmp.lib.event_emitter').new('source_completions', 'BlinkCmpSourceCompletions'),
+  completions_emitter = require('blink.cmp.lib.event_emitter').new('source_completions'),
 }
 local deduplicate = require('blink.cmp.lib.utils').deduplicate
 
