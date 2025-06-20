@@ -28,8 +28,16 @@ function event_emitter:emit(data)
     callback(data)
   end
   if self.autocmd then
+    -- TODO: come up with a more robust way of excluding fields
+    -- We exclude items field because it's large and
+    -- leads to >0.5ms for autocmd execution
+    local data_cloned = {}
+    for k, v in pairs(data) do
+      if k ~= 'items' then data_cloned[k] = v end
+    end
+
     require('blink.cmp.lib.utils').schedule_if_needed(
-      function() vim.api.nvim_exec_autocmds('User', { pattern = self.autocmd, modeline = false, data = data }) end
+      function() vim.api.nvim_exec_autocmds('User', { pattern = self.autocmd, modeline = false, data = data_cloned }) end
     )
   end
 end
