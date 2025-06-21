@@ -65,7 +65,7 @@ function context.new(opts)
     },
     providers = opts.providers,
     initial_selected_item_idx = opts.initial_selected_item_idx,
-  }, { __index = context })
+  }, { __index = context }) --[[@as blink.cmp.Context]]
 end
 
 function context.get_keyword()
@@ -92,7 +92,16 @@ end
 
 function context.get_mode()
   local mode = vim.api.nvim_get_mode().mode
-  return (mode == 'c' and 'cmdline') or (mode == 't' and 'term') or 'default'
+  return (mode == 'c' and 'cmdline')
+    or (mode == 't' and 'term')
+    -- 'cmdwin' is not a real mode returned by nvim_get_mode().
+    -- It refers to the command-line window (opened with q: or q/), which acts like a buffer
+    -- for editing command history, blending command-line and buffer features.
+    -- We need to dissociate 'cmdwin' as a separate mode because our logic
+    -- depends on distinguishing between regular command-line mode and the
+    -- command-line window.
+    or (vim.fn.win_gettype() == 'command' and 'cmdwin')
+    or 'default'
 end
 
 function context.get_cursor()
@@ -101,7 +110,7 @@ end
 
 function context.set_cursor(cursor)
   local mode = context.get_mode()
-  if mode == 'default' or mode == 'term' then return vim.api.nvim_win_set_cursor(0, cursor) end
+  if vim.tbl_contains({ 'default', 'term', 'cmdwin' }, mode) then return vim.api.nvim_win_set_cursor(0, cursor) end
 
   assert(mode == 'cmdline', 'Unsupported mode for setting cursor: ' .. mode)
   assert(cursor[1] == 1, 'Cursor must be on the first line in cmdline mode')

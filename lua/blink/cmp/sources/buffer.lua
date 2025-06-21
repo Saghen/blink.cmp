@@ -3,6 +3,7 @@
 -- but ensure it doesn't add too much complexity
 
 local fuzzy = require('blink.cmp.fuzzy')
+local utils = require('blink.cmp.sources.lib.utils')
 local uv = vim.uv
 
 --- @param bufnr integer
@@ -163,17 +164,13 @@ function buffer.new(opts)
 end
 
 function buffer:enabled()
-  local cmdtype = vim.fn.getcmdtype()
   -- Enable in regular buffer
-  if cmdtype == '' then return true end
+  if not utils.is_command_line() then return true end
   -- Enable in search mode
-  if cmdtype == '/' or cmdtype == '?' then return true end
-  -- Enable for substitute and global commands in ex mode
-  if cmdtype == ':' and self.opts.enable_in_ex_commands then
-    local valid_cmd, parsed = pcall(vim.api.nvim_parse_cmd, vim.fn.getcmdline(), {})
-    local cmd = (valid_cmd and parsed.cmd) or ''
-    if vim.tbl_contains({ 'substitute', 'global', 'vglobal' }, cmd) then return true end
-  end
+  if utils.is_command_line({ '/', '?' }) then return true end
+  -- Enable for substitute/global/vglobal in ex mode if user opts-in
+  if utils.is_ex_substitute() and self.opts.enable_in_ex_commands then return true end
+
   return false
 end
 

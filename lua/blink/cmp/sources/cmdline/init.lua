@@ -4,6 +4,7 @@
 
 local async = require('blink.cmp.lib.async')
 local constants = require('blink.cmp.sources.cmdline.constants')
+local utils = require('blink.cmp.sources.lib.utils')
 local path_lib = require('blink.cmp.sources.path.lib')
 
 --- Split the command line into arguments, handling path escaping and trailing spaces.
@@ -69,7 +70,7 @@ end
 
 ---@return boolean
 function cmdline:enabled()
-  return vim.api.nvim_get_mode().mode == 'c' and vim.tbl_contains({ ':', '@' }, vim.fn.getcmdtype())
+  return vim.bo.ft == 'vim' or (utils.is_command_line({ ':', '@' }) and not utils.is_ex_substitute())
 end
 
 ---@return table
@@ -79,7 +80,7 @@ function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/',
 ---@param callback fun(result?: blink.cmp.CompletionResponse)
 ---@return fun()
 function cmdline:get_completions(context, callback)
-  local completion_type = vim.fn.getcmdcompltype()
+  local completion_type = utils.getcmdcompltype()
 
   local is_path_completion = vim.tbl_contains(constants.completion_types.path, completion_type)
   local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
@@ -231,6 +232,7 @@ function cmdline:get_completions(context, callback)
         end
 
         local start_pos = #text_before_argument + #leading_spaces
+        local line = context.cursor[1] - 1
 
         -- exclude range for commands on the first argument
         if arg_number == 1 and completion_type == 'command' then
@@ -252,13 +254,13 @@ function cmdline:get_completions(context, callback)
           textEdit = {
             newText = new_text,
             insert = {
-              start = { line = 0, character = start_pos },
-              ['end'] = { line = 0, character = vim.fn.getcmdpos() - 1 },
+              start = { line = line, character = start_pos },
+              ['end'] = { line = line, character = context.cursor[2] },
             },
             replace = {
-              start = { line = 0, character = start_pos },
+              start = { line = line, character = start_pos },
               ['end'] = {
-                line = 0,
+                line = line,
                 character = math.min(start_pos + #current_arg, context.bounds.start_col + context.bounds.length - 1),
               },
             },

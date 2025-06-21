@@ -69,7 +69,7 @@ function ghost_text.show_preview(items, selection_idx)
   ghost_text.selected_item = selected_item
 
   vim.api.nvim_set_decoration_provider(ghost_text.ns, {
-    on_win = function(_, _, buf) return utils.is_noice() and buf == ghost_text_buf end,
+    on_win = function(_, _, buf) return (utils.is_cmdwin() or utils.is_noice()) and buf == ghost_text_buf end,
     on_line = function() ghost_text.draw_preview() end,
   })
 

@@ -478,6 +478,7 @@ sources = {
   per_filetype = {
     -- optionally inherit from the `default` sources
     -- lua = { inherit_defaults = true, 'lsp', 'path' },
+    -- vim = { inherit_defaults = true, 'cmdline' },
   },
 
   -- Function to use when transforming the items before they're returned for all providers
