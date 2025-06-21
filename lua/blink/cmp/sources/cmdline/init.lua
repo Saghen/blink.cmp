@@ -17,7 +17,7 @@ local function smart_split(context, is_path_completion)
 
   local function contains_vim_expr(line)
     -- Checks for common Vim expressions: %, #, %:h, %:p, etc.
-    return line:find('%%[:#]') or line:find('%% ') or line:find('#')
+    return vim.regex([[%\%(:[phtrwe~.]\)\?]]):match_str(line) ~= nil
   end
 
   if is_path_completion and not contains_vim_expr(line) then
@@ -217,10 +217,10 @@ function cmdline:get_completions(context, callback)
         elseif vim.tbl_contains({ 'filetype', 'lua', 'shellcmd' }, completion_type) then
           new_text = current_arg_prefix .. completion
 
-        -- empty completion '' is a special case, this can be:
+        -- treat custom and empty completion '' as special case, this can be:
         -- args (usually from user-defined commands): :Cmd [arg=]value
         -- values (from vim/user-defined commands), :set option=[value], :Cmd arg=[value]
-        elseif completion_type == '' then
+        elseif completion_type == '' or vim.startswith(completion_type, 'custom') then
           if completion:sub(1, #current_arg_prefix) == current_arg_prefix then
             -- same prefix, only need to sanitize the value for filtering
             filter_text = completion:sub(#current_arg_prefix + 1)
