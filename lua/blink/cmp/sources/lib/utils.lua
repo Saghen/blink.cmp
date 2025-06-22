@@ -39,9 +39,10 @@ function utils.is_command_line(types)
   return false
 end
 
---- Checks if the current command is an Ex substitute/global/vglobal command.
+--- Checks if the current command is one of the given Ex commands.
+--- @param commands table List of command names to check against.
 --- @return boolean
-function utils.is_ex_substitute()
+function utils.is_ex_command(commands)
   if not utils.is_command_line({ ':' }) then return false end
 
   local line = nil
@@ -56,7 +57,7 @@ function utils.is_ex_substitute()
 
   local ok, parsed = pcall(vim.api.nvim_parse_cmd, line, {})
   local cmd = (ok and parsed.cmd) or ''
-  return vim.tbl_contains({ 'substitute', 'global', 'vglobal' }, cmd)
+  return vim.tbl_contains(commands, cmd)
 end
 
 ---Get the current command-line completion type.
