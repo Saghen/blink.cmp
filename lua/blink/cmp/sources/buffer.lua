@@ -168,8 +168,8 @@ function buffer:enabled()
   if not utils.is_command_line() then return true end
   -- Enable in search mode
   if utils.is_command_line({ '/', '?' }) then return true end
-  -- Enable for substitute/global/vglobal in ex mode if user opts-in
-  if utils.is_ex_substitute() and self.opts.enable_in_ex_commands then return true end
+  -- Enable for specific ex commands if user opts-in
+  if utils.is_ex_command({ 'substitute', 'global', 'vglobal' }) and self.opts.enable_in_ex_commands then return true end
 
   return false
 end
