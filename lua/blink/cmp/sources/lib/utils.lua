@@ -62,16 +62,35 @@ end
 ---Get the current command-line completion type.
 ---@return string completion_type The detected completion type, or an empty string if unknown.
 function utils.getcmdcompltype()
-  -- FIXME: AFAIK Neovim does not provide an API to know which completion type we
-  -- are in so we attempt to parse the command and map it to a known completion
-  -- type using a constants mapping table.
   if vim.fn.win_gettype() == 'command' then
+    -- FIXME: AFAIK Neovim does not provide an API to determine the completion type in command-line window.
+    -- Therefore, we attempt to parse the command-line and map it to a known completion type,
+    -- either by guessing from the last argument or from the command name.
     local line = vim.api.nvim_get_current_line()
-    local parse_cmd = vim.api.nvim_parse_cmd(line, {})
-    if #parse_cmd.args > 0 then
+    local ok, parse_cmd = pcall(vim.api.nvim_parse_cmd, line, {})
+    if ok then
       local constants = require('blink.cmp.sources.cmdline.constants')
+
+      local function guess_type_by_prefix(arg)
+        for prefix, completion_type in pairs(constants.arg_prefix_type) do
+          if vim.startswith(arg, prefix) then return completion_type end
+        end
+        return nil
+      end
+
+      -- Guess by last argument
+      local args = parse_cmd.args
+      if #args > 0 then
+        local last_arg = args[#args]
+        local completion_type = guess_type_by_prefix(last_arg)
+        if completion_type then return completion_type end
+      end
+
+      -- Guess by command name
       return constants.commands_type[parse_cmd.cmd] or ''
     end
+
+    return ''
   end
 
   return vim.fn.getcmdcompltype()
