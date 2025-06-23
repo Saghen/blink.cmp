@@ -145,7 +145,7 @@ function cmdline:get_completions(context, callback)
       local completions = {}
 
       -- Input mode (vim.fn.input())
-      if vim.fn.getcmdtype() == '@' then
+      if utils.is_command_line({ '@' }) then
         local completion_args = vim.split(completion_type, ',', { plain = true })
         local completion_type = completion_args[1]
         local completion_func = completion_args[2]
@@ -160,7 +160,7 @@ function cmdline:get_completions(context, callback)
           and not vim.startswith(completion_func:lower(), '<sid>')
         then
           local success, fn_completions =
-            pcall(vim.fn.call, completion_func, { current_arg_prefix, vim.fn.getcmdline(), vim.fn.getcmdpos() })
+            pcall(vim.fn.call, completion_func, { current_arg_prefix, context.get_line(), context.cursor[2] + 1 })
 
           if success then
             if type(fn_completions) == 'table' then

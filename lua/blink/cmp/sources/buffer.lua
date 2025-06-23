@@ -163,13 +163,20 @@ function buffer.new(opts)
   return self
 end
 
+--- @return boolean
+function buffer:is_search_context()
+  -- In search mode
+  if utils.is_command_line({ '/', '?' }) then return true end
+  -- In specific ex commands, if enabled
+  if utils.is_ex_command({ 'substitute', 'global', 'vglobal' }) and self.opts.enable_in_ex_commands then return true end
+  return false
+end
+
 function buffer:enabled()
   -- Enable in regular buffer
   if not utils.is_command_line() then return true end
-  -- Enable in search mode
-  if utils.is_command_line({ '/', '?' }) then return true end
-  -- Enable for specific ex commands if user opts-in
-  if utils.is_ex_command({ 'substitute', 'global', 'vglobal' }) and self.opts.enable_in_ex_commands then return true end
+  -- Enable in search context
+  if self:is_search_context() then return true end
 
   return false
 end
@@ -180,7 +187,7 @@ function buffer:get_completions(_, callback)
   end
 
   vim.schedule(function()
-    local is_search = vim.tbl_contains({ '/', '?', ':' }, vim.fn.getcmdtype())
+    local is_search = self:is_search_context()
     local get_bufnrs = is_search and self.opts.get_search_bufnrs or self.opts.get_bufnrs
     local bufnrs = require('blink.cmp.lib.utils').deduplicate(get_bufnrs())
 
