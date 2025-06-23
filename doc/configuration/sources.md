@@ -122,3 +122,4 @@ See [blink.compat](https://github.com/Saghen/blink.compat) for using `nvim-cmp` 
 - [blink-cmp-yanky](https://github.com/marcoSven/blink-cmp-yanky): Completion for [yanky.nvim](https://github.com/gbprod/yanky.nvim)
 - [blink-cmp-register](https://github.com/phanen/blink-cmp-register)
 - [blink-cmp-sshconfig](https://github.com/bydlw98/blink-cmp-sshconfig)
+- [blink-cmp-words](https://github.com/archie-judd/blink-cmp-words): Definitions and synonyms
