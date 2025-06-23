@@ -708,7 +708,8 @@ cmdline = {
       },
     },
     -- Whether to automatically show the window when new completion items are available
-    menu = { auto_show = false },
+    -- Default is false for cmdline, true for cmdwin (command-line window)
+    menu = { auto_show = function(ctx, _) return ctx.mode == 'cmdwin' end },
     -- Displays a preview of the selected item on the current line
     ghost_text = { enabled = true },
   }
