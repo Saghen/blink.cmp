@@ -1,5 +1,5 @@
 local utils = {}
-local constants = require('blink.cmp.sources.cmdline.constants')
+local cmdline_constants = require('blink.cmp.sources.cmdline.constants')
 
 --- @param item blink.cmp.CompletionItem
 --- @return lsp.CompletionItem
@@ -64,15 +64,17 @@ end
 ---Get the current command-line completion type.
 ---@return string completion_type The detected completion type, or an empty string if unknown.
 function utils.getcmdcompltype()
-  if vim.fn.win_gettype() == 'command' then
-    -- FIXME: AFAIK Neovim does not provide an API to determine the completion type in command-line window.
+  if vim.api.nvim_get_mode().mode == 'c' then
+    return vim.fn.getcmdcompltype()
+  elseif vim.fn.win_gettype() == 'command' then
+    -- FIXME: Neovim does not provide yet an API to determine the completion type in command-line window.
     -- Therefore, we attempt to parse the command-line and map it to a known completion type,
     -- either by guessing from the last argument or from the command name. This roughly mimics vim.fn.getcmdcompltype()
     local line = vim.api.nvim_get_current_line()
     local ok, parse_cmd = pcall(vim.api.nvim_parse_cmd, line, {})
     if ok then
       local function guess_type_by_prefix(arg)
-        for prefix, completion_type in pairs(constants.arg_prefix_type) do
+        for prefix, completion_type in pairs(cmdline_constants.arg_prefix_type) do
           if vim.startswith(arg, prefix) then return completion_type end
         end
         return nil
@@ -87,7 +89,7 @@ function utils.getcmdcompltype()
       end
 
       -- Guess by command name
-      local completion_type = constants.commands_type[parse_cmd.cmd] or ''
+      local completion_type = cmdline_constants.commands_type[parse_cmd.cmd] or ''
       if #args > 0 then
         -- Adjust some completion type when args exists (to match cmdline)
         if completion_type == 'shellcmd' then completion_type = 'file' end
@@ -96,11 +98,9 @@ function utils.getcmdcompltype()
 
       return completion_type
     end
-
-    return ''
   end
 
-  return vim.fn.getcmdcompltype()
+  return ''
 end
 
 return utils
