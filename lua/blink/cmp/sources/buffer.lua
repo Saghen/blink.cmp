@@ -155,7 +155,7 @@ function buffer.new(opts)
   -- This sacrifice live substitution previews, but restores correct redraw.
   if opts.enable_in_ex_commands then
     vim.on_key(function()
-      if vim.fn.getcmdtype() == ':' and vim.o.inccommand ~= '' then vim.o.inccommand = '' end
+      if utils.is_command_line({ ':' }) and vim.o.inccommand ~= '' then vim.o.inccommand = '' end
     end)
   end
 
