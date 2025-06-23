@@ -3,8 +3,6 @@ return {
   arg_prefix_type = {
     ['$'] = 'environment',
     ['&'] = 'option',
-    ['%'] = 'dir',
-    ['~/'] = 'dir',
   },
   commands_type = {
     -- File completion
