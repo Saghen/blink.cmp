@@ -52,6 +52,39 @@ local function longest_match(str, patterns)
   return best
 end
 
+--- Returns completion items for a given pattern and type, with special handling for shell commands on Windows/WSL.
+--- @param pattern string The partial command to match for completion
+--- @param type string The type of completion
+--- @param completion_type? string Original completion type from vim.fn.getcmdcompltype()
+--- @return table completions
+local function get_completions(pattern, type, completion_type)
+  -- If a shell command is requested on Windows or WSL, update PATH to avoid performance issues.
+  if completion_type == 'shellcmd' then
+    local separator, filter_fn
+
+    if vim.fn.has('win32') == 1 then
+      separator = ';'
+      -- Remove System32 folder on native Windows
+      filter_fn = function(part) return not part:lower():match('^[a-z]:\\windows\\system32$') end
+    elseif vim.fn.has('wsl') == 1 then
+      separator = ':'
+      -- Remove all Windows filesystem mounts on WSL
+      filter_fn = function(part) return not part:lower():match('^/mnt/[a-z]/') end
+    end
+
+    if filter_fn then
+      local orig_path = vim.env.PATH
+      local new_path = table.concat(vim.tbl_filter(filter_fn, vim.split(orig_path, separator)), separator)
+      vim.env.PATH = new_path
+      local completions = vim.fn.getcompletion(pattern, type)
+      vim.env.PATH = orig_path
+      return completions
+    end
+  end
+
+  return vim.fn.getcompletion(pattern, type)
+end
+
 --- @class blink.cmp.Source
 local cmdline = {
   ---@type table<string, vim.api.keyset.get_option_info?>
@@ -145,7 +178,7 @@ function cmdline:get_completions(context, callback)
             -- path completions uniquely expect only the current path
             query = is_path_completion and current_arg_prefix or query
 
-            completions = vim.fn.getcompletion(query, compl_type)
+            completions = get_completions(query, compl_type, completion_type)
             if type(completions) ~= 'table' then completions = {} end
           end
         end
@@ -153,7 +186,7 @@ function cmdline:get_completions(context, callback)
       -- Cmdline mode
       else
         local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
-        completions = vim.fn.getcompletion(query, 'cmdline')
+        completions = get_completions(query, 'cmdline', completion_type)
       end
 
       return completions
