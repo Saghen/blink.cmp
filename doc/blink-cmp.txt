@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 23
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 24
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -2380,6 +2380,7 @@ See the |blink-cmp-mode-specific-configurations| for setting sources for
       per_filetype = {
         -- optionally inherit from the `default` sources
         -- lua = { inherit_defaults = true, 'lsp', 'path' },
+        -- vim = { inherit_defaults = true, 'cmdline' },
       },
     
       -- Function to use when transforming the items before they're returned for all providers
@@ -2615,7 +2616,8 @@ CMDLINE
           },
         },
         -- Whether to automatically show the window when new completion items are available
-        menu = { auto_show = false },
+        -- Default is false for cmdline, true for cmdwin (command-line window)
+        menu = { auto_show = function(ctx, _) return ctx.mode == 'cmdwin' end },
         -- Displays a preview of the selected item on the current line
         ghost_text = { enabled = true },
       }
