@@ -3,7 +3,7 @@ local char_lib = require('blink.cmp.fuzzy.lua.char')
 local keyword = {}
 
 local BACKWARD_REGEX = vim.regex([[\k*$]])
-local FORWARD_REGEX = vim.regex([[^\k+]])
+local FORWARD_REGEX = vim.regex([[^\k*]])
 
 --- @generic T
 --- @generic Y
@@ -29,9 +29,15 @@ end
 function keyword.get_keyword_range(line, col, match_suffix)
   return keyword.with_constant_is_keyword(function()
     local before_match_start = BACKWARD_REGEX:match_str(line:sub(1, col))
+    -- exclude leading dashes
+    if before_match_start ~= nil then
+      while string.byte(line, before_match_start + 1) == string.byte('-') and before_match_start < col do
+        before_match_start = before_match_start + 1
+      end
+    end
     if not match_suffix then return before_match_start or col, col end
 
-    local after_match_end = FORWARD_REGEX:match_str(line:sub(col + 1))
+    local _, after_match_end = FORWARD_REGEX:match_str(line:sub(col + 1))
     if after_match_end then after_match_end = after_match_end + col end
     return before_match_start or col, after_match_end or col
   end)
