@@ -230,7 +230,7 @@ function cmdline:get_completions(context, callback)
         -- buffer commands
         elseif is_buffer_completion then
           label = unique_prefixes[completion] or completion
-          if #unique_prefixes[completion] then
+          if unique_prefixes[completion] then
             label_details = { description = completion:sub(1, -#unique_prefixes[completion] - 2) }
           end
           new_text = vim.fn.fnameescape(completion)
