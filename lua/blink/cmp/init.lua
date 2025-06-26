@@ -271,7 +271,7 @@ function cmp.is_signature_visible() return require('blink.cmp.signature.window')
 function cmp.show_signature()
   local config = require('blink.cmp.config').signature
   if not config.enabled or cmp.is_signature_visible() then return end
-  vim.schedule(function() require('blink.cmp.signature.trigger').show() end)
+  vim.schedule(function() require('blink.cmp.signature.trigger').show({ force = true }) end)
   return true
 end
 
