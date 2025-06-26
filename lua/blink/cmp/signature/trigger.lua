@@ -120,9 +120,9 @@ function trigger.show_if_on_trigger_character()
 end
 
 function trigger.show(opts)
-  if not opts.force and not config.enabled then return end
-
   opts = opts or {}
+
+  if not opts.force and not config.enabled then return end
 
   -- update context
   local cursor = vim.api.nvim_win_get_cursor(0)
