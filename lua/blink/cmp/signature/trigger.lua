@@ -23,7 +23,7 @@
 --- @field activate fun()
 --- @field is_trigger_character fun(char: string, is_retrigger?: boolean): boolean
 --- @field show_if_on_trigger_character fun()
---- @field show fun(opts?: { trigger_character: string })
+--- @field show fun(opts?: { trigger_character: string, force?: boolean })
 --- @field hide fun()
 --- @field set_active_signature_help fun(signature_help: lsp.SignatureHelp)
 
@@ -120,7 +120,7 @@ function trigger.show_if_on_trigger_character()
 end
 
 function trigger.show(opts)
-  if not config.enabled then return end
+  if not opts.force and not config.enabled then return end
 
   opts = opts or {}
 
