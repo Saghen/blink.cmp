@@ -31,6 +31,7 @@ function cmdline_events:listen(opts)
   -- but we still want to fire the CursorMoved event, and not the TextChanged event
   local did_backspace = false
   local is_change_queued = false
+  local pending_key = nil
   vim.on_key(function(raw_key, escaped_key)
     if vim.api.nvim_get_mode().mode ~= 'c' then return end
 
@@ -41,12 +42,15 @@ function cmdline_events:listen(opts)
     if key:sub(1, 1) == '<' and key:sub(#key, #key) == '>' and raw_key ~= ' ' then return end
     if key == '' then return end
 
+    pending_key = raw_key
+
     if not is_change_queued then
       is_change_queued = true
       did_backspace = false
       vim.schedule(function()
-        on_changed(raw_key)
+        on_changed(pending_key)
         is_change_queued = false
+        pending_key = nil
       end)
     end
   end)
