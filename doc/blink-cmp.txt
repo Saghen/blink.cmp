@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 24
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 27
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1871,6 +1871,7 @@ sources
 - blink-cmp-git <https://github.com/Kaiser-Yang/blink-cmp-git>
 - blink-cmp-spell <https://github.com/ribru17/blink-cmp-spell.git>
 - blink-cmp-tmux <https://github.com/mgalliou/blink-cmp-tmux>
+- blink-cmp-wezterm <https://github.com/junkblocker/blink-cmp-wezterm>
 - css-vars.nvim <https://github.com/jdrupal-dev/css-vars.nvim>
 - blink-cmp-env <https://github.com/bydlw98/blink-cmp-env>
 - blink-cmp-avante <https://github.com/Kaiser-Yang/blink-cmp-avante>
