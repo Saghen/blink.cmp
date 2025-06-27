@@ -107,6 +107,7 @@ See [blink.compat](https://github.com/Saghen/blink.compat) for using `nvim-cmp` 
 - [blink-cmp-git](https://github.com/Kaiser-Yang/blink-cmp-git)
 - [blink-cmp-spell](https://github.com/ribru17/blink-cmp-spell.git)
 - [blink-cmp-tmux](https://github.com/mgalliou/blink-cmp-tmux)
+- [blink-cmp-wezterm](https://github.com/junkblocker/blink-cmp-wezterm)
 - [css-vars.nvim](https://github.com/jdrupal-dev/css-vars.nvim)
 - [blink-cmp-env](https://github.com/bydlw98/blink-cmp-env)
 - [blink-cmp-avante](https://github.com/Kaiser-Yang/blink-cmp-avante)
