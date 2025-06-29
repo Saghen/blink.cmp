@@ -168,7 +168,7 @@ function buffer:is_search_context()
   -- In search mode
   if utils.is_command_line({ '/', '?' }) then return true end
   -- In specific ex commands, if enabled
-  if utils.is_ex_command({ 'substitute', 'global', 'vglobal' }) and self.opts.enable_in_ex_commands then return true end
+  if utils.in_ex_context({ 'substitute', 'global', 'vglobal' }) and self.opts.enable_in_ex_commands then return true end
   return false
 end
 
