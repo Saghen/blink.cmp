@@ -124,3 +124,5 @@ See [blink.compat](https://github.com/Saghen/blink.compat) for using `nvim-cmp` 
 - [blink-cmp-register](https://github.com/phanen/blink-cmp-register)
 - [blink-cmp-sshconfig](https://github.com/bydlw98/blink-cmp-sshconfig)
 - [blink-cmp-words](https://github.com/archie-judd/blink-cmp-words): Definitions and synonyms
+- [cmp-rails-fixture-names](https://github.com/wassimk/cmp-rails-fixture-names): Ruby on Rails fixture names completion
+- [cmp-rails-fixture-types](https://github.com/wassimk/cmp-rails-fixture-types): Ruby on Rails fixture types completion
