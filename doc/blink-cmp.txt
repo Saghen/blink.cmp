@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 27
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 30
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1344,6 +1344,11 @@ path via `:echo stdpath('data')`. Use `.so` for linux, `.dylib` for mac, and
 `.dll` for windows. If you’re unsure whether you want `-musl` or `-gnu` for
 linux, you very likely want `-gnu`.
 
+
+  [!IMPORTANT] For the version verification to succeed, you must either ensure
+  there is no `version` file adjacent to your `libblink_cmp_fuzzy` library or you
+  must have `git` installed with the `.git` folder present in the `blink.cmp`
+  directory
 >sh
     # Linux
     ~/.local/share/nvim/lazy/blink.cmp/target/release/libblink_cmp_fuzzy.so
