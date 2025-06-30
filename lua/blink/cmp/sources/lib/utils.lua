@@ -43,7 +43,7 @@ end
 --- Checks if the current command is one of the given Ex commands.
 --- @param commands table List of command names to check against.
 --- @return boolean
-function utils.is_ex_command(commands)
+function utils.in_ex_context(commands)
   if not utils.is_command_line({ ':' }) then return false end
 
   local line = nil
@@ -58,7 +58,8 @@ function utils.is_ex_command(commands)
 
   local ok, parsed = pcall(vim.api.nvim_parse_cmd, line, {})
   local cmd = (ok and parsed.cmd) or ''
-  return vim.tbl_contains(commands, cmd)
+  local has_args = (ok and parsed.args and #parsed.args > 0) or false
+  return vim.tbl_contains(commands, cmd) and has_args
 end
 
 ---Get the current command-line completion type.
