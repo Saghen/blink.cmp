@@ -4,6 +4,7 @@
 
 local fuzzy = require('blink.cmp.fuzzy')
 local utils = require('blink.cmp.sources.lib.utils')
+local dedup = require('blink.cmp.lib.utils').deduplicate
 local uv = vim.uv
 
 --- @param bufnr integer
@@ -14,8 +15,9 @@ local function get_buf_text(bufnr, exclude_word_under_cursor)
   if bufnr ~= vim.api.nvim_get_current_buf() or not exclude_word_under_cursor then return table.concat(lines, '\n') end
 
   -- exclude word under the cursor for the current buffer
-  local line_number = vim.api.nvim_win_get_cursor(0)[1]
-  local column = vim.api.nvim_win_get_cursor(0)[2]
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local line_number = cursor[1]
+  local column = cursor[2]
   local line = lines[line_number]
   local start_col = column
   while start_col > 1 do
@@ -34,6 +36,8 @@ local function get_buf_text(bufnr, exclude_word_under_cursor)
   return table.concat(lines, '\n')
 end
 
+--- @param words string[]
+--- @return blink.cmp.CompletionItem[]
 local function words_to_items(words)
   local items = {}
   for _, word in ipairs(words) do
@@ -49,15 +53,20 @@ end
 
 --- @param buf_text string
 --- @param callback fun(items: blink.cmp.CompletionItem[])
-local function run_sync(buf_text, callback) callback(words_to_items(require('blink.cmp.fuzzy').get_words(buf_text))) end
+local function run_sync(buf_text, callback)
+  local words = fuzzy.get_words(buf_text)
+  callback(words_to_items(words))
+end
 
 local function run_async_rust(buf_text, callback)
   local worker = uv.new_work(
-    -- must use rust module directly since the normal one requires the config which isnt present
+    -- must use rust module directly since the normal one requires the config which isn't present
     function(buf_text, cpath)
       package.cpath = cpath
+      ---@diagnostic disable-next-line: redundant-return-value
       return table.concat(require('blink.cmp.fuzzy.rust').get_words(buf_text), '\n')
     end,
+    ---@param words string
     function(words)
       local items = words_to_items(vim.split(words, '\n'))
       vim.schedule(function() callback(items) end)
@@ -95,14 +104,14 @@ local function run_async_lua(buf_text, callback)
     pos = end_pos + 1
 
     local chunk_text = string.sub(buf_text, start_pos, end_pos)
-    local chunk_words = require('blink.cmp.fuzzy').get_words(chunk_text)
+    local chunk_words = fuzzy.get_words(chunk_text)
     vim.list_extend(all_words, chunk_words)
 
     -- next iter
     if pos < total_length then return vim.schedule(next_chunk) end
 
     -- Deduplicate and finish
-    local words = require('blink.cmp.lib.utils').deduplicate(all_words)
+    local words = dedup(all_words)
     vim.schedule(function() callback(words_to_items(words)) end)
   end
 
@@ -117,6 +126,11 @@ end
 --- @field max_sync_buffer_size integer Maximum buffer text size for sync processing
 --- @field max_async_buffer_size integer Maximum buffer text size for async processing
 --- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s) and global (:g) commands
+
+---@class blink.cmp.BufferCacheEntry
+---@field changedtick integer
+---@field exclude_word_under_cursor boolean
+---@field items blink.cmp.CompletionItem[]
 
 --- Public API
 
@@ -160,6 +174,15 @@ function buffer.new(opts)
   end
 
   self.opts = opts
+
+  ---@type table<integer, blink.cmp.BufferCacheEntry>
+  self.cache = {}
+
+  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
+    desc = 'Invalidate buffer cache items when buffer is deleted',
+    callback = function(args) self.cache[args.buf] = nil end,
+  })
+
   return self
 end
 
@@ -167,11 +190,53 @@ end
 function buffer:is_search_context()
   -- In search mode
   if utils.is_command_line({ '/', '?' }) then return true end
-  -- In specific ex commands, if enabled
-  if utils.in_ex_context({ 'substitute', 'global', 'vglobal' }) and self.opts.enable_in_ex_commands then return true end
+  -- In specific ex commands, if user opts in
+  if self.opts.enable_in_ex_commands and utils.in_ex_context({ 'substitute', 'global', 'vglobal' }) then return true end
+
   return false
 end
 
+---@param bufnr integer
+---@param exclude_word_under_cursor boolean
+---@param callback fun(items: blink.cmp.CompletionItem[])
+function buffer:get_buf_items(bufnr, exclude_word_under_cursor, callback)
+  local changedtick = vim.b[bufnr].changedtick
+  local cache = self.cache[bufnr]
+
+  if cache and cache.changedtick == changedtick and cache.exclude_word_under_cursor == exclude_word_under_cursor then
+    callback(cache.items)
+    return
+  end
+
+  ---@param items blink.cmp.CompletionItem[]
+  local function cache_and_callback(items)
+    self.cache[bufnr] = {
+      changedtick = changedtick,
+      exclude_word_under_cursor = exclude_word_under_cursor,
+      items = items,
+    }
+    callback(items)
+  end
+
+  local buf_text = get_buf_text(bufnr, exclude_word_under_cursor)
+
+  -- should take less than 2ms
+  if #buf_text < self.opts.max_sync_buffer_size then
+    run_sync(buf_text, cache_and_callback)
+  -- should take less than 10ms
+  elseif #buf_text < self.opts.max_async_buffer_size then
+    if fuzzy.implementation_type == 'rust' then
+      run_async_rust(buf_text, cache_and_callback)
+    else
+      run_async_lua(buf_text, cache_and_callback)
+    end
+  else
+    -- too big so ignore
+    cache_and_callback({})
+  end
+end
+
+--- @return boolean
 function buffer:enabled()
   -- Enable in regular buffer
   if not utils.is_command_line() then return true end
@@ -182,34 +247,28 @@ function buffer:enabled()
 end
 
 function buffer:get_completions(_, callback)
-  local transformed_callback = function(items)
-    callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
-  end
-
   vim.schedule(function()
     local is_search = self:is_search_context()
     local get_bufnrs = is_search and self.opts.get_search_bufnrs or self.opts.get_bufnrs
-    local bufnrs = require('blink.cmp.lib.utils').deduplicate(get_bufnrs())
+    local bufnrs = dedup(get_bufnrs())
 
-    local buf_texts = {}
-    for _, buf in ipairs(bufnrs) do
-      table.insert(buf_texts, get_buf_text(buf, not is_search))
+    if #bufnrs == 0 then
+      callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
+      return
     end
-    local buf_text = table.concat(buf_texts, '\n')
 
-    -- should take less than 2ms
-    if #buf_text < self.opts.max_sync_buffer_size then
-      run_sync(buf_text, transformed_callback)
-    -- should take less than 10ms
-    elseif #buf_text < self.opts.max_async_buffer_size then
-      if fuzzy.implementation_type == 'rust' then
-        return run_async_rust(buf_text, transformed_callback)
-      else
-        return run_async_lua(buf_text, transformed_callback)
-      end
-    -- too big so ignore
-    else
-      transformed_callback({})
+    ---@type blink.cmp.CompletionItem[]
+    local items = {}
+    local queued = #bufnrs
+
+    for _, buf in ipairs(bufnrs) do
+      self:get_buf_items(buf, not is_search, function(buf_items)
+        vim.list_extend(items, buf_items)
+        queued = queued - 1
+        if queued == 0 then
+          callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
+        end
+      end)
     end
   end)
 end
