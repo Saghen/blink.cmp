@@ -33,6 +33,9 @@ By default, Blink will download a prebuilt binary from the latest release, when 
 
 You may instead install the prebuilt binaries manually by downloading the appropriate binary from the [latest release](https://github.com/saghen/blink.cmp/releases/latest) and placing it at `$data/lazy/blink.cmp/target/release/libblink_cmp_fuzzy.$ext`. Get the `$data` path via `:echo stdpath('data')`. Use `.so` for linux, `.dylib` for mac, and `.dll` for windows. If you're unsure whether you want `-musl` or `-gnu` for linux, you very likely want `-gnu`.
 
+> [!IMPORTANT]
+> For the version verification to succeed, you must either ensure there is no `version` file adjacent to your `libblink_cmp_fuzzy` library or you must have `git` installed with the `.git` folder present in the `blink.cmp` directory
+
 ```sh
 # Linux
 ~/.local/share/nvim/lazy/blink.cmp/target/release/libblink_cmp_fuzzy.so
