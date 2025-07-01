@@ -59,7 +59,11 @@ See the [fuzzy section of the reference configuration](./reference.md#fuzzy). Fo
 
 ### Sorting
 
-The sorting can be customized by providing a custom function to sort the entries, based on [sorting in Lua](https://www.lua.org/manual/5.1/manual.html#pdf-table.sort), or by using one of the built-in sorts:
+You can control how entries are sorted by choosing from several built-in sorting methods or by providing your own custom Lua function.
+
+#### Built-in sorts
+
+The following built-in sort strings are available:
 
 - `exact`: Sorts by exact match, case-sensitive
 - `score`: Sorts by the fuzzy matching score
@@ -69,6 +73,32 @@ The sorting can be customized by providing a custom function to sort the entries
 - `label`: Sorts by the `label` field, deprioritizing entries with a leading `_`
 - `kind`: Sorts by the numeric `kind` field
   - Check the order via `:lua vim.print(vim.lsp.protocol.CompletionItemKind)`
+
+#### Sorting priority and tie-breaking
+
+**The order in which you specify sorts in your configuration determines their priority.**
+
+When sorting, each entry pair is compared using the first method in your list. If that comparison results in a tie, the next method is used, and so on. This allows you to build multi-level sorting logic.
+
+```lua
+fuzzy = {
+  sorts = {
+    'score',      -- Primary sort: by fuzzy matching score
+    'sort_text',  -- Secondary sort: by sortText field if scores are equal
+    'label',      -- Tertiary sort: by label if still tied
+  }
+}
+```
+
+In the example above:
+
+- Entries are first sorted by score.
+- If two entries have the same score, they are then sorted by sort_text.
+- If still tied, they are sorted by label.
+
+#### Custom sorting
+
+You may also provide a custom Lua function to define your own sorting logic. The function should follow the Lua [table.sort](https://www.lua.org/manual/5.1/manual.html#pdf-table.sort) convention.
 
 ```lua
 fuzzy = {
@@ -86,3 +116,13 @@ fuzzy = {
     'sort_text',
 }
 ```
+
+In the example above:
+
+- The custom function is the primary sort: it puts entries starting with _ last.
+- If two entries are equal according to the custom function, they are then sorted by score.
+- If still tied, they are sorted by sort_text.
+
+::: warning
+If you are using the Rust implementation but specify a custom Lua function for sorting, the sorting process will fall back to Lua instead of being handled by Rust. This can impact performance, particularly when working with large lists.
+:::
