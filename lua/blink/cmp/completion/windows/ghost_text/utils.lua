@@ -1,11 +1,5 @@
 local utils = {}
 
---- @param text_edit lsp.TextEdit
-function utils.get_still_untyped_text(text_edit)
-  local type_text_length = text_edit.range['end'].character - text_edit.range.start.character
-  return text_edit.newText:sub(type_text_length + 1)
-end
-
 function utils.is_cmdline() return vim.api.nvim_get_mode().mode == 'c' end
 function utils.is_cmdwin() return vim.fn.win_gettype() == 'command' end
 
