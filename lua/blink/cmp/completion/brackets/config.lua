@@ -5,7 +5,8 @@ return {
   blocked_filetypes = {
     'sql', 'ruby', 'perl', 'lisp', 'scheme', 'clojure',
     'prolog', 'vb', 'elixir', 'smalltalk', 'applescript',
-    'elm', 'rust', 'nu', 'cpp', 'fennel', 'janet', 'ps1'
+    'elm', 'rust', 'nu', 'cpp', 'fennel', 'janet', 'ps1',
+    'racket'
   },
   per_filetype = {
     -- languages with a space
