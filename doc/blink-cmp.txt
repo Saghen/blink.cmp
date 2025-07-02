@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 June 30
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 July 02
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1893,6 +1893,17 @@ sources
 - blink-cmp-register <https://github.com/phanen/blink-cmp-register>
 - blink-cmp-sshconfig <https://github.com/bydlw98/blink-cmp-sshconfig>
 - blink-cmp-words <https://github.com/archie-judd/blink-cmp-words>: Definitions and synonyms
+
+
+WORKING NVIM-CMP SOURCES VIA BLINK.COMPAT
+
+The vast majority of `nvim-cmp` sources work with `blink.compat`, see the
+`nvim-cmp` <https://github.com/topics/nvim-cmp> topic on github. The following
+is a non-exhaustive list of sources that have been tested by their author or
+the community.
+
+- cmp-rails-fixture-names <https://github.com/wassimk/cmp-rails-fixture-names>: Ruby on Rails fixture names completion
+- cmp-rails-fixture-types <https://github.com/wassimk/cmp-rails-fixture-types>: Ruby on Rails fixture types completion
 
 
 REFERENCE                                         *blink-cmp-config-reference*
