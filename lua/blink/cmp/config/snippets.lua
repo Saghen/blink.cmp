@@ -17,7 +17,7 @@ end
 --- @return boolean
 local function is_hidden_snippet()
   local ls = require('luasnip')
-  return not require('blink.cmp').is_visible() and not ls.in_snippet() and ls.expandable()
+  return not require('blink.cmp').is_visible() and not ls.locally_jumpable(1) and ls.expandable()
 end
 
 local validate = require('blink.cmp.config.utils').validate
@@ -44,7 +44,7 @@ local snippets = {
         local ls = require('luasnip')
         if is_hidden_snippet() then return true end
         if filter and filter.direction then return ls.jumpable(filter.direction) end
-        return ls.in_snippet()
+        return ls.locally_jumpable(1)
       end,
       mini_snippets = function()
         if not _G.MiniSnippets then error('mini.snippets has not been setup') end
