@@ -3,9 +3,11 @@ local fuzzy = require('blink.cmp.fuzzy')
 local uv = vim.uv
 local dedup = require('blink.cmp.lib.utils').deduplicate
 
+local parser = {}
+
 --- @param words string[]
 --- @return blink.cmp.CompletionItem[]
-local function words_to_items(words)
+function parser.words_to_items(words)
   local items = {}
   for _, word in ipairs(words) do
     table.insert(items, {
@@ -17,10 +19,6 @@ local function words_to_items(words)
   end
   return items
 end
-
---------------
-
-local parser = {}
 
 --- @param bufnr integer
 --- @param exclude_word_under_cursor boolean
@@ -57,7 +55,7 @@ end
 --- @return blink.cmp.Task
 function parser.run_sync(text)
   local words = fuzzy.get_words(text)
-  return async.task.identity(words_to_items(words))
+  return async.task.identity(parser.words_to_items(words))
 end
 
 --- @param text string
@@ -73,7 +71,7 @@ function parser.run_async_rust(text)
       end,
       ---@param words string
       function(words)
-        local items = words_to_items(vim.split(words, '\n'))
+        local items = parser.words_to_items(vim.split(words, '\n'))
         vim.schedule(function() resolve(items) end)
       end
     )
@@ -122,7 +120,7 @@ function parser.run_async_lua(text)
 
         -- Deduplicate and finish
         local words = dedup(all_words)
-        resolve(words_to_items(words))
+        resolve(parser.words_to_items(words))
       end
 
       next_chunk()

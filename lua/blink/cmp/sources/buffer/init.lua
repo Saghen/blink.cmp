@@ -92,7 +92,7 @@ function buffer:get_buf_items(bufnr, exclude_word_under_cursor)
   local cache = self.cache[bufnr]
 
   if cache and cache.changedtick == changedtick and cache.exclude_word_under_cursor == exclude_word_under_cursor then
-    return async.task.identity(cache.items)
+    return async.task.identity(parser.words_to_items(cache.words))
   end
 
   ---@param items blink.cmp.CompletionItem[]
@@ -100,7 +100,7 @@ function buffer:get_buf_items(bufnr, exclude_word_under_cursor)
     self.cache[bufnr] = {
       changedtick = changedtick,
       exclude_word_under_cursor = exclude_word_under_cursor,
-      items = items,
+      words = vim.tbl_map(function(item) return item.label end, items),
     }
     return items
   end
