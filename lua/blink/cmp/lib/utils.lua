@@ -44,6 +44,24 @@ function utils.deduplicate(arr)
   return result
 end
 
+--- Returns a list of unique items from the input array, using a key extractor function.
+--- @generic T
+--- @param arr T[]
+--- @param fn fun(item: T): string|number
+--- @return T[] Array
+function utils.deduplicate_by_key(arr, fn)
+  local seen = {}
+  local result = {}
+  for _, v in ipairs(arr) do
+    local key = fn(v)
+    if not seen[key] then
+      seen[key] = true
+      table.insert(result, v)
+    end
+  end
+  return result
+end
+
 function utils.schedule_if_needed(fn)
   if vim.in_fast_event() then
     vim.schedule(fn)
