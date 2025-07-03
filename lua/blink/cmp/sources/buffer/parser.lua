@@ -8,14 +8,17 @@ local parser = {}
 --- @param words string[]
 --- @return blink.cmp.CompletionItem[]
 function parser.words_to_items(words)
+  local kind_text = require('blink.cmp.types').CompletionItemKind.Text
+  local plain_text = vim.lsp.protocol.InsertTextFormat.PlainText
+
   local items = {}
-  for _, word in ipairs(words) do
-    table.insert(items, {
-      label = word,
-      kind = require('blink.cmp.types').CompletionItemKind.Text,
-      insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
-      insertText = word,
-    })
+  for i = 1, #words do
+    items[i] = {
+      label = words[i],
+      kind = kind_text,
+      insertTextFormat = plain_text,
+      insertText = words[i],
+    }
   end
   return items
 end
