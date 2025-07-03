@@ -1,7 +1,6 @@
 local async = require('blink.cmp.lib.async')
 local fuzzy = require('blink.cmp.fuzzy')
 local uv = vim.uv
-local dedup = require('blink.cmp.lib.utils').deduplicate
 
 local parser = {}
 
@@ -38,10 +37,7 @@ end
 
 --- @param text string
 --- @return blink.cmp.Task
-function parser.run_sync(text)
-  local words = fuzzy.get_words(text)
-  return async.task.identity(words)
-end
+function parser.run_sync(text) return async.task.identity(fuzzy.get_words(text)) end
 
 --- @param text string
 --- @return blink.cmp.Task
@@ -102,9 +98,7 @@ function parser.run_async_lua(text)
         -- next iter
         if pos < total_length then return vim.schedule(next_chunk) end
 
-        -- Deduplicate and finish
-        local words = dedup(all_words)
-        resolve(words)
+        resolve(all_words)
       end
 
       next_chunk()
