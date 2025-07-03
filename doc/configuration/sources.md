@@ -124,6 +124,7 @@ See [blink.compat](https://github.com/Saghen/blink.compat) for using `nvim-cmp` 
 - [blink-cmp-register](https://github.com/phanen/blink-cmp-register)
 - [blink-cmp-sshconfig](https://github.com/bydlw98/blink-cmp-sshconfig)
 - [blink-cmp-words](https://github.com/archie-judd/blink-cmp-words): Definitions and synonyms
+- [blink-cmp-vsnip](https://codeberg.org/FelipeLema/blink-cmp-vsnip)
 
 ### Working `nvim-cmp` sources via `blink.compat`
 
