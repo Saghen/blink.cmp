@@ -20,6 +20,24 @@ local dedup = require('blink.cmp.lib.utils').deduplicate
 ---@field exclude_word_under_cursor boolean
 ---@field items blink.cmp.CompletionItem[]
 
+--- @param words string[]
+--- @return blink.cmp.CompletionItem[]
+local function words_to_items(words)
+  local kind_text = require('blink.cmp.types').CompletionItemKind.Text
+  local plain_text = vim.lsp.protocol.InsertTextFormat.PlainText
+
+  local items = {}
+  for i = 1, #words do
+    items[i] = {
+      label = words[i],
+      kind = kind_text,
+      insertTextFormat = plain_text,
+      insertText = words[i],
+    }
+  end
+  return items
+end
+
 --- Public API
 
 local buffer = {}
@@ -92,17 +110,17 @@ function buffer:get_buf_items(bufnr, exclude_word_under_cursor)
   local cache = self.cache[bufnr]
 
   if cache and cache.changedtick == changedtick and cache.exclude_word_under_cursor == exclude_word_under_cursor then
-    return async.task.identity(parser.words_to_items(cache.words))
+    return async.task.identity(words_to_items(cache.words))
   end
 
-  ---@param items blink.cmp.CompletionItem[]
-  local function store_in_cache(items)
+  ---@param words string[]
+  local function store_in_cache(words)
     self.cache[bufnr] = {
       changedtick = changedtick,
       exclude_word_under_cursor = exclude_word_under_cursor,
-      words = vim.tbl_map(function(item) return item.label end, items),
+      words = words,
     }
-    return items
+    return words_to_items(words)
   end
 
   local buf_text = parser.get_buf_text(bufnr, exclude_word_under_cursor)

@@ -5,24 +5,6 @@ local dedup = require('blink.cmp.lib.utils').deduplicate
 
 local parser = {}
 
---- @param words string[]
---- @return blink.cmp.CompletionItem[]
-function parser.words_to_items(words)
-  local kind_text = require('blink.cmp.types').CompletionItemKind.Text
-  local plain_text = vim.lsp.protocol.InsertTextFormat.PlainText
-
-  local items = {}
-  for i = 1, #words do
-    items[i] = {
-      label = words[i],
-      kind = kind_text,
-      insertTextFormat = plain_text,
-      insertText = words[i],
-    }
-  end
-  return items
-end
-
 --- @param bufnr integer
 --- @param exclude_word_under_cursor boolean
 --- @return string
@@ -58,7 +40,7 @@ end
 --- @return blink.cmp.Task
 function parser.run_sync(text)
   local words = fuzzy.get_words(text)
-  return async.task.identity(parser.words_to_items(words))
+  return async.task.identity(words)
 end
 
 --- @param text string
@@ -74,8 +56,7 @@ function parser.run_async_rust(text)
       end,
       ---@param words string
       function(words)
-        local items = parser.words_to_items(vim.split(words, '\n'))
-        vim.schedule(function() resolve(items) end)
+        vim.schedule(function() resolve(vim.split(words, '\n')) end)
       end
     )
     worker:queue(text, package.cpath)
@@ -123,7 +104,7 @@ function parser.run_async_lua(text)
 
         -- Deduplicate and finish
         local words = dedup(all_words)
-        resolve(parser.words_to_items(words))
+        resolve(words)
       end
 
       next_chunk()
