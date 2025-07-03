@@ -110,7 +110,7 @@ function buffer:get_buf_items(bufnr, exclude_word_under_cursor)
   local cache = self.cache[bufnr]
 
   if cache and cache.changedtick == changedtick and cache.exclude_word_under_cursor == exclude_word_under_cursor then
-    return async.task.identity(words_to_items(cache.words))
+    return async.task.identity(cache.words)
   end
 
   ---@param words string[]
@@ -120,7 +120,7 @@ function buffer:get_buf_items(bufnr, exclude_word_under_cursor)
       exclude_word_under_cursor = exclude_word_under_cursor,
       words = words,
     }
-    return words_to_items(words)
+    return words
   end
 
   local buf_text = parser.get_buf_text(bufnr, exclude_word_under_cursor)
@@ -156,20 +156,14 @@ function buffer:get_completions(_, callback)
     end
 
     local tasks = vim.tbl_map(function(buf) return self:get_buf_items(buf, not is_search) end, bufnrs)
-    async.task.all(tasks):map(function(items_per_buf)
-      --- @cast items_per_buf blink.cmp.CompletionItem[][]
+    async.task.all(tasks):map(function(words_per_buf)
+      --- @cast words_per_buf string[][]
 
-      --- @type blink.cmp.CompletionItem[]
-      local all_items = {}
-      for _, buf_items in ipairs(items_per_buf) do
-        vim.list_extend(all_items, buf_items)
+      local all_words = {}
+      for _, buf_words in ipairs(words_per_buf) do
+        vim.list_extend(all_words, buf_words)
       end
-
-      --- @type blink.cmp.CompletionItem[]
-      local items = dedup(all_items, function(item)
-        --- @cast item blink.cmp.CompletionItem
-        return item.label
-      end)
+      local items = words_to_items(dedup(all_words))
 
       ---@diagnostic disable-next-line: missing-return
       callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
