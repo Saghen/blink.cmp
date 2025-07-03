@@ -58,6 +58,7 @@ function completion.setup()
   -- setup completion menu
   if config.completion.menu.enabled then
     local menu = function() return require('blink.cmp.completion.windows.menu') end
+    local docs = function() return require('blink.cmp.completion.windows.documentation') end
 
     local loading_timer = vim.uv.new_timer()
     trigger.show_emitter:on(function(event)
@@ -76,8 +77,9 @@ function completion.setup()
 
     list.select_emitter:on(function(event)
       menu().set_selected_item_idx(event.idx)
-      require('blink.cmp.completion.windows.documentation').auto_show_item(event.context, event.item)
+      docs().auto_show_item(event.context, event.item)
     end)
+    list.show_emitter:on(function() docs().close() end)
   end
 
   -- setup ghost text
