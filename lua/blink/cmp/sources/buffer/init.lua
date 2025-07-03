@@ -6,7 +6,7 @@ local async = require('blink.cmp.lib.async')
 local parser = require('blink.cmp.sources.buffer.parser')
 local fuzzy = require('blink.cmp.fuzzy')
 local utils = require('blink.cmp.sources.lib.utils')
-local lib_utils = require('blink.cmp.lib.utils')
+local dedup = require('blink.cmp.lib.utils').deduplicate
 
 --- @class blink.cmp.BufferOpts
 --- @field get_bufnrs fun(): integer[]
@@ -130,7 +130,7 @@ function buffer:get_completions(_, callback)
   vim.schedule(function()
     local is_search = self:is_search_context()
     local get_bufnrs = is_search and self.opts.get_search_bufnrs or self.opts.get_bufnrs
-    local bufnrs = lib_utils.deduplicate(get_bufnrs())
+    local bufnrs = dedup(get_bufnrs())
 
     if #bufnrs == 0 then
       callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = {} })
@@ -148,7 +148,7 @@ function buffer:get_completions(_, callback)
       end
 
       --- @type blink.cmp.CompletionItem[]
-      local items = lib_utils.deduplicate_by_key(all_items, function(item)
+      local items = dedup(all_items, function(item)
         --- @cast item blink.cmp.CompletionItem
         return item.label
       end)
