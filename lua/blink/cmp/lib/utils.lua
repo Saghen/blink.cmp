@@ -33,11 +33,15 @@ end
 --- @param arr T[]
 --- @return T[]
 function utils.deduplicate(arr)
-  local hash = {}
+  local seen = {}
+  local result = {}
   for _, v in ipairs(arr) do
-    hash[v] = true
+    if not seen[v] then
+      seen[v] = true
+      table.insert(result, v)
+    end
   end
-  return vim.tbl_keys(hash)
+  return result
 end
 
 function utils.schedule_if_needed(fn)
