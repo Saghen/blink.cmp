@@ -4,6 +4,7 @@
 
 local async = require('blink.cmp.lib.async')
 local parser = require('blink.cmp.sources.buffer.parser')
+local buf_utils = require('blink.cmp.sources.buffer.utils')
 local fuzzy = require('blink.cmp.fuzzy')
 local utils = require('blink.cmp.sources.lib.utils')
 local dedup = require('blink.cmp.lib.utils').deduplicate
@@ -13,12 +14,14 @@ local dedup = require('blink.cmp.lib.utils').deduplicate
 --- @field get_search_bufnrs fun(): integer[]
 --- @field max_sync_buffer_size integer Maximum buffer text size for sync processing
 --- @field max_async_buffer_size integer Maximum buffer text size for async processing
+--- @field max_total_buffer_size integer Maximum text size across all buffers
+--- @field retention_order string[] Order in which buffers are retained for completion, up to the max total size limit
 --- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s) and global (:g) commands
 
 ---@class blink.cmp.BufferCacheEntry
 ---@field changedtick integer
 ---@field exclude_word_under_cursor boolean
----@field items blink.cmp.CompletionItem[]
+---@field words string[]
 
 --- @param words string[]
 --- @return blink.cmp.CompletionItem[]
@@ -57,6 +60,8 @@ function buffer.new(opts)
     get_search_bufnrs = function() return { vim.api.nvim_get_current_buf() } end,
     max_sync_buffer_size = 20000,
     max_async_buffer_size = 500000,
+    max_total_buffer_size = 2000000,
+    retention_order = { 'visible', 'largest' },
     enable_in_ex_commands = false,
   })
   require('blink.cmp.config.utils').validate('sources.providers.buffer', {
@@ -64,6 +69,8 @@ function buffer.new(opts)
     get_search_bufnrs = { opts.get_search_bufnrs, 'function' },
     max_sync_buffer_size = { opts.max_sync_buffer_size, 'number' },
     max_async_buffer_size = { opts.max_async_buffer_size, 'number' },
+    max_total_buffer_size = { opts.max_total_buffer_size, 'number' },
+    retention_order = { opts.retention_order, 'table' },
     enable_in_ex_commands = { opts.enable_in_ex_commands, 'boolean' },
   }, opts)
 
@@ -155,7 +162,10 @@ function buffer:get_completions(_, callback)
       return
     end
 
-    local tasks = vim.tbl_map(function(buf) return self:get_buf_items(buf, not is_search) end, bufnrs)
+    local tasks = vim.tbl_map(
+      function(buf) return self:get_buf_items(buf, not is_search) end,
+      buf_utils.retain_buffers(bufnrs, self.opts.max_total_buffer_size, self.opts.retention_order)
+    )
     async.task.all(tasks):map(function(words_per_buf)
       --- @cast words_per_buf string[][]
 
