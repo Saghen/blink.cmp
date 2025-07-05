@@ -28,19 +28,16 @@ function utils.union_keys(t1, t2)
   return vim.tbl_keys(t3)
 end
 
---- Returns a list of unique values from the input array.
---- If a function is provided, uniqueness is based on the extracted key.
+--- Returns a list of unique values from the input array
 --- @generic T
 --- @param arr T[]
---- @param fn? fun(item: T): string|number
 --- @return T[]
-function utils.deduplicate(arr, fn)
+function utils.deduplicate(arr)
   local seen = {}
   local result = {}
   for _, v in ipairs(arr) do
-    local key = fn and fn(v) or v
-    if not seen[key] then
-      seen[key] = true
+    if not seen[v] then
+      seen[v] = true
       table.insert(result, v)
     end
   end
