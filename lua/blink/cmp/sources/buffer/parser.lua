@@ -106,4 +106,24 @@ function parser.run_async_lua(text)
     :on_cancel(function() cancelled = true end)
 end
 
+function parser.get_buf_words(bufnr, exclude_word_under_cursor, opts)
+  local buf_text = parser.get_buf_text(bufnr, exclude_word_under_cursor)
+  local len = #buf_text
+
+  -- should take less than 2ms
+  if len < opts.max_sync_buffer_size then
+    return parser.run_sync(buf_text)
+  -- should take less than 10ms
+  elseif len < opts.max_async_buffer_size then
+    if opts.fuzzy_implementation_type == 'rust' then
+      return parser.run_async_rust(buf_text)
+    else
+      return parser.run_async_lua(buf_text)
+    end
+  else
+    -- Too big, skip
+    return async.task.identity({})
+  end
+end
+
 return parser

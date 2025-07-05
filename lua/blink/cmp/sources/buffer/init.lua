@@ -5,7 +5,6 @@
 local async = require('blink.cmp.lib.async')
 local parser = require('blink.cmp.sources.buffer.parser')
 local buf_utils = require('blink.cmp.sources.buffer.utils')
-local fuzzy = require('blink.cmp.fuzzy')
 local utils = require('blink.cmp.sources.lib.utils')
 local dedup = require('blink.cmp.lib.utils').deduplicate
 
@@ -130,22 +129,7 @@ function buffer:get_buf_items(bufnr, exclude_word_under_cursor)
     return words
   end
 
-  local buf_text = parser.get_buf_text(bufnr, exclude_word_under_cursor)
-
-  -- should take less than 2ms
-  if #buf_text < self.opts.max_sync_buffer_size then
-    return parser.run_sync(buf_text):map(store_in_cache)
-  -- should take less than 10ms
-  elseif #buf_text < self.opts.max_async_buffer_size then
-    if fuzzy.implementation_type == 'rust' then
-      return parser.run_async_rust(buf_text):map(store_in_cache)
-    else
-      return parser.run_async_lua(buf_text):map(store_in_cache)
-    end
-  else
-    -- too big so ignore
-    return async.task.identity({})
-  end
+  return parser.get_buf_words(bufnr, exclude_word_under_cursor, self.opts):map(store_in_cache)
 end
 
 --- @return boolean
