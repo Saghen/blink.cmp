@@ -105,6 +105,7 @@ function completion.get_completion_for_client(context, client, opts)
       require('blink.cmp.sources.lsp.hacks.tailwind').process_response(response, opts.tailwind_color_icon)
     end
     if client.name == 'clangd' then require('blink.cmp.sources.lsp.hacks.clangd').process_response(response) end
+    if client.name == 'lua_ls' then require('blink.cmp.sources.lsp.hacks.lua_ls').process_response(response) end
 
     cache.set(context, client, response)
 

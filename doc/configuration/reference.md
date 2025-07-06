@@ -502,13 +502,6 @@ sources.providers = {
     -- You may enable the buffer source, when LSP is available, by setting this to `{}`
     -- You may want to set the score_offset of the buffer source to a lower value, such as -5 in this case
     fallbacks = { 'buffer' },
-    -- Filter text items from the LSP provider, since we have the buffer provider for that
-    transform_items = function(_, items)
-      return vim.tbl_filter(
-        function(item) return item.kind ~= require('blink.cmp.types').CompletionItemKind.Text end,
-        items
-      )
-    end,
     opts = { tailwind_color_icon = '██' },
 
     --- These properties apply to !!ALL sources!!
