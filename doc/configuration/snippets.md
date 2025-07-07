@@ -98,7 +98,7 @@ Some LSPs may ignore the `snippetSupport` field, in which case, you need to set 
 -- For `rust-analyzer`
 lspconfig['rust-analyzer'].setup({
   completion = {
-    capable = {
+    callable = {
       snippets = 'add_parenthesis'
     }
   }
