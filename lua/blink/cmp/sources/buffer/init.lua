@@ -150,11 +150,13 @@ function buffer:get_completions(_, callback)
     async.task.all(tasks):map(function(words_per_buf)
       --- @cast words_per_buf string[][]
 
-      local all_words = {}
+      local unique = {}
       for _, buf_words in ipairs(words_per_buf) do
-        vim.list_extend(all_words, buf_words)
+        for _, word in ipairs(buf_words) do
+          unique[word] = true
+        end
       end
-      local items = words_to_items(dedup(all_words))
+      local items = words_to_items(vim.tbl_keys(unique))
 
       if self.opts.use_cache then self.cache:cleanup(selected_bufnrs) end
 
