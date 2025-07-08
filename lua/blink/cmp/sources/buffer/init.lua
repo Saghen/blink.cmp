@@ -15,12 +15,8 @@ local dedup = require('blink.cmp.lib.utils').deduplicate
 --- @field max_async_buffer_size integer Maximum buffer text size for async processing
 --- @field max_total_buffer_size integer Maximum text size across all buffers
 --- @field retention_order string[] Order in which buffers are retained for completion, up to the max total size limit
+--- @field use_cache boolean Whether to cache words for each buffer. Invalidated and refreshed whenever the buffer content is modified.
 --- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s) and global (:g) commands
-
----@class blink.cmp.BufferCacheEntry
----@field changedtick integer
----@field exclude_word_under_cursor boolean
----@field words string[]
 
 --- @param words string[]
 --- @return blink.cmp.CompletionItem[]
@@ -61,6 +57,7 @@ function buffer.new(opts)
     max_async_buffer_size = 500000,
     max_total_buffer_size = 2000000,
     retention_order = { 'visible', 'largest' },
+    use_cache = false,
     enable_in_ex_commands = false,
   })
   require('blink.cmp.config.utils').validate('sources.providers.buffer', {
@@ -70,6 +67,7 @@ function buffer.new(opts)
     max_async_buffer_size = { opts.max_async_buffer_size, 'number' },
     max_total_buffer_size = { opts.max_total_buffer_size, 'number' },
     retention_order = { opts.retention_order, 'table' },
+    use_cache = { opts.use_cache, 'boolean' },
     enable_in_ex_commands = { opts.enable_in_ex_commands, 'boolean' },
   }, opts)
 
@@ -85,15 +83,9 @@ function buffer.new(opts)
     end)
   end
 
+  if opts.use_cache then self.cache = require('blink.cmp.sources.buffer.cache').new() end
+
   self.opts = opts
-
-  ---@type table<integer, blink.cmp.BufferCacheEntry>
-  self.cache = {}
-
-  vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
-    desc = 'Invalidate buffer cache items when buffer is deleted',
-    callback = function(args) self.cache[args.buf] = nil end,
-  })
 
   return self
 end
@@ -112,20 +104,26 @@ end
 --- @param exclude_word_under_cursor boolean
 --- @return blink.cmp.Task
 function buffer:get_buf_items(bufnr, exclude_word_under_cursor)
-  local changedtick = vim.b[bufnr].changedtick
-  local cache = self.cache[bufnr]
+  local changedtick
 
-  if cache and cache.changedtick == changedtick and cache.exclude_word_under_cursor == exclude_word_under_cursor then
-    return async.task.identity(cache.words)
+  if self.opts.use_cache then
+    changedtick = vim.b[bufnr].changedtick
+    local cache = self.cache:get(bufnr)
+
+    if cache and cache.changedtick == changedtick and cache.exclude_word_under_cursor == exclude_word_under_cursor then
+      return async.task.identity(cache.words)
+    end
   end
 
   ---@param words string[]
   local function store_in_cache(words)
-    self.cache[bufnr] = {
-      changedtick = changedtick,
-      exclude_word_under_cursor = exclude_word_under_cursor,
-      words = words,
-    }
+    if self.opts.use_cache then
+      self.cache:set(bufnr, {
+        changedtick = changedtick,
+        exclude_word_under_cursor = exclude_word_under_cursor,
+        words = words,
+      })
+    end
     return words
   end
 
@@ -146,10 +144,9 @@ function buffer:get_completions(_, callback)
       return
     end
 
-    local tasks = vim.tbl_map(
-      function(buf) return self:get_buf_items(buf, not is_search) end,
-      buf_utils.retain_buffers(bufnrs, self.opts.max_total_buffer_size, self.opts.retention_order)
-    )
+    local selected_bufnrs = buf_utils.retain_buffers(bufnrs, self.opts.max_total_buffer_size, self.opts.retention_order)
+
+    local tasks = vim.tbl_map(function(buf) return self:get_buf_items(buf, not is_search) end, selected_bufnrs)
     async.task.all(tasks):map(function(words_per_buf)
       --- @cast words_per_buf string[][]
 
@@ -158,6 +155,8 @@ function buffer:get_completions(_, callback)
         vim.list_extend(all_words, buf_words)
       end
       local items = words_to_items(dedup(all_words))
+
+      if self.opts.use_cache then self.cache:cleanup(selected_bufnrs) end
 
       ---@diagnostic disable-next-line: missing-return
       callback({ is_incomplete_forward = false, is_incomplete_backward = false, items = items })
