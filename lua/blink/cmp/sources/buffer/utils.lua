@@ -2,6 +2,15 @@ local utils = {}
 
 local priority = require('blink.cmp.sources.buffer.priority')
 
+--- @param lower integer
+function utils.validate_buffer_size(lower)
+  return function(val)
+    if type(val) ~= 'number' then return false end
+    if lower ~= nil and val <= lower then return false end
+    return true
+  end
+end
+
 --- @param bufnr integer
 --- @return integer
 function utils.get_buffer_size(bufnr)

@@ -64,8 +64,16 @@ function buffer.new(opts)
     get_bufnrs = { opts.get_bufnrs, 'function' },
     get_search_bufnrs = { opts.get_search_bufnrs, 'function' },
     max_sync_buffer_size = { opts.max_sync_buffer_size, 'number' },
-    max_async_buffer_size = { opts.max_async_buffer_size, 'number' },
-    max_total_buffer_size = { opts.max_total_buffer_size, 'number' },
+    max_async_buffer_size = {
+      opts.max_async_buffer_size,
+      buf_utils.validate_buffer_size(opts.max_sync_buffer_size),
+      'a number greater than max_sync_buffer_size (' .. opts.max_sync_buffer_size .. ')',
+    },
+    max_total_buffer_size = {
+      opts.max_total_buffer_size,
+      buf_utils.validate_buffer_size(opts.max_async_buffer_size),
+      'a number greater than max_async_buffer_size (' .. opts.max_async_buffer_size .. ')',
+    },
     retention_order = { opts.retention_order, 'table' },
     use_cache = { opts.use_cache, 'boolean' },
     enable_in_ex_commands = { opts.enable_in_ex_commands, 'boolean' },
