@@ -25,9 +25,10 @@ end
 --- Retain buffers up to a total size cap, in the specified retention order.
 --- @param bufnrs integer[]
 --- @param max_total_size integer
+--- @param max_buffer_size integer
 --- @param retention_order string[]
 --- @return integer[] selected
-function utils.retain_buffers(bufnrs, max_total_size, retention_order)
+function utils.retain_buffers(bufnrs, max_total_size, max_buffer_size, retention_order)
   local buf_sizes = {}
   for _, bufnr in ipairs(bufnrs) do
     buf_sizes[bufnr] = utils.get_buffer_size(bufnr)
@@ -35,7 +36,7 @@ function utils.retain_buffers(bufnrs, max_total_size, retention_order)
 
   local sorted_bufnrs = vim.deepcopy(bufnrs)
   table.sort(sorted_bufnrs, priority.comparator(retention_order, buf_sizes))
-  sorted_bufnrs = vim.tbl_filter(function(bufnr) return buf_sizes[bufnr] <= max_total_size end, sorted_bufnrs)
+  sorted_bufnrs = vim.tbl_filter(function(bufnr) return buf_sizes[bufnr] <= max_buffer_size end, sorted_bufnrs)
 
   local selected, total_size = {}, 0
   for _, bufnr in ipairs(sorted_bufnrs) do

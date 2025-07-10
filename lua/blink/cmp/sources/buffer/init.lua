@@ -157,7 +157,12 @@ function buffer:get_completions(_, callback)
       return
     end
 
-    local selected_bufnrs = buf_utils.retain_buffers(bufnrs, self.opts.max_total_buffer_size, self.opts.retention_order)
+    local selected_bufnrs = buf_utils.retain_buffers(
+      bufnrs,
+      self.opts.max_total_buffer_size,
+      self.opts.max_async_buffer_size,
+      self.opts.retention_order
+    )
 
     local tasks = vim.tbl_map(function(buf) return self:get_buf_items(buf, not is_search) end, selected_bufnrs)
     async.task.all(tasks):map(function(words_per_buf)
