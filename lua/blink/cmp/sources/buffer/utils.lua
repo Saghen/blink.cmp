@@ -35,6 +35,7 @@ function utils.retain_buffers(bufnrs, max_total_size, retention_order)
 
   local sorted_bufnrs = vim.deepcopy(bufnrs)
   table.sort(sorted_bufnrs, priority.comparator(retention_order, buf_sizes))
+  sorted_bufnrs = vim.tbl_filter(function(bufnr) return buf_sizes[bufnr] <= max_total_size end, sorted_bufnrs)
 
   local selected, total_size = {}, 0
   for _, bufnr in ipairs(sorted_bufnrs) do
