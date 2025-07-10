@@ -55,7 +55,7 @@ function buffer.new(opts)
     max_sync_buffer_size = 20000,
     max_async_buffer_size = 500000,
     max_total_buffer_size = 2000000,
-    retention_order = { 'visible', 'largest' },
+    retention_order = { 'focused', 'visible', 'largest' },
     enable_in_ex_commands = false,
   })
   require('blink.cmp.config.utils').validate('sources.providers.buffer', {

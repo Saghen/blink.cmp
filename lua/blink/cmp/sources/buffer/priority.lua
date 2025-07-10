@@ -1,5 +1,9 @@
 local priority = {}
 
+function priority.focused()
+  return function(bufnr) return bufnr == vim.api.nvim_win_get_buf(0) and 0 or 1 end
+end
+
 function priority.visible()
   local visible = {}
   for _, win in ipairs(vim.api.nvim_list_wins()) do
