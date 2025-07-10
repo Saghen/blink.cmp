@@ -72,7 +72,17 @@ function buffer.new(opts)
       buf_utils.validate_buffer_size(opts.max_async_buffer_size),
       'a number greater than max_async_buffer_size (' .. opts.max_async_buffer_size .. ')',
     },
-    retention_order = { opts.retention_order, 'table' },
+    retention_order = {
+      opts.retention_order,
+      function(retention_order)
+        if type(retention_order) ~= 'table' then return false end
+        for _, retention_type in ipairs(retention_order) do
+          if not vim.tbl_contains({ 'focused', 'visible', 'recency', 'largest' }, retention_type) then return false end
+        end
+        return true
+      end,
+      'table of: "focused", "visible", "recency", or "largest"',
+    },
     enable_in_ex_commands = { opts.enable_in_ex_commands, 'boolean' },
   }, opts)
 
