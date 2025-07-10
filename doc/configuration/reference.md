@@ -600,8 +600,6 @@ sources.providers = {
       max_total_buffer_size = 2000000,
       -- Order in which buffers are retained for completion, up to the max total size limit (see above)
       retention_order = { 'visible', 'largest' },
-      -- Whether to cache words for each buffer. Invalidated and refreshed whenever the buffer content is modified.
-      use_cache = true,
       -- Whether to enable buffer source in substitute (:s) and global (:g) commands.
       -- Note: Enabling this option will temporarily disable Neovim's 'inccommand' feature
       -- while editing Ex commands, due to a known redraw issue (see neovim/neovim#9783).
