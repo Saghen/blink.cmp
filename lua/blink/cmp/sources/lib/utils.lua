@@ -62,12 +62,13 @@ function utils.in_ex_context(commands)
   return vim.tbl_contains(commands, cmd) and has_args
 end
 
----Get the current command-line completion type.
+---Get the current completion type.
+---@param mode blink.cmp.Mode
 ---@return string completion_type The detected completion type, or an empty string if unknown.
-function utils.getcmdcompltype()
-  if vim.api.nvim_get_mode().mode == 'c' then
+function utils.get_completion_type(mode)
+  if mode == 'cmdline' then
     return vim.fn.getcmdcompltype()
-  elseif vim.fn.win_gettype() == 'command' then
+  elseif mode == 'cmdwin' then
     -- TODO: Remove the fallback below once 0.12 is the minimum supported version
     if vim.fn.exists('*getcompletiontype') == 1 then
       local line = vim.api.nvim_get_current_line()
@@ -87,7 +88,7 @@ function utils.getcmdcompltype()
       end
 
       -- Guess by last argument
-      local args = parse_cmd.args
+      local args = parse_cmd.args or {}
       if #args > 0 then
         local last_arg = args[#args]
         local completion_type = guess_type_by_prefix(last_arg)
