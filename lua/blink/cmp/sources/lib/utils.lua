@@ -68,9 +68,14 @@ function utils.getcmdcompltype()
   if vim.api.nvim_get_mode().mode == 'c' then
     return vim.fn.getcmdcompltype()
   elseif vim.fn.win_gettype() == 'command' then
-    -- FIXME: Neovim does not provide yet an API to determine the completion type in command-line window.
-    -- Therefore, we attempt to parse the command-line and map it to a known completion type,
-    -- either by guessing from the last argument or from the command name. This roughly mimics vim.fn.getcmdcompltype()
+    -- TODO: Remove the fallback below once 0.12 is the minimum supported version
+    if vim.fn.exists('*getcompletiontype') == 1 then
+      local line = vim.api.nvim_get_current_line()
+      return vim.fn.getcompletiontype(line)
+    end
+
+    -- As fallback, parse the command-line and map it to a known completion type,
+    -- either by guessing from the last argument or from the command name.
     local line = vim.api.nvim_get_current_line()
     local ok, parse_cmd = pcall(vim.api.nvim_parse_cmd, line, {})
     if ok then
