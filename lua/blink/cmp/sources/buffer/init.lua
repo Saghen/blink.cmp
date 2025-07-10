@@ -150,12 +150,16 @@ function buffer:get_completions(_, callback)
       --- @cast words_per_buf string[][]
 
       local unique = {}
+      local words = {}
       for _, buf_words in ipairs(words_per_buf) do
         for _, word in ipairs(buf_words) do
-          unique[word] = true
+          if not unique[word] then
+            unique[word] = true
+            table.insert(words, word)
+          end
         end
       end
-      local items = words_to_items(vim.tbl_keys(unique))
+      local items = words_to_items(words)
 
       self.cache:cleanup(selected_bufnrs)
 
