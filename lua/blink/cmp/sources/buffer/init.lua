@@ -55,7 +55,7 @@ function buffer.new(opts)
     max_sync_buffer_size = 20000,
     max_async_buffer_size = 500000,
     max_total_buffer_size = 2000000,
-    retention_order = { 'focused', 'visible', 'largest' },
+    retention_order = { 'focused', 'visible', 'recency', 'largest' },
     enable_in_ex_commands = false,
   })
   require('blink.cmp.config.utils').validate('sources.providers.buffer', {
@@ -75,6 +75,10 @@ function buffer.new(opts)
     retention_order = { opts.retention_order, 'table' },
     enable_in_ex_commands = { opts.enable_in_ex_commands, 'boolean' },
   }, opts)
+
+  if vim.tbl_contains(opts.retention_order, 'recency') then
+    require('blink.cmp.sources.buffer.recency').start_tracking()
+  end
 
   -- HACK: When using buffer completion sources in ex commands
   -- while 'inccommand' is active, Neovim's UI redraw is delayed by one frame.

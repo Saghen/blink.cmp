@@ -12,6 +12,12 @@ function priority.visible()
   return function(bufnr) return visible[bufnr] and 0 or 1 end
 end
 
+function priority.recency()
+  local recency = require('blink.cmp.sources.buffer.recency')
+  local time = vim.loop.hrtime()
+  return function(bufnr) return time - recency.accessed_at(bufnr) end
+end
+
 function priority.largest(buf_sizes)
   return function(bufnr) return -buf_sizes[bufnr] end
 end
