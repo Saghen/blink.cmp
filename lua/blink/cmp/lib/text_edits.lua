@@ -149,7 +149,7 @@ function text_edits.get_from_item(item)
   text_edit.replace = nil
   --- @cast text_edit lsp.TextEdit
 
-  text_edit = text_edits.compensate_for_cursor_movement(text_edit, item.cursor_column, context.get_cursor()[2])
+  text_edit = text_edits.compensate_for_cursor_movement(text_edit)
 
   -- convert the offset encoding to utf-8
   -- TODO: we have to do this last because it applies a max on the position based on the length of the line
@@ -162,18 +162,27 @@ function text_edits.get_from_item(item)
   return text_edit
 end
 
---- Adjust the position of the text edit to be the current cursor position
---- since the data might be outdated. We compare the cursor column position
---- from when the items were fetched versus the current.
+--- Adjust the position of the text edit to match the current cursor position.
+--- This is necessary because the user may have typed additional characters
+--- after the completion items were fetched, or because new completion items
+--- may have been fetched after typing a trigger character.
 --- HACK: is there a better way?
 --- TODO: take into account the offset_encoding
 --- @param text_edit lsp.TextEdit
---- @param old_cursor_col number Position of the cursor when the text edit was created
---- @param new_cursor_col number New position of the cursor
-function text_edits.compensate_for_cursor_movement(text_edit, old_cursor_col, new_cursor_col)
+function text_edits.compensate_for_cursor_movement(text_edit)
   text_edit = vim.deepcopy(text_edit)
-  local offset = new_cursor_col - old_cursor_col
-  text_edit.range['end'].character = text_edit.range['end'].character + offset
+
+  local orig_end = text_edit.range['end'].character
+  local new_cursor_col = context.get_cursor()[2]
+
+  -- Only adjust if the cursor moved past the original end of the edit range.
+  -- This ensures the edit range expands to include all newly typed characters,
+  -- so completion replaces exactly what the user has typed.
+  if new_cursor_col ~= orig_end then
+    local end_offset = new_cursor_col - text_edit.range.start.character
+    text_edit.range['end'].character = orig_end + end_offset
+  end
+
   return text_edit
 end
 

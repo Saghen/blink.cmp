@@ -238,9 +238,7 @@ function list.undo_preview()
 
   -- The text edit may be out of date due to the user typing more characters
   -- so we adjust the range to compensate
-  local old_cursor_col = list.preview_undo.cursor_after[2]
-  local new_cursor_col = context.get_cursor()[2]
-  text_edit = text_edits_lib.compensate_for_cursor_movement(text_edit, old_cursor_col, new_cursor_col)
+  text_edit = text_edits_lib.compensate_for_cursor_movement(text_edit)
 
   require('blink.cmp.lib.text_edits').apply(text_edit)
   if list.preview_undo.cursor_before ~= nil then
