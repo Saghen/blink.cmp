@@ -588,7 +588,13 @@ sources.providers = {
       -- Maximum total number of characters (across all selected buffers) for which buffer completion runs synchronously. Above this, asynchronous processing is used.
       max_sync_buffer_size = 20000,
       -- Maximum total number of characters (across all selected buffers) for which buffer completion runs asynchronously. Above this, buffer completions are skipped to avoid performance issues.
-      max_async_buffer_size = 500000,
+      max_async_buffer_size = 200000,
+      -- Maximum text size across all buffers (default: 500KB)
+      max_total_buffer_size = 500000,
+      -- Order in which buffers are retained for completion, up to the max total size limit (see above)
+      retention_order = { 'visible', 'largest' },
+      -- Cache words for each buffer which increases memory usage but drastically reduces cpu usage. Memory usage depends on the size of the buffers from `get_bufnrs`. For 100k items, it will use ~20MBs of memory. Invalidated and refreshed whenever the buffer content is modified.
+      use_cache = true,
       -- Whether to enable buffer source in substitute (:s) and global (:g) commands.
       -- Note: Enabling this option will temporarily disable Neovim's 'inccommand' feature
       -- while editing Ex commands, due to a known redraw issue (see neovim/neovim#9783).
