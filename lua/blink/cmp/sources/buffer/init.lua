@@ -15,7 +15,7 @@ local dedup = require('blink.cmp.lib.utils').deduplicate
 --- @field max_async_buffer_size integer Maximum buffer text size for async processing
 --- @field max_total_buffer_size integer Maximum text size across all buffers
 --- @field retention_order string[] Order in which buffers are retained for completion, up to the max total size limit
---- @field use_cache boolean Whether to cache words for each buffer. Invalidated and refreshed whenever the buffer content is modified.
+--- @field use_cache boolean Cache words for each buffer which increases memory usage but drastically reduces cpu usage. Memory usage depends on the size of the buffers from `get_bufnrs`. For 100k items, it will use ~20MBs of memory. Invalidated and refreshed whenever the buffer content is modified.
 --- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s) and global (:g) commands
 
 --- @param words string[]
@@ -38,6 +38,9 @@ end
 
 --- Public API
 
+--- @class blink.cmp.BufferSource : blink.cmp.Source
+--- @field opts blink.cmp.BufferOpts
+--- @field cache blink.cmp.BufferCache
 local buffer = {}
 
 function buffer.new(opts)
