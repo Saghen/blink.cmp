@@ -58,7 +58,7 @@ function buffer.new(opts)
     get_search_bufnrs = function() return { vim.api.nvim_get_current_buf() } end,
     max_sync_buffer_size = 20000,
     max_async_buffer_size = 200000,
-    max_total_buffer_size = 1000000,
+    max_total_buffer_size = 500000,
     retention_order = { 'focused', 'visible', 'recency', 'largest' },
     use_cache = true,
     enable_in_ex_commands = false,
