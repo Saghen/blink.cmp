@@ -149,12 +149,12 @@ function text_edits.get_from_item(item)
   text_edit.replace = nil
   --- @cast text_edit lsp.TextEdit
 
-  text_edit = text_edits.compensate_for_cursor_movement(text_edit)
+  local offset_encoding = text_edits.offset_encoding_from_item(item)
+  text_edit = text_edits.compensate_for_cursor_movement(text_edit, offset_encoding)
 
   -- convert the offset encoding to utf-8
   -- TODO: we have to do this last because it applies a max on the position based on the length of the line
   -- so it would break the offset code when removing characters at the end of the line
-  local offset_encoding = text_edits.offset_encoding_from_item(item)
   text_edit = text_edits.to_utf_8(text_edit, offset_encoding)
 
   text_edit.range = text_edits.clamp_range_to_bounds(text_edit.range)
@@ -167,21 +167,15 @@ end
 --- after the completion items were fetched, or because new completion items
 --- may have been fetched after typing a trigger character.
 --- HACK: is there a better way?
---- TODO: take into account the offset_encoding
 --- @param text_edit lsp.TextEdit
-function text_edits.compensate_for_cursor_movement(text_edit)
+--- @param offset_encoding ?string
+--- @return lsp.TextEdit
+function text_edits.compensate_for_cursor_movement(text_edit, offset_encoding)
   text_edit = vim.deepcopy(text_edit)
+  offset_encoding = offset_encoding or 'utf-8'
 
-  local orig_end = text_edit.range['end'].character
-  local new_cursor_col = context.get_cursor()[2]
-
-  -- Only adjust if the cursor moved past the original end of the edit range.
-  -- This ensures the edit range expands to include all newly typed characters,
-  -- so completion replaces exactly what the user has typed.
-  if new_cursor_col ~= orig_end then
-    local end_offset = new_cursor_col - text_edit.range.start.character
-    text_edit.range['end'].character = orig_end + end_offset
-  end
+  local new_cursor_col = vim.str_utfindex(context.get_line(), offset_encoding, context.get_cursor()[2])
+  text_edit.range['end'].character = new_cursor_col
 
   return text_edit
 end

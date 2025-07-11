@@ -238,6 +238,7 @@ function list.undo_preview()
 
   -- The text edit may be out of date due to the user typing more characters
   -- so we adjust the range to compensate
+  -- TODO: Set offset_encoding
   text_edit = text_edits_lib.compensate_for_cursor_movement(text_edit)
 
   require('blink.cmp.lib.text_edits').apply(text_edit)
