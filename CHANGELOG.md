@@ -1,3 +1,56 @@
+## [1.5.0](https://github.com/Saghen/blink.cmp/compare/v1.4.1...v1.5.0) (2025-07-11)
+
+### Highlights
+
+* ~1.5-3x global speed-up due to dropping `items` on `BlinkCmp*` autocmds
+  * You may use `require('blink.cmp').get_items()` instead
+* Buffer source rewrite ([#1964](https://github.com/Saghen/blink.cmp/issues/1964))
+  * Per-buffer caching for 2-100x speed-up, depending on the number, uniqueness and size of the buffers
+  * Added total size cap of 500k chars (`max_total_buffer_size`) with configurable `rentention_order`
+* Enable `cmdline` source in `command-line-window` (`q:`)
+
+Thank you @soifou for practically writing the whole release!
+
+### Features
+
+* cache buffer items by changedtick ([5e8165b](https://github.com/Saghen/blink.cmp/commit/5e8165bef3134b2cf95e4a5fd55042bca8753836))
+* add `clangd` hack, adding `.lsp_score` to completion items ([ca9019c](https://github.com/Saghen/blink.cmp/commit/ca9019cf9ab801c0818cbc825699b8582c9cb48a)), closes [#1778](https://github.com/Saghen/blink.cmp/issues/1778)
+* add blink-cmp-wezterm source ([#1951](https://github.com/Saghen/blink.cmp/issues/1951)) ([a5081e8](https://github.com/Saghen/blink.cmp/commit/a5081e88f983ec229d4f1994b6fbf1ec354bd753))
+* add blink-cmp-words to community sources ([#1938](https://github.com/Saghen/blink.cmp/issues/1938)) ([f4ecb69](https://github.com/Saghen/blink.cmp/commit/f4ecb693793cfb210e0dd08ee957c5c1ce806bbc))
+* **cmdline:** autoshow for cmdwin ([36de2a7](https://github.com/Saghen/blink.cmp/commit/36de2a72881b00f4cc9abe04c3c9e45ca79bfb1b))
+* **cmdline:** enable in `command-line-window` and vim filetype ([78b42f6](https://github.com/Saghen/blink.cmp/commit/78b42f6e59579a814815f4960375fc97cdd34e09)), closes [#1835](https://github.com/Saghen/blink.cmp/issues/1835) [#1447](https://github.com/Saghen/blink.cmp/issues/1447)
+* **cmdline:** support `getcompletiontype` for cmdwin ([ec03764](https://github.com/Saghen/blink.cmp/commit/ec03764122b028f1e0f86b885d6ad2ac9ea7cddf))
+* drop `BlinkCmpSourceCompletions` ([dc62667](https://github.com/Saghen/blink.cmp/commit/dc62667aa4bdef31ff0ff4700205dff402d5818c))
+* prefer continuous matches ([#1888](https://github.com/Saghen/blink.cmp/issues/1888)) ([2096cf1](https://github.com/Saghen/blink.cmp/commit/2096cf158133884738fef07f7b7d5bbf9accc237))
+
+### Bug Fixes
+
+* add racket to blocked filetypes for auto brackets ([f31a46e](https://github.com/Saghen/blink.cmp/commit/f31a46e64b846944da046ed0d6f994afd2ceb7b6)), closes [#1965](https://github.com/Saghen/blink.cmp/issues/1965)
+* **cmdline:** `:s`/`:g`/`:v` don't trigger auto completion ([#1956](https://github.com/Saghen/blink.cmp/issues/1956)) ([19a2ba4](https://github.com/Saghen/blink.cmp/commit/19a2ba4517c713dd6df9a958b59ded79cbf9d8fa))
+* **cmdline:** avoids unintended prefix duplication of user-defined command ([36ea052](https://github.com/Saghen/blink.cmp/commit/36ea052e1e59d348910e6dae0c65ff6bc301df0b))
+* **cmdline:** do not mutate label description for boolean option ([04b8325](https://github.com/Saghen/blink.cmp/commit/04b8325bfa97f99eb3aedde53c77af663746ceb5))
+* **cmdline:** improve Vim expression detection and handle custom completions ([fe7c974](https://github.com/Saghen/blink.cmp/commit/fe7c97455a375259a480c496fe3410c52ac004dc))
+* **cmdline:** pick last pasted char for completion, not just the first ([#1952](https://github.com/Saghen/blink.cmp/issues/1952)) ([e84b7d9](https://github.com/Saghen/blink.cmp/commit/e84b7d936eb8de042a5fc7c8dabef609dd8e2386)), closes [#1940](https://github.com/Saghen/blink.cmp/issues/1940)
+* **cmdline:** prepend prefix for expressions ([c880c77](https://github.com/Saghen/blink.cmp/commit/c880c773298ebabb6d4b0754d039a78082cadf46)), closes [#1939](https://github.com/Saghen/blink.cmp/issues/1939)
+* **cmdline:** prevent error when unique prefix for buffer is missing ([644fef3](https://github.com/Saghen/blink.cmp/commit/644fef327d3099fbf3be478735b3b55d9d4b74a3)), closes [#1927](https://github.com/Saghen/blink.cmp/issues/1927)
+* **cmdline:** prevent hangs from shellcmd completion on win32/wsl ([#1933](https://github.com/Saghen/blink.cmp/issues/1933)) ([1cc44a3](https://github.com/Saghen/blink.cmp/commit/1cc44a31f02fa54de3c1f89937bf48a2ac59d8eb)), closes [#1926](https://github.com/Saghen/blink.cmp/issues/1926) [#1029](https://github.com/Saghen/blink.cmp/issues/1029)
+* **ghost_text:** prevent out-of-bounds on multiline edits ([#1967](https://github.com/Saghen/blink.cmp/issues/1967)) ([f66e22e](https://github.com/Saghen/blink.cmp/commit/f66e22e3003c9dfe2eb7cddb4d314a57e48ac752)), closes [#1197](https://github.com/Saghen/blink.cmp/issues/1197) [#1739](https://github.com/Saghen/blink.cmp/issues/1739)
+* handle completion type for even more edge cases ([78a6275](https://github.com/Saghen/blink.cmp/commit/78a6275fca5541610ec14ee9bce61fd55d92c4c6))
+* keyword suffix matching and drop leading dash in lua impl ([6c4302b](https://github.com/Saghen/blink.cmp/commit/6c4302b42b0d420a991867fea57c9677a5099155)), closes [#1792](https://github.com/Saghen/blink.cmp/issues/1792)
+* **lsp:** filter out text completion items only for lua_ls ([#1979](https://github.com/Saghen/blink.cmp/issues/1979)) ([2f2ebc5](https://github.com/Saghen/blink.cmp/commit/2f2ebc5e007bb72d98dd13e1268af301533acca1)), closes [#1838](https://github.com/Saghen/blink.cmp/issues/1838)
+* **luasnip:** avoid false positives for in-snippet detection ([#1969](https://github.com/Saghen/blink.cmp/issues/1969)) ([47820df](https://github.com/Saghen/blink.cmp/commit/47820df10c5ef4bfae585a80f2baea5e90bac11d)), closes [#1805](https://github.com/Saghen/blink.cmp/issues/1805) [#1966](https://github.com/Saghen/blink.cmp/issues/1966)
+* minor signature improvements ([#1971](https://github.com/Saghen/blink.cmp/issues/1971)) ([6d6b009](https://github.com/Saghen/blink.cmp/commit/6d6b0092cfe570ade9b183cd53bb1a620290d02b))
+* show_signature now ignores trigger.enabled if called directly ([#1946](https://github.com/Saghen/blink.cmp/issues/1946)) ([83e6a29](https://github.com/Saghen/blink.cmp/commit/83e6a29c0bd7dc198d34921d0c41be1eb50d98af))
+* signature show failing due to opts not defined ([#1949](https://github.com/Saghen/blink.cmp/issues/1949)) ([dad68b3](https://github.com/Saghen/blink.cmp/commit/dad68b32bc8b91f04b2efd14abc57dd650c51e7e))
+* use cmdline config for cmdwin, add wrapper for completion type ([a4e2be4](https://github.com/Saghen/blink.cmp/commit/a4e2be425fe62cd9484a8dfbd7b3c82a8b04e465))
+* use edit range start for compensation instead of old cursor ([#1985](https://github.com/Saghen/blink.cmp/issues/1985)) ([d2ca33f](https://github.com/Saghen/blink.cmp/commit/d2ca33f6f2ff7a599e4007e48461340aedc8ae1e)), closes [#1736](https://github.com/Saghen/blink.cmp/issues/1736) [#1978](https://github.com/Saghen/blink.cmp/issues/1978)
+* use lsp offset encoding when compensating text edit range ([17e30f3](https://github.com/Saghen/blink.cmp/commit/17e30f35af24545fc2cd8711a0788f49b44c28ff))
+* **winborder:** handle custom border chars ([#1984](https://github.com/Saghen/blink.cmp/issues/1984)) ([a946054](https://github.com/Saghen/blink.cmp/commit/a946054f679dcbf60dcf807817cee7bcda05ec6e))
+
+### Performance Improvements
+
+* drop `items` field from autocmds ([ed5472b](https://github.com/Saghen/blink.cmp/commit/ed5472bcb394f5484621fe6ee23004bc48e2448a)), closes [#1752](https://github.com/Saghen/blink.cmp/issues/1752)
+
 ## [1.4.1](https://github.com/Saghen/blink.cmp/compare/v1.4.0...v1.4.1) (2025-06-17)
 
 ### Features
