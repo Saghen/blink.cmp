@@ -592,7 +592,7 @@ sources.providers = {
       -- Maximum text size across all buffers (default: 500KB)
       max_total_buffer_size = 500000,
       -- Order in which buffers are retained for completion, up to the max total size limit (see above)
-      retention_order = { 'visible', 'largest' },
+      retention_order = { 'focused', 'visible', 'recency', 'largest' },
       -- Cache words for each buffer which increases memory usage but drastically reduces cpu usage. Memory usage depends on the size of the buffers from `get_bufnrs`. For 100k items, it will use ~20MBs of memory. Invalidated and refreshed whenever the buffer content is modified.
       use_cache = true,
       -- Whether to enable buffer source in substitute (:s) and global (:g) commands.
