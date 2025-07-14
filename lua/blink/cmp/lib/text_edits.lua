@@ -174,7 +174,12 @@ function text_edits.compensate_for_cursor_movement(text_edit, offset_encoding)
   text_edit = vim.deepcopy(text_edit)
   offset_encoding = offset_encoding or 'utf-8'
 
-  local new_cursor_col = vim.str_utfindex(context.get_line(), offset_encoding, context.get_cursor()[2])
+  local new_cursor_col
+  if vim.fn.has('nvim-0.11') == 1 then
+    new_cursor_col = vim.str_utfindex(context.get_line(), offset_encoding, context.get_cursor()[2])
+  else
+    new_cursor_col = vim.lsp.util._str_utfindex_enc(context.get_line(), context.get_cursor()[2], offset_encoding)
+  end
   text_edit.range['end'].character = new_cursor_col
 
   return text_edit
