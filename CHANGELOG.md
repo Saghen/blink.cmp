@@ -1,3 +1,9 @@
+## [1.5.1](https://github.com/Saghen/blink.cmp/compare/v1.5.0...v1.5.1) (2025-07-14)
+
+### Bug Fixes
+
+* add backward compatibility for offset encoding conversion ([02ee0a1](https://github.com/Saghen/blink.cmp/commit/02ee0a164117aa3caf7af80cde3b917ad5effcde)), closes [#1988](https://github.com/Saghen/blink.cmp/issues/1988)
+
 ## [1.5.0](https://github.com/Saghen/blink.cmp/compare/v1.4.1...v1.5.0) (2025-07-11)
 
 ### Highlights
