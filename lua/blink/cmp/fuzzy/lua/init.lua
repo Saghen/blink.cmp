@@ -53,12 +53,12 @@ function fuzzy.fuzzy(line, cursor_col, provider_ids, opts)
     for idx, item in ipairs(fuzzy.provider_items[provider_id] or {}) do
       local score, exact = match(keyword, item.filterText or item.label)
 
-      score = score + item.score_offset
-      if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
-        score = score + opts.snippet_score_offset
-      end
-
       if score ~= nil then
+        score = score + (item.score_offset or 0)
+        if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
+          score = score + opts.snippet_score_offset
+        end
+
         table.insert(provider_idxs, provider_idx - 1)
         table.insert(matched_indices, idx - 1)
         table.insert(scores, score)
