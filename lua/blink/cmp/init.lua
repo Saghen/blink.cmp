@@ -208,6 +208,10 @@ function cmp.insert_prev()
   return true
 end
 
+--- Gets the current context
+--- @return blink.cmp.Context?
+function cmp.get_context() return require('blink.cmp.completion.list').context end
+
 --- Gets the currently selected completion item
 --- @return blink.cmp.CompletionItem?
 function cmp.get_selected_item() return require('blink.cmp.completion.list').get_selected_item() end
