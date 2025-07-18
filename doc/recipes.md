@@ -146,6 +146,35 @@ vim.api.nvim_create_autocmd('User', {
 })
 ```
 
+### Avoid multi-line completion ghost text
+
+See [nvim-cmp#1955](https://github.com/hrsh7th/nvim-cmp/pull/1955#issue-2341857764) for an example of what this looks like.
+
+When ghost text is enabled (`completion.ghost_text.enabled = true`), you may want the menu to avoid overlapping with the ghost text. You may provide a custom `completion.menu.direction_priority` function to achieve this
+
+```lua
+completion = {
+  menu = {
+    direction_priority = function()
+      local ctx = require('blink.cmp').get_context()
+      local item = require('blink.cmp').get_selected_item()
+      if ctx == nil item == nil then return { 's', 'n' } end
+
+      local item_text = item.textEdit ~= nil and item.textEdit.newText or item.insertText or item.label
+      local is_multi_line = item_text:find('\n') ~= nil
+
+      -- after showing the menu upwards, we want to maintain that direction
+      -- until we re-open the menu, so store the context id in a global variable
+      if is_multi_line or vim.g.blink_cmp_upwards_ctx_id == ctx.id then
+        vim.g.blink_cmp_upwards_ctx_id = ctx.id
+        return { 'n', 's' }
+      end
+      return { 's', 'n' }
+    end,
+  },
+},
+```
+
 ### Show on newline, tab and space
 
 ::: warning
