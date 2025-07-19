@@ -213,7 +213,6 @@ function cmdline:get_completions(context, callback)
           and #completions < 2000
           and path_lib:compute_unique_suffixes(completions)
         or {}
-      local vars_scope_regex = vim.regex([[\v^(g:|b:|w:|t:|l:|s:|a:|v:)]])
 
       ---@type blink.cmp.CompletionItem[]
       local items = {}
@@ -251,8 +250,7 @@ function cmdline:get_completions(context, callback)
 
         -- expressions
         elseif completion_type == 'expression' then
-          -- prepend the prefix except for variables scope
-          if not vars_scope_regex:match_str(current_arg_prefix) then new_text = current_arg_prefix .. completion end
+          if not vim.startswith(completion, current_arg_prefix) then new_text = current_arg_prefix .. completion end
 
         -- for other completions, prepend the prefix
         elseif vim.tbl_contains({ 'filetype', 'lua', 'shellcmd' }, completion_type) then
