@@ -12,6 +12,7 @@
 --- @field bufnr number
 --- @field cursor number[]
 --- @field line string
+--- @field terminal_command string|nil
 --- @field bounds blink.cmp.ContextBounds
 --- @field trigger blink.cmp.ContextTrigger
 --- @field providers string[]
@@ -26,6 +27,7 @@
 --- @field set_cursor fun(cursor: number[])
 --- @field get_line fun(num?: number): string
 --- @field get_bounds fun(range: blink.cmp.CompletionKeywordRange): blink.cmp.ContextBounds
+--- @field get_terminal_command fun(): string|nil
 
 --- @class blink.cmp.ContextTrigger
 --- @field initial_kind blink.cmp.CompletionTriggerKind The trigger kind when the context was first created
@@ -56,6 +58,7 @@ function context.new(opts)
     bufnr = vim.api.nvim_get_current_buf(),
     cursor = cursor,
     line = line,
+    terminal_command = context.get_terminal_command(),
     bounds = context.get_bounds('full'),
     trigger = {
       initial_kind = opts.initial_trigger_kind,
@@ -137,6 +140,36 @@ function context.get_bounds(range)
   local cursor = context.get_cursor()
   local start_col, end_col = require('blink.cmp.fuzzy').get_keyword_range(line, cursor[2], range)
   return { line_number = cursor[1], start_col = start_col + 1, length = end_col - start_col }
+end
+
+--- Get the terminal command in the current line without the shell prompt.
+--- Caution: this does not support for multiline commands.
+---
+--- @return string|nil
+function context.get_terminal_command()
+  if context.get_mode() ~= 'term' then return nil end
+
+  local cursor = context.get_cursor()
+  local cursor_row = cursor[1]
+  local cursor_col = cursor[2] + 1
+  local line = string.sub(context.get_line(), 1, cursor_col - 1)
+
+  local extmarks = vim.api.nvim_buf_get_extmarks(
+    0,
+    vim.api.nvim_create_namespace('blink-term-command-start'),
+    { cursor_row - 1, cursor_col - 1 },
+    { cursor_row - 1, 0 },
+    { limit = 1 }
+  )
+
+  --- If we find no mark for the start of the terminal command the terminal or shell
+  --- probably does not support the FTCS_COMMAND_START escape sequence. The best effort
+  --- we can do here is to return the full line text.
+  if #extmarks < 1 then return line end
+
+  local command_start_mark = extmarks[1]
+  local command_start_col = command_start_mark[3] + 1
+  return string.sub(line, command_start_col, string.len(line))
 end
 
 return context
