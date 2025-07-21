@@ -127,8 +127,16 @@ function download.ensure_downloaded(callback)
         .download(target_git_tag)
         :map(function() utils.notify({ { 'Downloaded pre-built binary successfully' } }, vim.log.levels.INFO) end)
     end)
-    :map(function(success)
-      if success == false then
+    :catch(function(err) return err end)
+    :map(function(success_or_err)
+      if success_or_err == false or type(success_or_err) == 'string' then
+        -- log error message
+        if fuzzy_config.implementation ~= 'prefer_rust' then
+          if type(success_or_err) == 'string' then
+            utils.notify({ { success_or_err, 'DiagnosticError' } }, vim.log.levels.ERROR)
+          end
+        end
+
         -- fallback to lua implementation
         if fuzzy_config.implementation == 'prefer_rust' then
           callback(nil, 'lua')
@@ -160,7 +168,6 @@ function download.ensure_downloaded(callback)
       package.loaded['blink.cmp.fuzzy.rust'] = nil
       callback(nil, 'rust')
     end)
-    :catch(callback)
 end
 
 function download.download(version)
