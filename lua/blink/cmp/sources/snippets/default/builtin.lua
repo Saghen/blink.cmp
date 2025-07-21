@@ -15,6 +15,8 @@ function builtin.lazy.TM_DIRECTORY() return vim.fn.expand('%:p:h') end
 
 function builtin.lazy.TM_FILEPATH() return vim.fn.expand('%:p') end
 
+function builtin.lazy.TM_SELECTED_TEXT() return vim.fn.trim(vim.fn.getreg(vim.v.register, true), '\n', 2) end
+
 function builtin.lazy.CLIPBOARD(opts) return vim.fn.getreg(opts.clipboard_register or vim.v.register, true) end
 
 local function buf_to_ws_part()
@@ -163,20 +165,15 @@ local function word_under_cursor(cur, line)
   return string.sub(line, ind_start, ind_end)
 end
 
-local function get_selected_text()
-  if vim.fn.visualmode() == 'V' then return vim.fn.trim(vim.fn.getreg(vim.v.register, true), '\n', 2) end
-  return ''
-end
-
 vim.api.nvim_create_autocmd('InsertEnter', {
   group = vim.api.nvim_create_augroup('BlinkSnippetsEagerEnter', { clear = true }),
   callback = function()
-    builtin.eager = {}
-    builtin.eager.TM_CURRENT_LINE = get_current_line()
-    builtin.eager.TM_CURRENT_WORD = word_under_cursor(get_cursor(), builtin.eager.TM_CURRENT_LINE)
-    builtin.eager.TM_LINE_INDEX = tostring(get_cursor()[1])
-    builtin.eager.TM_LINE_NUMBER = tostring(get_cursor()[1] + 1)
-    builtin.eager.TM_SELECTED_TEXT = get_selected_text()
+    builtin.eager = {
+      TM_CURRENT_LINE = get_current_line(),
+      TM_CURRENT_WORD = word_under_cursor(get_cursor(), builtin.eager.TM_CURRENT_LINE),
+      TM_LINE_INDEX = tostring(get_cursor()[1]),
+      TM_LINE_NUMBER = tostring(get_cursor()[1] + 1),
+    }
   end,
 })
 
