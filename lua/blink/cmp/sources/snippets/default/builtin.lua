@@ -168,12 +168,11 @@ end
 vim.api.nvim_create_autocmd('InsertEnter', {
   group = vim.api.nvim_create_augroup('BlinkSnippetsEagerEnter', { clear = true }),
   callback = function()
-    builtin.eager = {
-      TM_CURRENT_LINE = get_current_line(),
-      TM_CURRENT_WORD = word_under_cursor(get_cursor(), builtin.eager.TM_CURRENT_LINE),
-      TM_LINE_INDEX = tostring(get_cursor()[1]),
-      TM_LINE_NUMBER = tostring(get_cursor()[1] + 1),
-    }
+    builtin.eager = {}
+    builtin.eager.TM_CURRENT_LINE = get_current_line()
+    builtin.eager.TM_CURRENT_WORD = word_under_cursor(get_cursor(), builtin.eager.TM_CURRENT_LINE)
+    builtin.eager.TM_LINE_INDEX = tostring(get_cursor()[1])
+    builtin.eager.TM_LINE_NUMBER = tostring(get_cursor()[1] + 1)
   end,
 })
 
