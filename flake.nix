@@ -82,7 +82,7 @@
             buildScript = pkgs.writeShellApplication {
               name = "build-plugin";
               derivationArgs = {
-                NativeBuildInputs = with pkgs; [ fenix.minimal.toolchain gcc ];
+                nativeBuildInputs = with pkgs; [ fenix.minimal.toolchain gcc ];
                 buildInputs = with pkgs; [ libiconv ];
               };
               text = ''
