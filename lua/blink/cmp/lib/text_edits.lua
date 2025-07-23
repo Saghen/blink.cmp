@@ -386,7 +386,8 @@ function text_edits.write_to_dot_repeat(text_edit)
       local saved_shortmess = vim.o.shortmess
       vim.opt.completeopt = ''
       if not vim.o.shortmess:match('c') then vim.o.shortmess = vim.o.shortmess .. 'c' end
-      vim.fn.complete(1, { '_' .. chars_to_insert })
+      local success, err = pcall(vim.fn.complete, 1, { '_' .. chars_to_insert })
+      if not success then vim.print('dot repeat is not added: ' .. err) end
       vim.opt.completeopt = saved_completeopt
       vim.o.shortmess = saved_shortmess
 
