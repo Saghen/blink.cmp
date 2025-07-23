@@ -27,6 +27,7 @@
 --- @field accept fun(opts?: blink.cmp.CompletionListAcceptOpts): boolean Applies the currently selected item, returning true if it succeeded
 
 --- @class blink.cmp.CompletionListSelectOpts
+--- @field count? number The number of items to jump by, defaults to 1
 --- @field auto_insert? boolean Insert the completion item automatically when selecting it
 --- @field on_ghost_text? boolean Run when ghost text is visible, instead of only when the menu is visible
 
@@ -198,7 +199,8 @@ function list.select_next(opts)
   end
 
   -- typical case, select the next item
-  list.select(list.selected_item_idx + 1, opts)
+  local count = opts and opts.count or 1
+  list.select(math.min(list.selected_item_idx + count, #list.items), opts)
 end
 
 function list.select_prev(opts)
@@ -225,7 +227,8 @@ function list.select_prev(opts)
   end
 
   -- typical case, select the previous item
-  list.select(list.selected_item_idx - 1, opts)
+  local count = opts and opts.count or 1
+  list.select(math.max(list.selected_item_idx - count, 1), opts)
 end
 
 ---------- Preview ----------
