@@ -4,6 +4,8 @@ local GAP_EXTEND_PENALTY = -1
 
 -- bonus for matching the first character of the haystack
 local PREFIX_BONUS = 12
+-- bonus for matching the second character of the haystack, if the first character is not a letter (e.g. "h" on "_hello_world")
+local OFFSET_PREFIX_BONUS = 8
 -- bonus for matching character after a delimiter in the haystack (e.g. space, comma, underscore, slash, etc)
 local DELIMITER_BONUS = 4
 -- bonus for haystack == needle
@@ -21,12 +23,15 @@ local DELIMITERS = {
   [string.byte(':', 1)] = true,
 }
 
+local function is_letter(char) return char >= 65 and char <= 90 or char >= 97 and char <= 122 end
+
 --- @param needle string
 --- @param haystack string
 --- @return number?, boolean?
 local function match(needle, haystack)
   local score = 0
   local haystack_idx = 1
+  local has_matched = false
 
   for needle_idx = 1, #needle do
     local needle_char = string.byte(needle, needle_idx)
@@ -51,9 +56,15 @@ local function match(needle, haystack)
 
         -- bonuses
         if needle_char == haystack_char then score = score + MATCHING_CASE_BONUS end
-        if haystack_idx == 1 then score = score + PREFIX_BONUS end
-        if DELIMITERS[string.byte(haystack, haystack_idx - 1)] then score = score + DELIMITER_BONUS end
+        if haystack_idx == 1 then
+          score = score + PREFIX_BONUS
+        elseif haystack_idx == 2 and not has_matched and not is_letter(string.byte(haystack, 1)) then
+          score = score + OFFSET_PREFIX_BONUS
+        elseif DELIMITERS[string.byte(haystack, haystack_idx - 1)] then
+          score = score + DELIMITER_BONUS
+        end
 
+        has_matched = true
         haystack_idx = haystack_idx + 1
         goto continue
       end
@@ -74,7 +85,8 @@ local function match(needle, haystack)
 end
 
 assert(match('fbb', 'barbazfoobarbaz') == 36, 'fbb should match barbazfoobarbaz with score 36')
-assert(match('foo', '_foobar') == 52, 'foo should match foobar with score 52')
+assert(match('foo', '_foobar') == 56, 'foo should match _foobar with score 56')
+assert(match('foo', '__foobar') == 52, 'foo should match __foobar with score 52')
 assert(match('Foo', 'foobar') == 56, 'foo should match foobar with score 56')
 assert(match('foo', 'foobar') == 60, 'foo should match foobar with score 60')
 assert(match('foo', 'fobar') == nil, 'foo should not match fobar')
