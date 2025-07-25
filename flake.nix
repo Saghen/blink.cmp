@@ -81,9 +81,11 @@
           program = let
             buildScript = pkgs.writeShellApplication {
               name = "build-plugin";
-              runtimeInputs = with pkgs; [ fenix.minimal.toolchain gcc ];
+              derivationArgs = {
+                nativeBuildInputs = with pkgs; [ fenix.minimal.toolchain gcc ];
+                buildInputs = with pkgs; [ libiconv ];
+              };
               text = ''
-                export LIBRARY_PATH="${lib.makeLibraryPath [ pkgs.libiconv ]}";
                 cargo build --release
               '';
             };
