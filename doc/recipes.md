@@ -158,7 +158,7 @@ completion = {
     direction_priority = function()
       local ctx = require('blink.cmp').get_context()
       local item = require('blink.cmp').get_selected_item()
-      if ctx == nil item == nil then return { 's', 'n' } end
+      if ctx == nil or item == nil then return { 's', 'n' } end
 
       local item_text = item.textEdit ~= nil and item.textEdit.newText or item.insertText or item.label
       local is_multi_line = item_text:find('\n') ~= nil
