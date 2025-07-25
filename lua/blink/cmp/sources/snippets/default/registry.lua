@@ -137,6 +137,15 @@ function registry:expand_vars(snippet)
 
   for _, child in ipairs(parsed_snippet.data.children) do
     local type, data = child.type, child.data
+
+    -- Tabstop with placeholder such as `${1:${TM_FILENAME_BASE}}`
+    -- Get the value inside the placeholder
+    -- TODO: support nested placeholders when neovim does
+    if type == vim.lsp._snippet_grammar.NodeType.Placeholder then
+      type = data.value.type
+      data = data.value.data
+    end
+
     if type == vim.lsp._snippet_grammar.NodeType.Variable then
       if eager_vars[data.name] then
         resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', eager_vars[data.name])

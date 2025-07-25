@@ -98,6 +98,9 @@ function source:get_completions(ctx, callback)
   -- The callback _MUST_ be called at least once. The first time it's called,
   -- blink.cmp will show the results in the completion menu. Subsequent calls
   -- will append the results to the menu to support streaming results.
+  --
+  -- NOTE: blink.cmp will mutate the items you return, so you must vim.deepcopy them
+  -- before returning if you want to re-use them in the future (such as for caching)
   callback({
     items = items,
     -- Whether blink.cmp should request items when deleting characters

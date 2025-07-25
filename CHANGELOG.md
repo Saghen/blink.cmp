@@ -1,3 +1,34 @@
+## [1.6.0](https://github.com/Saghen/blink.cmp/compare/v1.5.1...v1.6.0) (2025-07-24)
+
+### Highlights
+
+* Fuzzy matching:
+  * Always prefer continuous matches over fuzzy matches (i.e. `foo` on `foobar` beats `f_o_o_bar`) (Change made in v1.5.0 but forgot to mention it)
+  * `OFFSET_PREFIX_BONUS` for matching second character, if the first character is not a letter and not matched (i.e. `h` on `_hello`)
+  * Lua implementation no longer ignores `score_offset`
+* Fixed regression where text after the cursor was not being replaced
+
+### Features
+
+* add `.get_context()` function to API ([6f3ed55](https://github.com/Saghen/blink.cmp/commit/6f3ed55a0b1a298ddf4d00cc50dc66b59865df40))
+* add `count` option to `select_next` and `select_prev` ([796a00e](https://github.com/Saghen/blink.cmp/commit/796a00e861a0872ad6452bc8a2faf250abf59117)), closes [#569](https://github.com/Saghen/blink.cmp/issues/569)
+* add `OFFSET_PREFIX_BONUS` to lua matcher ([2faf063](https://github.com/Saghen/blink.cmp/commit/2faf06302894c9dc6f6771e2c3a9368194f655af))
+* add terminal_command to the completion context ([#2001](https://github.com/Saghen/blink.cmp/issues/2001)) ([b163deb](https://github.com/Saghen/blink.cmp/commit/b163deb174806b5cdb1e7e68bf53e7cf56caea65))
+* bump frizbee to 0.5.0 with offset prefix bonus ([b6ea46e](https://github.com/Saghen/blink.cmp/commit/b6ea46efdd219416d837ac48a71fd9df16d71606))
+* lazily get `TM_SELECTED_TEXT` for snippets ([04f9f22](https://github.com/Saghen/blink.cmp/commit/04f9f224e4a71b672170f3b73d099b69ce1a7c4e)), closes [#1998](https://github.com/Saghen/blink.cmp/issues/1998)
+* **snippet:** support variables in placeholders ([277203b](https://github.com/Saghen/blink.cmp/commit/277203ba10de02770329ac7d59dc8508afc24a39)), closes [#950](https://github.com/Saghen/blink.cmp/issues/950)
+* update menu position on selection with dynamic direction priority ([d89b7e4](https://github.com/Saghen/blink.cmp/commit/d89b7e43edc7bdaddb87a6460e2baaef1cff3488)), closes [#2000](https://github.com/Saghen/blink.cmp/issues/2000)
+
+### Bug Fixes
+
+* apply score_offset and snippet.score_offset with lua matcher ([6c1d41e](https://github.com/Saghen/blink.cmp/commit/6c1d41e160b80e0d68a6b3dc50442bd5728b86e7))
+* applying score_offset on nil match ([3545f6d](https://github.com/Saghen/blink.cmp/commit/3545f6dce83baacbedfb5dd8d1230cd0492fd1d7))
+* **cmdline:** avoid doubling variable scope prefixes in expression ([60f446a](https://github.com/Saghen/blink.cmp/commit/60f446a62d9c3417e8de52f08a0712fcd398711f)), closes [#1994](https://github.com/Saghen/blink.cmp/issues/1994)
+* **cmdline:** improve prefix handling to avoid duplication in expression ([af22c52](https://github.com/Saghen/blink.cmp/commit/af22c527a451d162e5229a1eff9283ee840b4bca)), closes [#2005](https://github.com/Saghen/blink.cmp/issues/2005)
+* eager error in snippets ([adaff22](https://github.com/Saghen/blink.cmp/commit/adaff226a952acc583f57827bac36afa6a281db0))
+* log errors from downloader and fallback to lua ([b812f16](https://github.com/Saghen/blink.cmp/commit/b812f1660b580c3e3f6e7dd666556f8ed955b741)), closes [#1999](https://github.com/Saghen/blink.cmp/issues/1999)
+* revert [#1985](https://github.com/Saghen/blink.cmp/issues/1985) "use edit range start for compensation instead of old cursor" ([4663e23](https://github.com/Saghen/blink.cmp/commit/4663e231b70f59a2f413978d4149290e46e4acde)), closes [#2013](https://github.com/Saghen/blink.cmp/issues/2013)
+
 ## [1.5.1](https://github.com/Saghen/blink.cmp/compare/v1.5.0...v1.5.1) (2025-07-14)
 
 ### Bug Fixes

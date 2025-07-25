@@ -6,6 +6,7 @@ local guess_keyword_range = require('blink.cmp.fuzzy.lua.keyword').guess_keyword
 --- @type blink.cmp.FuzzyImplementation
 --- @diagnostic disable-next-line: missing-fields
 local fuzzy = {
+  --- @type table<string, blink.cmp.CompletionItem[]>
   provider_items = {},
 }
 
@@ -51,7 +52,13 @@ function fuzzy.fuzzy(line, cursor_col, provider_ids, opts)
   for provider_idx, provider_id in ipairs(provider_ids) do
     for idx, item in ipairs(fuzzy.provider_items[provider_id] or {}) do
       local score, exact = match(keyword, item.filterText or item.label)
+
       if score ~= nil then
+        score = score + (item.score_offset or 0)
+        if item.kind == require('blink.cmp.types').CompletionItemKind.Snippet then
+          score = score + opts.snippet_score_offset
+        end
+
         table.insert(provider_idxs, provider_idx - 1)
         table.insert(matched_indices, idx - 1)
         table.insert(scores, score)

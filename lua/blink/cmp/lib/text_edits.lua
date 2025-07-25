@@ -150,7 +150,7 @@ function text_edits.get_from_item(item)
   --- @cast text_edit lsp.TextEdit
 
   local offset_encoding = text_edits.offset_encoding_from_item(item)
-  text_edit = text_edits.compensate_for_cursor_movement(text_edit, offset_encoding)
+  text_edit = text_edits.compensate_for_cursor_movement(text_edit, item.cursor_column, context.get_cursor()[2])
 
   -- convert the offset encoding to utf-8
   -- TODO: we have to do this last because it applies a max on the position based on the length of the line
@@ -162,25 +162,19 @@ function text_edits.get_from_item(item)
   return text_edit
 end
 
---- Adjust the position of the text edit to match the current cursor position.
---- This is necessary because the user may have typed additional characters
---- after the completion items were fetched, or because new completion items
---- may have been fetched after typing a trigger character.
+--- Adjust the position of the text edit to be the current cursor position
+--- since the data might be outdated. We compare the cursor column position
+--- from when the items were fetched versus the current.
 --- HACK: is there a better way?
 --- @param text_edit lsp.TextEdit
---- @param offset_encoding ?string
+--- @param old_cursor_col number Position of the cursor when the text edit was created
+--- @param new_cursor_col number New position of the cursor
 --- @return lsp.TextEdit
-function text_edits.compensate_for_cursor_movement(text_edit, offset_encoding)
+function text_edits.compensate_for_cursor_movement(text_edit, old_cursor_col, new_cursor_col)
   text_edit = vim.deepcopy(text_edit)
-  offset_encoding = offset_encoding or 'utf-8'
 
-  local new_cursor_col
-  if vim.fn.has('nvim-0.11') == 1 then
-    new_cursor_col = vim.str_utfindex(context.get_line(), offset_encoding, context.get_cursor()[2])
-  else
-    new_cursor_col = vim.lsp.util._str_utfindex_enc(context.get_line(), context.get_cursor()[2], offset_encoding)
-  end
-  text_edit.range['end'].character = new_cursor_col
+  local offset = new_cursor_col - old_cursor_col
+  text_edit.range['end'].character = text_edit.range['end'].character + offset
 
   return text_edit
 end

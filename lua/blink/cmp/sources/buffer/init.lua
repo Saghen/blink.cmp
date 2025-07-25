@@ -11,12 +11,12 @@ local dedup = require('blink.cmp.lib.utils').deduplicate
 --- @class blink.cmp.BufferOpts
 --- @field get_bufnrs fun(): integer[]
 --- @field get_search_bufnrs fun(): integer[]
---- @field max_sync_buffer_size integer Maximum buffer text size for sync processing
---- @field max_async_buffer_size integer Maximum buffer text size for async processing
---- @field max_total_buffer_size integer Maximum text size across all buffers
+--- @field max_sync_buffer_size integer Maximum total number of characters (in an individual buffer) for which buffer completion runs synchronously. Above this, asynchronous processing is used.
+--- @field max_async_buffer_size integer Maximum total number of characters (in an individual buffer) for which buffer completion runs asynchronously. Above this, the buffer will be skipped.
+--- @field max_total_buffer_size integer Maximum text size across all buffers (default: 500KB)
 --- @field retention_order string[] Order in which buffers are retained for completion, up to the max total size limit
 --- @field use_cache boolean Cache words for each buffer which increases memory usage but drastically reduces cpu usage. Memory usage depends on the size of the buffers from `get_bufnrs`. For 100k items, it will use ~20MBs of memory. Invalidated and refreshed whenever the buffer content is modified.
---- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s) and global (:g) commands
+--- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s) and global (:g) commands. Note: Enabling this option will temporarily disable Neovim's 'inccommand' feature while editing Ex commands, due to a known redraw issue (see neovim/neovim#9783). This means you will lose live substitution previews when using :s, :smagic, or :snomagic while buffer completions are active.
 
 --- @param words string[]
 --- @return blink.cmp.CompletionItem[]

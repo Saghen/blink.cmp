@@ -113,6 +113,11 @@ function menu.set_selected_item_idx(idx)
   menu.win:set_option_value('cursorline', idx ~= nil)
   menu.selected_item_idx = idx
   if menu.win:is_open() then menu.win:set_cursor({ idx or 1, 0 }) end
+
+  -- user may want to reposition on the menu based on the selected item
+  -- https://github.com/Saghen/blink.cmp/issues/2000
+  -- https://github.com/Saghen/blink.cmp/issues/1801
+  if type(config.direction_priority) == 'function' then menu.update_position() end
 end
 
 function menu.should_auto_show(context, items)

@@ -585,9 +585,9 @@ sources.providers = {
       end,
       -- buffers when searching with `/` or `?`
       get_search_bufnrs = function() return { vim.api.nvim_get_current_buf() } end,
-      -- Maximum total number of characters (across all selected buffers) for which buffer completion runs synchronously. Above this, asynchronous processing is used.
+      -- Maximum total number of characters (in an individual buffer) for which buffer completion runs synchronously. Above this, asynchronous processing is used.
       max_sync_buffer_size = 20000,
-      -- Maximum total number of characters (across all selected buffers) for which buffer completion runs asynchronously. Above this, buffer completions are skipped to avoid performance issues.
+      -- Maximum total number of characters (in an individual buffer) for which buffer completion runs asynchronously. Above this, the buffer will be skipped.
       max_async_buffer_size = 200000,
       -- Maximum text size across all buffers (default: 500KB)
       max_total_buffer_size = 500000,

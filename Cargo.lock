@@ -182,9 +182,9 @@ dependencies = [
 
 [[package]]
 name = "frizbee"
-version = "0.4.4"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e7176de2a01d8ad914b52b41125e6fe9ee6493245b7c2be367c9c87af75d559"
+checksum = "cf07bb9bf0cb3e201c76a7dfd7c0e78ed1ef60d46c2be1126f76394f96bdcfd6"
 dependencies = [
  "memchr",
  "rayon",

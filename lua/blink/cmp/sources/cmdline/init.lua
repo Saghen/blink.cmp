@@ -248,8 +248,12 @@ function cmdline:get_completions(context, callback)
           filter_text = '$' .. completion
           new_text = '$' .. completion
 
+        -- expressions
+        elseif completion_type == 'expression' then
+          if not vim.startswith(completion, current_arg_prefix) then new_text = current_arg_prefix .. completion end
+
         -- for other completions, prepend the prefix
-        elseif vim.tbl_contains({ 'expression', 'filetype', 'lua', 'shellcmd' }, completion_type) then
+        elseif vim.tbl_contains({ 'filetype', 'lua', 'shellcmd' }, completion_type) then
           new_text = current_arg_prefix .. completion
 
         -- treat custom and empty completion '' as special case, this can be:

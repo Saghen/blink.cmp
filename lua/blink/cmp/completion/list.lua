@@ -27,6 +27,7 @@
 --- @field accept fun(opts?: blink.cmp.CompletionListAcceptOpts): boolean Applies the currently selected item, returning true if it succeeded
 
 --- @class blink.cmp.CompletionListSelectOpts
+--- @field count? number The number of items to jump by, defaults to 1
 --- @field auto_insert? boolean Insert the completion item automatically when selecting it
 --- @field on_ghost_text? boolean Run when ghost text is visible, instead of only when the menu is visible
 
@@ -198,7 +199,8 @@ function list.select_next(opts)
   end
 
   -- typical case, select the next item
-  list.select(list.selected_item_idx + 1, opts)
+  local count = opts and opts.count or 1
+  list.select(math.min(list.selected_item_idx + count, #list.items), opts)
 end
 
 function list.select_prev(opts)
@@ -225,7 +227,8 @@ function list.select_prev(opts)
   end
 
   -- typical case, select the previous item
-  list.select(list.selected_item_idx - 1, opts)
+  local count = opts and opts.count or 1
+  list.select(math.max(list.selected_item_idx - count, 1), opts)
 end
 
 ---------- Preview ----------
@@ -239,7 +242,9 @@ function list.undo_preview()
   -- The text edit may be out of date due to the user typing more characters
   -- so we adjust the range to compensate
   -- TODO: Set offset_encoding
-  text_edit = text_edits_lib.compensate_for_cursor_movement(text_edit)
+  local old_cursor_col = list.preview_undo.cursor_after[2]
+  local new_cursor_col = context.get_cursor()[2]
+  text_edit = text_edits_lib.compensate_for_cursor_movement(text_edit, old_cursor_col, new_cursor_col)
 
   require('blink.cmp.lib.text_edits').apply(text_edit)
   if list.preview_undo.cursor_before ~= nil then
