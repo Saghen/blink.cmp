@@ -36,6 +36,7 @@ local presets_keymaps = {
 
     ['<C-y>'] = { 'select_and_accept' },
     ['<C-e>'] = { 'cancel' },
+    ['<End>'] = { 'hide', 'fallback' },
   },
 
   ['super-tab'] = {
