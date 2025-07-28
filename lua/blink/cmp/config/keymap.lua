@@ -2,13 +2,13 @@
 --- | 'fallback' Fallback to mappings or the built-in behavior
 --- | 'fallback_to_mappings' Fallback to mappings only (not built-in behavior)
 --- | 'show' Show the completion window
---- | 'show_and_insert' Show the completion window and select the first item
+--- | 'show_and_insert' Show the completion menu and insert the first item. Short form for `cmp.show({ initial_selected_item_idx = 1 })` when `auto_insert = true`
+--- | 'show_and_insert_or_accept_single' Show the completion menu and insert the first item, or accepts the first item if there is only one
 --- | 'hide' Hide the completion window
 --- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
 --- | 'accept_and_enter' Accept the current completion item and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_and_accept' Select the first completion item, if there's no selection, and accept
---- | 'select_or_accept' Select the first completion item if there are multiple candidates, or accept it if there is only one.
 --- | 'select_accept_and_enter' Select the first completion item, if there's no selection, accept and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_prev' Select the previous completion item
 --- | 'select_next' Select the next completion item
@@ -53,8 +53,8 @@
 --- Mappings similar to the built-in completion in cmdline mode:
 --- ```lua
 --- {
----   ['<Tab>'] = { 'select_or_accept', 'select_next' },
----   ['<S-Tab>'] = { 'select_or_accept', 'select_prev' },
+---   ['<Tab>'] = { 'show_and_insert_or_accept_single', 'select_next' },
+---   ['<S-Tab>'] = { 'show_and_insert_or_accept_single', 'select_prev' },
 ---
 ---   ['<C-n>'] = { 'select_next' },
 ---   ['<C-p>'] = { 'select_prev' },
@@ -168,12 +168,12 @@ function keymap.validate(config, is_mode)
     'fallback_to_mappings',
     'show',
     'show_and_insert',
+    'show_and_insert_or_accept_single',
     'hide',
     'cancel',
     'accept',
     'accept_and_enter',
     'select_and_accept',
-    'select_or_accept',
     'select_accept_and_enter',
     'select_prev',
     'select_next',

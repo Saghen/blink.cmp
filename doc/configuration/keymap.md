@@ -43,6 +43,7 @@ keymap = {
   - Optionally use `function(cmp) cmp.show({ providers = { 'snippets' } }) end` to show with a specific list of providers
 - `show_and_insert`: Shows the completion menu and inserts the first item
   - Short form for `cmp.show({ initial_selected_item_idx = 1 })` when `auto_insert = true`
+- `show_and_insert_or_accept_single`: Shows the completion menu and inserts the first item, or accepts the first item if there is only one
 - `hide`: Hides the completion menu
 - `cancel`: Reverts `completion.list.selection.auto_insert` and hides the completion menu
 - `accept`: Accepts the currently selected item
@@ -51,7 +52,6 @@ keymap = {
 - `accept_and_enter`: Accepts the currently selected item and feeds an enter key to neovim
   - Useful in `cmdline` mode to accept the current item and run the command
 - `select_and_accept`: Accepts the currently selected item, or the first item if none are selected
-- `select_or_accept`: Select the first completion item if there are multiple candidates, or accept it if there is only one.
 - `select_accept_and_enter`: Accepts the currently selected item, or the first item if none are selected, and feeds an enter key to neovim
   - Useful in `cmdline` mode to accept the current item and run the command
 - `select_prev`: Selects the previous item, cycling to the bottom of the list if at the top, if `completion.list.cycle.from_top == true`
