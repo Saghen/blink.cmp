@@ -86,7 +86,7 @@ function docs.show_item(context, item)
 
         -- allow the provider to override the drawing optionally
         -- TODO: should the default_implementation be the configured draw function instead of the built-in?
-        local draw = item.documentation and (item.documentation.draw or item.documentation.render) or config.draw
+        local draw = item.documentation and item.documentation.draw or config.draw
         draw({
           item = item,
           window = docs.win,
