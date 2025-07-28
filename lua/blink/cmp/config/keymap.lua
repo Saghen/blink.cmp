@@ -8,6 +8,7 @@
 --- | 'accept' Accept the current completion item
 --- | 'accept_and_enter' Accept the current completion item and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_and_accept' Select the first completion item, if there's no selection, and accept
+--- | 'select_or_accept' Select the first completion item if there are multiple candidates, or accept it if there is only one.
 --- | 'select_accept_and_enter' Select the first completion item, if there's no selection, accept and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- | 'select_prev' Select the previous completion item
 --- | 'select_next' Select the next completion item
@@ -52,14 +53,8 @@
 --- Mappings similar to the built-in completion in cmdline mode:
 --- ```lua
 --- {
----   ['<Tab>'] = {
----     function(cmp)
----       if cmp.is_ghost_text_visible() and not cmp.is_menu_visible() then return cmp.accept() end
----     end,
----     'show_and_insert',
----     'select_next',
----   },
----   ['<S-Tab>'] = { 'show_and_insert', 'select_prev' },
+---   ['<Tab>'] = { 'select_or_accept', 'select_next' },
+---   ['<S-Tab>'] = { 'select_or_accept', 'select_prev' },
 ---
 ---   ['<C-n>'] = { 'select_next' },
 ---   ['<C-p>'] = { 'select_prev' },
@@ -178,6 +173,7 @@ function keymap.validate(config, is_mode)
     'accept',
     'accept_and_enter',
     'select_and_accept',
+    'select_or_accept',
     'select_accept_and_enter',
     'select_prev',
     'select_next',

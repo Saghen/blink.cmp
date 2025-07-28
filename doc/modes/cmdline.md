@@ -33,8 +33,8 @@ Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `'none
   -- instead of using the neovim defaults
   -- preset = 'inherit',
 
-  ['<Tab>'] = { 'show_and_insert', 'select_next' },
-  ['<S-Tab>'] = { 'show_and_insert', 'select_prev' },
+  ['<Tab>'] = { 'select_or_accept', 'select_next' },
+  ['<S-Tab>'] = { 'select_or_accept', 'select_prev' },
 
   ['<C-space>'] = { 'show', 'fallback' },
 

@@ -152,7 +152,27 @@ function cmp.select_and_accept(opts)
   return true
 end
 
---- Select the first completion item, if there's no selection, and enter
+--- Select the first completion item if there are multiple candidates, or accept it if there is only one.
+--- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
+function cmp.select_or_accept(opts)
+  local completion_list = require('blink.cmp.completion.list')
+
+  if #completion_list.items == 1 then
+    vim.schedule(
+      function()
+        completion_list.accept({
+          index = completion_list.selected_item_idx or 1,
+          callback = opts and opts.callback,
+        })
+      end
+    )
+    return true
+  end
+
+  return cmp.show_and_insert()
+end
+
+--- Accept the current completion item and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
 function cmp.accept_and_enter(opts)
   return cmp.accept({
@@ -163,7 +183,7 @@ function cmp.accept_and_enter(opts)
   })
 end
 
---- Select the first completion item, if there's no selection, and enter
+--- Select the first completion item, if there's no selection, accept and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
 --- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
 function cmp.select_accept_and_enter(opts)
   return cmp.select_and_accept({
