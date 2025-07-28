@@ -54,7 +54,7 @@ function draw_context.new(draw, item_idx, item, matched_indices)
   -- Escape them to avoid errors in nvim_buf_set_lines when rendering the completion menu
   local newline_char = '↲' .. icon_spacing
 
-  local label = item.label:gsub('\n', newline_char) .. (kind == 'Snippet' and '~' or '')
+  local label = item.label:gsub('\n', newline_char) .. (kind == 'Snippet' and draw.snippet_indicator or '')
   if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
   local label_detail = (item.labelDetails and item.labelDetails.detail or ''):gsub('\n', newline_char)

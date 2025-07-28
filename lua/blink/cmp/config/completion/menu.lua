@@ -130,6 +130,8 @@ local window = {
           highlight = 'BlinkCmpSource',
         },
       },
+      -- Appends an indicator to snippets label, `'~'` by default
+      snippet_indicator = '~',
     },
   },
 }
@@ -215,6 +217,7 @@ function window.validate(config)
         .. table.concat(vim.tbl_keys(config.draw.components), ', '),
     },
     components = { config.draw.components, 'table' },
+    snippet_indicator = { config.draw.snippet_indicator, 'string' },
   }, config.draw)
 
   for component, definition in pairs(config.draw.components) do

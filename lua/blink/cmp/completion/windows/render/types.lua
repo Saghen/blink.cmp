@@ -6,6 +6,7 @@
 --- @field columns? blink.cmp.DrawColumnDefinition[] | fun(context: blink.cmp.Context): blink.cmp.DrawColumnDefinition[] Components to render, grouped by column
 --- @field components? table<string, blink.cmp.DrawComponent> Component definitions
 --- @field treesitter? string[] Use treesitter to highlight the label text of completions from these sources
+--- @field snippet_indicator string Appends an indicator to snippets label, `'~'` by default
 ---
 --- @class blink.cmp.DrawHighlight
 --- @field [number] number Start and end index of the highlight
