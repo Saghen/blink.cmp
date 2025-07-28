@@ -283,6 +283,9 @@ completion.menu.draw = {
       highlight = 'BlinkCmpSource',
     },
   },
+
+  -- Appends an indicator to snippets label, `'~'` by default
+  snippet_indicator = '~',
 },
 ```
 
