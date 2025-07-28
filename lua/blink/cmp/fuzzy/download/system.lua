@@ -42,12 +42,13 @@ function system.get_linux_libc()
 
       -- strip whitespace
       local stdout = process.stdout:gsub('%s+', '')
-      return vim.fn.split(stdout, '-')[4]
+      local parts = vim.fn.split(stdout, '-')
+      return parts[#parts]
     end)
     :catch(function() end)
     -- Fall back to checking for alpine
     :map(function(libc)
-      if libc ~= nil then return libc end
+      if libc ~= nil and vim.tbl_contains({ 'gnu', 'musl' }, libc) then return libc end
 
       return async.task.new(function(resolve)
         vim.uv.fs_stat('/etc/alpine-release', function(err, is_alpine)
