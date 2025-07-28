@@ -3,7 +3,33 @@ title: Snippets
 ---
 # Snippets<!-- panvimdoc-ignore-start --> <Badge type="info"><a href="./reference#snippets">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
 
-Blink uses the `vim.snippet` API by default for expanding and navigating snippets. The built-in `snippets` source will load [friendly-snippets](https://github.com/rafamadriz/friendly-snippets), if available, and load any snippets found at `~/.config/nvim/snippets/`. For use with Luasnip, see the [Luasnip section](#luasnip).
+Blink uses the `vim.snippet` API by default for expanding and navigating snippets. The built-in `snippets` source will load [friendly-snippets](https://github.com/rafamadriz/friendly-snippets), if available, and load any snippets found at `~/.config/nvim/snippets/`. For use with Luasnip, see the [Luasnip section](#luasnip). For use with mini.snippets, see the [mini.snippets section](#mini-snippets).
+
+## Friendly Snippets
+
+When using the built-in `vim.snippet` snippet engine, [friendly-snippets](https://github.com/rafamadriz/friendly-snippets) will be automatically loaded, if available (disable with `friendly_snippets = false`). To [add snippets from a framework to a filetype](https://github.com/rafamadriz/friendly-snippets?tab=readme-ov-file#add-snippets-from-a-framework-to-a-filetype) use `extended_filetypes`.
+
+```lua
+sources = {
+  providers = {
+    snippets = {
+      opts = {
+        friendly_snippets = true, -- default
+
+        -- see the list of frameworks in: https://github.com/rafamadriz/friendly-snippets/tree/main/snippets/frameworks
+        -- and search for possible languages in: https://github.com/rafamadriz/friendly-snippets/blob/main/package.json
+        -- the following is just an example, you should only enable the frameworks that you use
+        extended_filetypes = {
+          markdown = { 'jekyll' },
+          sh = { 'shelldoc' },
+          php = { 'phpdoc' },
+          cpp = { 'unreal' }
+        }
+      }
+    }
+  }
+}
+```
 
 ## Custom snippets
 
