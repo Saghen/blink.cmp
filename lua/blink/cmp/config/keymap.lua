@@ -2,7 +2,8 @@
 --- | 'fallback' Fallback to mappings or the built-in behavior
 --- | 'fallback_to_mappings' Fallback to mappings only (not built-in behavior)
 --- | 'show' Show the completion window
---- | 'show_and_insert' Show the completion window and select the first item
+--- | 'show_and_insert' Show the completion menu and insert the first item. Short form for `cmp.show({ initial_selected_item_idx = 1 })` when `auto_insert = true`
+--- | 'show_and_insert_or_accept_single' Show the completion menu and insert the first item, or accepts the first item if there is only one
 --- | 'hide' Hide the completion window
 --- | 'cancel' Cancel the current completion, undoing the preview from auto_insert
 --- | 'accept' Accept the current completion item
@@ -52,14 +53,8 @@
 --- Mappings similar to the built-in completion in cmdline mode:
 --- ```lua
 --- {
----   ['<Tab>'] = {
----     function(cmp)
----       if cmp.is_ghost_text_visible() and not cmp.is_menu_visible() then return cmp.accept() end
----     end,
----     'show_and_insert',
----     'select_next',
----   },
----   ['<S-Tab>'] = { 'show_and_insert', 'select_prev' },
+---   ['<Tab>'] = { 'show_and_insert_or_accept_single', 'select_next' },
+---   ['<S-Tab>'] = { 'show_and_insert_or_accept_single', 'select_prev' },
 ---
 ---   ['<C-n>'] = { 'select_next' },
 ---   ['<C-p>'] = { 'select_prev' },
@@ -173,6 +168,7 @@ function keymap.validate(config, is_mode)
     'fallback_to_mappings',
     'show',
     'show_and_insert',
+    'show_and_insert_or_accept_single',
     'hide',
     'cancel',
     'accept',

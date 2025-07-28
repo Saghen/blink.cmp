@@ -24,8 +24,8 @@ local presets_keymaps = {
   },
 
   cmdline = {
-    ['<Tab>'] = { 'show_and_insert', 'select_next' },
-    ['<S-Tab>'] = { 'show_and_insert', 'select_prev' },
+    ['<Tab>'] = { 'show_and_insert_or_accept_single', 'select_next' },
+    ['<S-Tab>'] = { 'show_and_insert_or_accept_single', 'select_prev' },
 
     ['<C-space>'] = { 'show', 'fallback' },
 

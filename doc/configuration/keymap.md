@@ -43,6 +43,7 @@ keymap = {
   - Optionally use `function(cmp) cmp.show({ providers = { 'snippets' } }) end` to show with a specific list of providers
 - `show_and_insert`: Shows the completion menu and inserts the first item
   - Short form for `cmp.show({ initial_selected_item_idx = 1 })` when `auto_insert = true`
+- `show_and_insert_or_accept_single`: Shows the completion menu and inserts the first item, or accepts the first item if there is only one
 - `hide`: Hides the completion menu
 - `cancel`: Reverts `completion.list.selection.auto_insert` and hides the completion menu
 - `accept`: Accepts the currently selected item
