@@ -217,6 +217,8 @@ completion.menu.draw = {
   gap = 1,
   -- Priority of the cursorline highlight, setting this to 0 will render it below other highlights
   cursorline_priority = 10000,
+  -- Appends an indicator to snippets label
+  snippet_indicator = '~',
   -- Use treesitter to highlight the label text for the given list of sources
   treesitter = {},
   -- treesitter = { 'lsp' }
@@ -283,9 +285,6 @@ completion.menu.draw = {
       highlight = 'BlinkCmpSource',
     },
   },
-
-  -- Appends an indicator to snippets label, `'~'` by default
-  snippet_indicator = '~',
 },
 ```
 

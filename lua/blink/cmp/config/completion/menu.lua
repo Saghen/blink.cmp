@@ -62,7 +62,10 @@ local window = {
       gap = 1,
       -- Priority of the cursorline highlight, setting this to 0 will render it below other highlights
       cursorline_priority = 10000,
-      treesitter = {}, -- Use treesitter to highlight the label text of completions from these sources
+      -- Appends an indicator to snippets label, `'~'` by default
+      snippet_indicator = '~',
+      -- Use treesitter to highlight the label text of completions from these sources
+      treesitter = {},
       -- Components to render, grouped by column
       columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
       -- Definitions for possible components to render. Each component defines:
@@ -130,8 +133,6 @@ local window = {
           highlight = 'BlinkCmpSource',
         },
       },
-      -- Appends an indicator to snippets label, `'~'` by default
-      snippet_indicator = '~',
     },
   },
 }
@@ -195,6 +196,7 @@ function window.validate(config)
     },
     gap = { config.draw.gap, 'number' },
     cursorline_priority = { config.draw.cursorline_priority, 'number' },
+    snippet_indicator = { config.draw.snippet_indicator, 'string' },
 
     treesitter = { config.draw.treesitter, 'table' },
 
@@ -217,7 +219,6 @@ function window.validate(config)
         .. table.concat(vim.tbl_keys(config.draw.components), ', '),
     },
     components = { config.draw.components, 'table' },
-    snippet_indicator = { config.draw.snippet_indicator, 'string' },
   }, config.draw)
 
   for component, definition in pairs(config.draw.components) do
