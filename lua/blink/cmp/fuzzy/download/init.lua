@@ -30,8 +30,17 @@ function download.ensure_downloaded(callback)
 
       -- built locally
       if version.current.sha ~= nil then
-        -- up to date or version ignored, ignore
-        if version.current.sha == version.git.sha or download_config.ignore_version_mismatch then return end
+        -- check version matches (or explicitly ignored) and shared library exists
+        if version.current.sha == version.git.sha or download_config.ignore_version_mismatch then
+          local res = vim.uv.fs_stat(files.lib_path)
+          if res ~= nil then return end
+
+          -- shared library missing despite matching version info (e.g., incomplete build)
+          utils.notify({
+            { 'Shared library expected but not found at ', 'DiagnosticWarn' },
+            { files.lib_path, 'DiagnosticInfo' },
+          }, vim.log.levels.WARN)
+        end
 
         -- out of date
         utils.notify({
