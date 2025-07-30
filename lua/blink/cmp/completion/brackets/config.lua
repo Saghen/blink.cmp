@@ -1,3 +1,7 @@
+local css_exceptions = function(ctx)
+  local str = string.sub(ctx.line, 1, ctx.cursor[2] or #ctx.line)
+  return not str:find('[%w_-]*::?[%w-]*$')
+end
 local typescript_exceptions = function(ctx) return ctx.line:find('^%s*import%s') == nil end
 
 return {
@@ -49,6 +53,11 @@ return {
           and ctx.line:find('^%s*from%s') == nil
           and ctx.line:find('^%s*except%s') == nil
       end,
+      -- ignore pseudo-classes and pseudo-elements
+      css = css_exceptions,
+      scss = css_exceptions,
+      less = css_exceptions,
+      html = css_exceptions, -- remove after adding treesitter based language detection
       -- ignore `import ...` statements
       javascript = typescript_exceptions,
       javascriptreact = typescript_exceptions,
