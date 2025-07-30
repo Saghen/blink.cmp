@@ -70,6 +70,10 @@ keymap = {
   - Optionally use `function(cmp) cmp.scroll_documentation_down(4) end` to scroll by a specific number of lines
 - `show_signature`: Shows the signature help window
 - `hide_signature`: Hides the signature help window
+- `scroll_signature_up`: Scrolls the signature help window up by 4 lines
+  - Optionally use `function(cmp) cmp.scroll_signature_up(4) end` to scroll by a specific number of lines
+- `scroll_signature_down`: Scrolls the signature help window down by 4 lines
+  - Optionally use `function(cmp) cmp.scroll_signature_down(4) end` to scroll by a specific number of lines
 - `snippet_forward`: Jumps to the next snippet placeholder
 - `snippet_backward`: Jumps to the previous snippet placeholder
 - `fallback`: Runs the next non-blink keymap, or runs the built-in neovim binding
