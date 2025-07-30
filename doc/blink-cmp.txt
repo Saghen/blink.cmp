@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 July 28
+*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 July 30
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1565,6 +1565,10 @@ COMMANDS ~
     - Optionally use `function(cmp) cmp.scroll_documentation_down(4) end` to scroll by a specific number of lines
 - `show_signature`: Shows the signature help window
 - `hide_signature`: Hides the signature help window
+- `scroll_signature_up`: Scrolls the signature help window up by 4 lines
+    - Optionally use `function(cmp) cmp.scroll_signature_up(4) end` to scroll by a specific number of lines
+- `scroll_signature_down`: Scrolls the signature help window down by 4 lines
+    - Optionally use `function(cmp) cmp.scroll_signature_down(4) end` to scroll by a specific number of lines
 - `snippet_forward`: Jumps to the next snippet placeholder
 - `snippet_backward`: Jumps to the previous snippet placeholder
 - `fallback`: Runs the next non-blink keymap, or runs the built-in neovim binding
@@ -1670,10 +1674,10 @@ info in: https://cmp.saghen.dev/configuration/completion.html#list
 SIGNATURE                                         *blink-cmp-config-signature*
 
 
-Blink supports signature help, automatically triggered when typing trigger
-characters, defined by the LSP, such as `(` for `lua`. The menu will be updated
-when pressing a retrigger character, such as `,`. Due to it being experimental,
-this feature is opt-in.
+Blink supports signature help by manually pressing `<C-k>` (by default) or
+automatically triggered when typing trigger characters, defined by the LSP,
+such as `(` for `lua`. The menu will be updated when pressing a retrigger
+character, such as `,`. Due to it being experimental, this feature is opt-in.
 
 >lua
     signature = { enabled = true }
@@ -1683,6 +1687,23 @@ this feature is opt-in.
 
 You may want to set `signature.window.show_documentation = false` to only show
 the signature, and not the documentation.
+
+
+KEYMAP ~
+
+See the keymap documentation <../modes/cmdline.md#keymap> for a full list of
+commands. By default, the `scroll_signature_up` and `scroll_signature_down`
+commands are not bound to any keys. You may bind them like so:
+
+>lua
+    keymap = {
+      ['<C-u>'] = { 'scroll_signature_up', 'fallback' },
+      ['<C-d>'] = { 'scroll_signature_down', 'fallback' },
+    
+      -- default in all keymap presets
+      ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
+    }
+<
 
 
 SNIPPETS                                           *blink-cmp-config-snippets*
