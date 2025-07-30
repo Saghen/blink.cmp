@@ -129,6 +129,7 @@ end
 --- @return string
 function registry:expand_vars(snippet)
   local lazy_vars = self.builtin_vars.lazy
+  local lazy_vars_cache = {}
   local eager_vars = self.builtin_vars.eager or {}
 
   local resolved_snippet = snippet
@@ -150,7 +151,9 @@ function registry:expand_vars(snippet)
       if eager_vars[data.name] then
         resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', eager_vars[data.name])
       elseif lazy_vars[data.name] then
-        local replacement = lazy_vars[data.name]({ clipboard_register = self.config.clipboard_register })
+        local replacement = lazy_vars_cache[data.name]
+          or lazy_vars[data.name]({ clipboard_register = self.config.clipboard_register })
+        lazy_vars_cache[data.name] = replacement
         -- gsub otherwise fails with strings like `%20` in the replacement string
         local escaped_for_gsub = replacement:gsub('%%', '%%%%')
         resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', escaped_for_gsub)
