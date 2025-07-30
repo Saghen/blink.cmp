@@ -305,6 +305,26 @@ function cmp.hide_signature()
   return true
 end
 
+--- Scroll the documentation window up
+--- @param count? number
+function cmp.scroll_signature_up(count)
+  local sig = require('blink.cmp.signature.window')
+  if not sig.win:is_open() then return end
+
+  vim.schedule(function() sig.scroll_up(count or 4) end)
+  return true
+end
+
+--- Scroll the documentation window down
+--- @param count? number
+function cmp.scroll_signature_down(count)
+  local sig = require('blink.cmp.signature.window')
+  if not sig.win:is_open() then return end
+
+  vim.schedule(function() sig.scroll_down(count or 4) end)
+  return true
+end
+
 --- Check if a snippet is active, optionally filtering by direction
 --- @param filter? { direction?: number }
 function cmp.snippet_active(filter) return require('blink.cmp.config').snippets.active(filter) end

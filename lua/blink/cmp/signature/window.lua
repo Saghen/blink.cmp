@@ -88,6 +88,7 @@ function signature.open_with_signature_help(context, signature_help)
 
   signature.win:open()
   signature.update_position()
+  signature.scroll_up(1)
 end
 
 function signature.close()
@@ -100,7 +101,7 @@ function signature.scroll_up(amount)
   local top_line = math.max(1, vim.fn.line('w0', winnr) - 1)
   local desired_line = math.max(1, top_line - amount)
 
-  vim.api.nvim_win_set_cursor(signature.win:get_win(), { desired_line, 0 })
+  signature.win:set_cursor({ desired_line, 0 })
 end
 
 function signature.scroll_down(amount)
@@ -109,7 +110,7 @@ function signature.scroll_down(amount)
   local bottom_line = math.max(1, vim.fn.line('w$', winnr) + 1)
   local desired_line = math.min(line_count, bottom_line + amount)
 
-  vim.api.nvim_win_set_cursor(signature.win:get_win(), { desired_line, 0 })
+  signature.win:set_cursor({ desired_line, 0 })
 end
 
 function signature.update_position()
