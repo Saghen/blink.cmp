@@ -30,8 +30,22 @@ function download.ensure_downloaded(callback)
 
       -- built locally
       if version.current.sha ~= nil then
-        -- up to date or version ignored, ignore
-        if version.current.sha == version.git.sha or download_config.ignore_version_mismatch then return end
+        -- check version matches (or explicitly ignored) and shared library exists
+        if version.current.sha == version.git.sha or download_config.ignore_version_mismatch then
+          local loaded, err = pcall(require, 'blink.cmp.fuzzy.rust')
+          if loaded then return end
+
+          -- shared library missing despite matching version info (e.g., incomplete build)
+          utils.notify({
+            { 'Incomplete build of the ' },
+            { 'fuzzy matching library', 'DiagnosticInfo' },
+            { ' detected, please re-run ' },
+            { ' cargo build --release ', 'DiagnosticVirtualTextInfo' },
+            { ' such as by re-installing. ' },
+            { 'Error: ' .. tostring(err), 'DiagnosticError' },
+          })
+          return false
+        end
 
         -- out of date
         utils.notify({
