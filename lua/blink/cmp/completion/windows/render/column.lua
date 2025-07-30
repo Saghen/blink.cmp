@@ -103,9 +103,12 @@ function column:get_line_highlights(line_idx)
         table.insert(highlights, { offset, offset + #text, group = column_highlights })
       elseif type(column_highlights) == 'table' then
         for _, highlight in ipairs(column_highlights) do
+          local start_col = offset + (highlight[1] or 0)
+          local end_col = offset + (highlight[2] or #text)
+
           table.insert(highlights, {
-            offset + (highlight[1] or 0),
-            offset + (highlight[2] or #text),
+            math.min(math.max(start_col, offset), offset + #text),
+            math.min(math.max(end_col, offset), offset + #text),
             group = highlight.group,
             params = highlight.params,
             priority = highlight.priority,
