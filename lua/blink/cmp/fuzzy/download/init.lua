@@ -32,14 +32,19 @@ function download.ensure_downloaded(callback)
       if version.current.sha ~= nil then
         -- check version matches (or explicitly ignored) and shared library exists
         if version.current.sha == version.git.sha or download_config.ignore_version_mismatch then
-          local res = vim.uv.fs_stat(files.lib_path)
-          if res ~= nil then return end
+          local loaded, err = pcall(require, 'blink.cmp.fuzzy.rust')
+          if loaded then return end
 
           -- shared library missing despite matching version info (e.g., incomplete build)
           utils.notify({
-            { 'Shared library expected but not found at ', 'DiagnosticWarn' },
-            { files.lib_path, 'DiagnosticInfo' },
-          }, vim.log.levels.WARN)
+            { 'Incomplete build of the ' },
+            { 'fuzzy matching library', 'DiagnosticInfo' },
+            { ' detected, please re-run ' },
+            { ' cargo build --release ', 'DiagnosticVirtualTextInfo' },
+            { ' such as by re-installing. ' },
+            { 'Error: ' .. tostring(err), 'DiagnosticError' },
+          })
+          return false
         end
 
         -- out of date
