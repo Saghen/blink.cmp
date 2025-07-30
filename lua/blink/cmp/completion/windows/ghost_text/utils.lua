@@ -12,7 +12,10 @@ function utils.is_noice()
 end
 
 function utils.redraw_if_needed()
-  if utils.is_cmdline() then vim.api.nvim__redraw({ buf = utils.get_buf(), flush = true }) end
+  if utils.is_cmdline() then
+    local bufnr = utils.get_buf() or 0
+    if vim.api.nvim_buf_is_valid(bufnr) then vim.api.nvim__redraw({ buf = utils.get_buf(), flush = true }) end
+  end
 end
 
 --- Gets the buffer to use for ghost text
