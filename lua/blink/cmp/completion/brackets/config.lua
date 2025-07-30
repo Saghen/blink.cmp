@@ -57,6 +57,7 @@ return {
       css = css_exceptions,
       scss = css_exceptions,
       less = css_exceptions,
+      html = css_exceptions, -- remove after adding treesitter based language detection
       -- ignore `import ...` statements
       javascript = typescript_exceptions,
       javascriptreact = typescript_exceptions,
