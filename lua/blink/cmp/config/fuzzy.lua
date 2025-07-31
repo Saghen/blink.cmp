@@ -66,21 +66,11 @@ local fuzzy = {
 function fuzzy.validate(config)
   -- TODO: Deprecations to be removed in v2.0
   if config.use_frecency ~= nil then
-    utils.notify({
-      { 'fuzzy.use_frecency', 'DiagnosticWarn' },
-      { ' is deprecated and has been replaced by ' },
-      { 'fuzzy.frecency.enabled', 'DiagnosticInfo' },
-      { '. Please update your config before version 2.0' },
-    })
+    vim.deprecate('fuzzy.use_frecency', 'fuzzy.frecency.enabled', 'v2.0.0', 'blink-cmp')
     config.frecency.enabled = config.use_frecency
   end
   if config.use_unsafe_no_lock ~= nil then
-    utils.notify({
-      { 'fuzzy.use_unsafe_no_lock', 'DiagnosticWarn' },
-      { ' is deprecated and has been replaced by ' },
-      { 'fuzzy.frecency.unsafe_no_lock', 'DiagnosticInfo' },
-      { '. Please update your config before version 2.0' },
-    })
+    vim.deprecate('fuzzy.use_unsafe_no_lock', 'fuzzy.frecency.unsafe_no_lock', 'v2.0.0', 'blink-cmp')
     config.frecency.unsafe_no_lock = config.use_unsafe_no_lock
   end
   -- Migrate the frecency database to its new location if needed
