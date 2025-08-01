@@ -62,7 +62,7 @@
 ---   ['<C-p>'] = { 'select_prev' },
 ---
 ---   ['<C-y>'] = { 'select_and_accept' },
----   ['<C-e>'] = { 'cancel' },
+---   ['<C-e>'] = { 'cancel', 'fallback' },
 --- }
 --- ```
 --- | 'cmdline'
@@ -131,7 +131,7 @@
 ---   ['<Down>'] = { 'select_next', 'fallback' },
 ---
 ---   -- disable a keymap from the preset
----   ['<C-e>'] = {},
+---   ['<C-e>'] = false,
 ---
 ---   -- show with a list of providers
 ---   ['<C-space>'] = { function(cmp) cmp.show({ providers = { 'snippets' } }) end },

@@ -35,7 +35,7 @@ local presets_keymaps = {
     ['<Left>'] = { 'select_prev', 'fallback' },
 
     ['<C-y>'] = { 'select_and_accept' },
-    ['<C-e>'] = { 'cancel' },
+    ['<C-e>'] = { 'cancel', 'fallback' },
     ['<End>'] = { 'hide', 'fallback' },
   },
 
