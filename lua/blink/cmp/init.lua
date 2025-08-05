@@ -100,14 +100,18 @@ end
 --- Select the first completion item if there are multiple candidates, or accept it if there is only one, after showing
 --- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
 function cmp.show_and_insert_or_accept_single(opts)
+  local list = require('blink.cmp.completion.list')
+
+  -- If the candidate list has been filtered down to exactly one item, accept it.
+  if #list.items == 1 then
+    vim.schedule(function() list.accept({ index = 1, callback = opts and opts.callback }) end)
+    return true
+  end
+
   return cmp.show_and_insert({
     callback = function()
-      local list = require('blink.cmp.completion.list')
       if #list.items == 1 then
-        list.accept({
-          index = 1,
-          callback = opts and opts.callback,
-        })
+        list.accept({ index = 1, callback = opts and opts.callback })
       elseif opts and opts.callback then
         opts.callback()
       end
