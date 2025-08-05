@@ -1,4 +1,4 @@
-*blink-cmp.txt*           For NVIM v0.10.0           Last change: 2025 July 30
+*blink-cmp.txt*          For NVIM v0.10.0          Last change: 2025 August 05
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1590,7 +1590,7 @@ DEFAULT
 
 >lua
     ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
-    ['<C-e>'] = { 'hide' },
+    ['<C-e>'] = { 'hide', 'fallback' },
     ['<C-y>'] = { 'select_and_accept' },
     
     ['<Up>'] = { 'select_prev', 'fallback' },
@@ -2853,7 +2853,7 @@ for more information on defining your own.
       ['<Left>'] = { 'select_prev', 'fallback' },
     
       ['<C-y>'] = { 'select_and_accept' },
-      ['<C-e>'] = { 'cancel' },
+      ['<C-e>'] = { 'cancel', 'fallback' },
     }
 <
 
