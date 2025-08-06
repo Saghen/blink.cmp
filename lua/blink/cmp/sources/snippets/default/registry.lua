@@ -106,30 +106,24 @@ function registry:get_global_snippets()
 end
 
 --- @param snippet blink.cmp.Snippet
+--- @param cache_key number
 --- @return blink.cmp.CompletionItem
-function registry:snippet_to_completion_item(snippet)
+function registry:snippet_to_completion_item(snippet, cache_key)
   local body = type(snippet.body) == 'string' and snippet.body or table.concat(snippet.body, '\n')
   return {
     kind = require('blink.cmp.types').CompletionItemKind.Snippet,
     label = snippet.prefix,
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
-    insertText = self:expand_vars(body),
+    insertText = self:expand_vars(body, cache_key),
     description = snippet.description,
   }
 end
 
 --- @param snippet string
+--- @param cache_key number
 --- @return string
-function registry:parse_body(snippet)
-  local parse = utils.safe_parse(self:expand_vars(snippet))
-  return parse and tostring(parse) or snippet
-end
-
---- @param snippet string
---- @return string
-function registry:expand_vars(snippet)
+function registry:expand_vars(snippet, cache_key)
   local lazy_vars = self.builtin_vars.lazy
-  local lazy_vars_cache = {}
   local eager_vars = self.builtin_vars.eager or {}
 
   local resolved_snippet = snippet
@@ -151,9 +145,7 @@ function registry:expand_vars(snippet)
       if eager_vars[data.name] then
         resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', eager_vars[data.name])
       elseif lazy_vars[data.name] then
-        local replacement = lazy_vars_cache[data.name]
-          or lazy_vars[data.name]({ clipboard_register = self.config.clipboard_register })
-        lazy_vars_cache[data.name] = replacement
+        local replacement = lazy_vars[data.name](cache_key, { clipboard_register = self.config.clipboard_register })
         -- gsub otherwise fails with strings like `%20` in the replacement string
         local escaped_for_gsub = replacement:gsub('%%', '%%%%')
         resolved_snippet = resolved_snippet:gsub('%$[{]?(' .. data.name .. ')[}]?', escaped_for_gsub)

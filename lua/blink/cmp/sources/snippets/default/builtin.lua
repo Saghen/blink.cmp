@@ -7,17 +7,28 @@ local builtin = {
   lazy = {},
 }
 
-function builtin.lazy.TM_FILENAME() return vim.fn.expand('%:t') end
+--- Higher-order function to add single-value caching
+local function cached(fn)
+  local cache_key = -1
+  local cached_value = nil
+  return function(key, ...)
+    assert(key ~= -1, 'key cannot be -1')
+    if cache_key == key then return cached_value end
 
-function builtin.lazy.TM_FILENAME_BASE() return vim.fn.expand('%:t:s?\\.[^\\.]\\+$??') end
+    cached_value = fn(...)
+    cache_key = key
+    return cached_value
+  end
+end
 
-function builtin.lazy.TM_DIRECTORY() return vim.fn.expand('%:p:h') end
-
-function builtin.lazy.TM_FILEPATH() return vim.fn.expand('%:p') end
-
-function builtin.lazy.TM_SELECTED_TEXT() return vim.fn.trim(vim.fn.getreg(vim.v.register, true), '\n', 2) end
-
-function builtin.lazy.CLIPBOARD(opts) return vim.fn.getreg(opts.clipboard_register or vim.v.register, true) end
+builtin.lazy.TM_FILENAME = cached(function() return vim.fn.expand('%:t') end)
+builtin.lazy.TM_FILENAME_BASE = cached(function() return vim.fn.expand('%:t:s?\\.[^\\.]\\+$??') end)
+builtin.lazy.TM_DIRECTORY = cached(function() return vim.fn.expand('%:p:h') end)
+builtin.lazy.TM_FILEPATH = cached(function() return vim.fn.expand('%:p') end)
+builtin.lazy.TM_SELECTED_TEXT = cached(function() return vim.fn.trim(vim.fn.getreg(vim.v.register, true), '\n', 2) end)
+builtin.lazy.CLIPBOARD = cached(
+  function(opts) return vim.fn.getreg(opts.clipboard_register or vim.v.register, true) end
+)
 
 local function buf_to_ws_part()
   local LSP_WORSKPACE_PARTS = 'LSP_WORSKPACE_PARTS'
@@ -38,18 +49,18 @@ local function buf_to_ws_part()
   return ws_parts
 end
 
-function builtin.lazy.RELATIVE_FILEPATH() -- The relative (to the opened workspace or folder) file path of the current document
-  return buf_to_ws_part()[2]
-end
-
-function builtin.lazy.WORKSPACE_FOLDER() -- The path of the opened workspace or folder
+builtin.lazy.RELATIVE_FILEPATH = cached(
+  function() -- The relative (to the opened workspace or folder) file path of the current document
+    return buf_to_ws_part()[2]
+  end
+)
+builtin.lazy.WORKSPACE_FOLDER = cached(function() -- The path of the opened workspace or folder
   return buf_to_ws_part()[1]
-end
-
-function builtin.lazy.WORKSPACE_NAME() -- The name of the opened workspace or folder
+end)
+builtin.lazy.WORKSPACE_NAME = cached(function() -- The name of the opened workspace or folder
   local parts = vim.split(buf_to_ws_part()[1] or '', '[\\/]')
   return parts[#parts]
-end
+end)
 
 function builtin.lazy.CURRENT_YEAR() return os.date('%Y') end
 
@@ -129,11 +140,9 @@ local function buffer_comment_chars()
   return comments
 end
 
-function builtin.lazy.LINE_COMMENT() return buffer_comment_chars()[1] end
-
-function builtin.lazy.BLOCK_COMMENT_START() return buffer_comment_chars()[2] end
-
-function builtin.lazy.BLOCK_COMMENT_END() return buffer_comment_chars()[3] end
+builtin.lazy.LINE_COMMENT = cached(function() return buffer_comment_chars()[1] end)
+builtin.lazy.BLOCK_COMMENT_START = cached(function() return buffer_comment_chars()[2] end)
+builtin.lazy.BLOCK_COMMENT_END = cached(function() return buffer_comment_chars()[3] end)
 
 local function get_cursor()
   local c = vim.api.nvim_win_get_cursor(0)
