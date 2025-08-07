@@ -175,16 +175,6 @@ function lib.basename_with_sep(path)
   return basename
 end
 
--- Reverts the escaping of environment variable of vim.fn.fnameescape
----@param path string
----@return string
-function lib:fnameescape(path)
-  path = vim.fn.fnameescape(path)
-  path = path:gsub('\\(%$[%w_]+)', '%1')
-  path = path:gsub('\\(%${[%w_]+})', '%1')
-  return path
-end
-
 --- Splits a string on spaces, but only when the space is not escaped by a backslash.
 -- For example: 'foo bar\ baz' -> { 'foo', 'bar\ baz' }
 ---@param str string

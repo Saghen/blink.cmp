@@ -4,88 +4,9 @@
 
 local async = require('blink.cmp.lib.async')
 local constants = require('blink.cmp.sources.cmdline.constants')
+local cmdline_utils = require('blink.cmp.sources.cmdline.utils')
 local utils = require('blink.cmp.sources.lib.utils')
 local path_lib = require('blink.cmp.sources.path.lib')
-
---- Split the command line into arguments, handling path escaping and trailing spaces.
---- For path completions, split by paths and normalize each one if needed.
---- For other completions, splits by spaces and preserves trailing empty arguments.
----@param context table
----@param is_path_completion boolean
----@return string, table
-local function smart_split(context, is_path_completion)
-  local line = context.line
-
-  local function contains_vim_expr(line)
-    -- Checks for common Vim expressions: %, #, %:h, %:p, etc.
-    return vim.regex([[%\%(:[phtrwe~.]\)\?]]):match_str(line) ~= nil
-  end
-  local function contains_wildcard(line) return line:find('[%*%?%[%]]') ~= nil end
-
-  if is_path_completion and not contains_vim_expr(line) and not contains_wildcard(line) then
-    -- Split the line into tokens, respecting escaped spaces in paths
-    local tokens = path_lib:split_unescaped(line:gsub('^%s+', ''))
-    local cmd = tokens[1]
-    local args = {}
-
-    for i = 2, #tokens do
-      local arg = tokens[i]
-      -- Escape argument if it contains unescaped spaces
-      -- Some commands may expect escaped paths (:edit), others may not (:view)
-      if arg and arg ~= '' and not arg:find('\\ ') then arg = path_lib:fnameescape(arg) end
-      table.insert(args, arg)
-    end
-    return line, { cmd, unpack(args) }
-  end
-
-  return line, vim.split(line:gsub('^%s+', ''), ' ', { plain = true })
-end
-
--- Find the longest match for a given set of patterns
----@param str string
----@param patterns table
----@return string
-local function longest_match(str, patterns)
-  local best = ''
-  for _, pat in ipairs(patterns) do
-    local m = str:match(pat)
-    if m and #m > #best then best = m end
-  end
-  return best
-end
-
---- Returns completion items for a given pattern and type, with special handling for shell commands on Windows/WSL.
---- @param pattern string The partial command to match for completion
---- @param type string The type of completion
---- @param completion_type? string Original completion type from vim.fn.getcmdcompltype()
---- @return table completions
-local function get_completions(pattern, type, completion_type)
-  -- If a shell command is requested on Windows or WSL, update PATH to avoid performance issues.
-  if completion_type == 'shellcmd' then
-    local separator, filter_fn
-
-    if vim.fn.has('win32') == 1 then
-      separator = ';'
-      -- Remove System32 folder on native Windows
-      filter_fn = function(part) return not part:lower():match('^[a-z]:\\windows\\system32$') end
-    elseif vim.fn.has('wsl') == 1 then
-      separator = ':'
-      -- Remove all Windows filesystem mounts on WSL
-      filter_fn = function(part) return not part:lower():match('^/mnt/[a-z]/') end
-    end
-
-    if filter_fn then
-      local orig_path = vim.env.PATH
-      local new_path = table.concat(vim.tbl_filter(filter_fn, vim.split(orig_path, separator)), separator)
-      vim.env.PATH = new_path
-      local completions = vim.fn.getcompletion(pattern, type, true)
-      vim.env.PATH = orig_path
-      return completions
-    end
-  end
-
-  return vim.fn.getcompletion(pattern, type, true)
-end
 
 --- @class blink.cmp.Source
 local cmdline = {
@@ -109,7 +30,7 @@ function cmdline:enabled()
 end
 
 ---@return table
-function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':', '!' } end
+function cmdline:get_trigger_characters() return { ' ', '.', '#', '-', '=', '/', ':', '!', '%', '~' } end
 
 ---@param context blink.cmp.Context
 ---@param callback fun(result?: blink.cmp.CompletionResponse)
@@ -119,11 +40,15 @@ function cmdline:get_completions(context, callback)
 
   local is_path_completion = vim.tbl_contains(constants.completion_types.path, completion_type)
   local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
+  local is_filename_modifier_completion = cmdline_utils.contains_filename_modifiers(context.line)
+  local is_wildcard_completion = cmdline_utils.contains_wildcard(context.line)
 
-  local context_line, arguments = smart_split(context, is_path_completion or is_buffer_completion)
-  local cmd = arguments[1]
+  local should_split_path = (is_path_completion or is_buffer_completion)
+    and not is_filename_modifier_completion
+    and not is_wildcard_completion
+  local context_line, arguments = cmdline_utils.smart_split(context.line, should_split_path)
   local before_cursor = context_line:sub(1, context.cursor[2])
-  local _, args_before_cursor = smart_split({ line = before_cursor }, is_path_completion or is_buffer_completion)
+  local _, args_before_cursor = cmdline_utils.smart_split(before_cursor, should_split_path)
   local arg_number = #args_before_cursor
 
   local leading_spaces = context.line:match('^(%s*)') -- leading spaces in the original query
@@ -134,6 +59,10 @@ function cmdline:get_completions(context, callback)
   local keyword_config = require('blink.cmp.config').completion.keyword
   local keyword = context.get_bounds(keyword_config.range)
   local current_arg_prefix = current_arg:sub(1, keyword.start_col - #text_before_argument - 1)
+
+  local unique_suffixes = {}
+  local unique_suffixes_limit = 2000
+  local special_char, vim_expr
 
   local task = async.task
     .empty()
@@ -181,21 +110,52 @@ function cmdline:get_completions(context, callback)
             -- path completions uniquely expect only the current path
             query = is_path_completion and current_arg_prefix or query
 
-            completions = get_completions(query, compl_type, completion_type)
+            completions = cmdline_utils.get_completions(query, compl_type, completion_type)
             if type(completions) ~= 'table' then completions = {} end
           end
+        end
+      elseif is_filename_modifier_completion then
+        vim_expr = cmdline_utils.extract_quoted_part(current_arg) or current_arg
+        special_char = vim_expr:sub(-1)
+
+        -- Alternate files
+        if special_char == '#' then
+          local alt_buf = vim.fn.bufnr('#')
+          if alt_buf ~= -1 then
+            local buffers = { [''] = vim.fn.expand('#') } -- Keep the '#' prefix as a completion option
+            local curr_buf = vim.api.nvim_get_current_buf()
+            for _, buf in ipairs(vim.fn.getbufinfo({ bufloaded = 1, buflisted = 1 })) do
+              if buf.bufnr ~= curr_buf and buf.bufnr ~= alt_buf then
+                buffers[tostring(buf.bufnr)] = vim.fn.expand('#' .. buf.bufnr)
+              end
+            end
+            completions = vim.tbl_keys(buffers)
+            if #completions < unique_suffixes_limit then
+              unique_suffixes = path_lib:compute_unique_suffixes(vim.tbl_values(buffers))
+            end
+          end
+        -- Current file
+        elseif special_char == '%' then
+          completions = { '' }
+        -- Modifiers
+        elseif special_char == ':' then
+          completions = vim.tbl_keys(constants.modifiers)
+        elseif vim.tbl_contains({ '~', '.' }, special_char) then
+          completions = { special_char }
         end
 
       -- Cmdline mode
       else
         local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
-        completions = get_completions(query, 'cmdline', completion_type)
+        completions = cmdline_utils.get_completions(query, 'cmdline', completion_type)
       end
 
       return completions
     end)
     :schedule()
     :map(function(completions)
+      ---@cast completions string[]
+
       -- The getcompletion() api is inconsistent in whether it returns the prefix or not.
       --
       -- I.e. :set shiftwidth=| will return '2'
@@ -209,11 +169,9 @@ function cmdline:get_completions(context, callback)
       -- In all other cases, we want to check for the prefix and remove it from the filter text
       -- and add it to the newText
 
-      ---@cast completions string[]
-      local unique_prefixes = is_buffer_completion
-          and #completions < 2000
-          and path_lib:compute_unique_suffixes(completions)
-        or {}
+      if is_buffer_completion and #completions < unique_suffixes_limit then
+        unique_suffixes = path_lib:compute_unique_suffixes(completions)
+      end
 
       ---@type blink.cmp.CompletionItem[]
       local items = {}
@@ -222,19 +180,36 @@ function cmdline:get_completions(context, callback)
         local label, label_details
         local option_info
 
+        -- current (%) or alternate (#) filename with optional modifiers (:)
+        if is_filename_modifier_completion then
+          local expanded = vim.fn.expand(vim_expr .. completion)
+          -- expand in command (e.g. :edit %) but don't in expression (e.g =vim.fn.expand("%"))
+          new_text = vim_expr:sub(1, 1) == current_arg_prefix:sub(1, 1) and expanded or current_arg_prefix .. completion
+
+          if special_char == '#' then
+            -- special case: we need to display # along with #n
+            if completion == '' then filter_text = special_char end
+            label_details = { description = unique_suffixes[new_text] or expanded }
+          elseif special_char == '%' then
+            label_details = { description = expanded }
+          elseif vim.tbl_contains({ ':', '~', '.' }, special_char) then
+            label_details = { description = constants.modifiers[completion] or expanded }
+          end
+
         -- path completion in commands, e.g. `chdir <path>` and options, e.g. `:set directory=<path>`
-        if is_path_completion then
+        elseif is_path_completion then
+          if current_arg == '~' then label = completion end
           filter_text = path_lib.basename_with_sep(completion)
           new_text = vim.fn.fnameescape(completion)
-          if cmd == 'set' then
+          if arguments[1] == 'set' then
             new_text = current_arg_prefix:sub(1, current_arg_prefix:find('=') or #current_arg_prefix) .. new_text
           end
 
         -- buffer commands
         elseif is_buffer_completion then
-          label = unique_prefixes[completion] or completion
-          if unique_prefixes[completion] then
-            label_details = { description = completion:sub(1, -#unique_prefixes[completion] - 2) }
+          label = unique_suffixes[completion] or completion
+          if unique_suffixes[completion] then
+            label_details = { description = completion:sub(1, -#unique_suffixes[completion] - 2) }
           end
           new_text = vim.fn.fnameescape(completion)
 
@@ -281,7 +256,7 @@ function cmdline:get_completions(context, callback)
 
         -- exclude range for commands on the first argument
         if arg_number == 1 and completion_type == 'command' then
-          local prefix = longest_match(current_arg, {
+          local prefix = cmdline_utils.longest_match(current_arg, {
             "^%s*'<%s*,%s*'>%s*", -- Visual range, e.g., '<,>'
             '^%s*%d+%s*,%s*%d+%s*', -- Numeric range, e.g., 3,5
             '^%s*[%p]+%s*', -- One or more punctuation characters
