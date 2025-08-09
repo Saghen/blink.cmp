@@ -17,13 +17,24 @@ mod keyword;
 mod lsp_item;
 mod sort;
 
-static REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"[\p{L}_][\p{L}0-9_\\-]{2,}").unwrap());
+static REGEX: LazyLock<RwLock<Regex>> =
+    LazyLock::new(|| RwLock::new(Regex::new(r"[\p{L}0-9_\\-]{2,}").unwrap()));
 static FRECENCY: LazyLock<RwLock<Option<FrecencyTracker>>> = LazyLock::new(|| RwLock::new(None));
 static HAYSTACKS_BY_PROVIDER: LazyLock<RwLock<HashMap<String, Vec<LspItem>>>> =
     LazyLock::new(|| RwLock::new(HashMap::new()));
 
-pub fn init_db(_: &Lua, (db_path, use_unsafe_no_lock): (String, bool)) -> LuaResult<bool> {
+fn update_regex(new_pattern: &str) {
+    let mut regex = REGEX.write().unwrap();
+    *regex = Regex::new(new_pattern).unwrap();
+}
+
+pub fn init_db(
+    _: &Lua,
+    (db_path, use_unsafe_no_lock, custom_regex): (String, bool, Option<String>),
+) -> LuaResult<bool> {
+    if let Some(regex) = custom_regex {
+        update_regex(&regex);
+    }
     let mut frecency = FRECENCY.write().map_err(|_| Error::AcquireFrecencyLock)?;
     if frecency.is_some() {
         return Ok(false);
@@ -211,6 +222,8 @@ pub fn guess_edit_range(
 
 pub fn get_words(_: &Lua, text: mlua::String) -> LuaResult<Vec<String>> {
     Ok(REGEX
+        .read()
+        .unwrap()
         .find_iter(&text.to_string_lossy())
         .map(|m| m.as_str().to_string())
         .filter(|s| s.len() < 512)

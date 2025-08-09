@@ -1,8 +1,12 @@
+local config_fuzzy = require('blink.cmp.config').fuzzy
 local match = require('blink.cmp.fuzzy.lua.match')
 local match_indices = require('blink.cmp.fuzzy.lua.match_indices')
 local get_keyword_range = require('blink.cmp.fuzzy.lua.keyword').get_keyword_range
 local guess_keyword_range = require('blink.cmp.fuzzy.lua.keyword').guess_keyword_range
 
+local words_regex = vim.regex(
+  [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\%(\w\|á\|Á\|é\|É\|í\|Í\|ó\|Ó\|ú\|Ú\)*\%(-\%(\w\|á\|Á\|é\|É\|í\|Í\|ó\|Ó\|ú\|Ú\)*\)*\)]]
+)
 --- @type blink.cmp.FuzzyImplementation
 --- @diagnostic disable-next-line: missing-fields
 local fuzzy = {
@@ -10,13 +14,13 @@ local fuzzy = {
   provider_items = {},
 }
 
-function fuzzy.init_db() end
-function fuzzy.destroy_db() end
-function fuzzy.access() end
+function fuzzy.init_db()
+  if config_fuzzy.custom_regex then words_regex = vim.regex(config_fuzzy.custom_regex) end
+end
 
-local words_regex = vim.regex(
-  [[\%(-\?\d\+\%(\.\d\+\)\?\|\h\%(\w\|á\|Á\|é\|É\|í\|Í\|ó\|Ó\|ú\|Ú\)*\%(-\%(\w\|á\|Á\|é\|É\|í\|Í\|ó\|Ó\|ú\|Ú\)*\)*\)]]
-)
+function fuzzy.destroy_db() end
+
+function fuzzy.access() end
 
 --- Takes ~0.25ms for 1200 characters split over 40 lines
 function fuzzy.get_words(text)
