@@ -1,4 +1,4 @@
-*blink-cmp.txt*          For NVIM v0.10.0          Last change: 2025 August 05
+*blink-cmp.txt*          For NVIM v0.10.0          Last change: 2025 August 09
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1093,6 +1093,7 @@ Manages the completion list and its behavior when selecting items. The most
 commonly changed option is `selection.preselect/auto_insert`, which controls
 whether the list will automatically select the first item in the list, and
 whether a "preview" will be inserted on selection.
+
 
 
 
