@@ -130,6 +130,10 @@ completion.trigger.show_on_x_blocked_trigger_characters = { "'", '"', '(', '{', 
 
 Manages the completion list and its behavior when selecting items. The most commonly changed option is `selection.preselect/auto_insert`, which controls whether the list will automatically select the first item in the list, and whether a "preview" will be inserted on selection.
 
+::: info
+The completion list in **cmdline mode** does **not** inherit the following settings from the default mode. To control its behavior, explicitly configure `cmdline.completion.list`. See [cmdline mode](../modes/cmdline.md) for more information.
+:::
+
 :::tabs
 == Preselect, Auto Insert (default)
 ```lua
