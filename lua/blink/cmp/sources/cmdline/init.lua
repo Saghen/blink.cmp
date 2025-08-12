@@ -77,13 +77,13 @@ local function get_completions(pattern, type, completion_type)
       local orig_path = vim.env.PATH
       local new_path = table.concat(vim.tbl_filter(filter_fn, vim.split(orig_path, separator)), separator)
       vim.env.PATH = new_path
-      local completions = vim.fn.getcompletion(pattern, type)
+      local completions = vim.fn.getcompletion(pattern, type, true)
       vim.env.PATH = orig_path
       return completions
     end
   end
 
-  return vim.fn.getcompletion(pattern, type)
+  return vim.fn.getcompletion(pattern, type, true)
 end
 
 --- @class blink.cmp.Source
