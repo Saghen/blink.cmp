@@ -21,6 +21,7 @@
 --- @field select fun(idx?: number, opts?: { auto_insert?: boolean, undo_preview?: boolean, is_explicit_selection?: boolean })
 --- @field select_next fun(opts?: blink.cmp.CompletionListSelectOpts)
 --- @field select_prev fun(opts?: blink.cmp.CompletionListSelectOpts)
+--- @field jump_by fun(dir: number, opts?: blink.cmp.CompletionListSelectOpts): boolean
 ---
 --- @field undo_preview fun()
 --- @field apply_preview fun(item: blink.cmp.CompletionItem)
@@ -28,8 +29,20 @@
 
 --- @class blink.cmp.CompletionListSelectOpts
 --- @field count? number The number of items to jump by, defaults to 1
+--- @field jump_by? blink.cmp.CompletionListJumpBy Jump to the item whose specified property differs from the current one. Fallbacks to `count` when no such item is found.
 --- @field auto_insert? boolean Insert the completion item automatically when selecting it
 --- @field on_ghost_text? boolean Run when ghost text is visible, instead of only when the menu is visible
+
+--- @alias blink.cmp.CompletionListJumpBy
+--- | 'client_id'
+--- | 'client_name'
+--- | 'deprecated'
+--- | 'exact'
+--- | 'kind'
+--- | 'score'
+--- | 'score_offset'
+--- | 'source_id'
+--- | 'source_name'
 
 --- @class blink.cmp.CompletionListSelectAndAcceptOpts
 --- @field callback? fun() Called after the item is accepted
@@ -198,7 +211,10 @@ function list.select_next(opts)
     return list.select(1, opts)
   end
 
-  -- typical case, select the next item
+  -- try to jump to the item whose specified property differs from the current one
+  if list.jump_by(1, opts) then return end
+
+  -- fallback, select the next item
   local count = opts and opts.count or 1
   list.select(math.min(list.selected_item_idx + count, #list.items), opts)
 end
@@ -226,9 +242,50 @@ function list.select_prev(opts)
     return list.select(#list.items, opts)
   end
 
-  -- typical case, select the previous item
+  -- try to jump to the item whose specified property differs from the current one
+  if list.jump_by(-1, opts) then return end
+
+  -- fallback, select the previous item
   local count = opts and opts.count or 1
   list.select(math.max(list.selected_item_idx - count, 1), opts)
+end
+
+--- Jump to the item whose specified property differs from the current one. Supports cycling.
+--- @param dir integer direction - 1 for next, -1 for previous
+--- @param opts blink.cmp.CompletionListSelectOpts
+--- @return boolean
+function list.jump_by(dir, opts)
+  opts = opts or {}
+
+  if not list.items or #list.items == 0 or not list.selected_item_idx then return false end
+  if type(opts.jump_by) ~= 'string' then return false end
+
+  local current = list.items[list.selected_item_idx][opts.jump_by]
+  if not vim.tbl_contains({ 'string', 'number', 'boolean' }, type(current)) then return false end
+
+  local function try_jump(start_idx, end_idx, step)
+    for i = start_idx, end_idx, step do
+      if list.items[i][opts.jump_by] ~= current then
+        list.select(i, opts)
+        return true
+      end
+    end
+    return false
+  end
+
+  if dir == 1 then
+    if try_jump(list.selected_item_idx + 1, #list.items, 1) then return true end
+    if list.config and list.config.cycle and list.config.cycle.from_bottom then
+      return try_jump(1, list.selected_item_idx - 1, 1)
+    end
+  elseif dir == -1 then
+    if try_jump(list.selected_item_idx - 1, 1, -1) then return true end
+    if list.config and list.config.cycle and list.config.cycle.from_top then
+      return try_jump(#list.items, list.selected_item_idx + 1, -1)
+    end
+  end
+
+  return false
 end
 
 ---------- Preview ----------
