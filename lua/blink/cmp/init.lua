@@ -199,8 +199,7 @@ end
 --- Select the previous completion item
 --- @param opts? blink.cmp.CompletionListSelectOpts
 function cmp.select_prev(opts)
-  local on_ghost_text = opts and opts.on_ghost_text
-  if not cmp.is_menu_visible() and (not on_ghost_text or not cmp.is_ghost_text_visible()) then return end
+  if not require('blink.cmp.completion.list').can_select(opts) then return end
   vim.schedule(function() require('blink.cmp.completion.list').select_prev(opts) end)
   return true
 end
@@ -208,8 +207,7 @@ end
 --- Select the next completion item
 --- @param opts? blink.cmp.CompletionListSelectOpts
 function cmp.select_next(opts)
-  local on_ghost_text = opts and opts.on_ghost_text
-  if not cmp.is_menu_visible() and (not on_ghost_text or not cmp.is_ghost_text_visible()) then return end
+  if not require('blink.cmp.completion.list').can_select(opts) then return end
   vim.schedule(function() require('blink.cmp.completion.list').select_next(opts) end)
   return true
 end
@@ -218,6 +216,8 @@ end
 --- This will trigger completions if none are available, unlike `select_next` which would fallback to the next keymap in this case.
 function cmp.insert_next()
   if not cmp.is_active() then return cmp.show_and_insert() end
+  if not require('blink.cmp.completion.list').can_select({ auto_insert = true }) then return end
+
   vim.schedule(function() require('blink.cmp.completion.list').select_next({ auto_insert = true }) end)
   return true
 end
@@ -226,6 +226,8 @@ end
 --- This will trigger completions if none are available, unlike `select_prev` which would fallback to the next keymap in this case.
 function cmp.insert_prev()
   if not cmp.is_active() then return cmp.show_and_insert() end
+  if not require('blink.cmp.completion.list').can_select({ auto_insert = true }) then return end
+
   vim.schedule(function() require('blink.cmp.completion.list').select_prev({ auto_insert = true }) end)
   return true
 end
