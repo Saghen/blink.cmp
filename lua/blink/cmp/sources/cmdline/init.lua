@@ -195,6 +195,7 @@ function cmdline:get_completions(context, callback)
 
         -- path completion in commands, e.g. `chdir <path>` and options, e.g. `:set directory=<path>`
         elseif is_path_completion then
+          if current_arg == '~' then label = completion end
           filter_text = path_lib.basename_with_sep(completion)
           new_text = vim.fn.fnameescape(completion)
           if arguments[1] == 'set' then
