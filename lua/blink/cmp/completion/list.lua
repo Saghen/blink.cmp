@@ -18,9 +18,9 @@
 --- @field get_selected_item fun(): blink.cmp.CompletionItem?
 --- @field get_selection_mode fun(context: blink.cmp.Context): { preselect: boolean, auto_insert: boolean }
 --- @field get_item_idx_in_list fun(item?: blink.cmp.CompletionItem): number?
---- @field select fun(idx?: number, opts?: { auto_insert?: boolean, undo_preview?: boolean, is_explicit_selection?: boolean })
---- @field select_next fun(opts?: blink.cmp.CompletionListSelectOpts)
---- @field select_prev fun(opts?: blink.cmp.CompletionListSelectOpts)
+--- @field select fun(idx?: number, opts?: { auto_insert?: boolean, undo_preview?: boolean, is_explicit_selection?: boolean }): boolean
+--- @field select_next fun(opts?: blink.cmp.CompletionListSelectOpts): boolean
+--- @field select_prev fun(opts?: blink.cmp.CompletionListSelectOpts): boolean
 --- @field jump_by fun(dir: number, opts?: blink.cmp.CompletionListSelectOpts): boolean
 ---
 --- @field undo_preview fun()
@@ -29,7 +29,7 @@
 
 --- @class blink.cmp.CompletionListSelectOpts
 --- @field count? number The number of items to jump by, defaults to 1
---- @field jump_by? blink.cmp.CompletionListJumpBy Jump to the item whose specified property differs from the current one. Fallbacks to `count` when no such item is found.
+--- @field jump_by? blink.cmp.CompletionListJumpBy Jump to the item whose specified property differs from the current one.
 --- @field auto_insert? boolean Insert the completion item automatically when selecting it
 --- @field on_ghost_text? boolean Run when ghost text is visible, instead of only when the menu is visible
 
@@ -190,10 +190,11 @@ function list.select(idx, opts)
   list.is_explicitly_selected = opts.is_explicit_selection == nil and true or opts.is_explicit_selection
   list.selected_item_idx = idx
   list.select_emitter:emit({ idx = idx, item = item, items = list.items, context = list.context })
+  return true
 end
 
 function list.select_next(opts)
-  if #list.items == 0 or list.context == nil then return end
+  if #list.items == 0 or list.context == nil then return false end
 
   -- haven't selected anything yet, select the first item, if cycling enabled
   if list.selected_item_idx == nil then return list.select(1, opts) end
@@ -205,26 +206,25 @@ function list.select_next(opts)
     if not select_mode.preselect or select_mode.auto_insert then return list.select(nil, opts) end
 
     -- cycling around has been disabled, ignore
-    if not list.config.cycle.from_bottom then return end
+    if not list.config.cycle.from_bottom then return false end
 
     -- otherwise, we cycle around
     return list.select(1, opts)
   end
 
-  -- try to jump to the item whose specified property differs from the current one
-  if list.jump_by(1, opts) then return end
+  if opts and opts.jump_by then return list.jump_by(1, opts) end
 
   -- fallback, select the next item
   local count = opts and opts.count or 1
-  list.select(math.min(list.selected_item_idx + count, #list.items), opts)
+  return list.select(math.min(list.selected_item_idx + count, #list.items), opts)
 end
 
 function list.select_prev(opts)
-  if #list.items == 0 or list.context == nil then return end
+  if #list.items == 0 or list.context == nil then return false end
 
   -- haven't selected anything yet, select the last item, if cycling enabled
   if list.selected_item_idx == nil then
-    if not list.config.cycle.from_top then return end
+    if not list.config.cycle.from_top then return false end
 
     return list.select(#list.items, opts)
   end
@@ -236,18 +236,17 @@ function list.select_prev(opts)
     if not select_mode.preselect or select_mode.auto_insert then return list.select(nil, opts) end
 
     -- cycling around has been disabled, ignore
-    if not list.config.cycle.from_top then return end
+    if not list.config.cycle.from_top then return false end
 
     -- otherwise, we cycle around
     return list.select(#list.items, opts)
   end
 
-  -- try to jump to the item whose specified property differs from the current one
-  if list.jump_by(-1, opts) then return end
+  if opts and opts.jump_by then return list.jump_by(-1, opts) end
 
   -- fallback, select the previous item
   local count = opts and opts.count or 1
-  list.select(math.max(list.selected_item_idx - count, 1), opts)
+  return list.select(math.max(list.selected_item_idx - count, 1), opts)
 end
 
 --- Jump to the item whose specified property differs from the current one. Supports cycling.
@@ -265,10 +264,7 @@ function list.jump_by(dir, opts)
 
   local function try_jump(start_idx, end_idx, step)
     for i = start_idx, end_idx, step do
-      if list.items[i][opts.jump_by] ~= current then
-        list.select(i, opts)
-        return true
-      end
+      if list.items[i][opts.jump_by] ~= current then return list.select(i, opts) end
     end
     return false
   end
