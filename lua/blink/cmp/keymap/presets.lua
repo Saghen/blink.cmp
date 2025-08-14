@@ -7,7 +7,7 @@ local presets_keymaps = {
   default = {
     ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
     ['<C-e>'] = { 'cancel', 'fallback' },
-    ['<C-y>'] = { 'select_and_accept' },
+    ['<C-y>'] = { 'select_and_accept', 'fallback' },
 
     ['<Up>'] = { 'select_prev', 'fallback' },
     ['<Down>'] = { 'select_next', 'fallback' },
@@ -34,7 +34,7 @@ local presets_keymaps = {
     ['<Right>'] = { 'select_next', 'fallback' },
     ['<Left>'] = { 'select_prev', 'fallback' },
 
-    ['<C-y>'] = { 'select_and_accept' },
+    ['<C-y>'] = { 'select_and_accept', 'fallback' },
     ['<C-e>'] = { 'cancel', 'fallback' },
     ['<End>'] = { 'hide', 'fallback' },
   },

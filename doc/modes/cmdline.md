@@ -43,7 +43,7 @@ Set via `cmdline.keymap.preset = 'cmdline'`, which is the default. Set to `'none
   ['<Right>'] = { 'select_next', 'fallback' },
   ['<Left>'] = { 'select_prev', 'fallback' },
 
-  ['<C-y>'] = { 'select_and_accept' },
+  ['<C-y>'] = { 'select_and_accept', 'fallback' },
   ['<C-e>'] = { 'cancel', 'fallback' },
 }
 ```

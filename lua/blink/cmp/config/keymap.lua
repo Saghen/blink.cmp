@@ -34,7 +34,7 @@
 --- {
 ---   ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
 ---   ['<C-e>'] = { 'cancel', 'fallback' },
----   ['<C-y>'] = { 'select_and_accept' },
+---   ['<C-y>'] = { 'select_and_accept', 'fallback' },
 ---
 ---   ['<Up>'] = { 'select_prev', 'fallback' },
 ---   ['<Down>'] = { 'select_next', 'fallback' },
@@ -61,7 +61,7 @@
 ---   ['<C-n>'] = { 'select_next' },
 ---   ['<C-p>'] = { 'select_prev' },
 ---
----   ['<C-y>'] = { 'select_and_accept' },
+---   ['<C-y>'] = { 'select_and_accept', 'fallback' },
 ---   ['<C-e>'] = { 'cancel', 'fallback' },
 --- }
 --- ```

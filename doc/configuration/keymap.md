@@ -92,7 +92,7 @@ Set the preset to `'none'` to disable the presets
 ```lua
 ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
 ['<C-e>'] = { 'hide', 'fallback' },
-['<C-y>'] = { 'select_and_accept' },
+['<C-y>'] = { 'select_and_accept', 'fallback' },
 
 ['<Up>'] = { 'select_prev', 'fallback' },
 ['<Down>'] = { 'select_next', 'fallback' },
