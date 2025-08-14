@@ -125,7 +125,7 @@ function sources.get_provider_by_id(provider_id)
     'Requested provider "'
       .. provider_id
       .. '" has not been configured. Available providers: '
-      .. vim.fn.join(vim.tbl_keys(sources.providers), ', ')
+      .. table.concat(vim.tbl_keys(sources.providers), ', ')
   )
 
   -- initialize the provider if it hasn't been initialized yet
