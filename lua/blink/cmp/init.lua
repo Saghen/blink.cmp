@@ -201,8 +201,7 @@ end
 function cmp.select_prev(opts)
   local on_ghost_text = opts and opts.on_ghost_text
   if not cmp.is_menu_visible() and (not on_ghost_text or not cmp.is_ghost_text_visible()) then return end
-  vim.schedule(function() require('blink.cmp.completion.list').select_prev(opts) end)
-  return true
+  return require('blink.cmp.completion.list').select_prev(opts)
 end
 
 --- Select the next completion item
@@ -210,24 +209,21 @@ end
 function cmp.select_next(opts)
   local on_ghost_text = opts and opts.on_ghost_text
   if not cmp.is_menu_visible() and (not on_ghost_text or not cmp.is_ghost_text_visible()) then return end
-  vim.schedule(function() require('blink.cmp.completion.list').select_next(opts) end)
-  return true
+  return require('blink.cmp.completion.list').select_next(opts)
 end
 
 --- Inserts the next item (`auto_insert`), cycling to the top of the list if at the bottom, if `completion.list.cycle.from_bottom == true`.
 --- This will trigger completions if none are available, unlike `select_next` which would fallback to the next keymap in this case.
 function cmp.insert_next()
   if not cmp.is_active() then return cmp.show_and_insert() end
-  vim.schedule(function() require('blink.cmp.completion.list').select_next({ auto_insert = true }) end)
-  return true
+  return require('blink.cmp.completion.list').select_next({ auto_insert = true })
 end
 
 --- Inserts the previous item (`auto_insert`), cycling to the bottom of the list if at the top, if `completion.list.cycle.from_top == true`.
 --- This will trigger completions if none are available, unlike `select_prev` which would fallback to the next keymap in this case.
 function cmp.insert_prev()
   if not cmp.is_active() then return cmp.show_and_insert() end
-  vim.schedule(function() require('blink.cmp.completion.list').select_prev({ auto_insert = true }) end)
-  return true
+  return require('blink.cmp.completion.list').select_prev({ auto_insert = true })
 end
 
 --- Gets the current context
