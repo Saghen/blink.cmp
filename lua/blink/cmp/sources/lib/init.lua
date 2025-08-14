@@ -1,6 +1,6 @@
 local async = require('blink.cmp.lib.async')
 local config = require('blink.cmp.config')
-local utils = require('blink.cmp.lib.utils')
+local deduplicate = require('blink.cmp.lib.utils').deduplicate
 
 --- @class blink.cmp.Sources
 --- @field completions_queue blink.cmp.SourcesQueue | nil
@@ -43,7 +43,6 @@ local sources = {
   per_filetype_provider_ids = {},
   completions_emitter = require('blink.cmp.lib.event_emitter').new('source_completions'),
 }
-local deduplicate = require('blink.cmp.lib.utils').deduplicate
 
 function sources.get_all_providers()
   local providers = {}
