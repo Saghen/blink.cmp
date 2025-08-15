@@ -53,6 +53,7 @@ local function to_completion_items(snippets)
       insertText = snip.prefix,
       insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
       data = { snip = snip },
+      labelDetails = require('blink.cmp.sources.snippets.utils').build_label_details(snip.desc),
     }
     table.insert(result, item)
   end

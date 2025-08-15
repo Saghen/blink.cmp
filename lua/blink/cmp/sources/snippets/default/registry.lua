@@ -116,6 +116,7 @@ function registry:snippet_to_completion_item(snippet, cache_key)
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
     insertText = self:expand_vars(body, cache_key),
     description = snippet.description,
+    labelDetails = require('blink.cmp.sources.snippets.utils').build_label_details(snippet.description or ''),
   }
 end
 
