@@ -28,6 +28,14 @@ snippets = {
   active = function(filter) return vim.snippet.active(filter) end,
   -- Function to use when jumping between tab stops in a snippet, where direction can be negative or positive
   jump = function(direction) vim.snippet.jump(direction) end,
+  -- Display the description of snippets in the completion menu, specify the column to be displayed. The description information of snippets is shown in the document by default.
+  --
+  -- '' Do not show description in completion menu.
+  -- label_detail Show in column label_detail.
+  -- label_description Show in column label_description.
+  --
+  -- column is defined in config `completion.menu.draw.columns`.
+  desc_column = '',
 }
 ```
 
@@ -74,7 +82,7 @@ completion.trigger = {
 
   -- When true, will show the completion window after entering insert mode
   show_on_insert = false,
-  
+
   -- LSPs can indicate when to show the completion window via trigger characters
   -- however, some LSPs (i.e. tsserver) return characters that would essentially
   -- always show the window. We block these by default.

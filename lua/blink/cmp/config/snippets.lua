@@ -4,6 +4,7 @@
 --- @field active fun(filter?: { direction?: number }): boolean Function to use when checking if a snippet is active
 --- @field jump fun(direction: number) Function to use when jumping between tab stops in a snippet, where direction can be negative or positive
 --- @field score_offset number Offset to the score of all snippet items
+--- @field desc_column '' | 'label_detail' | 'label_description' Show snippet description in completion menu, specify the column to be displayed.
 
 --- @param handlers table<'default' | 'luasnip' | 'mini_snippets', fun(...): any>
 local function by_preset(handlers)
@@ -64,6 +65,7 @@ local snippets = {
       end,
     }),
     score_offset = -3,
+    desc_column = '',
   },
 }
 
@@ -78,6 +80,7 @@ function snippets.validate(config)
     active = { config.active, 'function' },
     jump = { config.jump, 'function' },
     score_offset = { config.score_offset, 'number' },
+    desc_column = { config.desc_column, 'string' },
   }, config)
 end
 
