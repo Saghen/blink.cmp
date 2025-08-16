@@ -20,7 +20,11 @@ end
 function fuzzy.init_db()
   if fuzzy.has_init_db then return end
 
-  fuzzy.implementation.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db', config.use_unsafe_no_lock)
+  fuzzy.implementation.init_db(
+    vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db',
+    config.use_unsafe_no_lock,
+    config.fuzzy.custom_regex
+  )
 
   vim.api.nvim_create_autocmd('VimLeavePre', {
     callback = fuzzy.implementation.destroy_db,
