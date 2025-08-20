@@ -43,7 +43,8 @@ local snippets = {
           return
         end
         if vim.fn.empty(snippet.textEdit) ~= 1 then
-          -- TODO
+          assert(vim.fn.empty(snippet.textEdit.newText) ~= 1)
+          vim.fn['vsnip#anonymous'](snippet.textEdit.newText)
           return
         end
         error('vsnip got an unexpected snippet')
