@@ -3,7 +3,7 @@ title: Snippets
 ---
 # Snippets<!-- panvimdoc-ignore-start --> <Badge type="info"><a href="./reference#snippets">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
 
-Blink uses the `vim.snippet` API by default for expanding and navigating snippets. The built-in `snippets` source will load [friendly-snippets](https://github.com/rafamadriz/friendly-snippets), if available, and load any snippets found at `~/.config/nvim/snippets/`. For use with Luasnip, see the [Luasnip section](#luasnip). For use with mini.snippets, see the [mini.snippets section](#mini-snippets).
+Blink uses the `vim.snippet` API by default for expanding and navigating snippets. The built-in `snippets` source will load [friendly-snippets](https://github.com/rafamadriz/friendly-snippets), if available, and load any snippets found at `~/.config/nvim/snippets/`. For use with Luasnip, see the [Luasnip section](#luasnip). For use with mini.snippets, see the [mini.snippets section](#mini-snippets). For use with vim-vsnip, see the [vim-vsnip section](#vim-vsnip).
 
 ## Friendly Snippets
 
@@ -93,6 +93,21 @@ There's a great introduction to writing custom snippets [in the nvim-scissors re
     -- ensure you have the `snippets` source (enabled by default)
     sources = {
       default = { 'lsp', 'path', 'snippets', 'buffer' },
+    },
+  }
+}
+```
+
+## `vim-vsnip`
+
+```lua
+{
+  'saghen/blink.cmp',
+  dependencies = {'hrsh7th/vim-vsnip', 'https://codeberg.org/FelipeLema/bink-cmp-vsnip.git'},
+  opts = {
+    snippets = { preset = 'vsnip' },
+    sources = {
+      default = { 'lsp', 'path', 'vsnip', 'buffer' },
     },
   }
 }
