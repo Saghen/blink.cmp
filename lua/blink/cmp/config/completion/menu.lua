@@ -64,6 +64,11 @@ local window = {
       cursorline_priority = 10000,
       -- Appends an indicator to snippets label, `'~'` by default
       snippet_indicator = '~',
+      -- Display snippet description in completion menu column.
+      -- `nil` Do NOT show description in completion menu.
+      -- `label_detail` Show in menu column label_detail.
+      -- `label_description` Show in menu column label_description.
+      snippet_desc_column = nil,
       -- Use treesitter to highlight the label text of completions from these sources
       treesitter = {},
       -- Components to render, grouped by column
@@ -197,6 +202,7 @@ function window.validate(config)
     gap = { config.draw.gap, 'number' },
     cursorline_priority = { config.draw.cursorline_priority, 'number' },
     snippet_indicator = { config.draw.snippet_indicator, 'string' },
+    snippet_desc_column = { config.draw.snippet_desc_column, 'string', true },
 
     treesitter = { config.draw.treesitter, 'table' },
 

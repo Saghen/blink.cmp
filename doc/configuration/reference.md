@@ -74,7 +74,7 @@ completion.trigger = {
 
   -- When true, will show the completion window after entering insert mode
   show_on_insert = false,
-  
+
   -- LSPs can indicate when to show the completion window via trigger characters
   -- however, some LSPs (i.e. tsserver) return characters that would essentially
   -- always show the window. We block these by default.
@@ -219,6 +219,12 @@ completion.menu.draw = {
   cursorline_priority = 10000,
   -- Appends an indicator to snippets label
   snippet_indicator = '~',
+  -- Display snippet description in completion menu column.
+  -- `nil` Do NOT show description in completion menu.
+  -- `label_detail` Show in column label_detail.
+  -- `label_description` Show in column label_description.
+  -- menu column see config `completion.menu.draw.columns`
+  snippet_desc_column = nil,
   -- Use treesitter to highlight the label text for the given list of sources
   treesitter = {},
   -- treesitter = { 'lsp' }

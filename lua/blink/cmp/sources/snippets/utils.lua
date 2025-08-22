@@ -111,4 +111,24 @@ function utils.get_tab_stops(snippet)
   return tabstops
 end
 
+--- Build field `labelDetails` for snippet source.
+---
+--- @param desc string
+--- @return nil | lsp.CompletionItemLabelDetails
+function utils.build_label_details(desc)
+  local column = require('blink.cmp.config').completion.menu.draw.snippet_desc_column
+
+  if column == nil then return nil end
+
+  if column == 'label_detail' then return {
+    detail = desc,
+  } end
+
+  if column == 'label_description' then return {
+    description = desc,
+  } end
+
+  return nil
+end
+
 return utils

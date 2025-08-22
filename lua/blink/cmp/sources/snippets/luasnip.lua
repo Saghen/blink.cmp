@@ -111,6 +111,9 @@ function source:get_completions(ctx, callback)
         insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
         sortText = sort_text,
         data = { snip_id = snip.id, show_condition = snip.show_condition },
+        labelDetails = require('blink.cmp.sources.snippets.utils').build_label_details(
+          snip.dscr and table.concat(snip.dscr, ' ') or ''
+        ),
       }
       -- populate snippet cache for this filetype
       table.insert(self.items_cache[ft], item)
