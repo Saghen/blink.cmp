@@ -63,7 +63,7 @@ For more common configurations, see the [recipes](../recipes.md).
   },
 
   -- Use a preset for snippets, check the snippets documentation for more information
-  snippets = { preset = 'default' | 'luasnip' | 'mini_snippets' },
+  snippets = { preset = 'default' | 'luasnip' | 'mini_snippets' | 'vsnip' },
 
   -- Experimental signature help support
   signature = { enabled = true }
