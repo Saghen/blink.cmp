@@ -37,18 +37,7 @@ local snippets = {
         -- we run after it completes it callback. We do this by resubscribing to TextChangedI
         require('blink.cmp').resubscribe()
       end,
-      vsnip = function(snippet)
-        if vim.fn.empty(snippet.insertText) ~= 1 then
-          vim.fn['vsnip#anonymous'](snippet.insertText)
-          return
-        end
-        if vim.fn.empty(snippet.textEdit) ~= 1 then
-          assert(vim.fn.empty(snippet.textEdit.newText) ~= 1)
-          vim.fn['vsnip#anonymous'](snippet.textEdit.newText)
-          return
-        end
-        error('vsnip got an unexpected snippet')
-      end,
+      vsnip = function(snippet) vim.fn['vsnip#anonymous'](snippet) end,
     }),
     active = by_preset({
       default = function(filter) return vim.snippet.active(filter) end,
