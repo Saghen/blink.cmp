@@ -355,6 +355,50 @@ completion = {
 }
 ```
 
+### `mini.icons` + `lspkind`
+
+```lua
+completion = {
+  menu = {
+    draw = {
+      components = {
+        kind_icon = {
+          text = function(ctx)
+            local icon = ctx.kind_icon
+            if vim.tbl_contains({ "Path" }, ctx.source_name) then
+                local mini_icon, _ = require("mini.icons").get_icon(ctx.item.data.type, ctx.label)
+                if mini_icon then
+                    icon = mini_icon
+                end
+            else
+                icon = require("lspkind").symbolic(ctx.kind, {
+                    mode = "symbol",
+                })
+            end
+
+            return icon .. ctx.icon_gap
+          end,
+
+          -- Optionally, use the highlight groups from mini.icons
+          -- You can also add the same function for `kind.highlight` if you want to
+          -- keep the highlight groups in sync with the icons.
+          highlight = function(ctx)
+            local hl = ctx.kind_hl
+            if vim.tbl_contains({ "Path" }, ctx.source_name) then
+              local mini_icon, mini_hl = require("mini.icons").get_icon(ctx.item.data.type, ctx.label)
+              if mini_icon then
+                hl = mini_hl
+              end
+            end
+            return hl
+          end,
+        }
+      }
+    }
+  }
+}
+```
+
 ## Sources
 
 [See the full docs](./configuration/sources.md)
