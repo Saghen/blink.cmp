@@ -258,6 +258,17 @@ function list.apply_preview(item)
   -- undo the previous preview if it exists
   list.undo_preview()
 
+  -- Skip applying preview when the suggestion is blacklisted from being previewed
+  local blacklist = list.config.selection.auto_insert_blacklist
+  if blacklist ~= nil and #blacklist > 0 then
+    for _, v in ipairs(blacklist) do
+      if v == item.client_name or v == item.source_name then
+        list.preview_undo = nil
+        return
+      end
+    end
+  end
+
   -- apply the new preview
   local undo_text_edit, undo_cursor = require('blink.cmp.completion.accept.preview')(item)
   list.preview_undo = {
