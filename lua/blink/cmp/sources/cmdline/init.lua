@@ -20,8 +20,9 @@ local function smart_split(context, is_path_completion)
     -- Checks for common Vim expressions: %, #, %:h, %:p, etc.
     return vim.regex([[%\%(:[phtrwe~.]\)\?]]):match_str(line) ~= nil
   end
+  local function contains_wildcard(line) return line:find('[%*%?%[%]]') ~= nil end
 
-  if is_path_completion and not contains_vim_expr(line) then
+  if is_path_completion and not contains_vim_expr(line) and not contains_wildcard(line) then
     -- Split the line into tokens, respecting escaped spaces in paths
     local tokens = path_lib:split_unescaped(line:gsub('^%s+', ''))
     local cmd = tokens[1]
