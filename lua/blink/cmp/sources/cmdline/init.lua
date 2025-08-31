@@ -244,6 +244,12 @@ function cmdline:get_completions(context, callback)
           option_info = self.options[completion]
           if option_info then label_details = { description = option_info.shortname } end
 
+        -- mappings
+        elseif completion_type == 'mapping' then
+          completion = completion:gsub('\22', '') -- remove control characters
+          completion = vim.fn.keytrans(completion):gsub('<lt>', '<')
+          filter_text, new_text = completion, completion
+
         -- env variables
         elseif completion_type == 'environment' then
           filter_text = '$' .. completion
