@@ -19,6 +19,7 @@ fuzzy = { implementation = "prefer_rust_with_warning" }
 
 If possible, it's highly recommended to use the Rust implementation of the fuzzy matcher!
 
+- Full unicode support
 - Always finds the best match (resulting in better sorting)
 - Performance on long lists (10k+ items)
 - Typo resistance
