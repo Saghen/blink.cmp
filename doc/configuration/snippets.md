@@ -107,7 +107,7 @@ There's a great introduction to writing custom snippets [in the nvim-scissors re
   opts = {
     snippets = { preset = 'vsnip' },
     sources = {
-      default = { 'lsp', 'path', 'vsnip', 'buffer' },
+      default = { 'lsp', 'path', 'snippets', 'buffer' },
     },
   }
 }
