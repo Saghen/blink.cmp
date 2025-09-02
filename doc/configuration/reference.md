@@ -74,7 +74,7 @@ completion.trigger = {
 
   -- When true, will show the completion window after entering insert mode
   show_on_insert = false,
-  
+
   -- LSPs can indicate when to show the completion window via trigger characters
   -- however, some LSPs (i.e. tsserver) return characters that would essentially
   -- always show the window. We block these by default.
@@ -554,6 +554,8 @@ sources.providers = {
       end,
       -- Set to '+' to use the system clipboard, or '"' to use the unnamed register
       clipboard_register = nil,
+      -- Whether to put the snippet description in the label description
+      use_label_description = false,
     }
 
     -- For `snippets.preset == 'luasnip'`

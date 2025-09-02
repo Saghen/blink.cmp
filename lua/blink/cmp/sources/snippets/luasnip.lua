@@ -2,6 +2,7 @@
 --- @field use_show_condition? boolean Whether to use show_condition for filtering snippets
 --- @field show_autosnippets? boolean Whether to show autosnippets in the completion list
 --- @field prefer_doc_trig? boolean When expanding `regTrig` snippets, prefer `docTrig` over `trig` placeholder
+--- @field use_label_description? boolean Whether to put the snippet description in the label description
 
 --- @class blink.cmp.LuasnipSource : blink.cmp.Source
 --- @field config blink.cmp.LuasnipSourceOptions
@@ -17,6 +18,7 @@ local defaults_config = {
   use_show_condition = true,
   show_autosnippets = true,
   prefer_doc_trig = false,
+  use_label_description = false,
 }
 
 ---@param snippet table
@@ -36,6 +38,7 @@ function source.new(opts)
     use_show_condition = { config.use_show_condition, 'boolean' },
     show_autosnippets = { config.show_autosnippets, 'boolean' },
     prefer_doc_trig = { config.prefer_doc_trig, 'boolean' },
+    use_label_description = { config.use_label_description, 'boolean' },
   }, config)
 
   local self = setmetatable({}, { __index = source })
@@ -111,6 +114,9 @@ function source:get_completions(ctx, callback)
         insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
         sortText = sort_text,
         data = { snip_id = snip.id, show_condition = snip.show_condition },
+        labelDetails = snip.dscr and self.config.use_label_description and {
+          description = table.concat(snip.dscr, ' '),
+        } or nil,
       }
       -- populate snippet cache for this filetype
       table.insert(self.items_cache[ft], item)
