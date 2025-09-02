@@ -4,6 +4,7 @@
 --- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item. Note, this does not apply when using the Lua implementation.
 --- @field use_proximity boolean Boosts the score of items matching nearby words. Note, this does not apply when using the Lua implementation.
 --- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux). Note, this does not apply when using the Lua implementation.
+--- @field custom_regex? string Override the default regex with a custom pattern for word matching.
 --- @field sorts blink.cmp.Sort[] Controls which sorts to use and in which order.
 --- @field prebuilt_binaries blink.cmp.PrebuiltBinariesConfig
 
@@ -37,6 +38,7 @@ local fuzzy = {
     use_frecency = true,
     use_proximity = true,
     use_unsafe_no_lock = false,
+    custom_regex = nil,
     sorts = { 'score', 'sort_text' },
     prebuilt_binaries = {
       download = true,
@@ -65,6 +67,7 @@ function fuzzy.validate(config)
     use_frecency = { config.use_frecency, 'boolean' },
     use_proximity = { config.use_proximity, 'boolean' },
     use_unsafe_no_lock = { config.use_unsafe_no_lock, 'boolean' },
+    custom_regex = { config.custom_regex, { 'string', 'nil' } },
     sorts = {
       config.sorts,
       function(sorts)
