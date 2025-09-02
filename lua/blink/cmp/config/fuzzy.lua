@@ -1,11 +1,17 @@
 --- @class (exact) blink.cmp.FuzzyConfig
 --- @field implementation blink.cmp.FuzzyImplementationType Controls which implementation to use for the fuzzy matcher. See the documentation for the available values for more information.
 --- @field max_typos number | fun(keyword: string): number Allows for a number of typos relative to the length of the query. Set this to 0 to match the behavior of fzf. Note, this does not apply when using the Lua implementation.
---- @field use_frecency boolean Tracks the most recently/frequently used items and boosts the score of the item. Note, this does not apply when using the Lua implementation.
+--- @field use_frecency boolean (deprecated) alias for frecency.enabled, will be removed in v2.0
+--- @field use_unsafe_no_lock boolean (deprecated) alias for frecency.unsafe_no_lock, will be removed in v2.0
 --- @field use_proximity boolean Boosts the score of items matching nearby words. Note, this does not apply when using the Lua implementation.
---- @field use_unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux). Note, this does not apply when using the Lua implementation.
 --- @field sorts blink.cmp.Sort[] Controls which sorts to use and in which order.
+--- @field frecency blink.cmp.FuzzyFrecencyConfig Tracks the most recently/frequently used items and boosts the score of the item. Note, this does not apply when using the Lua implementation.
 --- @field prebuilt_binaries blink.cmp.PrebuiltBinariesConfig
+
+--- @class (exact) blink.cmp.FuzzyFrecencyConfig
+--- @field enabled boolean Whether to enable the frecency feature
+--- @field path string Location of the frecency database
+--- @field unsafe_no_lock boolean UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. This should only be used on unsupported platforms (i.e. alpine termux).
 
 --- @class (exact) blink.cmp.PrebuiltBinariesConfig
 --- @field download boolean Whenther or not to automatically download a prebuilt binary from github. If this is set to `false`, you will need to manually build the fuzzy binary dependencies by running `cargo build --release`. Disabled by default when `fuzzy.implementation = 'lua'`
@@ -29,15 +35,19 @@
 --- @alias blink.cmp.Sort ("label" | "sort_text" | "kind" | "score" | "exact" | blink.cmp.SortFunction)
 
 local validate = require('blink.cmp.config.utils').validate
+
 local fuzzy = {
   --- @type blink.cmp.FuzzyConfig
   default = {
     implementation = 'prefer_rust_with_warning',
     max_typos = function(keyword) return math.floor(#keyword / 4) end,
-    use_frecency = true,
     use_proximity = true,
-    use_unsafe_no_lock = false,
     sorts = { 'score', 'sort_text' },
+    frecency = {
+      enabled = true,
+      path = vim.fn.stdpath('state') .. '/blink/cmp/fuzzy.db',
+      unsafe_no_lock = false,
+    },
     prebuilt_binaries = {
       download = true,
       ignore_version_mismatch = false,
@@ -53,6 +63,18 @@ local fuzzy = {
 }
 
 function fuzzy.validate(config)
+  -- TODO: Deprecations to be removed in v2.0
+  if config.use_frecency ~= nil then
+    vim.deprecate('fuzzy.use_frecency', 'fuzzy.frecency.enabled', 'v2.0.0', 'blink-cmp')
+    config.frecency.enabled = config.use_frecency
+    config.use_frecency = nil
+  end
+  if config.use_unsafe_no_lock ~= nil then
+    vim.deprecate('fuzzy.use_unsafe_no_lock', 'fuzzy.frecency.unsafe_no_lock', 'v2.0.0', 'blink-cmp')
+    config.frecency.unsafe_no_lock = config.use_unsafe_no_lock
+    config.use_unsafe_no_lock = nil
+  end
+
   validate('fuzzy', {
     implementation = {
       config.implementation,
@@ -62,9 +84,7 @@ function fuzzy.validate(config)
       'one of: "prefer_rust", "prefer_rust_with_warning", "rust", "lua"',
     },
     max_typos = { config.max_typos, { 'number', 'function' } },
-    use_frecency = { config.use_frecency, 'boolean' },
     use_proximity = { config.use_proximity, 'boolean' },
-    use_unsafe_no_lock = { config.use_unsafe_no_lock, 'boolean' },
     sorts = {
       config.sorts,
       function(sorts)
@@ -80,8 +100,15 @@ function fuzzy.validate(config)
       end,
       'one of: "label", "sort_text", "kind", "score", "exact" or a function',
     },
+    frecency = { config.frecency, 'table' },
     prebuilt_binaries = { config.prebuilt_binaries, 'table' },
   }, config)
+
+  validate('fuzzy.frecency', {
+    enabled = { config.frecency.enabled, 'boolean' },
+    path = { config.frecency.path, 'string' },
+    unsafe_no_lock = { config.frecency.unsafe_no_lock, 'boolean' },
+  }, config.frecency)
 
   validate('fuzzy.prebuilt_binaries', {
     download = { config.prebuilt_binaries.download, 'boolean' },

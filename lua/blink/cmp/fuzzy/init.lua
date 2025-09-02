@@ -20,7 +20,7 @@ end
 function fuzzy.init_db()
   if fuzzy.has_init_db then return end
 
-  fuzzy.implementation.init_db(vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db', config.use_unsafe_no_lock)
+  fuzzy.implementation.init_db(config.fuzzy.frecency.path, config.fuzzy.frecency.unsafe_no_lock)
 
   vim.api.nvim_create_autocmd('VimLeavePre', {
     callback = fuzzy.implementation.destroy_db,
@@ -106,7 +106,7 @@ function fuzzy.fuzzy(line, cursor_col, haystacks_by_provider, range)
   local provider_ids = vim.tbl_keys(haystacks_by_provider)
   local provider_idxs, matched_indices, scores, exacts = fuzzy.implementation.fuzzy(line, cursor_col, provider_ids, {
     max_typos = max_typos,
-    use_frecency = config.fuzzy.use_frecency and keyword_length > 0,
+    use_frecency = config.fuzzy.frecency.enabled and keyword_length > 0,
     use_proximity = config.fuzzy.use_proximity and keyword_length > 0,
     nearby_words = nearby_words,
     match_suffix = range == 'full',
