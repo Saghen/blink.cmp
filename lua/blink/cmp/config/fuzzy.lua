@@ -34,7 +34,6 @@
 --- @alias blink.cmp.SortFunction fun(a: blink.cmp.CompletionItem, b: blink.cmp.CompletionItem): boolean | nil
 --- @alias blink.cmp.Sort ("label" | "sort_text" | "kind" | "score" | "exact" | blink.cmp.SortFunction)
 
-local utils = require('blink.cmp.lib.utils')
 local validate = require('blink.cmp.config.utils').validate
 
 local fuzzy = {
@@ -68,29 +67,12 @@ function fuzzy.validate(config)
   if config.use_frecency ~= nil then
     vim.deprecate('fuzzy.use_frecency', 'fuzzy.frecency.enabled', 'v2.0.0', 'blink-cmp')
     config.frecency.enabled = config.use_frecency
+    config.use_frecency = nil
   end
   if config.use_unsafe_no_lock ~= nil then
     vim.deprecate('fuzzy.use_unsafe_no_lock', 'fuzzy.frecency.unsafe_no_lock', 'v2.0.0', 'blink-cmp')
     config.frecency.unsafe_no_lock = config.use_unsafe_no_lock
-  end
-  -- Migrate the frecency database to its new location if needed
-  local deprecated_path = vim.fn.stdpath('data') .. '/blink/cmp/fuzzy.db'
-  if
-    config.frecency.enabled
-    and config.frecency.path ~= deprecated_path
-    and vim.fn.isdirectory(deprecated_path) == 1
-  then
-    local fromto_msg = ('from %s to %s'):format(deprecated_path, config.frecency.path)
-    local has_migrated = false
-    if vim.fn.mkdir(vim.fn.fnamemodify(config.frecency.path, ':h'), 'p') then
-      if vim.fn.rename(deprecated_path, config.frecency.path) == 0 then
-        has_migrated = true
-        utils.notify({ { 'Successfully migrated frecency database ' .. fromto_msg } })
-      end
-    end
-    if not has_migrated then
-      utils.notify({ { 'An error occurred while migrating frecency database ' .. fromto_msg } })
-    end
+    config.use_unsafe_no_lock = nil
   end
 
   validate('fuzzy', {
