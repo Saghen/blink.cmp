@@ -19,6 +19,7 @@ local default_config = {
   extended_filetypes = {},
   --- @type string?
   clipboard_register = nil,
+  use_label_description = false,
 }
 
 --- @param config blink.cmp.SnippetsOpts
@@ -116,7 +117,8 @@ function registry:snippet_to_completion_item(snippet, cache_key)
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
     insertText = self:expand_vars(body, cache_key),
     description = snippet.description,
-    labelDetails = require('blink.cmp.sources.snippets.utils').build_label_details(snippet.description or ''),
+    labelDetails = snippet.description and self.config.use_label_description and { description = snippet.description }
+      or nil,
   }
 end
 

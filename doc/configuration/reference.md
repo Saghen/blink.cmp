@@ -219,12 +219,6 @@ completion.menu.draw = {
   cursorline_priority = 10000,
   -- Appends an indicator to snippets label
   snippet_indicator = '~',
-  -- Display snippet description in completion menu column.
-  -- `nil` Do NOT show description in completion menu.
-  -- `label_detail` Show in column label_detail.
-  -- `label_description` Show in column label_description.
-  -- menu column see config `completion.menu.draw.columns`
-  snippet_desc_column = nil,
   -- Use treesitter to highlight the label text for the given list of sources
   treesitter = {},
   -- treesitter = { 'lsp' }
@@ -560,6 +554,8 @@ sources.providers = {
       end,
       -- Set to '+' to use the system clipboard, or '"' to use the unnamed register
       clipboard_register = nil,
+      -- Whether to put the snippet description in the label description
+      use_label_description = false,
     }
 
     -- For `snippets.preset == 'luasnip'`
