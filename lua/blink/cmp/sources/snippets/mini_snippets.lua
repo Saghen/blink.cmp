@@ -2,6 +2,7 @@
 
 --- @class blink.cmp.MiniSnippetsSourceOptions
 --- @field use_items_cache? boolean completion items are cached using default mini.snippets context
+--- @field use_label_description? boolean Whether to put the snippet description in the label description
 
 --- @class blink.cmp.MiniSnippetsSource : blink.cmp.Source
 --- @field config blink.cmp.MiniSnippetsSourceOptions
@@ -19,6 +20,8 @@ local source = {}
 local defaults_config = {
   --- Whether to use a cache for completion items
   use_items_cache = true,
+  --- Whether to put the snippet description in the label description
+  use_label_description = false,
 }
 
 function source.new(opts)
@@ -29,6 +32,7 @@ function source.new(opts)
       'boolean',
       'use_items_cache must be a boolean when using mini__snippets preset',
     },
+    use_label_description = { config.use_label_description, 'boolean' },
   }, opts)
 
   local self = setmetatable({}, { __index = source })
@@ -42,7 +46,7 @@ function source:enabled()
   return _G.MiniSnippets ~= nil -- ensure that user has explicitly setup mini.snippets
 end
 
-local function to_completion_items(snippets)
+local function to_completion_items(snippets, use_label_description)
   local result = {}
 
   for _, snip in ipairs(snippets) do
@@ -53,7 +57,7 @@ local function to_completion_items(snippets)
       insertText = snip.prefix,
       insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
       data = { snip = snip },
-      labelDetails = require('blink.cmp.sources.snippets.utils').build_label_details(snip.desc),
+      labelDetails = snip.desc and use_label_description and { description = snip.desc } or nil,
     }
     table.insert(result, item)
   end
@@ -68,8 +72,10 @@ end
 -- See :h MiniSnippets.default_prepare
 --
 -- Return completion items produced from snippets either directly or from cache
-local function get_completion_items(cache)
-  if not cache then return to_completion_items(MiniSnippets.expand({ match = false, insert = false })) end
+local function get_completion_items(cache, use_label_description)
+  if not cache then
+    return to_completion_items(MiniSnippets.expand({ match = false, insert = false }), use_label_description)
+  end
 
   -- Compute cache id
   local _, context = MiniSnippets.default_prepare({})
@@ -81,7 +87,7 @@ local function get_completion_items(cache)
   -- Retrieve all raw snippets in context and transform into completion items
   local snippets = MiniSnippets.expand({ match = false, insert = false })
   --- @cast snippets table
-  local items = to_completion_items(vim.deepcopy(snippets))
+  local items = to_completion_items(vim.deepcopy(snippets), use_label_description)
   cache[id] = items
 
   return items
@@ -91,7 +97,7 @@ function source:get_completions(ctx, callback)
   local cache = self.config.use_items_cache and self.items_cache or nil
 
   --- @type blink.cmp.CompletionItem[]
-  local items = get_completion_items(cache)
+  local items = get_completion_items(cache, self.config.use_label_description)
   callback({
     is_incomplete_forward = false,
     is_incomplete_backward = false,
