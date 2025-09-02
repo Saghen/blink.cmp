@@ -968,7 +968,7 @@ For more common configurations, see the recipes <../recipes.md>.
       },
     
       -- Use a preset for snippets, check the snippets documentation for more information
-      snippets = { preset = 'default' | 'luasnip' | 'mini_snippets' | 'vsnip' },
+      snippets = { preset = 'default' | 'luasnip' | 'mini_snippets' },
     
       -- Experimental signature help support
       signature = { enabled = true }
@@ -1765,8 +1765,7 @@ snippets. The built-in `snippets` source will load friendly-snippets
 <https://github.com/rafamadriz/friendly-snippets>, if available, and load any
 snippets found at `~/.config/nvim/snippets/`. For use with Luasnip, see the
 |blink-cmp-luasnip-section|. For use with mini.snippets, see the
-|blink-cmp-mini.snippets-section|. For use with vim-vsnip, see the
-|blink-cmp-vim-vsnip-section|.
+|blink-cmp-mini.snippets-section|.
 
 
 FRIENDLY SNIPPETS ~
@@ -1867,23 +1866,6 @@ LUASNIP ~
 
 
 MINI.SNIPPETS ~
-
->lua
-    {
-      'saghen/blink.cmp',
-      dependencies = 'echasnovski/mini.snippets',
-      opts = {
-        snippets = { preset = 'mini_snippets' },
-        -- ensure you have the `snippets` source (enabled by default)
-        sources = {
-          default = { 'lsp', 'path', 'snippets', 'buffer' },
-        },
-      }
-    }
-<
-
-
-VIM-VSNIP ~
 
 >lua
     {
