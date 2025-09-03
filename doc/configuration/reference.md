@@ -572,12 +572,16 @@ sources.providers = {
       show_autosnippets = true,
       -- Whether to prefer docTrig placeholders over trig when expanding regTrig snippets
       prefer_doc_trig = false,
+      -- Whether to put the snippet description in the label description
+      use_label_description = false,
     }
 
     -- For `snippets.preset == 'mini_snippets'`
     opts = {
       -- Whether to use a cache for completion items
       use_items_cache = true,
+      -- Whether to put the snippet description in the label description
+      use_label_description = false,
     }
 
     -- For `snippets.preset == 'vsnip'`

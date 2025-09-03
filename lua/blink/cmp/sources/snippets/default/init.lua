@@ -11,6 +11,7 @@
 local snippets = {}
 
 function snippets.new(opts)
+  -- TODO: config validation
   --- @cast opts blink.cmp.SnippetsOpts
 
   local self = setmetatable({}, { __index = snippets })

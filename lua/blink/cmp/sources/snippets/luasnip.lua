@@ -14,7 +14,7 @@ local utils = require('blink.cmp.lib.utils')
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
 
-local defaults_config = {
+local default_config = {
   use_show_condition = true,
   show_autosnippets = true,
   prefer_doc_trig = false,
@@ -33,8 +33,8 @@ local function add_luasnip_callback(snippet, event, callback)
 end
 
 function source.new(opts)
-  local config = vim.tbl_deep_extend('keep', opts, defaults_config)
-  require('blink.cmp.config.utils').validate('sources.providers.luasnip', {
+  local config = vim.tbl_deep_extend('keep', opts, default_config)
+  require('blink.cmp.config.utils').validate('sources.providers.snippets.opts', {
     use_show_condition = { config.use_show_condition, 'boolean' },
     show_autosnippets = { config.show_autosnippets, 'boolean' },
     prefer_doc_trig = { config.prefer_doc_trig, 'boolean' },

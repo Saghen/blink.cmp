@@ -17,7 +17,7 @@
 --- @diagnostic disable-next-line: missing-fields
 local source = {}
 
-local defaults_config = {
+local default_config = {
   --- Whether to use a cache for completion items
   use_items_cache = true,
   --- Whether to put the snippet description in the label description
@@ -25,7 +25,7 @@ local defaults_config = {
 }
 
 function source.new(opts)
-  local config = vim.tbl_deep_extend('keep', opts, defaults_config)
+  local config = vim.tbl_deep_extend('keep', opts, default_config)
   require('blink.cmp.config.utils').validate('sources.providers.snippets.opts', {
     use_items_cache = {
       config.use_items_cache,
