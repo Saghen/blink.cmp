@@ -579,6 +579,9 @@ sources.providers = {
       -- Whether to use a cache for completion items
       use_items_cache = true,
     }
+
+    -- For `snippets.preset == 'vsnip'`
+    opts = {}
   },
 
   buffer = {

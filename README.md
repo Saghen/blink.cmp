@@ -63,6 +63,7 @@ Head over to the [documentation website](https://cmp.saghen.dev/installation) fo
 - [@scottmckendry](https://github.com/scottmckendry) CI and prebuilt binaries
 - [@balssh](https://github.com/Balssh) + [@konradmalik](https://github.com/konradmalik) Nix flake, nixpkg and nixvim
 - [@abeldekat](https://github.com/abeldekat) mini.snippets source
+- [@FelipeLema](https://github.com/FelipeLema) vsnip source
 - [@wurli](https://github.com/wurli) Terminal completions
 - [@mikavilpas](https://github.com/mikavilpas) + [@xzbdmw](https://github.com/xzbdmw) Dot-repeat (`.`)
 - [@FerretDetective](https://github.com/FerretDetective) `complete_func` source
