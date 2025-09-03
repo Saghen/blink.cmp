@@ -56,7 +56,7 @@ function cmdline_events:listen(opts)
   -- movements in CursorMovedC, we detect bursts by measuring the time between moves.
   -- If two cursor moves occur within a short threshold (burst_threshold_ms), we treat them
   -- as part of a burst and ignore them.
-  local burst_threshold_ms = 60
+  local burst_threshold_ms = 2
   local function is_burst_move()
     local current_time = vim.loop.hrtime() / 1e6
     local is_burst = last_move_time and (current_time - last_move_time) < burst_threshold_ms
