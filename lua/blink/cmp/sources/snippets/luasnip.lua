@@ -194,7 +194,12 @@ function source:execute(ctx, item)
     to = cursor,
   }
 
-  local expand_params = snip:matches(require('luasnip.util.util').get_current_line_to_cursor())
+  local line = ctx.get_line()
+  local line_to_cursor = line:sub(1, range['end'].character)
+  local range_text = line:sub(range.start.character + 1, range['end'].character)
+
+  local expand_params = snip:matches(line_to_cursor, { fallback_match = range_text })
+
   if expand_params ~= nil then
     if expand_params.clear_region ~= nil then
       clear_region = expand_params.clear_region
