@@ -58,7 +58,10 @@
 --- @class (exact) blink.cmp.CompletionGhostTextConfigPartial : blink.cmp.CompletionGhostTextConfig, {}
 
 --- @class (exact) blink.cmp.FuzzyConfigPartial : blink.cmp.FuzzyConfig, {}
+--- @field frecency? blink.cmp.FuzzyFrecencyConfigPartial
 --- @field prebuilt_binaries? blink.cmp.PrebuiltBinariesConfigPartial
+
+--- @class (exact) blink.cmp.FuzzyFrecencyConfigPartial : blink.cmp.FuzzyFrecencyConfig, {}
 
 --- @class (exact) blink.cmp.PrebuiltBinariesConfigPartial : blink.cmp.PrebuiltBinariesConfig, {}
 --- @field proxy? blink.cmp.PrebuiltBinariesProxyConfigPartial

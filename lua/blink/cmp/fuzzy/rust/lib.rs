@@ -64,13 +64,13 @@ pub fn fuzzy(
     _lua: &Lua,
     (line, cursor_col, provider_ids, opts): (mlua::String, usize, Vec<String>, FuzzyOptions),
 ) -> LuaResult<(Vec<u16>, Vec<u32>, Vec<i32>, Vec<bool>)> {
+    // Gather static data
     let frecency = FRECENCY.read().map_err(|_| Error::AcquireFrecencyLock)?;
-    let frecency = frecency.as_ref().ok_or(Error::UseFrecencyBeforeInit)?;
-
     let haystacks_by_provider = HAYSTACKS_BY_PROVIDER
         .read()
         .map_err(|_| Error::AcquireItemLock)?;
 
+    // Perform fuzzy matching per provider and combine
     let mut matches = provider_ids
         .iter()
         .enumerate()
@@ -86,7 +86,7 @@ pub fn fuzzy(
                 &line.to_string_lossy(),
                 cursor_col,
                 haystack,
-                frecency,
+                frecency.as_ref(),
                 opts.clone(),
             ))
         })
@@ -123,7 +123,7 @@ pub fn fuzzy(
                         // Neither has sort text
                         (None, None) => Ordering::Equal,
                     },
-                    Sort::Label => Sort::label(&a.item, &b.item),
+                    Sort::Label => Sort::label(a.item, b.item),
                 }
             })
         })

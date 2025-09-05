@@ -89,7 +89,7 @@ pub fn fuzzy<'a>(
     line: &str,
     cursor_col: usize,
     haystack: &'a [LspItem],
-    frecency: &FrecencyTracker,
+    frecency: Option<&FrecencyTracker>,
     opts: FuzzyOptions,
 ) -> Vec<FuzzyMatch<'a>> {
     let haystack_labels = haystack
@@ -127,11 +127,11 @@ pub fn fuzzy<'a>(
     matches
         .into_iter()
         .map(|mtch| {
-            let frecency_score = if opts.use_frecency {
-                frecency.get_score(&haystack[mtch.index_in_haystack as usize]) as i32
-            } else {
-                0
-            };
+            let frecency_score = frecency
+                .map(|frecency| {
+                    frecency.get_score(&haystack[mtch.index_in_haystack as usize]) as i32
+                })
+                .unwrap_or(0);
             let nearby_words_score = if opts.use_proximity {
                 nearby_words
                     .get(&haystack_labels[mtch.index_in_haystack as usize])
