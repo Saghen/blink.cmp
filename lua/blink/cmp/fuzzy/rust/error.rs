@@ -1,5 +1,4 @@
 #[derive(thiserror::Error, Debug)]
-#[non_exhaustive]
 pub enum Error {
     #[error("Failed to acquire lock for frecency")]
     AcquireFrecencyLock,
@@ -16,25 +15,12 @@ pub enum Error {
     FuzzyBeforeSetItems { provider_id: String },
 
     #[error("Failed to create frecency database directory: {0}")]
-    CreateDir(#[source] std::io::Error),
-    #[error("Failed to open frecency database env: {0}")]
-    EnvOpen(#[source] heed::Error),
-    #[error("Failed to create frecency database: {0}")]
-    DbCreate(#[source] heed::Error),
-    #[error("Failed to clear stale readers for frecency database: {0}")]
-    DbClearStaleReaders(#[source] heed::Error),
+    IoError(#[from] std::io::Error),
 
-    #[error("Failed to start read transaction for frecency database: {0}")]
-    DbStartReadTxn(#[source] heed::Error),
-    #[error("Failed to start write transaction for frecency database: {0}")]
-    DbStartWriteTxn(#[source] heed::Error),
-
-    #[error("Failed to read from frecency database: {0}")]
-    DbRead(#[source] heed::Error),
-    #[error("Failed to write to frecency database: {0}")]
-    DbWrite(#[source] heed::Error),
-    #[error("Failed to commit write transaction to frecency database: {0}")]
-    DbCommit(#[source] heed::Error),
+    #[error("Failed to decode frecency entry: {0}")]
+    BincodeDecodeError(#[from] bincode::error::DecodeError),
+    #[error("Failed to encode frecency entry: {0}")]
+    BincodeEncodeError(#[from] bincode::error::EncodeError),
 }
 
 impl From<Error> for mlua::Error {

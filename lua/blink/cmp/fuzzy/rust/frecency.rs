@@ -1,119 +1,157 @@
-use crate::error::Error;
-use crate::lsp_item::LspItem;
-use heed::{types::*, EnvFlags};
-use heed::{Database, Env, EnvOpenOptions};
-use serde::{Deserialize, Serialize};
-use std::fs;
+use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::io::{Read, Seek, SeekFrom, Write};
+use std::path::PathBuf;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-#[derive(Clone, Serialize, Deserialize)]
-struct CompletionItemKey {
-    label: String,
-    kind: u32,
-    source_id: String,
+use bincode::{Decode, Encode};
+use blake3::Hash;
+
+use crate::error::Error;
+
+const ENTRY_SIZE: usize = 64;
+// ~0.5 after 1 minute (x = 60)
+// ~0.2 after 1 hour (x = 3600)
+// ~0.1 after 1 day (x = 86400)
+// ~0.06 after 1 week (x = 604800)
+const DECAY_CONSTANT: f64 = 0.2;
+
+#[derive(Decode, Encode, Clone, Debug)]
+struct FrecencyEntry {
+    hash: [u8; 32],
+    timestamp: u64,
+    score: f64,
 }
 
-impl From<&LspItem> for CompletionItemKey {
-    fn from(item: &LspItem) -> Self {
-        Self {
-            label: item.label.clone(),
-            kind: item.kind,
-            source_id: item.source_id.clone(),
+/// Frecency database using fixed-sized entries and atomic writes for lock-free cross-process access
+/// algorithm:     new_score = score * (1 / (1 + (current_time - score_time)) ^ decay_constant)
+/// or more mathy: f(x) = (1 / (1 + (x - x0)) ^ a)
+/// https://github.com/Saghen/blink.cmp/issues/258
+pub struct FrecencyDB {
+    path: PathBuf,
+    cache: HashMap<[u8; 32], (u64, FrecencyEntry)>, // hash -> (file_position, entry)
+}
+
+impl FrecencyDB {
+    pub fn new(path: &PathBuf) -> Result<Self, Error> {
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
         }
-    }
-}
+        OpenOptions::new()
+            .create(true)
+            .write(true)
+            .truncate(false)
+            .open(path)?;
 
-#[derive(Debug)]
-pub struct FrecencyTracker {
-    env: Env,
-    db: Database<Bytes, SerdeBincode<Vec<u64>>>,
-    access_thresholds: Vec<(f64, u64)>,
-}
-
-impl FrecencyTracker {
-    pub fn new(db_path: &str, use_unsafe_no_lock: bool) -> Result<Self, Error> {
-        fs::create_dir_all(db_path).map_err(Error::CreateDir)?;
-        let env = unsafe {
-            let mut opts = EnvOpenOptions::new();
-            if use_unsafe_no_lock {
-                opts.flags(EnvFlags::NO_LOCK | EnvFlags::NO_SYNC | EnvFlags::NO_META_SYNC);
-            }
-            opts.open(db_path).map_err(Error::EnvOpen)?
+        let mut db = FrecencyDB {
+            path: path.clone(),
+            cache: HashMap::new(),
         };
-        env.clear_stale_readers()
-            .map_err(Error::DbClearStaleReaders)?;
 
-        // we will open the default unnamed database
-        let mut wtxn = env.write_txn().map_err(Error::DbStartWriteTxn)?;
-        let db = env
-            .create_database(&mut wtxn, None)
-            .map_err(Error::DbCreate)?;
+        // Load cache on initialization
+        db.reload_cache()?;
 
-        let access_thresholds = [
-            (1., 1000 * 60 * 2),             // 2 minutes
-            (0.2, 1000 * 60 * 60),           // 1 hour
-            (0.1, 1000 * 60 * 60 * 24),      // 1 day
-            (0.05, 1000 * 60 * 60 * 24 * 7), // 1 week
-        ]
-        .to_vec();
+        Ok(db)
+    }
 
-        Ok(FrecencyTracker {
-            env: env.clone(),
-            db,
-            access_thresholds,
+    /// Gets the score for a given item
+    pub fn get_score(&self, key: &Hash) -> Option<f64> {
+        self.get(key).map(|(timestamp, score)| {
+            let current_timestamp = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .map(|timestamp| timestamp.as_secs())
+                .unwrap_or(0);
+
+            score * (1. / (1. + (current_timestamp - timestamp) as f64)).powf(DECAY_CONSTANT)
         })
     }
 
-    fn get_accesses(&self, item: &LspItem) -> Result<Option<Vec<u64>>, Error> {
-        let rtxn = self.env.read_txn().map_err(Error::DbStartReadTxn)?;
-        let key_hash = Self::key_to_hash_bytes(item);
-        self.db
-            .get(&rtxn, &key_hash)
-            .map_err(Error::DbRead)
-    }
+    /// Accesses a given item
+    pub fn access(&mut self, key: &Hash) -> Result<(), Error> {
+        let score = self.get_score(&key).unwrap_or(0.0);
 
-    fn get_now(&self) -> u64 {
-        SystemTime::now()
+        let current_timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs()
-    }
+            .map(|timestamp| timestamp.as_secs())
+            .unwrap_or(0);
 
-    fn key_to_hash_bytes(item: &LspItem) -> [u8; 32] {
-        let key = CompletionItemKey::from(item);
-        let encoded = bincode::serialize(&key).expect("serialization failed");
-        *blake3::hash(&encoded).as_bytes()
-    }
-
-    pub fn access(&self, item: &LspItem) -> Result<(), Error> {
-        let mut wtxn = self.env.write_txn().map_err(Error::DbStartWriteTxn)?;
-
-        let key_hash = Self::key_to_hash_bytes(item);
-        let mut accesses = self.get_accesses(item)?.unwrap_or_default();
-        accesses.push(self.get_now());
-
-        self.db
-            .put(&mut wtxn, &key_hash, &accesses)
-            .map_err(Error::DbWrite)?;
-
-        wtxn.commit().map_err(Error::DbCommit)?;
+        self.put(key, current_timestamp, score + 4.)?;
 
         Ok(())
     }
 
-    pub fn get_score(&self, item: &LspItem) -> i64 {
-        let accesses = self.get_accesses(item).unwrap_or(None).unwrap_or_default();
-        let now = self.get_now();
-        let mut score = 0.0;
-        'outer: for access in &accesses {
-            let duration_since = now - access;
-            for (rank, threshold_duration_since) in &self.access_thresholds {
-                if duration_since < *threshold_duration_since {
-                    score += rank;
-                    continue 'outer;
+    /// Gets an entry from the cache, if it exists
+    fn get(&self, hash: &Hash) -> Option<(u64, f64)> {
+        self.cache
+            .get(hash.as_bytes())
+            .map(|(_, entry)| (entry.timestamp, entry.score))
+    }
+
+    // Inserts an item in the filesystem, updating in-place if it already exists
+    fn put(&mut self, hash: &Hash, timestamp: u64, score: f64) -> Result<(), Error> {
+        // First, reload cache to ensure we have latest state
+        self.reload_cache()?;
+
+        let entry = FrecencyEntry {
+            hash: *hash.as_bytes(),
+            timestamp,
+            score,
+        };
+
+        // Check cache for existing position
+        let position = self.cache.get(hash.as_bytes()).map(|(pos, _)| *pos);
+
+        // Prepare entry buffer
+        let mut serialized_entry = [0u8; ENTRY_SIZE];
+        bincode::encode_into_slice(&entry, &mut serialized_entry, bincode::config::standard())?;
+
+        let mut file = OpenOptions::new().write(true).read(true).open(&self.path)?;
+
+        // Update filesystem
+        let final_position = if let Some(pos) = position {
+            // Update in place
+            file.seek(SeekFrom::Start(pos))?;
+            file.write_all(&serialized_entry)?;
+            pos
+        } else {
+            // Append new entry
+            file.seek(SeekFrom::End(0))?;
+            let pos = file.stream_position()?;
+            file.write_all(&serialized_entry)?;
+            pos
+        };
+
+        // Update cache
+        self.cache.insert(entry.hash, (final_position, entry));
+
+        // fsync the data
+        file.sync_data()?;
+
+        Ok(())
+    }
+
+    fn reload_cache(&mut self) -> Result<(), Error> {
+        let mut file = OpenOptions::new().read(true).open(&self.path)?;
+
+        let mut new_cache = HashMap::new();
+        let mut buffer = [0u8; ENTRY_SIZE];
+        let mut position = 0u64;
+
+        loop {
+            file.seek(SeekFrom::Start(position))?;
+            match file.read_exact(&mut buffer) {
+                Ok(_) => {
+                    let entry: FrecencyEntry =
+                        bincode::decode_from_slice(&buffer, bincode::config::standard())?.0;
+                    new_cache.insert(entry.hash, (position, entry));
+                    position += ENTRY_SIZE as u64;
                 }
+                Err(_) => break,
             }
         }
-        score.min(4.) as i64
+
+        self.cache = new_cache;
+
+        Ok(())
     }
 }

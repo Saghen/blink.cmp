@@ -45,7 +45,7 @@ local fuzzy = {
     sorts = { 'score', 'sort_text' },
     frecency = {
       enabled = true,
-      path = vim.fn.stdpath('state') .. '/blink/cmp/fuzzy.db',
+      path = vim.fn.stdpath('state') .. '/blink/cmp/frecency.dat',
       unsafe_no_lock = false,
     },
     prebuilt_binaries = {
