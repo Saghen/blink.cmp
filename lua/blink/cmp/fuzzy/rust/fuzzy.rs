@@ -1,6 +1,6 @@
 // TODO: refactor this heresy
 
-use crate::frecency::FrecencyTracker;
+use crate::frecency::FrecencyDB;
 use crate::keyword;
 use crate::lsp_item::LspItem;
 use crate::sort::Sort;
@@ -89,7 +89,7 @@ pub fn fuzzy<'a>(
     line: &str,
     cursor_col: usize,
     haystack: &'a [LspItem],
-    frecency: Option<&FrecencyTracker>,
+    frecency: Option<&FrecencyDB>,
     opts: FuzzyOptions,
 ) -> Vec<FuzzyMatch<'a>> {
     let haystack_labels = haystack
@@ -129,7 +129,11 @@ pub fn fuzzy<'a>(
         .map(|mtch| {
             let frecency_score = frecency
                 .map(|frecency| {
-                    frecency.get_score(&haystack[mtch.index_in_haystack as usize]) as i32
+                    frecency
+                        .get_score(&(&haystack[mtch.index_in_haystack as usize]).into())
+                        .unwrap_or(0.)
+                        .min(6.)
+                        .round() as i32
                 })
                 .unwrap_or(0);
             let nearby_words_score = if opts.use_proximity {

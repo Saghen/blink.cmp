@@ -1,5 +1,5 @@
 use crate::error::Error;
-use crate::frecency::FrecencyTracker;
+use crate::frecency::FrecencyDB;
 use crate::fuzzy::FuzzyOptions;
 use crate::lsp_item::LspItem;
 use crate::sort::Sort;
@@ -19,16 +19,16 @@ mod sort;
 
 static REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"[\p{L}_][\p{L}0-9_\\-]{2,}").unwrap());
-static FRECENCY: LazyLock<RwLock<Option<FrecencyTracker>>> = LazyLock::new(|| RwLock::new(None));
+static FRECENCY: LazyLock<RwLock<Option<FrecencyDB>>> = LazyLock::new(|| RwLock::new(None));
 static HAYSTACKS_BY_PROVIDER: LazyLock<RwLock<HashMap<String, Vec<LspItem>>>> =
     LazyLock::new(|| RwLock::new(HashMap::new()));
 
-pub fn init_db(_: &Lua, (db_path, use_unsafe_no_lock): (String, bool)) -> LuaResult<bool> {
+pub fn init_db(_: &Lua, db_path: String) -> LuaResult<bool> {
     let mut frecency = FRECENCY.write().map_err(|_| Error::AcquireFrecencyLock)?;
     if frecency.is_some() {
         return Ok(false);
     }
-    *frecency = Some(FrecencyTracker::new(&db_path, use_unsafe_no_lock)?);
+    *frecency = Some(FrecencyDB::new(&std::path::PathBuf::from(db_path))?);
     Ok(true)
 }
 
@@ -45,7 +45,7 @@ pub fn destroy_db(_: &Lua, _: ()) -> LuaResult<bool> {
 pub fn access(_: &Lua, item: LspItem) -> LuaResult<bool> {
     let mut frecency = FRECENCY.write().map_err(|_| Error::AcquireFrecencyLock)?;
     let frecency = frecency.as_mut().ok_or(Error::UseFrecencyBeforeInit)?;
-    frecency.access(&item)?;
+    frecency.access(&(&item).into())?;
     Ok(true)
 }
 
