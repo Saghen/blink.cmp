@@ -6,6 +6,7 @@
 --- @class (exact) blink.cmp.CompletionListSelectionConfig
 --- @field preselect boolean | fun(ctx: blink.cmp.Context): boolean When `true`, will automatically select the first item in the completion list
 --- @field auto_insert boolean | fun(ctx: blink.cmp.Context): boolean When `true`, inserts the completion item automatically when selecting it. You may want to bind a key to the `cancel` command (default <C-e>) when using this option, which will both undo the selection and hide the completion menu
+--- @field auto_insert_blacklist? string[] List of mixed client_names and source_names that won't auto-insert when selected, even if `auto_insert` is `true`
 
 --- @class (exact) blink.cmp.CompletionListCycleConfig
 --- @field from_bottom boolean When `true`, calling `select_next` at the *bottom* of the completion list will select the *first* completion item.
@@ -19,6 +20,7 @@ local list = {
     selection = {
       preselect = true,
       auto_insert = true,
+      auto_insert_blacklist = {},
     },
     cycle = {
       from_bottom = true,
@@ -43,6 +45,7 @@ function list.validate(config)
   validate('completion.list.selection', {
     preselect = { config.selection.preselect, { 'boolean', 'function' } },
     auto_insert = { config.selection.auto_insert, { 'boolean', 'function' } },
+    auto_insert_blacklist = { config.selection.auto_insert_blacklist, 'table' },
   }, config.selection)
 
   validate('completion.list.cycle', {

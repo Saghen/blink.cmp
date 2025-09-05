@@ -137,7 +137,7 @@ The completion list in **cmdline mode** does **not** inherit the following setti
 :::tabs
 == Preselect, Auto Insert (default)
 ```lua
-completion.list.selection = { preselect = true, auto_insert = true }
+completion.list.selection = { preselect = true, auto_insert = true, auto_insert_blacklist = {} }
 ```
 Selects the first item automatically, and inserts a preview of the item on selection. The `cancel` keymap (default `<C-e>`) will close the menu and undo the preview.
 
@@ -234,6 +234,16 @@ completion.list.selection = {
 }
 ```
 
+To blacklist certain big or misbehaving completion sources (like Copilot) from being automatically inserted regardless of `auto_insert` being true, use `auto_insert_blacklist`.
+The blacklist accepts `client_name` and `source_name` values allowing you to blacklist entire sources or specific lsp clients:
+
+```lua
+completion.list.selection = {
+  preselect = false,
+  auto_insert = true,
+  auto_insert_blacklist = { 'copilot' },
+}
+```
 
 ## Accept <!-- panvimdoc-ignore-start --><Badge type="info"><a href="./reference#completion-accept">Go to default configuration</a></Badge><!-- panvimdoc-ignore-end -->
 
