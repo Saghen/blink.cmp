@@ -71,7 +71,7 @@ function M.get_geometry(target_win)
   local start_line = get_content_start_line(target_win, width or 1)
 
   local pct = (start_line - 1) / (buf_height - height)
-  local thumb_offset = math.floor((pct * (height - thumb_height)) + 0.5)
+  local thumb_offset = math.min(math.floor((pct * (height - thumb_height)) + 0.5), height - 1)
   thumb_height = thumb_offset + thumb_height > height and height - thumb_offset or thumb_height
   thumb_height = math.max(1, thumb_height)
 
