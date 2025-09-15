@@ -1,3 +1,62 @@
+## [1.7.0](https://github.com/Saghen/blink.cmp/compare/v1.6.0...v1.7.0) (2025-09-15)
+
+### Highlights
+
+* [Configurable delay](https://cmp.saghen.dev/recipes.html#disable-or-delay-auto-showing-completion-menu) before showing completion menu (`completion.menu.auto_show_delay_ms`)
+* Added `:BlinkCmp build` command for building fuzzy matching library from source, primarily for `vim.pack` users building from soruce
+* Dropped LMDB in favor of pure Rust implementation for frecency DB, resolving neovim crashing on accepting completions
+  * Moved from `~/.local/share/nvim/blink/cmp/fuzzy.db` to `~/.local/state/nvim/blink/cmp/frecency.dat`
+* Added support for vsnip via `snippets.preset = 'vsnip'`
+* Fixed stutter on `InsertEnter` when using snippets with `TM_SELECTED_TEXT` (such as with `friendly-snippets` in latex)
+* Misc cmdline fixes/performance improvements
+
+### Features
+
+* `completion.menu.auto_show_delay_ms` option ([debe907](https://github.com/Saghen/blink.cmp/commit/debe907a5f3e340cf940d6fb47e52cb845992452)), closes [#619](https://github.com/Saghen/blink.cmp/issues/619)
+* `scroll_signature_up/down` keymap commands ([#2057](https://github.com/Saghen/blink.cmp/issues/2057)) ([b7e2404](https://github.com/Saghen/blink.cmp/commit/b7e240484affbb62eebb8604ea3d63f88d320f12))
+* add `:BlinkCmp build` and `:BlinkCmp build-log` commands ([4c6a29e](https://github.com/Saghen/blink.cmp/commit/4c6a29ef6b527309566bcf1bb90318e36ca9f1f8))
+* add `show_and_insert_or_accept_single` keymap, set as `<Tab>` in cmdline ([#2037](https://github.com/Saghen/blink.cmp/issues/2037)) ([a93cdb8](https://github.com/Saghen/blink.cmp/commit/a93cdb8769ac17ffe2abc7196f6ab9e500af1f37)), closes [#2032](https://github.com/Saghen/blink.cmp/issues/2032)
+* add `snippet_indicator` option [#2034](https://github.com/Saghen/blink.cmp/issues/2034) ([#2038](https://github.com/Saghen/blink.cmp/issues/2038)) ([5e1c0e8](https://github.com/Saghen/blink.cmp/commit/5e1c0e8d54a266c7b1f629e943c0b360bcd9cd39))
+* add `snippets.preset = 'vsnip'` ([#2110](https://github.com/Saghen/blink.cmp/issues/2110)) ([221c3d8](https://github.com/Saghen/blink.cmp/commit/221c3d86ddd0379bd51f4fe43ee7089fd07b7432))
+* append-only frecency database, drop LMDB ([#2136](https://github.com/Saghen/blink.cmp/issues/2136)) ([f1c3905](https://github.com/Saghen/blink.cmp/commit/f1c3905d863942aa0b89e621a79b3a3cf2090fd0))
+* **brackets:** add css pseudo-class exceptions ([#2054](https://github.com/Saghen/blink.cmp/issues/2054)) ([e3f28f1](https://github.com/Saghen/blink.cmp/commit/e3f28f12e6cc1113129150c069e84761abe8a31d)), closes [#2052](https://github.com/Saghen/blink.cmp/issues/2052)
+* **cmdline:** handle ex special characters and filename modifiers ([#2074](https://github.com/Saghen/blink.cmp/issues/2074)) ([f6ca10f](https://github.com/Saghen/blink.cmp/commit/f6ca10fe15579775fd8c02e2d3cc74eaa9824f5e)), closes [#2068](https://github.com/Saghen/blink.cmp/issues/2068)
+* **fuzzy:** make frecency database path configurable ([#2061](https://github.com/Saghen/blink.cmp/issues/2061)) ([b8154b4](https://github.com/Saghen/blink.cmp/commit/b8154b444cadc3c32896c27c7814fd4284f83d05)), closes [#2006](https://github.com/Saghen/blink.cmp/issues/2006)
+* **keymap:** add `jump_by` option to navigate by item property ([6a84282](https://github.com/Saghen/blink.cmp/commit/6a84282009cdb348899b014d7332e63babd504e4)), closes [#1890](https://github.com/Saghen/blink.cmp/issues/1890)
+* **keymap:** add fallback action to <C-e> mapping ([#2064](https://github.com/Saghen/blink.cmp/issues/2064)) ([d9fa997](https://github.com/Saghen/blink.cmp/commit/d9fa997147b7af3699ea6b980bdcf2cb06d1eb32)), closes [#2063](https://github.com/Saghen/blink.cmp/issues/2063)
+* **luasnip:** pass matched part of trigger to luasnip. ([#2132](https://github.com/Saghen/blink.cmp/issues/2132)) ([6bceed7](https://github.com/Saghen/blink.cmp/commit/6bceed730e61fb36142ee6ff27358453f324453d))
+* remove `item.documentation.render` ([aeba0f0](https://github.com/Saghen/blink.cmp/commit/aeba0f03985c7590d13606ea8ceb9a05c4995d38))
+* **snippets:** add option `sources.providers.snippets.opts.use_label_description` ([#2094](https://github.com/Saghen/blink.cmp/issues/2094)) ([34e4483](https://github.com/Saghen/blink.cmp/commit/34e4483b39785a47e90a7826664273354f6d6ae0))
+
+### Bug Fixes
+
+* `:BlinkCmp build` working directory ([5209af5](https://github.com/Saghen/blink.cmp/commit/5209af5881cc795ee492ad4516285db925fdde92))
+* add `svelte` to `javascript` auto-brackets `import` exception  ([#2152](https://github.com/Saghen/blink.cmp/issues/2152)) ([5a4461b](https://github.com/Saghen/blink.cmp/commit/5a4461b41ae0f64a17f4f0ffbb852997f2fd6921)), closes [#2151](https://github.com/Saghen/blink.cmp/issues/2151)
+* **cmdline:** respect `wildignore` during command-line completion ([dc68824](https://github.com/Saghen/blink.cmp/commit/dc6882469bf3b98e078888f86bb68ad90d395c7e)), closes [#2083](https://github.com/Saghen/blink.cmp/issues/2083)
+* **cmdline:** support wildcard completion in `file` ([7b0548e](https://github.com/Saghen/blink.cmp/commit/7b0548e5103e295f465be00b1bb7770c548776c1)), closes [#2106](https://github.com/Saghen/blink.cmp/issues/2106)
+* **cmdline:** translate mappings for use with `:map` ([7770a67](https://github.com/Saghen/blink.cmp/commit/7770a67c2cd10d036cbd92ced2fd8b36a6fd29d8)), closes [#2126](https://github.com/Saghen/blink.cmp/issues/2126)
+* disable frecency writing when not enabled ([fa9e5fa](https://github.com/Saghen/blink.cmp/commit/fa9e5fa324f8a721a562a7baeba35a0da44ec651)), closes [#2031](https://github.com/Saghen/blink.cmp/issues/2031)
+* **fuzzy:** check shared lib existence before skipping download ([#2055](https://github.com/Saghen/blink.cmp/issues/2055)) ([b745bea](https://github.com/Saghen/blink.cmp/commit/b745bea3537b4a28f1976477a3474774c82f10ec)), closes [#2048](https://github.com/Saghen/blink.cmp/issues/2048)
+* **ghost_text:** validate buffer before redraw to prevent errors ([#2050](https://github.com/Saghen/blink.cmp/issues/2050)) ([16b6ba0](https://github.com/Saghen/blink.cmp/commit/16b6ba0979756da3a38b936f9800d3479cd8202e)), closes [#1764](https://github.com/Saghen/blink.cmp/issues/1764)
+* **keymap:** accept completion when only one item remains ([54cc521](https://github.com/Saghen/blink.cmp/commit/54cc5219b9307a5a261fac6978c1bdce492e8500))
+* **keymap:** add fallback action to <C-y> mapping ([c375967](https://github.com/Saghen/blink.cmp/commit/c3759677caa289e6e6b5f37b191007eddefc1d3e))
+* libc detection failing on shorter triples ([6d35b78](https://github.com/Saghen/blink.cmp/commit/6d35b7891717b65dcd8488471cc7cd747472d038)), closes [#2040](https://github.com/Saghen/blink.cmp/issues/2040)
+* Move runtime inputs to derivation args and add libiconv for macOS compatibility ([#1993](https://github.com/Saghen/blink.cmp/issues/1993)) ([4834ecf](https://github.com/Saghen/blink.cmp/commit/4834ecfc2312b66436803c10acb6310391ddd43e))
+* **presets:** add missing `cmdline` preset to hide completion on `<End>` ([#2030](https://github.com/Saghen/blink.cmp/issues/2030)) ([1a5607f](https://github.com/Saghen/blink.cmp/commit/1a5607f90c8804cc13ea94a3ec6ea614141609bf))
+* prevent out of bounds scrollbar position ([e465c73](https://github.com/Saghen/blink.cmp/commit/e465c73674fb5fd3ecb7d0dabec195a4a929ee11))
+* use table.concat instead of vim.fn.join for provider list ([4e9edba](https://github.com/Saghen/blink.cmp/commit/4e9edba1b1cef1585cc65e54287229e5d34e4df8))
+* **window:** clamp highlights to prevent overflow beyond text bounds ([#2049](https://github.com/Saghen/blink.cmp/issues/2049)) ([d73dfcb](https://github.com/Saghen/blink.cmp/commit/d73dfcb488b7cfbfbefe2daa82bbf0bd6b043616))
+
+### Performance Improvements
+
+* **cmdline:** reduce spurious cursor and char events ([#1953](https://github.com/Saghen/blink.cmp/issues/1953)) ([6323a6d](https://github.com/Saghen/blink.cmp/commit/6323a6ddb191323904557dc9b545f309ea2b0e12))
+* **snippets:** cache lazy vars when expanding vars ([33f0789](https://github.com/Saghen/blink.cmp/commit/33f0789297cfec5279c30c8f8980c035fdc91e34)), closes [#2024](https://github.com/Saghen/blink.cmp/issues/2024)
+* **snippets:** fix previous attempt at caching snippet lazy vars ([ce26f9f](https://github.com/Saghen/blink.cmp/commit/ce26f9fbaa4560440dd981cad1d2e47ae82dd3a6)), closes [#2024](https://github.com/Saghen/blink.cmp/issues/2024)
+
+### Reverts
+
+* Move runtime inputs to derivation args and add libiconv for macOS compatibility ([#1993](https://github.com/Saghen/blink.cmp/issues/1993)) ([a0bcede](https://github.com/Saghen/blink.cmp/commit/a0bcedefce8d74179d0f2401d9915eaaf16974ce)), closes [#2044](https://github.com/Saghen/blink.cmp/issues/2044)
+
 ## [1.6.0](https://github.com/Saghen/blink.cmp/compare/v1.5.1...v1.6.0) (2025-07-24)
 
 ### Highlights
