@@ -18,7 +18,17 @@ function snippets.new(opts)
   --- @type table<string, blink.cmp.CompletionItem[]>
   self.cache = {}
   self.registry = require('blink.cmp.sources.snippets.default.registry').new(opts)
-  self.get_filetype = opts.get_filetype or function() return vim.bo.filetype end
+  self.get_filetype = opts.get_filetype
+    or function()
+      -- determine embedded language with treesitter
+      local success, parser = pcall(vim.treesitter.get_parser)
+      if success and parser then
+        local curline = vim.fn.line('.')
+        local lang = parser:language_for_range({ curline, 0, curline, 0 }):lang()
+        if lang ~= '' then return lang end
+      end
+      return vim.bo.filetype -- fall back to filetype
+    end
 
   return self
 end
