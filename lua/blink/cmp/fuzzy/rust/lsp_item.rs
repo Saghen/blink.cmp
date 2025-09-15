@@ -1,3 +1,4 @@
+use blake3::Hash;
 use mlua::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -40,6 +41,16 @@ pub struct LspItem {
     pub kind: u32,
     pub score_offset: i32,
     pub source_id: String,
+}
+
+impl Into<Hash> for &LspItem {
+    fn into(self) -> Hash {
+        blake3::Hasher::new()
+            .update(&self.label.as_bytes())
+            .update(&[self.kind as u8])
+            .update(&self.source_id.as_bytes())
+            .finalize()
+    }
 }
 
 impl FromLua for LspItem {
