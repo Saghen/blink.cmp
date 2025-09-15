@@ -63,6 +63,7 @@ return {
       javascriptreact = typescript_exceptions,
       typescript = typescript_exceptions,
       typescriptreact = typescript_exceptions,
+      svelte = typescript_exceptions,
     },
   },
 }
