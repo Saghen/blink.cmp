@@ -62,7 +62,7 @@ function cmp.show(opts)
   if require('blink.cmp.completion.windows.menu').win:is_open() and not (opts and opts.providers) then return end
 
   vim.schedule(function()
-    require('blink.cmp.completion.windows.menu').auto_show = true
+    require('blink.cmp.completion.windows.menu').force_auto_show()
 
     -- HACK: because blink is event based, we don't have an easy way to know when the "show"
     -- event completes. So we wait for the list to trigger the show event and check if we're

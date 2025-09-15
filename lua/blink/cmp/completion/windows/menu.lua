@@ -12,12 +12,17 @@
 --- @field open_loading fun(context: blink.cmp.Context)
 --- @field open fun()
 --- @field close fun()
---- @field should_auto_show fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
 --- @field set_selected_item_idx fun(idx?: number)
+---
+--- @field queue_auto_show fun(context: blink.cmp.Context, items: blink.cmp.CompletionItem[])
+--- @field force_auto_show fun()
+--- @field reset_auto_show fun()
+---
 --- @field update_position fun()
 --- @field redraw_if_needed fun()
 
 local config = require('blink.cmp.config').completion.menu
+local event_emitter = require('blink.cmp.lib.event_emitter')
 
 --- @type blink.cmp.CompletionMenu
 --- @diagnostic disable-next-line: missing-fields
@@ -35,20 +40,30 @@ local menu = {
     scrollbar = config.scrollbar,
     filetype = 'blink-cmp-menu',
   }),
-  items = {},
+
   context = nil,
-  auto_show = config.auto_show,
-  open_emitter = require('blink.cmp.lib.event_emitter').new('completion_menu_open', 'BlinkCmpMenuOpen'),
-  close_emitter = require('blink.cmp.lib.event_emitter').new('completion_menu_close', 'BlinkCmpMenuClose'),
-  position_update_emitter = require('blink.cmp.lib.event_emitter').new(
-    'completion_menu_position_update',
-    'BlinkCmpMenuPositionUpdate'
-  ),
+  items = {},
+
+  auto_show = {
+    enabled = type(config.auto_show) == 'function' and config.auto_show or function() return config.auto_show end,
+    delay_ms = type(config.auto_show_delay_ms) == 'function' and config.auto_show_delay_ms
+      or function() return config.auto_show_delay_ms end,
+    timer = vim.uv.new_timer(),
+    timer_key = '',
+  },
+
+  open_emitter = event_emitter.new('completion_menu_open', 'BlinkCmpMenuOpen'),
+  close_emitter = event_emitter.new('completion_menu_close', 'BlinkCmpMenuClose'),
+  position_update_emitter = event_emitter.new('completion_menu_position_update', 'BlinkCmpMenuPositionUpdate'),
 }
 
 vim.api.nvim_create_autocmd({ 'CursorMovedI', 'WinScrolled', 'WinResized' }, {
   callback = function() menu.update_position() end,
 })
+
+---------------
+--- Windowing
+---------------
 
 function menu.open_with_items(context, items)
   menu.context = context
@@ -58,10 +73,7 @@ function menu.open_with_items(context, items)
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
   menu.renderer:draw(context, menu.win:get_buf(), items)
 
-  if menu.should_auto_show(context, items) then
-    menu.open()
-    menu.update_position()
-  end
+  menu.queue_auto_show(context, items)
 end
 
 function menu.open_loading(context)
@@ -84,16 +96,14 @@ function menu.open_loading(context)
     },
   })
 
-  if menu.should_auto_show(context, {}) then
-    menu.open()
-    menu.update_position()
-  end
+  menu.queue_auto_show(context, {})
 end
 
 function menu.open()
   if menu.win:is_open() then return end
 
   menu.win:open()
+  menu.win:set_option_value('cursorline', menu.selected_item_idx ~= nil)
   if menu.selected_item_idx ~= nil then
     vim.api.nvim_win_set_cursor(menu.win:get_win(), { menu.selected_item_idx, 0 })
   end
@@ -102,7 +112,8 @@ function menu.open()
 end
 
 function menu.close()
-  menu.auto_show = config.auto_show
+  menu.reset_auto_show()
+
   if not menu.win:is_open() then return end
 
   menu.win:close()
@@ -120,10 +131,58 @@ function menu.set_selected_item_idx(idx)
   if type(config.direction_priority) == 'function' then menu.update_position() end
 end
 
-function menu.should_auto_show(context, items)
-  if type(menu.auto_show) == 'function' then return menu.auto_show(context, items) end
-  return menu.auto_show
+---------------
+--- Auto show
+---------------
+
+function menu.queue_auto_show(context, items)
+  if not menu.auto_show.enabled(context, items) then return end
+
+  -- getting completions can take a while, so we factor in how long it's been since the context was created
+  local delay_ms = math.max(0, menu.auto_show.delay_ms(context, items) - (vim.uv.now() - context.timestamp))
+
+  -- no delay, show immediately
+  if delay_ms == 0 then
+    menu.open()
+    menu.update_position()
+    return
+  end
+
+  -- only start a new timer if the cursor has moved or the id has changed
+  local timer_key = string.format('%d|%d|%d', context.id, context.cursor[1], context.cursor[2])
+  if menu.auto_show.timer:is_active() and menu.auto_show.timer_key == timer_key then return end
+
+  menu.auto_show.timer_key = timer_key
+  menu.auto_show.timer:start(
+    delay_ms,
+    0,
+    vim.schedule_wrap(function()
+      menu.open()
+      menu.update_position()
+    end)
+  )
 end
+
+--- Forces auto show to be enabled, will be reset when the menu is closed
+--- HACK: used by the `show()` command because we don't pass down the "source"
+--- of the show event from the trigger
+function menu.force_auto_show()
+  menu.auto_show.enabled = function() return true end
+  menu.auto_show.delay_ms = function() return 0 end
+end
+
+function menu.reset_auto_show()
+  menu.auto_show.enabled = type(config.auto_show) == 'function' and config.auto_show
+    or function() return config.auto_show end
+  menu.auto_show.delay_ms = type(config.auto_show_delay_ms) == 'function' and config.auto_show_delay_ms
+    or function() return config.auto_show_delay_ms end
+  menu.auto_show.timer:stop()
+  menu.auto_show.timer_key = ''
+end
+
+---------------
+--- Positioning
+---------------
 
 --- TODO: Don't switch directions if the context is the same
 function menu.update_position()

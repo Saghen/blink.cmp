@@ -17,6 +17,7 @@
 --- @field trigger blink.cmp.ContextTrigger
 --- @field providers string[]
 --- @field initial_selected_item_idx? number
+--- @field timestamp number
 ---
 --- @field new fun(opts: blink.cmp.ContextOpts): blink.cmp.Context
 --- @field get_keyword fun(): string
@@ -76,6 +77,7 @@ function context.new(opts)
     },
     providers = opts.providers,
     initial_selected_item_idx = opts.initial_selected_item_idx,
+    timestamp = vim.uv.now(),
   }, { __index = context }) --[[@as blink.cmp.Context]]
 end
 

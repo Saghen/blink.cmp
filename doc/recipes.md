@@ -46,6 +46,26 @@ sources = {
 }
 ```
 
+### Disable or delay auto-showing completion menu
+
+You may disable the auto-show behavior of the menu, or delay it by a given number of milliseconds, via the `completion.menu.auto_show` and `completion.menu.auto_show_delay_ms` options.
+
+```lua
+completion = {
+  menu = {
+    -- Disable automatically showing the menu while typing, instead press `<C-space>` (by default) to show it manually
+    auto_show = false,
+    -- or per filetype
+    auto_show = function(ctx, items) return vim.bo.filetype == 'markdown' end,
+
+    -- Delay before showing the completion menu while typing
+    auto_show_delay_ms = 500,
+    -- or per filetype
+    auto_show_delay_ms = function(ctx, items) return vim.bo.filetype == 'markdown' and 1000 or 0 end,
+  }
+}
+```
+
 ### Emacs behavior
 
 Full discussion: https://github.com/Saghen/blink.cmp/issues/1367

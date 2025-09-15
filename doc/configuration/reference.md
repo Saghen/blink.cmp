@@ -191,6 +191,8 @@ completion.menu = {
 
   -- Whether to automatically show the window when new completion items are available
   auto_show = true,
+  -- Delay before showing the completion menu
+  auto_show_delay_ms = 0,
 
   -- Screen coordinates of the command line
   cmdline_position = function()
