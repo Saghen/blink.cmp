@@ -23,11 +23,10 @@ function cmp.setup(opts)
     if err then error(err) end
     require('blink.cmp.fuzzy').set_implementation(fuzzy_implementation)
 
-    -- setup highlights, keymap, completion, commands and signature help
+    -- setup highlights, keymap, completion, and signature help
     require('blink.cmp.highlights').setup()
     require('blink.cmp.keymap').setup()
     require('blink.cmp.completion').setup()
-    require('blink.cmp.commands').setup()
     if config.signature.enabled then require('blink.cmp.signature').setup() end
   end)
 end

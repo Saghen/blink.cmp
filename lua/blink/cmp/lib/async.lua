@@ -98,7 +98,7 @@ end
 --- @generic T
 --- @generic U
 --- @param self blink.cmp.Task<T>
---- @param fn fun(result: T): blink.cmp.Task<U> | U
+--- @param fn fun(result: T): blink.cmp.Task<U> | U | nil
 --- @return blink.cmp.Task<U>
 function task:map(fn)
   local chained_task
@@ -129,7 +129,7 @@ end
 --- This only applies if the input task errored.
 --- @generic T
 --- @generic U
---- @param fn fun(self: blink.cmp.Task<T>, err: any): blink.cmp.Task<U> | U
+--- @param fn fun(self: blink.cmp.Task<T>, err: any): blink.cmp.Task<U> | U | nil
 --- @return blink.cmp.Task<T | U>
 function task:catch(fn)
   local chained_task
