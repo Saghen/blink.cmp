@@ -8,8 +8,8 @@ local build = {}
 --- @return string
 local function get_project_root()
   local current_file = debug.getinfo(1, 'S').source:sub(2)
-  -- Go up from lua/blink.cmp/fuzzy/build.lua to the project root
-  return vim.fn.fnamemodify(current_file, ':p:h:h:h:h:h')
+  -- Go up from lua/blink.cmp/fuzzy/build/init.lua to the project root
+  return vim.fn.fnamemodify(current_file, ':p:h:h:h:h:h:h')
 end
 
 --- @param cmd string[]
