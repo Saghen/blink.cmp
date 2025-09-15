@@ -10,7 +10,7 @@ return {
     'sql', 'ruby', 'perl', 'lisp', 'scheme', 'clojure',
     'prolog', 'vb', 'elixir', 'smalltalk', 'applescript',
     'elm', 'rust', 'nu', 'cpp', 'fennel', 'janet', 'ps1',
-    'racket', 'svelte'
+    'racket'
   },
   per_filetype = {
     -- languages with a space
@@ -63,6 +63,7 @@ return {
       javascriptreact = typescript_exceptions,
       typescript = typescript_exceptions,
       typescriptreact = typescript_exceptions,
+      svelte = typescript_exceptions,
     },
   },
 }
