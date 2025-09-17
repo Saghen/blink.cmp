@@ -147,6 +147,7 @@ function cmdline:get_completions(context, callback)
       -- Cmdline mode
       else
         local query = (text_before_argument .. current_arg_prefix):gsub([[\\]], [[\\\\]])
+        if query == '=' then query = '= ' end
         completions = cmdline_utils.get_completions(query, 'cmdline', completion_type)
       end
 
