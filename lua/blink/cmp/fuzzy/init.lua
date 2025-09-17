@@ -47,12 +47,26 @@ function fuzzy.access(item)
   }
 
   -- writing to the db takes ~10ms, so schedule writes in another thread
+  local encode
+  if jit and package.preload['string.buffer'] then
+    encode = require('string.buffer').encode
+  else
+    encode = vim.mpack.encode
+  end
+
   vim.uv
     .new_work(function(itm, cpath)
+      local decode
+      if jit and package.preload['string.buffer'] then
+        decode = require('string.buffer').decode
+      else
+        decode = vim.mpack.decode
+      end
+
       package.cpath = cpath
-      require('blink.cmp.fuzzy.rust').access(require('string.buffer').decode(itm))
+      require('blink.cmp.fuzzy.rust').access(decode(itm))
     end, function() end)
-    :queue(require('string.buffer').encode(trimmed_item), package.cpath)
+    :queue(encode(trimmed_item), package.cpath)
 end
 
 ---@param lines string
