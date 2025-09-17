@@ -24,7 +24,7 @@
 --- | 'scroll_signature_down' Scroll the signature window down
 --- | 'snippet_forward' Move the cursor forward to the next snippet placeholder
 --- | 'snippet_backward' Move the cursor backward to the previous snippet placeholder
---- | (fun(cmp: blink.cmp.API): boolean?) Custom function where returning true will prevent the next command from running
+--- | (fun(cmp: blink.cmp.API): string? | boolean?) Custom function where returning true will prevent the next command from running. Returning a string will insert the literal characters
 
 --- @alias blink.cmp.KeymapPreset
 --- | 'none' No keymaps

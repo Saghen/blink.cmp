@@ -23,7 +23,9 @@ function apply.keymap_to_current_buffer(keys_to_commands)
 
           -- run user defined functions
         elseif type(command) == 'function' then
-          if command(require('blink.cmp')) then return end
+          local ret = command(require('blink.cmp'))
+          if type(ret) == 'string' then return ret end
+          if ret then return end
 
           -- otherwise, run the built-in command
         elseif require('blink.cmp')[command]() then
