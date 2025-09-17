@@ -16,6 +16,7 @@
 --- @class blink.cmp.ModeCompletionListSelectionConfig
 --- @field preselect? boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether to preselect the first item when the list is shown
 --- @field auto_insert? boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean When `true`, inserts the completion item automatically when selecting it
+--- @field auto_insert_blacklist? string[] List of mixed client_names and source_names that won't auto-insert when selected, even if `auto_insert` is `true`
 
 --- @class blink.cmp.ModeCompletionTriggerConfig
 --- @field show_on_blocked_trigger_characters? string[] | (fun(): string[]) LSPs can indicate when to show the completion window via trigger characters. However, some LSPs (i.e. tsserver) return characters that would essentially always show the window. We block these by default.
