@@ -78,7 +78,7 @@ function keymap.setup()
   -- from overriding our mappings. We also use InsertEnter & CursorMoved to avoid conflicts with keymaps
   -- applied on other autocmds, such as LspAttach used by nvim-lspconfig and most configs
   -- CursorMoved is needed for cases where we enter snippet without entering insert mode first, e.g. neogen
-  vim.api.nvim_create_autocmd({'InsertEnter', 'CursorMoved'}, {
+  vim.api.nvim_create_autocmd({ 'InsertEnter', 'CursorMoved' }, {
     callback = function()
       if not require('blink.cmp.config').enabled() then return end
       apply.keymap_to_current_buffer(mappings)
