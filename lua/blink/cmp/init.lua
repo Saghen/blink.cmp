@@ -383,7 +383,7 @@ end
 --- Adds a source provider to the list of enabled sources for a given filetype
 ---
 --- Equivalent to adding the source via `sources.per_filetype.<filetype> = { <source_id>, inherit_defaults = true }`
---- in the config, appending to the default list.
+--- in the config, appending to the existing list.
 --- If the user already has a source defined for the filetype, `inherit_defaults` will default to `false`.
 --- @param filetype string
 --- @param source_id string
