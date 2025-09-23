@@ -376,7 +376,7 @@ function cmp.add_provider(source_id, source_config)
   return cmp.add_source_provider(source_id, source_config)
 end
 
---- Add a new source provider at runtime
+--- Equivalent to adding the source via `sources.providers.<source_id> = <source_config>`
 --- @param source_id string
 --- @param source_config blink.cmp.SourceProviderConfig
 function cmp.add_source_provider(source_id, source_config)
@@ -388,7 +388,11 @@ function cmp.add_source_provider(source_id, source_config)
   config.sources.providers[source_id] = source_config
 end
 
---- Adds a source provider to the list of enable sources for a given filetype
+--- Adds a source provider to the list of enabled sources for a given filetype
+---
+--- Equivalent to adding the source via `sources.per_filetype.<filetype> = { <source_id>, inherit_defaults = true }`
+--- in the config, appending to the default list.
+--- If the user already has a source defined for the filetype, `inherit_defaults` will default to `false`.
 --- @param filetype string
 --- @param source_id string
 function cmp.add_filetype_source(filetype, source_id)
