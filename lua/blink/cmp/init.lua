@@ -368,14 +368,6 @@ function cmp.get_lsp_capabilities(override, include_nvim_defaults)
 end
 
 --- Add a new source provider at runtime
---- @deprecated Use `cmp.add_source_provider` instead
---- @param source_id string
---- @param source_config blink.cmp.SourceProviderConfig
-function cmp.add_provider(source_id, source_config)
-  vim.deprecate('cmp.add_provider', 'cmp.add_source_provider', 'v1.0.0', 'blink-cmp')
-  return cmp.add_source_provider(source_id, source_config)
-end
-
 --- Equivalent to adding the source via `sources.providers.<source_id> = <source_config>`
 --- @param source_id string
 --- @param source_config blink.cmp.SourceProviderConfig
