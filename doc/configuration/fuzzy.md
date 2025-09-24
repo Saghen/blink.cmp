@@ -52,6 +52,12 @@ You may instead install the prebuilt binaries manually by downloading the approp
 
 When on `main`, it's highly recommended to build from source via `cargo build --release` (via `build = '...'` on `lazy.nvim` for example). This requires a nightly rust toolchain, which will be automatically downloaded when using `rustup`.
 
+Copy compiled library in the plugin folder mentioned above. For example on Linux/FreeBSD it would be
+
+```
+cp target/release/libfrizbee.so  ~/.local/share/nvim/lazy/blink.cmp/target/release/libblink_cmp_fuzzy.so
+```
+
 You may also build with nix via `nix run .#build-plugin`.
 
 ## Configuration
