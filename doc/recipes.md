@@ -453,81 +453,38 @@ completion = {
 
 ### `mini.icons` + `lspkind`
 
+Uses [mini.icons](https://github.com/echasnovski/mini.icons) to display icons for filetypes and [lspkind](https://github.com/onsails/lspkind-nvim) for LSP kinds.
+
 ```lua
+local fs_types = { "link", "socket", "fifo", "char", "block", "unknown" }
 completion = {
   menu = {
     draw = {
       components = {
         kind_icon = {
           text = function(ctx)
-            local icon = ctx.kind_icon
-            if vim.tbl_contains({ "Path" }, ctx.source_name) then
-              local fs_types = {
-                "link",
-                "socket",
-                "fifo",
-                "char",
-                "block",
-                "unknown",
-              }
-              local found = false
-              for i = 1, #fs_types do
-                if ctx.item.data.type == fs_types[i] then
-                  found = true
-                  break
-                end
-              end
-
-              local mini_icon = nil
-              if found then
-                mini_icon, _ = require("mini.icons").get("os", "")
-              else
-                mini_icon, _ = require("mini.icons").get(ctx.item.data.type, ctx.label)
-              end
-
-              if mini_icon then
-                icon = mini_icon
-              end
-            else
-              icon = require("lspkind").symbolic(ctx.kind, {
-                mode = "symbol",
-              })
+            if ctx.source_name ~= "Path" then
+              return require("lspkind").symbolic(ctx.kind, { mode = "symbol" }) .. ctx.icon_gap
             end
 
-            return icon .. ctx.icon_gap
+            local is_fs_type = vim.tbl_contains(fs_types, ctx.item.data.type)
+            local mini_icon, _ = require("mini.icons").get(
+              is_fs_type and "os" or ctx.item.data.type,
+              is_fs_type and "" or ctx.label
+            )
+
+            return (mini_icon or ctx.kind_icon) .. ctx.icon_gap
           end,
 
           highlight = function(ctx)
-            local hl = ctx.kind_hl
-            if vim.tbl_contains({ "Path" }, ctx.source_name) then
-              local fs_types = {
-                "link",
-                "socket",
-                "fifo",
-                "char",
-                "block",
-                "unknown",
-              }
-              local found = false
-              for i = 1, #fs_types do
-                if ctx.item.data.type == fs_types[i] then
-                  found = true
-                  break
-                end
-              end
+            if ctx.source_name ~= "Path" then return ctx.kind_hl end
 
-              local mini_icon, mini_hl = nil, nil
-              if found then
-                mini_icon, mini_hl = require("mini.icons").get("os", "")
-              else
-                mini_icon, mini_hl = require("mini.icons").get(ctx.item.data.type, ctx.label)
-              end
-
-              if mini_icon then
-                hl = mini_hl
-              end
-            end
-            return hl
+            local is_fs_type = vim.tbl_contains(fs_types, ctx.item.data.type)
+            local mini_icon, mini_hl = require("mini.icons").get(
+              is_fs_type and "os" or ctx.item.data.type,
+              is_fs_type and "" or ctx.label
+            )
+            return mini_icon ~= nil and mini_hl or ctx.kind_hl
           end,
         }
       }
