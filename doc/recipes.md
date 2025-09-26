@@ -456,7 +456,6 @@ completion = {
 Uses [mini.icons](https://github.com/echasnovski/mini.icons) to display icons for filetypes and [lspkind](https://github.com/onsails/lspkind-nvim) for LSP kinds.
 
 ```lua
-local fs_types = { "link", "socket", "fifo", "char", "block", "unknown" }
 completion = {
   menu = {
     draw = {
@@ -467,7 +466,7 @@ completion = {
               return require("lspkind").symbolic(ctx.kind, { mode = "symbol" }) .. ctx.icon_gap
             end
 
-            local is_fs_type = vim.tbl_contains(fs_types, ctx.item.data.type)
+            local is_fs_type = vim.tbl_contains({ "link", "socket", "fifo", "char", "block", "unknown" }, ctx.item.data.type)
             local mini_icon, _ = require("mini.icons").get(
               is_fs_type and "os" or ctx.item.data.type,
               is_fs_type and "" or ctx.label
@@ -479,7 +478,7 @@ completion = {
           highlight = function(ctx)
             if ctx.source_name ~= "Path" then return ctx.kind_hl end
 
-            local is_fs_type = vim.tbl_contains(fs_types, ctx.item.data.type)
+            local is_fs_type = vim.tbl_contains({ "link", "socket", "fifo", "char", "block", "unknown" }, ctx.item.data.type)
             local mini_icon, mini_hl = require("mini.icons").get(
               is_fs_type and "os" or ctx.item.data.type,
               is_fs_type and "" or ctx.label
