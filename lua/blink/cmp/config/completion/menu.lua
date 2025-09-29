@@ -13,7 +13,6 @@ local validate = require('blink.cmp.config.utils').validate
 --- @field order blink.cmp.CompletionMenuOrderConfig TODO: implement
 --- @field auto_show boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether to automatically show the window when new completion items are available
 --- @field auto_show_delay_ms number | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): number Delay before showing the completion menu
-
 --- @field cmdline_position fun(): number[] Screen coordinates (0-indexed) of the command line
 --- @field draw blink.cmp.Draw Controls how the completion items are rendered on the popup window
 
