@@ -1,5 +1,5 @@
 --- @class blink.cmp.FuzzyImplementation
---- @field init_db fun(path: string, use_unsafe_no_lock: boolean)
+--- @field init_db fun(path: string)
 --- @field destroy_db fun()
 --- @field access fun(item: blink.cmp.CompletionItem)
 --- @field get_words fun(text: string): string[]

@@ -8,7 +8,7 @@ function utils.pick_border(border, default)
 
   -- On neovim 0.11+, use the vim.o.winborder option by default
   -- Use `vim.opt.winborder:get()` to handle custom border characters
-  if vim.fn.exists('&winborder') == 1 and vim.o.winborder ~= '' then
+  if vim.o.winborder ~= '' then
     local winborder = vim.opt.winborder:get()
     return #winborder == 1 and winborder[1] or winborder
   end

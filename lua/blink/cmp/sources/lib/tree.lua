@@ -40,7 +40,8 @@ function tree.new(context)
   for idx, source in ipairs(sources) do
     local node = nodes[idx]
     for _, fallback_source_id in ipairs(source.config.fallbacks(context, source_ids)) do
-      local fallback_node = nodes[utils.index_of(source_ids, fallback_source_id)]
+      local fallback_node =
+        nodes[utils.find_idx(source_ids, function(source_id) return source_id == fallback_source_id end)]
       if fallback_node ~= nil then
         table.insert(node.dependents, fallback_node)
         table.insert(fallback_node.dependencies, node)

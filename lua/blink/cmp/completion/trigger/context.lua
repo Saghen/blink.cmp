@@ -12,11 +12,9 @@
 --- @field bufnr number
 --- @field cursor number[]
 --- @field line string
---- @field term blink.cmp.ContextTerm
 --- @field bounds blink.cmp.ContextBounds
 --- @field trigger blink.cmp.ContextTrigger
---- @field providers string[]
---- @field initial_selected_item_idx? number
+--- @field lsps string[]
 --- @field timestamp number
 ---
 --- @field new fun(opts: blink.cmp.ContextOpts): blink.cmp.Context
@@ -36,9 +34,6 @@
 --- @field kind blink.cmp.CompletionTriggerKind The current trigger kind
 --- @field character? string The trigger character when kind == 'trigger_character'
 
---- @class blink.cmp.ContextTerm
---- @field command blink.cmp.ContextTermCommand
-
 --- @class blink.cmp.ContextTermCommand
 --- @field found_escape_code boolean Whether the FTCS_COMMAND_START escape sequence was found when querying for the command on the current line. This will always be false when the cursor isn't in a prompt, such as when a command is running.
 --- @field text string The command in the current line, without the shell prompt if found_escape_code = true, up to the cursor. Note that for multiline commands, it will always provide you with the content of the last line. This is because there is no way to distinguish the starting point of a single line command from a multiline one using terminal escape sequences
@@ -46,7 +41,7 @@
 
 --- @class blink.cmp.ContextOpts
 --- @field id number
---- @field providers string[]
+--- @field lsps string[]
 --- @field initial_trigger_kind blink.cmp.CompletionTriggerKind
 --- @field initial_trigger_character? string
 --- @field trigger_kind blink.cmp.CompletionTriggerKind
@@ -67,7 +62,6 @@ function context.new(opts)
     bufnr = vim.api.nvim_get_current_buf(),
     cursor = cursor,
     line = line,
-    term = { command = context.get_term_command() },
     bounds = context.get_bounds('full'),
     trigger = {
       initial_kind = opts.initial_trigger_kind,
@@ -75,8 +69,7 @@ function context.new(opts)
       kind = opts.trigger_kind,
       character = opts.trigger_character,
     },
-    providers = opts.providers,
-    initial_selected_item_idx = opts.initial_selected_item_idx,
+    lsps = opts.lsps,
     timestamp = vim.uv.now(),
   }, { __index = context }) --[[@as blink.cmp.Context]]
 end

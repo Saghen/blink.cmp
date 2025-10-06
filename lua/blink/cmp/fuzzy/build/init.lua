@@ -78,7 +78,7 @@ function build.build()
   utils.notify({ { 'Building fuzzy matching library from source...' } }, vim.log.levels.INFO)
 
   local log = log_file.create()
-  log.write('Working Directory: ' .. get_project_root())
+  log.write('Working Directory: ' .. get_project_root() .. '\n')
 
   return get_cargo_cmd()
     --- @param cmd string[]

@@ -27,11 +27,7 @@ function docs.render_detail_and_documentation(opts)
   end
 
   local doc_lines = {}
-  if opts.documentation ~= nil then
-    local doc = opts.documentation
-    if type(opts.documentation) == 'string' then doc = { kind = 'plaintext', value = opts.documentation } end
-    vim.lsp.util.convert_input_to_markdown_lines(doc, doc_lines)
-  end
+  if opts.documentation ~= nil then vim.lsp.util.convert_input_to_markdown_lines(opts.documentation, doc_lines) end
 
   ---@type string[]
   local combined_lines = vim.list_extend({}, detail_lines)

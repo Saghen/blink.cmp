@@ -67,8 +67,6 @@ local window = {
       cursorline_priority = 10000,
       -- Appends an indicator to snippets label, `'~'` by default
       snippet_indicator = '~',
-      -- Use treesitter to highlight the label text of completions from these sources
-      treesitter = {},
       -- Components to render, grouped by column
       columns = { { 'kind_icon' }, { 'label', 'label_description', gap = 1 } },
       -- Definitions for possible components to render. Each component defines:
@@ -102,11 +100,6 @@ local window = {
             }
             if ctx.label_detail then
               table.insert(highlights, { #label, #label + #ctx.label_detail, group = 'BlinkCmpLabelDetail' })
-            end
-
-            if vim.list_contains(ctx.self.treesitter, ctx.source_id) and not ctx.deprecated then
-              -- add treesitter highlights
-              vim.list_extend(highlights, require('blink.cmp.completion.windows.render.treesitter').highlight(ctx))
             end
 
             -- characters matched on the label by the fuzzy matcher
@@ -201,8 +194,6 @@ function window.validate(config)
     gap = { config.draw.gap, 'number' },
     cursorline_priority = { config.draw.cursorline_priority, 'number' },
     snippet_indicator = { config.draw.snippet_indicator, 'string' },
-
-    treesitter = { config.draw.treesitter, 'table' },
 
     columns = {
       config.draw.columns,

@@ -1,8 +1,8 @@
 --- @alias blink.cmp.CompletionTriggerKind 'manual' | 'prefetch' | 'keyword' | 'trigger_character'
 ---
--- Handles hiding and showing the completion window. When a user types a trigger character
--- (provided by the sources) or anything matching the `keyword_regex`, we create a new `context`.
--- This can be used downstream to determine if we should make new requests to the sources or not.
+--- Handles hiding and showing the completion window. When a user types a trigger character
+--- (provided by the sources) or anything matching the `keyword_regex`, we create a new `context`.
+--- This can be used downstream to determine if we should make new requests to the sources or not.
 --- @class blink.cmp.CompletionTrigger
 --- @field buffer_events blink.cmp.BufferEvents
 --- @field cmdline_events blink.cmp.CmdlineEvents
@@ -44,14 +44,9 @@ local trigger = {
   hide_emitter = require('blink.cmp.lib.event_emitter').new('hide'),
 }
 
-local function on_char_added(char, is_ignored)
-  -- we were told to ignore the text changed event, so we update the context
-  -- but don't send an on_show event upstream
-  if is_ignored then
-    if trigger.context ~= nil then trigger.show({ send_upstream = false, trigger_kind = 'keyword' }) end
-
+local function on_char_added(char)
   -- character forces a trigger according to the sources, create a fresh context
-  elseif trigger.is_trigger_character(char) and (config.show_on_trigger_character or trigger.context ~= nil) then
+  if trigger.is_trigger_character(char) and (config.show_on_trigger_character or trigger.context ~= nil) then
     trigger.context = nil
     trigger.show({ trigger_kind = 'trigger_character', trigger_character = char })
 
@@ -68,77 +63,17 @@ local function on_char_added(char, is_ignored)
   end
 end
 
-local function on_cursor_moved(event, is_ignored, is_backspace, last_event)
-  local is_enter_event = event == 'InsertEnter' or event == 'TermEnter'
-
+local function on_cursor_moved()
   local cursor = context.get_cursor()
-  local cursor_col = cursor[2]
-
   local char_under_cursor = utils.get_char_at_cursor()
-  local is_keyword = fuzzy.is_keyword_character(char_under_cursor)
-
-  -- we were told to ignore the cursor moved event, so we update the context
-  -- but don't send an on_show event upstream
-  if is_ignored and event == 'CursorMoved' then
-    if trigger.context ~= nil then
-      -- If we `auto_insert` with the `path` source, we may end up on a trigger character
-      -- i.e. `downloads/`. If we naively update the context, we'll show the menu with the
-      -- existing context
-      -- TODO: is this still needed since we handle this in char added?
-      if require('blink.cmp.completion.list').preview_undo ~= nil then trigger.context = nil end
-
-      trigger.show({ send_upstream = false, trigger_kind = 'keyword' })
-    end
-    return
-  end
-
-  -- TODO: doesn't handle `a` where the cursor moves immediately after
-  -- Reproducible with `example.|a` and pressing `a`, should not show the menu
-  local insert_enter_on_trigger_character = config.show_on_trigger_character
-    and config.show_on_insert_on_trigger_character
-    and is_enter_event
-    and trigger.is_trigger_character(char_under_cursor, true)
+  local on_trigger_character = trigger.is_trigger_character(char_under_cursor)
 
   -- check if we're still within the bounds of the query used for the context
   if
     trigger.context ~= nil
     and trigger.context.trigger.kind ~= 'prefetch'
-    and trigger.context:within_query_bounds(cursor, trigger.is_trigger_character(char_under_cursor))
+    and trigger.context:within_query_bounds(cursor, on_trigger_character)
   then
-    trigger.show({ trigger_kind = 'keyword' })
-
-  -- check if we've entered insert mode on a trigger character
-  elseif insert_enter_on_trigger_character then
-    trigger.context = nil
-    trigger.show({ trigger_kind = 'trigger_character', trigger_character = char_under_cursor })
-
-  -- show if we currently have a context, and we've moved outside of it's bounds by 1 char
-  elseif is_keyword and trigger.context ~= nil and cursor_col == trigger.context.bounds.start_col - 1 then
-    trigger.context = nil
-    trigger.show({ trigger_kind = 'keyword' })
-
-  -- show after entering insert mode
-  elseif is_enter_event and config.show_on_insert then
-    trigger.show({ trigger_kind = 'keyword' })
-
-  -- prefetch completions without opening window after entering insert mode
-  elseif is_enter_event and config.prefetch_on_insert then
-    trigger.show({ trigger_kind = 'prefetch' })
-
-  -- show after backspacing
-  elseif config.show_on_backspace and is_backspace then
-    trigger.show({ trigger_kind = 'keyword' })
-
-  -- show after backspacing into a keyword
-  elseif config.show_on_backspace_in_keyword and is_backspace and is_keyword then
-    trigger.show({ trigger_kind = 'keyword' })
-
-  -- show after entering insert or term mode and backspacing into a keyword
-  elseif config.show_on_backspace_after_insert_enter and is_backspace and last_event == 'enter' and is_keyword then
-    trigger.show({ trigger_kind = 'keyword' })
-
-  -- show after accepting a completion and then backspacing into a keyword
-  elseif config.show_on_backspace_after_accept and is_backspace and last_event == 'accept' and is_keyword then
     trigger.show({ trigger_kind = 'keyword' })
 
   -- otherwise hide
@@ -147,81 +82,56 @@ local function on_cursor_moved(event, is_ignored, is_backspace, last_event)
   end
 end
 
-function trigger.activate()
-  trigger.buffer_events = require('blink.cmp.lib.buffer_events').new({
-    -- TODO: should this ignore trigger.kind == 'prefetch'?
-    has_context = function() return trigger.context ~= nil end,
-    show_in_snippet = config.show_in_snippet,
-  })
+local function on_insert_enter()
+  -- TODO: doesn't handle `a` where the cursor moves immediately after
+  -- Reproducible with `example.|a` and pressing `a`, should not show the menu
+  --
+  -- check if we've entered insert mode on a trigger character
+  if
+    config.show_on_trigger_character
+    and config.show_on_insert_on_trigger_character
+    and trigger.is_trigger_character(utils.get_char_at_cursor(), true)
+  then
+    trigger.show({ trigger_kind = 'trigger_character', trigger_character = utils.get_char_at_cursor() })
+  elseif config.show_on_insert then
+    trigger.show({ trigger_kind = 'keyword' })
+  end
+end
 
-  trigger.buffer_events:listen({
+function trigger.activate()
+  require('blink.cmp.events.buffer').listen({
     on_char_added = on_char_added,
     on_cursor_moved = on_cursor_moved,
+    on_insert_enter = on_insert_enter,
     on_insert_leave = function() trigger.hide() end,
     on_complete_changed = function()
       if vim.fn.pumvisible() == 1 then trigger.hide() end
     end,
   })
 
-  trigger.cmdline_events = require('blink.cmp.lib.cmdline_events').new()
-  if root_config.cmdline.enabled then
-    trigger.cmdline_events:listen({
-      on_char_added = on_char_added,
-      on_cursor_moved = on_cursor_moved,
-      on_leave = function() trigger.hide() end,
-    })
-  end
-
-  trigger.term_events = require('blink.cmp.lib.term_events').new({
-    has_context = function() return trigger.context ~= nil end,
+  require('blink.cmp.events.cmdline').listen({
+    on_char_added = on_char_added,
+    on_cursor_moved = on_cursor_moved,
+    on_leave = trigger.hide,
   })
-  if root_config.term.enabled then
-    trigger.term_events:listen({
-      on_char_added = on_char_added,
-      on_term_leave = function() trigger.hide() end,
-    })
-  end
-end
 
-function trigger.resubscribe()
-  ---@diagnostic disable-next-line: missing-fields
-  trigger.buffer_events:resubscribe({ on_char_added = on_char_added })
+  require('blink.cmp.events.term').listen({
+    on_char_added = on_char_added,
+    on_term_leave = trigger.hide,
+  })
 end
 
 function trigger.is_trigger_character(char, is_show_on_x)
   local sources = require('blink.cmp.sources.lib')
   local is_trigger = vim.tbl_contains(sources.get_trigger_characters(context.get_mode()), char)
 
-  -- ignore a-z and A-Z characters
-  if char:match('%a') then return false end
-
-  local show_on_blocked_trigger_characters = type(config.show_on_blocked_trigger_characters) == 'function'
-      and config.show_on_blocked_trigger_characters()
-    or config.show_on_blocked_trigger_characters
-  --- @cast show_on_blocked_trigger_characters string[]
-  local show_on_x_blocked_trigger_characters = type(config.show_on_x_blocked_trigger_characters) == 'function'
-      and config.show_on_x_blocked_trigger_characters()
-    or config.show_on_x_blocked_trigger_characters
-  --- @cast show_on_x_blocked_trigger_characters string[]
+  local show_on_blocked_trigger_characters = config.show_on_blocked_trigger_characters()
+  local show_on_x_blocked_trigger_characters = config.show_on_x_blocked_trigger_characters()
 
   local is_blocked = vim.tbl_contains(show_on_blocked_trigger_characters, char)
     or (is_show_on_x and vim.tbl_contains(show_on_x_blocked_trigger_characters, char))
 
   return is_trigger and not is_blocked
-end
-
---- Suppresses on_hide and on_show events for the duration of the callback
-function trigger.suppress_events_for_callback(cb)
-  local mode = vim.api.nvim_get_mode().mode
-  mode = (vim.api.nvim_get_mode().mode == 'c' and 'cmdline') or (mode == 't' and 'term') or 'default'
-
-  local events = (mode == 'default' and trigger.buffer_events)
-    or (mode == 'term' and trigger.term_events)
-    or trigger.cmdline_events
-
-  if not events then return cb() end
-
-  events:suppress_events_for_callback(cb)
 end
 
 function trigger.show_if_on_trigger_character(opts)
@@ -287,10 +197,9 @@ function trigger.show(opts)
     initial_trigger_character = initial_trigger_character,
     trigger_kind = opts.trigger_kind,
     trigger_character = opts.trigger_character,
-    initial_selected_item_idx = opts.initial_selected_item_idx,
   })
 
-  if opts.send_upstream ~= false then trigger.show_emitter:emit({ context = trigger.context }) end
+  trigger.show_emitter:emit({ context = trigger.context })
   return trigger.context
 end
 

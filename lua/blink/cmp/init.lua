@@ -350,45 +350,8 @@ function cmp.snippet_backward()
   return true
 end
 
---- Ensures that blink.cmp will be notified last when a user adds a character
-function cmp.resubscribe()
-  local trigger = require('blink.cmp.completion.trigger')
-  trigger.resubscribe()
-end
-
 --- Tells the sources to reload a specific provider or all providers (when nil)
 --- @param provider? string
 function cmp.reload(provider) require('blink.cmp.sources.lib').reload(provider) end
-
---- Gets the capabilities to pass to the LSP client
---- @param override? lsp.ClientCapabilities Overrides blink.cmp's default capabilities
---- @param include_nvim_defaults? boolean Whether to include nvim's default capabilities
-function cmp.get_lsp_capabilities(override, include_nvim_defaults)
-  return require('blink.cmp.sources.lib').get_lsp_capabilities(override, include_nvim_defaults)
-end
-
---- Add a new source provider at runtime
---- Equivalent to adding the source via `sources.providers.<source_id> = <source_config>`
---- @param source_id string
---- @param source_config blink.cmp.SourceProviderConfig
-function cmp.add_source_provider(source_id, source_config)
-  local config = require('blink.cmp.config')
-
-  assert(config.sources.providers[source_id] == nil, 'Provider with id ' .. source_id .. ' already exists')
-  require('blink.cmp.config.sources').validate_provider(source_id, source_config)
-
-  config.sources.providers[source_id] = source_config
-end
-
---- Adds a source provider to the list of enabled sources for a given filetype
----
---- Equivalent to adding the source via `sources.per_filetype.<filetype> = { <source_id>, inherit_defaults = true }`
---- in the config, appending to the existing list.
---- If the user already has a source defined for the filetype, `inherit_defaults` will default to `false`.
---- @param filetype string
---- @param source_id string
-function cmp.add_filetype_source(filetype, source_id)
-  require('blink.cmp.sources.lib').add_filetype_provider_id(filetype, source_id)
-end
 
 return cmp

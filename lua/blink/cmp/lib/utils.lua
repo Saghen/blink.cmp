@@ -12,22 +12,6 @@ function utils.shallow_copy(t)
   return t2
 end
 
---- Returns the union of the keys of two tables
---- @generic T
---- @param t1 T[]
---- @param t2 T[]
---- @return T[]
-function utils.union_keys(t1, t2)
-  local t3 = {}
-  for k, _ in pairs(t1) do
-    t3[k] = true
-  end
-  for k, _ in pairs(t2) do
-    t3[k] = true
-  end
-  return vim.tbl_keys(t3)
-end
-
 --- Returns a list of unique values from the input array
 --- @generic T
 --- @param arr T[]
@@ -71,18 +55,6 @@ function utils.flatten(t)
     ::continue::
   end
   return flattened
-end
-
---- Returns the index of the first occurrence of the value in the array
---- @generic T
---- @param arr T[]
---- @param val T
---- @return number?
-function utils.index_of(arr, val)
-  for idx, v in ipairs(arr) do
-    if v == val then return idx end
-  end
-  return nil
 end
 
 --- Finds an item in an array using a predicate function
@@ -139,18 +111,6 @@ function utils.get_char_at_cursor()
   end
 
   return line:sub(start_col, end_col)
-end
-
---- Reverses an array
---- @generic T
---- @param arr T[]
---- @return T[]
-function utils.reverse(arr)
-  local reversed = {}
-  for i = #arr, 1, -1 do
-    reversed[#reversed + 1] = arr[i]
-  end
-  return reversed
 end
 
 --- Disables all autocmds for the duration of the callback
