@@ -97,6 +97,22 @@ In the example above:
 - If two entries have the same score, they are then sorted by sort_text.
 - If still tied, they are sorted by label.
 
+#### Sort list function
+
+Instead of specifying a static list, you may also provide a function that returns a list of sorts.
+
+```lua
+fuzzy = {
+  sorts = function()
+    if vim.bo.filetype == "lua" then
+      return { 'score', 'label' }  -- Prioritize label sorting for Lua files
+    else
+      return { 'score', 'sort_text', 'label' }  -- Default sorting for other filetypes
+    end
+  end,
+}
+```
+
 #### Custom sorting
 
 You may also provide a custom Lua function to define your own sorting logic. The function should follow the Lua [table.sort](https://www.lua.org/manual/5.1/manual.html#pdf-table.sort) convention.

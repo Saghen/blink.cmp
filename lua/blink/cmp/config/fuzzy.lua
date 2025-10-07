@@ -88,6 +88,8 @@ function fuzzy.validate(config)
     sorts = {
       config.sorts,
       function(sorts)
+        if type(sorts) == 'function' then return true end
+        if type(sorts) ~= 'table' then return false end
         for _, sort in ipairs(sorts) do
           if
             not vim.tbl_contains({ 'label', 'sort_text', 'kind', 'score', 'exact' }, sort)
