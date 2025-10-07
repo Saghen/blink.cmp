@@ -1,4 +1,4 @@
-*blink-cmp.txt*          For NVIM v0.10.0         Last change: 2025 October 06
+*blink-cmp.txt*          For NVIM v0.10.0         Last change: 2025 October 07
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -1524,6 +1524,24 @@ In the example above:
 - Entries are first sorted by score.
 - If two entries have the same score, they are then sorted by sort_text.
 - If still tied, they are sorted by label.
+
+
+SORT LIST FUNCTION
+
+Instead of specifying a static list, you may also provide a function that
+returns a list of sorts.
+
+>lua
+    fuzzy = {
+      sorts = function()
+        if vim.bo.filetype == "lua" then
+          return { 'score', 'label' }  -- Prioritize label sorting for Lua files
+        else
+          return { 'score', 'sort_text', 'label' }  -- Default sorting for other filetypes
+        end
+      end,
+    }
+<
 
 
 CUSTOM SORTING
