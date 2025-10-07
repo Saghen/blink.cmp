@@ -7,7 +7,8 @@ local fs = {}
 --- @param path string
 --- @return blink.cmp.Task
 function fs.scan_dir_async(path)
-  local max_entries = 200
+  local max_entries = 5000
+  local entries_per_chunk = 200
   return async.task.new(function(resolve, reject)
     uv.fs_opendir(path, function(err, handle)
       if err ~= nil or handle == nil then return reject(err) end
@@ -22,7 +23,7 @@ function fs.scan_dir_async(path)
           end
 
           vim.list_extend(all_entries, entries)
-          if #entries == max_entries then
+          if #entries == entries_per_chunk and #entries < max_entries then
             read_dir()
           else
             uv.fs_closedir(handle, function() end)
@@ -31,7 +32,7 @@ function fs.scan_dir_async(path)
         end)
       end
       read_dir()
-    end, max_entries)
+    end, entries_per_chunk)
   end)
 end
 
