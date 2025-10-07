@@ -426,6 +426,8 @@ fuzzy = {
 
   -- Controls which sorts to use and in which order, falling back to the next sort if the first one returns nil
   -- You may pass a function instead of a string to customize the sorting
+  --
+  -- Optionally, set the table of sorts via a function instead: sorts = function() return { 'exact', 'score', 'sort_text' } end
   sorts = {
     -- (optionally) always prioritize exact matches
     -- 'exact',
