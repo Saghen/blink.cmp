@@ -58,7 +58,6 @@ function lib.candidates(context, dirname, include_hidden, opts)
   local fs = require('blink.cmp.sources.path.fs')
   local ranges = lib.get_text_edit_ranges(context)
   return fs.scan_dir_async(dirname)
-    :map(function(entries) return fs.fs_stat_all(dirname, entries) end)
     :map(function(entries)
       return vim.tbl_filter(function(entry) return include_hidden or entry.name:sub(1, 1) ~= '.' end, entries)
     end)
@@ -101,7 +100,7 @@ function lib.entry_to_completion_item(entry, dirname, range, opts)
     insertText = insert_text,
     textEdit = { newText = insert_text, range = range },
     sortText = (is_dir and '1' or '2') .. entry.name:lower(), -- Sort directories before files
-    data = { path = entry.name, full_path = dirname .. '/' .. entry.name, type = entry.type, stat = entry.stat },
+    data = { path = entry.name, full_path = dirname .. '/' .. entry.name, type = entry.type },
   }
 end
 

@@ -36,26 +36,6 @@ function fs.scan_dir_async(path)
   end)
 end
 
---- @param entries { name: string, type: string }[]
---- @return blink.cmp.Task
-function fs.fs_stat_all(cwd, entries)
-  local tasks = {}
-  for _, entry in ipairs(entries) do
-    table.insert(
-      tasks,
-      async.task.new(function(resolve)
-        uv.fs_stat(cwd .. '/' .. entry.name, function(err, stat)
-          if err then return resolve(nil) end
-          resolve({ name = entry.name, type = entry.type, stat = stat })
-        end)
-      end)
-    )
-  end
-  return async.task.all(tasks):map(function(entries)
-    return vim.tbl_filter(function(entry) return entry ~= nil end, entries)
-  end)
-end
-
 --- @param path string
 --- @param byte_limit number
 --- @return blink.cmp.Task
