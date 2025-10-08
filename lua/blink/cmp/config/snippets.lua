@@ -65,9 +65,9 @@ local snippets = {
         MiniSnippets.session.jump(direction == -1 and 'prev' or 'next')
       end,
       vsnip = function(direction)
-        local session = vim.fn['vsnip#get_session']()
-        if vim.fn.empty(session) == 1 then return false end
-        return session.jumpable(direction)
+        if vim.fn['vsnip#jumpable'](direction) ~= 1 then return false end
+        vim.cmd.call(string.format('vsnip#get_session().jump(%d)', direction))
+        return true
       end,
     }),
     score_offset = -3,
