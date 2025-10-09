@@ -58,7 +58,7 @@ function utils.smart_split(line, is_path_completion)
       local arg = tokens[i]
       -- Escape argument if it contains unescaped spaces
       -- Some commands may expect escaped paths (:edit), others may not (:view)
-      if arg and arg ~= '' and not arg:find('\\ ') then arg = fnameescape(arg) end
+      if arg and arg ~= '' and arg ~= '|' and not arg:find('\\ ') then arg = fnameescape(arg) end
       table.insert(args, arg)
     end
     return line, { cmd, unpack(args) }
