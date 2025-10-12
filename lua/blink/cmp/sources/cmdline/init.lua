@@ -159,8 +159,8 @@ function cmdline:get_completions(context, callback)
 
       -- The getcompletion() api is inconsistent in whether it returns the prefix or not.
       --
-      -- I.e. :set shiftwidth=| will return '2'
-      -- I.e. :Neogit kind=| will return 'kind=commit'
+      -- E.g. :set shiftwidth=| will return '2'
+      -- E.g. :Neogit kind=| will return 'kind=commit'
       --
       -- For simplicity, excluding the first argument, we always replace the entire command argument,
       -- so we want to ensure the prefix is always in the new_text.
@@ -184,7 +184,7 @@ function cmdline:get_completions(context, callback)
         -- current (%) or alternate (#) filename with optional modifiers (:)
         if is_filename_modifier_completion then
           local expanded = vim.fn.expand(vim_expr .. completion)
-          -- expand in command (e.g. :edit %) but don't in expression (e.g =vim.fn.expand("%"))
+          -- expand in command (e.g. :edit %) but don't in expression (e.g. =vim.fn.expand("%"))
           new_text = vim_expr:sub(1, 1) == current_arg_prefix:sub(1, 1) and expanded or current_arg_prefix .. completion
 
           if special_char == '#' then
@@ -258,8 +258,8 @@ function cmdline:get_completions(context, callback)
         -- exclude range for commands on the first argument
         if arg_number == 1 and completion_type == 'command' then
           local prefix = cmdline_utils.longest_match(current_arg, {
-            "^%s*'<%s*,%s*'>%s*", -- Visual range, e.g., '<,>'
-            '^%s*%d+%s*,%s*%d+%s*', -- Numeric range, e.g., 3,5
+            "^%s*'<%s*,%s*'>%s*", -- Visual range, e.g. '<,>'
+            '^%s*%d+%s*,%s*%d+%s*', -- Numeric range, e.g. 3,5
             '^%s*[%p]+%s*', -- One or more punctuation characters
           })
           start_pos = start_pos + #prefix

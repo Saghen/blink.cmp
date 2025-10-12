@@ -307,7 +307,7 @@ end
 
 --- Other plugins may use feedkeys to switch modes, with `i` set. This would
 --- cause neovim to run those feedkeys first, potentially causing our <C-x><C-z> to run
---- in the wrong mode. I.e. if the plugin runs `<Esc>v` (luasnip)
+--- in the wrong mode, e.g. if the plugin runs `<Esc>v` (luasnip)
 ---
 --- In normal and visual mode, these keys cause neovim to go to the background
 --- so we create our own mapping that only runs `<C-x><C-z>` if we're in insert mode

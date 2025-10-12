@@ -12,7 +12,7 @@
 --- @field show_on_insert boolean Show the signature help window when entering insert mode
 --- @field show_on_insert_on_trigger_character boolean Show the signature help window when the cursor comes after a trigger character when entering insert mode
 --- @field show_on_accept boolean Show the signature help window after accepting a completion item
---- @field show_on_accept_on_trigger_character boolean Show the signature help window when the cursor comes after a trigger character after accepting a completion item (i.e. func(|) where "(" is a trigger character)
+--- @field show_on_accept_on_trigger_character boolean Show the signature help window when the cursor comes after a trigger character after accepting a completion item, e.g. func(|) where "(" is a trigger character
 
 --- @class (exact) blink.cmp.SignatureWindowConfig
 --- @field min_width number

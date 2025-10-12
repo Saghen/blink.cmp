@@ -104,12 +104,12 @@ function source:get_completions(ctx, callback)
   callback({
     items = items,
     -- Whether blink.cmp should request items when deleting characters
-    -- from the keyword (i.e. "foo|" -> "fo|")
+    -- from the keyword (e.g. "foo|" -> "fo|")
     -- Note that any non-alphanumeric characters will always request
     -- new items (excluding `-` and `_`)
     is_incomplete_backward = false,
     -- Whether blink.cmp should request items when adding characters
-    -- to the keyword (i.e. "fo|" -> "foo|")
+    -- to the keyword (e.g. "fo|" -> "foo|")
     -- Note that any non-alphanumeric characters will always request
     -- new items (excluding `-` and `_`)
     is_incomplete_forward = false,
@@ -121,7 +121,7 @@ function source:get_completions(ctx, callback)
 end
 
 -- (Optional) Before accepting the item or showing documentation, blink.cmp will call this function
--- so you may avoid calculating expensive fields (i.e. documentation) for only when they're actually needed
+-- so you may avoid calculating expensive fields (e.g. documentation) for only when they're actually needed
 -- Note only some fields may be resolved lazily. You may check the LSP capabilities for a complete list:
 -- `textDocument.completion.completionItem.resolveSupport`
 -- At the time of writing: 'documentation', 'detail', 'additionalTextEdits', 'command', 'data'

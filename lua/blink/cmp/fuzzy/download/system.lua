@@ -27,7 +27,7 @@ function system.get_info()
 end
 
 --- Gets the system target triple from `cc -dumpmachine`
---- I.e. 'gnu' | 'musl'
+--- E.g. 'gnu' | 'musl'
 --- @return blink.cmp.Task
 function system.get_linux_libc()
   return async
@@ -74,7 +74,7 @@ function system.get_linux_libc_sync()
 end
 
 --- Gets the system triple for the current system
---- I.e. `x86_64-unknown-linux-gnu` or `aarch64-apple-darwin`
+--- E.g. `x86_64-unknown-linux-gnu` or `aarch64-apple-darwin`
 --- @return blink.cmp.Task
 function system.get_triple()
   return async.task.new(function(resolve, reject)

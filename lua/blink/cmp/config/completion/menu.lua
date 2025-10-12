@@ -196,7 +196,7 @@ function window.validate(config)
         if type(padding[1]) == 'number' and type(padding[2]) == 'number' then return true end
         return false
       end,
-      'a number or a tuple of 2 numbers (i.e. [1, 2])',
+      'a number or a tuple of 2 numbers, e.g. [1, 2]',
     },
     gap = { config.draw.gap, 'number' },
     cursorline_priority = { config.draw.cursorline_priority, 'number' },

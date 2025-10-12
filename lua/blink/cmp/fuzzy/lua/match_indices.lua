@@ -3,7 +3,7 @@ local GAP_PENALTY = -1
 
 -- bonus for matching the first character of the haystack
 local PREFIX_BONUS = 6
--- bonus for matching character after a delimiter in the haystack (e.g. space, comma, underscore, slash, etc)
+-- bonus for matching character after a delimiter in the haystack (e.g. space, comma, underscore, slash)
 local DELIMITER_BONUS = 4
 -- bonus for haystack == needle
 local EXACT_MATCH_BONUS = 4

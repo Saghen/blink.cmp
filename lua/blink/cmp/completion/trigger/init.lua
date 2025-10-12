@@ -81,9 +81,8 @@ local function on_cursor_moved(event, is_ignored, is_backspace, last_event)
   -- but don't send an on_show event upstream
   if is_ignored and event == 'CursorMoved' then
     if trigger.context ~= nil then
-      -- If we `auto_insert` with the `path` source, we may end up on a trigger character
-      -- i.e. `downloads/`. If we naively update the context, we'll show the menu with the
-      -- existing context
+      -- If we `auto_insert` with the `path` source, we may end up on a trigger character, e.g. `downloads/`
+      -- If we naively update the context, we'll show the menu with the existing context
       -- TODO: is this still needed since we handle this in char added?
       if require('blink.cmp.completion.list').preview_undo ~= nil then trigger.context = nil end
 

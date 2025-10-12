@@ -76,7 +76,7 @@ completion.trigger = {
   show_on_insert = false,
 
   -- LSPs can indicate when to show the completion window via trigger characters
-  -- however, some LSPs (i.e. tsserver) return characters that would essentially
+  -- however, some LSPs (e.g. tsserver) return characters that would essentially
   -- always show the window. We block these by default.
   show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
   -- You can also block per filetype with a function:
@@ -413,8 +413,8 @@ fuzzy = {
     enabled = true,
     -- Location of the frecency database
     path = vim.fn.stdpath('state') .. '/blink/cmp/frecency.dat',
-    -- UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. 
-    -- This should only be used on unsupported platforms (i.e. alpine termux)
+    -- UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database.
+    -- This should only be used on unsupported platforms (e.g. alpine, termux)
     unsafe_no_lock = false,
   },
   use_frecency = true, -- deprecated alias for frecency.enabled, will be removed in v2.0

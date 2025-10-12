@@ -35,7 +35,7 @@ function download.ensure_downloaded(callback)
           local loaded, err = pcall(require, 'blink.cmp.fuzzy.rust')
           if loaded then return end
 
-          -- shared library missing despite matching version info (e.g., incomplete build)
+          -- shared library missing despite matching version info (e.g. incomplete build)
           utils.notify({
             { 'Incomplete build of the ' },
             { 'fuzzy matching library', 'DiagnosticInfo' },

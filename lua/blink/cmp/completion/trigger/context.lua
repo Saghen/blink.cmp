@@ -89,7 +89,7 @@ end
 
 --- @param cursor number[]
 --- Whether to include the start boundary as inside of the query
---- I.e. start_col = 1 (one indexed), cursor[2] = 0 (zero indexed) would be considered within the query bounds with this flag enabled.
+--- E.g. start_col = 1 (one indexed), cursor[2] = 0 (zero indexed) would be considered within the query bounds with this flag enabled.
 --- @param include_start_bound? boolean
 --- @return boolean
 function context:within_query_bounds(cursor, include_start_bound)

@@ -95,8 +95,8 @@ local function accept(ctx, item, callback)
   require('blink.cmp.completion.trigger').hide()
 
   -- Start the resolve immediately since text changes can invalidate the item
-  -- with some LSPs (i.e. rust-analyzer) causing them to return the item as-is
-  -- without i.e. auto-imports
+  -- with some LSPs (e.g. rust-analyzer) causing them to return the item as-is
+  -- without, e.g. auto-imports
   sources
     .resolve(ctx, item)
     -- Some LSPs may take a long time to resolve the item, so we timeout

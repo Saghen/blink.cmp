@@ -44,7 +44,7 @@ function health.report_sources()
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].filetype = 'checkhealth'
 
-  vim.health.warn('Some providers may show up as "disabled" but are enabled dynamically (i.e. cmdline)')
+  vim.health.warn('Some providers may show up as "disabled" but are enabled dynamically (e.g. cmdline)')
 
   --- @type string[]
   local disabled_providers = {}

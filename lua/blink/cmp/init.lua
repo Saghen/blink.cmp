@@ -173,7 +173,7 @@ function cmp.select_and_accept(opts)
   return true
 end
 
---- Accept the current completion item and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
+--- Accept the current completion item and feed an enter key to neovim (e.g. to execute the current command in cmdline mode)
 --- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
 function cmp.accept_and_enter(opts)
   return cmp.accept({
@@ -184,7 +184,7 @@ function cmp.accept_and_enter(opts)
   })
 end
 
---- Select the first completion item, if there's no selection, accept and feed an enter key to neovim (i.e. to execute the current command in cmdline mode)
+--- Select the first completion item, if there's no selection, accept and feed an enter key to neovim (e.g. to execute the current command in cmdline mode)
 --- @param opts? blink.cmp.CompletionListSelectAndAcceptOpts
 function cmp.select_accept_and_enter(opts)
   return cmp.select_and_accept({
