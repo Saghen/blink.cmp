@@ -1,4 +1,4 @@
-*blink-cmp.txt*          For NVIM v0.10.0         Last change: 2025 October 07
+*blink-cmp.txt*          For NVIM v0.10.0         Last change: 2025 October 12
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -341,8 +341,8 @@ DISABLE COMPLETION IN ONLY SHELL COMMAND MODE ~
 
 When inside of git bash or WSL on windows, you may experience a hang with shell
 commands. The following disables cmdline completions only when running shell
-commands (i.e. `[':!' , ':%!']`), but still allows completion in other command
-modes (i.e. `[':' , ':help', '/' , '?', ...]`).
+commands (e.g. `[':!' , ':%!']`), but still allows completion in other command
+modes (e.g. `[':' , ':help', '/' , '?']`).
 
 >lua
     sources = {
@@ -615,7 +615,7 @@ See the full docs <./configuration/sources.md>
 BUFFER COMPLETION FROM ALL OPEN BUFFERS ~
 
 The default behavior is to only show completions from **visible** "normal"
-buffers (i.e. it wouldn’t include neo-tree). This will instead show
+buffers (e.g. it wouldn’t include neo-tree). This will instead show
 completions from all buffers, even if they’re not visible on screen. Note
 that the performance impact of this has not been tested.
 
@@ -2217,7 +2217,7 @@ COMPLETION TRIGGER
       show_on_insert = false,
     
       -- LSPs can indicate when to show the completion window via trigger characters
-      -- however, some LSPs (i.e. tsserver) return characters that would essentially
+      -- however, some LSPs (e.g. tsserver) return characters that would essentially
       -- always show the window. We block these by default.
       show_on_blocked_trigger_characters = { ' ', '\n', '\t' },
       -- You can also block per filetype with a function:
@@ -2562,8 +2562,8 @@ FUZZY ~
         enabled = true,
         -- Location of the frecency database
         path = vim.fn.stdpath('state') .. '/blink/cmp/frecency.dat',
-        -- UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database. 
-        -- This should only be used on unsupported platforms (i.e. alpine termux)
+        -- UNSAFE!! When enabled, disables the lock and fsync when writing to the frecency database.
+        -- This should only be used on unsupported platforms (e.g. alpine, termux)
         unsafe_no_lock = false,
       },
       use_frecency = true, -- deprecated alias for frecency.enabled, will be removed in v2.0
@@ -3078,8 +3078,8 @@ ARCHITECTURE                              *blink-cmp-development-architecture*
 
 The plugin use a 4 stage pipeline: trigger -> sources -> fuzzy -> render 1.
 **Trigger:** Controls when to request completion items from the sources and
-provides a context downstream with the current query (i.e. `hello.wo|`, the
-query would be `wo`) and the treesitter object under the cursor (i.e. for
+provides a context downstream with the current query (e.g. `hello.wo|`, the
+query would be `wo`) and the treesitter object under the cursor (e.g. for
 intelligently enabling/disabling sources). It respects trigger characters
 passed by the LSP (or any other source) and includes it in the context for
 sending to the LSP. 2. **Sources:** Provides a common interface for and merges
@@ -3293,12 +3293,12 @@ when pointing to a directory):
       callback({
         items = items,
         -- Whether blink.cmp should request items when deleting characters
-        -- from the keyword (i.e. "foo|" -> "fo|")
+        -- from the keyword (e.g. "foo|" -> "fo|")
         -- Note that any non-alphanumeric characters will always request
         -- new items (excluding `-` and `_`)
         is_incomplete_backward = false,
         -- Whether blink.cmp should request items when adding characters
-        -- to the keyword (i.e. "fo|" -> "foo|")
+        -- to the keyword (e.g. "fo|" -> "foo|")
         -- Note that any non-alphanumeric characters will always request
         -- new items (excluding `-` and `_`)
         is_incomplete_forward = false,
@@ -3310,7 +3310,7 @@ when pointing to a directory):
     end
     
     -- (Optional) Before accepting the item or showing documentation, blink.cmp will call this function
-    -- so you may avoid calculating expensive fields (i.e. documentation) for only when they're actually needed
+    -- so you may avoid calculating expensive fields (e.g. documentation) for only when they're actually needed
     -- Note only some fields may be resolved lazily. You may check the LSP capabilities for a complete list:
     -- `textDocument.completion.completionItem.resolveSupport`
     -- At the time of writing: 'documentation', 'detail', 'additionalTextEdits', 'command', 'data'
