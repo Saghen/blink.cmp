@@ -1,3 +1,4 @@
+local async = require('blink.cmp.lib.async')
 local regex = require('blink.cmp.sources.path.regex')
 local lib = {}
 
@@ -53,27 +54,24 @@ end
 --- @param context blink.cmp.Context
 --- @param dirname string
 --- @param include_hidden boolean
---- @param opts table
+--- @param opts blink.cmp.PathOpts
 function lib.candidates(context, dirname, include_hidden, opts)
   local fs = require('blink.cmp.sources.path.fs')
   local ranges = lib.get_text_edit_ranges(context)
-  return fs.scan_dir_async(dirname)
-    :map(function(entries)
-      return vim.tbl_filter(function(entry) return include_hidden or entry.name:sub(1, 1) ~= '.' end, entries)
+  local results = {}
+  return async.task.new(function(resolve, reject)
+    fs.scan_dir_async(dirname, function(entries_chunk)
+      for _, entry in ipairs(entries_chunk) do
+        if include_hidden or entry.name:sub(1, 1) ~= '.' then
+          local kind = entry.type == 'directory' and ranges.directory or ranges.file
+          local item = lib.entry_to_completion_item(entry, dirname, kind, opts)
+          results[#results + 1] = item
+        end
+      end
     end)
-    :map(function(entries)
-      return vim.tbl_map(
-        function(entry)
-          return lib.entry_to_completion_item(
-            entry,
-            dirname,
-            entry.type == 'directory' and ranges.directory or ranges.file,
-            opts
-          )
-        end,
-        entries
-      )
-    end)
+      :map(function() resolve(results) end)
+      :catch(reject)
+  end)
 end
 
 function lib.is_slash_comment()
