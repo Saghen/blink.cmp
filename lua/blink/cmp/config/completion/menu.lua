@@ -9,7 +9,7 @@ local validate = require('blink.cmp.config.utils').validate
 --- @field winhighlight string
 --- @field scrolloff number Keep the cursor X lines away from the top/bottom of the window
 --- @field scrollbar boolean Note that the gutter will be disabled when border ~= 'none'
---- @field direction_priority ("n" | "s")[]| fun(): table Which directions to show the window, or a function returning such a table, falling back to the next direction when there's not enough space
+--- @field direction_priority ("n" | "s")[]| fun(): ("n" | "s")[] Which directions to show the window, or a function returning such a table, falling back to the next direction when there's not enough space
 --- @field order blink.cmp.CompletionMenuOrderConfig TODO: implement
 --- @field auto_show boolean | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean Whether to automatically show the window when new completion items are available
 --- @field auto_show_delay_ms number | fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): number Delay before showing the completion menu

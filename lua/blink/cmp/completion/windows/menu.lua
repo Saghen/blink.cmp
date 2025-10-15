@@ -71,7 +71,7 @@ function menu.open_with_items(context, items)
   menu.set_selected_item_idx(menu.selected_item_idx ~= nil and math.min(menu.selected_item_idx, #items) or nil)
 
   if not menu.renderer then menu.renderer = require('blink.cmp.completion.windows.render').new(config.draw) end
-  menu.renderer:draw(context, menu.win:get_buf(), items)
+  menu.renderer:draw(context, menu.win:get_buf(), items, {})
 
   menu.queue_auto_show(context, items)
 end
@@ -94,7 +94,7 @@ function menu.open_loading(context)
       source_name = '',
       cursor_column = 0,
     },
-  })
+  }, {})
 
   menu.queue_auto_show(context, {})
 end
