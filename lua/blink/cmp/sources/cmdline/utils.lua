@@ -30,10 +30,11 @@ end
 -- Detects whether the provided line contains current (%) or alternate (#, #n) filename
 -- or vim expression (<cfile>, <abuf>, ...) with optional modifiers: :h, :p:h
 ---@param line string
+---@param completion_type string
 ---@return boolean
-function utils.contains_filename_modifiers(line)
+function utils.contains_filename_modifiers(line, completion_type)
   local pat = [[\v(\s+|'|")((\%|#\d*|\<\w+\>)(:(h|p|t|r|e|s|S|gs|\~|\.)?)*)\<?(\s+|'|"|$)]]
-  return vim.regex(pat):match_str(line) ~= nil
+  return completion_type ~= 'help' and vim.regex(pat):match_str(line) ~= nil
 end
 
 -- Detects whether the provided line contains wildcard, see :h wildcard

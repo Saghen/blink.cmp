@@ -40,7 +40,7 @@ function cmdline:get_completions(context, callback)
 
   local is_path_completion = vim.tbl_contains(constants.completion_types.path, completion_type)
   local is_buffer_completion = vim.tbl_contains(constants.completion_types.buffer, completion_type)
-  local is_filename_modifier_completion = cmdline_utils.contains_filename_modifiers(context.line)
+  local is_filename_modifier_completion = cmdline_utils.contains_filename_modifiers(context.line, completion_type)
   local is_wildcard_completion = cmdline_utils.contains_wildcard(context.line)
 
   local should_split_path = (is_path_completion or is_buffer_completion)
