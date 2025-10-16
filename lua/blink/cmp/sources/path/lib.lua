@@ -58,18 +58,29 @@ end
 function lib.candidates(context, dirname, include_hidden, opts)
   local fs = require('blink.cmp.sources.path.fs')
   local ranges = lib.get_text_edit_ranges(context)
-  local results = {}
+
+  -- Use a module-level table for storing completion candidates instead of
+  -- a locally scoped variable. This prevents memory bloat caused by async
+  -- closures holding old tables alive.
+  lib._candidates = {}
+
+  -- Force a full garbage collection before scanning to free memory from
+  -- previous runs. This is crucial for directories with hundreds of thousands
+  -- of files where Lua's incremental GC may fall behind.
+  -- See https://github.com/Saghen/blink.cmp/issues/2196
+  collectgarbage('collect')
+
   return async.task.new(function(resolve, reject)
     fs.scan_dir_async(dirname, function(entries_chunk)
       for _, entry in ipairs(entries_chunk) do
         if include_hidden or entry.name:sub(1, 1) ~= '.' then
           local kind = entry.type == 'directory' and ranges.directory or ranges.file
           local item = lib.entry_to_completion_item(entry, dirname, kind, opts)
-          results[#results + 1] = item
+          table.insert(lib._candidates, item)
         end
       end
     end)
-      :map(function() resolve(results) end)
+      :map(function() resolve(lib._candidates) end)
       :catch(reject)
   end)
 end
