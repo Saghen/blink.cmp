@@ -79,10 +79,8 @@ function lib.candidates(context, dirname, include_hidden, opts)
           table.insert(lib._candidates, item)
 
           if #lib._candidates >= opts.max_entries then
-            vim.notify(
-              string.format('Maximum of %d entries in path source reached, further files ignored.', opts.max_entries),
-              vim.log.levels.WARN,
-              { title = 'blink.cmp' }
+            vim.print(
+              string.format('Maximum of %d entries in path source reached, further files ignored.', opts.max_entries)
             )
             resolve(lib._candidates)
             return
