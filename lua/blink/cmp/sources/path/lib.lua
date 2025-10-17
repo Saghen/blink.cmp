@@ -77,9 +77,19 @@ function lib.candidates(context, dirname, include_hidden, opts)
           local kind = entry.type == 'directory' and ranges.directory or ranges.file
           local item = lib.entry_to_completion_item(entry, dirname, kind, opts)
           table.insert(lib._candidates, item)
+
+          if #lib._candidates >= opts.max_entries then
+            vim.notify(
+              string.format('Maximum of %d entries in path source reached, further files ignored.', opts.max_entries),
+              vim.log.levels.WARN,
+              { title = 'blink.cmp' }
+            )
+            resolve(lib._candidates)
+            return
+          end
         end
       end
-    end)
+    end, opts.chunk_size)
       :map(function() resolve(lib._candidates) end)
       :catch(reject)
   end)
