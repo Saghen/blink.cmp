@@ -562,7 +562,7 @@ sources.providers = {
       search_paths = { vim.fn.stdpath('config') .. '/snippets' },
       global_snippets = { 'all' },
       extended_filetypes = {},
-      ignored_filetypes = {},
+      filter_snippets = function(filetype, file) return true end,
       get_filetype = function(context)
         return vim.bo.filetype
       end,
