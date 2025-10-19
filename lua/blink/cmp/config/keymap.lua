@@ -58,11 +58,16 @@
 ---   ['<Tab>'] = { 'show_and_insert_or_accept_single', 'select_next' },
 ---   ['<S-Tab>'] = { 'show_and_insert_or_accept_single', 'select_prev' },
 ---
+---   ['<C-space>'] = { 'show', 'fallback' },
+---
 ---   ['<C-n>'] = { 'select_next' },
 ---   ['<C-p>'] = { 'select_prev' },
+---   ['<Right>'] = { 'select_next', 'fallback' },
+---   ['<Left>'] = { 'select_prev', 'fallback' },
 ---
 ---   ['<C-y>'] = { 'select_and_accept', 'fallback' },
 ---   ['<C-e>'] = { 'cancel', 'fallback' },
+---   ['<End>'] = { 'hide', 'fallback' },
 --- }
 --- ```
 --- | 'cmdline'
@@ -90,6 +95,8 @@
 ---
 ---   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ---   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+---
+---   ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 --- }
 --- ```
 --- | 'super-tab'
@@ -111,6 +118,8 @@
 ---
 ---   ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
 ---   ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+---
+---   ['<C-k>'] = { 'show_signature', 'hide_signature', 'fallback' },
 --- }
 --- ```
 --- | 'enter'
