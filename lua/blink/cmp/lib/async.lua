@@ -194,7 +194,7 @@ function task:on_completion(cb)
 end
 
 --- @generic T
---- @param self blink.cmp.Task<T
+--- @param self blink.cmp.Task<T>
 --- @param cb fun(err: any)
 --- @return blink.cmp.Task<T>
 function task:on_failure(cb)
