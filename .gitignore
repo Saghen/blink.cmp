@@ -9,3 +9,5 @@ result
 .devenv
 .repro/
 .wrangler/
+.emmyrc.json
+.luarc.json
