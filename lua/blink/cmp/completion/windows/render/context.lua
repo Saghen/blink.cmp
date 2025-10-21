@@ -57,6 +57,10 @@ function draw_context.new(draw, item_idx, item, matched_indices)
   local label = item.label:gsub('\n', newline_char) .. (kind == 'Snippet' and draw.snippet_indicator or '')
   if config.nerd_font_variant == 'normal' then label = label:gsub('…', '… ') end
 
+  if config.nerd_font_variant == 'mono' then
+    label = label:gsub('…', '… ')
+  end
+
   local label_detail = (item.labelDetails and item.labelDetails.detail or ''):gsub('\n', newline_char)
   if config.nerd_font_variant == 'normal' then label_detail = label_detail:gsub('…', '… ') end
 
