@@ -10,7 +10,6 @@
 --- @field scroll_up fun(amount: number)
 --- @field scroll_down fun(amount: number)
 --- @field close fun()
-
 local config = require('blink.cmp.config').completion.documentation
 local win_config = config.window
 
