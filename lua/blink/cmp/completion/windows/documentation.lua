@@ -1,7 +1,7 @@
 --- @class blink.cmp.CompletionDocumentationWindow
 --- @field win blink.cmp.Window
 --- @field last_context_id? number
---- @field auto_show_timer uv_timer_t
+--- @field auto_show_timer uv.uv_timer_t?
 --- @field shown_item? blink.cmp.CompletionItem
 ---
 --- @field auto_show_item fun(context: blink.cmp.Context, item: blink.cmp.CompletionItem)
