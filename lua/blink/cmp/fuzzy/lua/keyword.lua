@@ -10,13 +10,13 @@ local FORWARD_REGEX = vim.regex([[^\k*]])
 --- @param cb fun(): T, Y
 --- @return T, Y
 function keyword.with_constant_is_keyword(cb)
-  local existing_is_keyword = vim.opt.iskeyword
+  local existing_is_keyword = vim.bo.iskeyword
   local desired_is_keyword = '@,48-57,_,-,192-255'
   if existing_is_keyword == desired_is_keyword then return cb() end
 
-  vim.opt.iskeyword = '@,48-57,_,-,192-255'
+  vim.bo.iskeyword = '@,48-57,_,-,192-255'
   local success, a, b = pcall(cb)
-  vim.opt.iskeyword = existing_is_keyword
+  vim.bo.iskeyword = existing_is_keyword
 
   if success then return a, b end
   error(a)
