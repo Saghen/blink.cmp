@@ -549,6 +549,10 @@ sources.providers = {
       show_hidden_files_by_default = false,
       -- Treat `/path` as starting from the current working directory (cwd) instead of the root of your filesystem
       ignore_root_slash = false,
+      -- Maximum number of files/directories to return. This limits memory use and responsiveness for very large folders. Scanning halts if this cap is reached.
+      max_entries = 10000,
+      -- Number of entries read per chunk during asynchronous scanning. Must be less than or equal to max_entries.
+      chunk_size = 200,
     }
   },
 

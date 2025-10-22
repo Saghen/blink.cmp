@@ -10,6 +10,8 @@
 --- @field get_cwd fun(context: blink.cmp.Context): string
 --- @field show_hidden_files_by_default boolean
 --- @field ignore_root_slash boolean
+--- @field max_entries number Maximum number of files/directories to return. This limits memory use and responsiveness for very large folders. Scanning halts if this cap is reached. Defaults to 10000
+--- @field chunk_size number Number of entries read per chunk during asynchronous scanning. Must be less than or equal to max_entries. Defaults to 200.
 
 --- @class blink.cmp.Source
 --- @field opts blink.cmp.PathOpts
@@ -25,6 +27,8 @@ function path.new(opts)
     get_cwd = function(context) return vim.fn.expand(('#%d:p:h'):format(context.bufnr)) end,
     show_hidden_files_by_default = false,
     ignore_root_slash = false,
+    max_entries = 10000,
+    chunk_size = 200,
   })
   require('blink.cmp.config.utils').validate('sources.providers.path', {
     trailing_slash = { opts.trailing_slash, 'boolean' },
@@ -32,6 +36,12 @@ function path.new(opts)
     get_cwd = { opts.get_cwd, 'function' },
     show_hidden_files_by_default = { opts.show_hidden_files_by_default, 'boolean' },
     ignore_root_slash = { opts.ignore_root_slash, 'boolean' },
+    max_entries = {
+      opts.max_entries,
+      function(value) return type(value) == 'number' and value >= opts.chunk_size end,
+      'a number greater than chunk_size (' .. opts.chunk_size .. ')',
+    },
+    chunk_size = { opts.chunk_size, 'number' },
   }, opts)
 
   self.opts = opts
