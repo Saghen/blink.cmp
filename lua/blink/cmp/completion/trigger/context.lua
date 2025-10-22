@@ -106,15 +106,15 @@ end
 function context.get_mode()
   local mode = vim.api.nvim_get_mode().mode
   return (mode == 'c' and 'cmdline')
-    or (mode == 't' and 'term')
-    -- 'cmdwin' is not a real mode returned by nvim_get_mode().
-    -- It refers to the command-line window (opened with q: or q/), which acts like a buffer
-    -- for editing command history, blending command-line and buffer features.
-    -- We need to dissociate 'cmdwin' as a separate mode because our logic
-    -- depends on distinguishing between regular command-line mode and the
-    -- command-line window.
-    or (vim.fn.win_gettype() == 'command' and 'cmdwin')
-    or 'default'
+      or (mode == 't' and 'term')
+      -- 'cmdwin' is not a real mode returned by nvim_get_mode().
+      -- It refers to the command-line window (opened with q: or q/), which acts like a buffer
+      -- for editing command history, blending command-line and buffer features.
+      -- We need to dissociate 'cmdwin' as a separate mode because our logic
+      -- depends on distinguishing between regular command-line mode and the
+      -- command-line window.
+      or (vim.fn.win_gettype() == 'command' and 'cmdwin')
+      or 'default'
 end
 
 function context.get_cursor()
@@ -181,11 +181,13 @@ function context.get_term_command()
   --- If we find no mark for the start of the terminal command the terminal or shell
   --- probably does not support the FTCS_COMMAND_START escape sequence. The best effort
   --- we can do here is to return the full line text.
-  if #extmarks < 1 then return {
-    found_escape_code = false,
-    text = line,
-    start_col = 0,
-  } end
+  if #extmarks < 1 then
+    return {
+      found_escape_code = false,
+      text = line,
+      start_col = 0,
+    }
+  end
 
   local command_start_mark = extmarks[1]
   local command_start_col = command_start_mark[3] + 1
