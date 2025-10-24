@@ -29,7 +29,6 @@ function renderer.new(draw)
 
   -- Setting highlights is slow and we update on every keystroke so we instead use a decoration provider
   -- which will only render highlights of the visible lines. This also avoids having to do virtual scroll
-  -- like nvim-cmp does, which breaks on UIs like neovide
   vim.api.nvim_set_decoration_provider(ns, {
     on_win = function(_, _, win_bufnr) return self.bufnr == win_bufnr end,
     on_line = function(_, _, _, line)

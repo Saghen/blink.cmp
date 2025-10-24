@@ -1,22 +1,21 @@
 --- @alias blink.cmp.Mode 'cmdline' | 'cmdwin' | 'term' | 'default'
 
---- @class blink.cmp.CompletionItem : lsp.CompletionItem
---- @field documentation? string | { kind: lsp.MarkupKind, value: string, draw?: fun(opts?: blink.cmp.CompletionDocumentationDrawOpts) }
---- @field score_offset? number
---- @field source_id string
---- @field source_name string
---- @field cursor_column number
---- @field client_id? number
---- @field client_name? string
---- @field kind_name? string
---- @field kind_icon? string
---- @field kind_hl? string
---- @field exact? boolean
---- @field score? number
+--- @class blink.cmp.CompletionItemKindExt
+--- @field name? string
+--- @field icon? string
+--- @field hl? string
 
-return {
-  -- some plugins mutate the vim.lsp.protocol.CompletionItemKind table
-  -- so we use our own copy
+--- @class blink.cmp.CompletionItemExt
+--- @field cursor_column number TODO: can we remove this?
+--- @field score_offset? number
+--- @field kind blink.cmp.CompletionItemKindExt
+
+--- @class blink.cmp.CompletionItem : lsp.CompletionItem
+--- @field blink blink.cmp.CompletionItemExt
+
+-- some plugins mutate the vim.lsp.protocol.CompletionItemKind table
+-- so we use our own copy
+local utils = {
   CompletionItemKind = {
     'Text',
     'Method',
@@ -71,3 +70,189 @@ return {
     TypeParameter = 25,
   },
 }
+
+--- Shallow copy table
+--- @generic T
+--- @param t T
+--- @return T
+function utils.shallow_copy(t)
+  local t2 = {}
+  for k, v in pairs(t) do
+    t2[k] = v
+  end
+  return t2
+end
+
+--- Returns a list of unique values from the input array
+--- @generic T
+--- @param arr T[]
+--- @return T[]
+function utils.deduplicate(arr)
+  local seen = {}
+  local result = {}
+  for _, v in ipairs(arr) do
+    if not seen[v] then
+      seen[v] = true
+      table.insert(result, v)
+    end
+  end
+  return result
+end
+
+function utils.schedule_if_needed(fn)
+  if vim.in_fast_event() then
+    vim.schedule(fn)
+  else
+    fn()
+  end
+end
+
+--- Flattens an arbitrarily deep table into a  single level table
+--- @param t table
+--- @return table
+function utils.flatten(t)
+  if t[1] == nil then return t end
+
+  local flattened = {}
+  for _, v in ipairs(t) do
+    if type(v) == 'table' and vim.tbl_isempty(v) then goto continue end
+
+    if v[1] == nil then
+      table.insert(flattened, v)
+    else
+      vim.list_extend(flattened, utils.flatten(v))
+    end
+
+    ::continue::
+  end
+  return flattened
+end
+
+--- Finds an item in an array using a predicate function
+--- @generic T
+--- @param arr T[]
+--- @param predicate fun(item: T): boolean
+--- @return number?
+function utils.find_idx(arr, predicate)
+  for idx, v in ipairs(arr) do
+    if predicate(v) then return idx end
+  end
+  return nil
+end
+
+--- Slices an array
+--- @generic T
+--- @param arr T[]
+--- @param start number?
+--- @param finish number?
+--- @return T[]
+function utils.slice(arr, start, finish)
+  start = start or 1
+  finish = finish or #arr
+  local sliced = {}
+  for i = start, finish do
+    sliced[#sliced + 1] = arr[i]
+  end
+  return sliced
+end
+
+--- Gets the full Unicode character at cursor position
+--- @return string
+function utils.get_char_at_cursor()
+  local context = require('blink.cmp.completion.trigger.context')
+
+  local line = context.get_line()
+  if line == '' then return '' end
+  local cursor_col = context.get_cursor()[2]
+
+  -- Find the start of the UTF-8 character
+  local start_col = cursor_col
+  while start_col > 1 do
+    local char = string.byte(line:sub(start_col, start_col))
+    if char < 0x80 or char > 0xBF then break end
+    start_col = start_col - 1
+  end
+
+  -- Find the end of the UTF-8 character
+  local end_col = cursor_col
+  while end_col < #line do
+    local char = string.byte(line:sub(end_col + 1, end_col + 1))
+    if char < 0x80 or char > 0xBF then break end
+    end_col = end_col + 1
+  end
+
+  return line:sub(start_col, end_col)
+end
+
+--- Disables all autocmds for the duration of the callback
+--- @param cb fun()
+function utils.with_no_autocmds(cb)
+  local original_eventignore = vim.opt.eventignore
+  vim.opt.eventignore = 'all'
+
+  local success, result_or_err = pcall(cb)
+
+  vim.opt.eventignore = original_eventignore
+
+  if not success then error(result_or_err) end
+  return result_or_err
+end
+
+--- Disable redraw in neovide for the duration of the callback
+--- Useful for preventing the cursor from jumping to the top left during `vim.fn.complete`
+--- @generic T
+--- @param fn fun(): T
+--- @return T
+function utils.defer_neovide_redraw(fn)
+  -- don't do anything special when not running inside neovide
+  if not _G.neovide or not neovide.enable_redraw or not neovide.disable_redraw then return fn() end
+
+  neovide.disable_redraw()
+
+  local success, result = pcall(fn)
+
+  -- make sure that the screen is updated and the mouse cursor returned to the right position before re-enabling redrawing
+  pcall(vim.api.nvim__redraw, { cursor = true, flush = true })
+
+  neovide.enable_redraw()
+
+  if not success then error(result) end
+  return result
+end
+
+local ui_entered = vim.v.vim_did_enter == 1 -- technically for VimEnter, but should be good enough for when we're lazy loaded
+local notification_queue = {}
+vim.api.nvim_create_autocmd('UIEnter', {
+  callback = function()
+    ui_entered = true
+    for _, fn in ipairs(notification_queue) do
+      pcall(fn)
+    end
+  end,
+})
+
+--- Fancy notification wrapper.
+--- @param msg [string, string?][]
+--- @param lvl? number
+function utils.notify(msg, lvl)
+  local header_hl = 'DiagnosticVirtualTextWarn'
+  if lvl == vim.log.levels.ERROR then
+    header_hl = 'DiagnosticVirtualTextError'
+  elseif lvl == vim.log.levels.INFO then
+    header_hl = 'DiagnosticVirtualTextInfo'
+  end
+
+  table.insert(msg, 1, { ' blink.cmp ', header_hl })
+  table.insert(msg, 2, { ' ' })
+
+  local echo_opts = { verbose = false }
+  if lvl == vim.log.levels.ERROR and vim.fn.has('nvim-0.11') == 1 then echo_opts.err = true end
+  if ui_entered then
+    vim.schedule(function() vim.api.nvim_echo(msg, true, echo_opts) end)
+  else
+    -- Queue notification for the UIEnter event.
+    table.insert(notification_queue, function() vim.api.nvim_echo(msg, true, echo_opts) end)
+  end
+end
+
+return utils

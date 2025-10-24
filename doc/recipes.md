@@ -31,7 +31,7 @@ vim.b.completion = false
 
 ### Disable completion in *only* shell command mode
 
-When inside of git bash or WSL on windows, you may experience a hang with shell commands. The following disables cmdline completions only when running shell commands (i.e. `[':!' , ':%!']`), but still allows completion in other command modes (i.e. `[':' , ':help', '/' , '?', ...]`).
+When inside of git bash or WSL on windows, you may experience a hang with shell commands. The following disables cmdline completions only when running shell commands (e.g. `[':!' , ':%!']`), but still allows completion in other command modes (i.e. `[':' , ':help', '/' , '?', ...]`).
 
 ```lua
 sources = {
@@ -279,7 +279,7 @@ sources = {
 
 ### Buffer completion from all open buffers
 
-The default behavior is to only show completions from **visible** "normal" buffers (i.e. it wouldn't include neo-tree). This will instead show completions from all buffers, even if they're not visible on screen. Note that the performance impact of this has not been tested.
+The default behavior is to only show completions from **visible** "normal" buffers (e.g. it wouldn't include neo-tree). This will instead show completions from all buffers, even if they're not visible on screen. Note that the performance impact of this has not been tested.
 
 ```lua
 sources = {

@@ -15,7 +15,8 @@ local validate = require('blink.cmp.config.utils').validate
 local list = {
   --- @type blink.cmp.CompletionListConfig
   default = {
-    max_items = 200,
+    max_items = 200, -- TODO: hard code
+    -- move to `select_next/prev` args
     selection = {
       preselect = true,
       auto_insert = true,

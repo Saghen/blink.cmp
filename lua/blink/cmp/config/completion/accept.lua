@@ -29,22 +29,6 @@ local accept = {
     dot_repeat = true,
     create_undo_point = true,
     resolve_timeout_ms = 100,
-    auto_brackets = {
-      enabled = true,
-      default_brackets = { '(', ')' },
-      override_brackets_for_filetypes = {},
-      force_allow_filetypes = {},
-      blocked_filetypes = {},
-      kind_resolution = {
-        enabled = true,
-        blocked_filetypes = { 'typescriptreact', 'javascriptreact', 'vue' },
-      },
-      semantic_token_resolution = {
-        enabled = true,
-        blocked_filetypes = { 'java' },
-        timeout_ms = 400,
-      },
-    },
   },
 }
 
@@ -53,26 +37,7 @@ function accept.validate(config)
     dot_repeat = { config.dot_repeat, 'boolean' },
     create_undo_point = { config.create_undo_point, 'boolean' },
     resolve_timeout_ms = { config.resolve_timeout_ms, 'number' },
-    auto_brackets = { config.auto_brackets, 'table' },
   }, config)
-  validate('completion.accept.auto_brackets', {
-    enabled = { config.auto_brackets.enabled, 'boolean' },
-    default_brackets = { config.auto_brackets.default_brackets, 'table' },
-    override_brackets_for_filetypes = { config.auto_brackets.override_brackets_for_filetypes, 'table' },
-    force_allow_filetypes = { config.auto_brackets.force_allow_filetypes, 'table' },
-    blocked_filetypes = { config.auto_brackets.blocked_filetypes, 'table' },
-    kind_resolution = { config.auto_brackets.kind_resolution, 'table' },
-    semantic_token_resolution = { config.auto_brackets.semantic_token_resolution, 'table' },
-  }, config.auto_brackets)
-  validate('completion.accept.auto_brackets.kind_resolution', {
-    enabled = { config.auto_brackets.kind_resolution.enabled, 'boolean' },
-    blocked_filetypes = { config.auto_brackets.kind_resolution.blocked_filetypes, 'table' },
-  }, config.auto_brackets.kind_resolution)
-  validate('completion.accept.auto_brackets.semantic_token_resolution', {
-    enabled = { config.auto_brackets.semantic_token_resolution.enabled, 'boolean' },
-    blocked_filetypes = { config.auto_brackets.semantic_token_resolution.blocked_filetypes, 'table' },
-    timeout_ms = { config.auto_brackets.semantic_token_resolution.timeout_ms, 'number' },
-  }, config.auto_brackets.semantic_token_resolution)
 end
 
 return accept

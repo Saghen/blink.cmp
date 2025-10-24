@@ -151,7 +151,7 @@ function trigger.show_if_on_trigger_character(opts)
 end
 
 function trigger.show(opts)
-  if vim.fn.pumvisible() == 1 or not root_config.enabled() then return trigger.hide() end
+  if vim.fn.pumvisible() == 1 or vim.b.completion == false then return trigger.hide() end
 
   opts = opts or {}
 

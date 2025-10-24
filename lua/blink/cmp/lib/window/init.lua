@@ -1,6 +1,3 @@
--- TODO: The scrollbar and redrawing logic should be done by wrapping the functions that would
--- trigger a redraw or update the window
-
 local utils = require('blink.cmp.lib.window.utils')
 
 --- @class blink.cmp.WindowOptions
@@ -16,46 +13,16 @@ local utils = require('blink.cmp.lib.window.utils')
 --- @field winblend? number
 --- @field winhighlight? string
 --- @field scrolloff? number
---- @field scrollbar? boolean
 --- @field filetype string
-
---- @class blink.cmp.Window
---- @field id? number
---- @field buf? number
---- @field config blink.cmp.WindowOptions
---- @field scrollbar? blink.cmp.Scrollbar
---- @field cursor_line blink.cmp.CursorLine
---- @field redraw_queued boolean
----
---- @field new fun(name: string, config: blink.cmp.WindowOptions): blink.cmp.Window
---- @field get_buf fun(self: blink.cmp.Window): number
---- @field get_win fun(self: blink.cmp.Window): number
---- @field is_open fun(self: blink.cmp.Window): boolean
---- @field open fun(self: blink.cmp.Window)
---- @field close fun(self: blink.cmp.Window)
---- @field set_option_value fun(self: blink.cmp.Window, option: string, value: any)
---- @field update_size fun(self: blink.cmp.Window)
---- @field get_content_height fun(self: blink.cmp.Window): number
---- @field get_border_size fun(self: blink.cmp.Window, border?: 'none' | 'single' | 'double' | 'rounded' | 'solid' | 'shadow' | 'bold' | 'padded' | string[]): { vertical: number, horizontal: number, left: number, right: number, top: number, bottom: number }
---- @field expand_border_chars fun(border: string[]): string[]
---- @field get_height fun(self: blink.cmp.Window): number
---- @field get_content_width fun(self: blink.cmp.Window): number
---- @field get_width fun(self: blink.cmp.Window): number
---- @field get_cursor_screen_position fun(): { distance_from_top: number, distance_from_bottom: number }
---- @field set_cursor fun(self: blink.cmp.Window, cursor: number[])
---- @field set_height fun(self: blink.cmp.Window, height: number)
---- @field set_width fun(self: blink.cmp.Window, width: number)
---- @field set_win_config fun(self: blink.cmp.Window, config: table)
---- @field get_vertical_direction_and_height fun(self: blink.cmp.Window, direction_priority: blink.cmp.WindowDirectionPriority, max_height: number): { height: number, direction: 'n' | 's' }?
---- @field get_direction_with_window_constraints fun(self: blink.cmp.Window, anchor_win: blink.cmp.Window, direction_priority: ("n" | "s" | "e" | "w")[], desired_min_size?: { width: number, height: number }): { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
---- @field redraw_if_needed fun(self: blink.cmp.Window)
 
 --- @alias blink.cmp.WindowDirectionPriority ("n"|"s")[] | fun(): ("n"|"s")[]
 
---- @type blink.cmp.Window
---- @diagnostic disable-next-line: missing-fields
+--- @class blink.cmp.Window
 local win = {}
 
+--- @param name string
+--- @param config blink.cmp.WindowOptions
+--- @return blink.cmp.Window
 function win.new(name, config)
   local self = setmetatable({}, { __index = win })
 
@@ -72,28 +39,15 @@ function win.new(name, config)
     winblend = config.winblend or 0,
     winhighlight = config.winhighlight or 'Normal:NormalFloat,FloatBorder:NormalFloat',
     scrolloff = config.scrolloff or 0,
-    scrollbar = config.scrollbar,
     filetype = config.filetype,
   }
   self.redraw_queued = false
-
   self.cursor_line = require('blink.cmp.lib.window.cursor_line').new(name, config.cursorline_priority)
-
-  if self.config.scrollbar then
-    -- Enable the gutter if there's no border, or the border is a space
-    local enable_gutter = self.config.border == 'padded' or self.config.border == 'none'
-    local border = self.config.border
-    if type(border) == 'table' then
-      local resolved_border = self.expand_border_chars(border)
-      enable_gutter = resolved_border[4] == '' or resolved_border[4] == ' '
-    end
-
-    self.scrollbar = require('blink.cmp.lib.window.scrollbar').new({ enable_gutter = enable_gutter })
-  end
 
   return self
 end
 
+--- @return number?
 function win:get_buf()
   -- create buffer if it doesn't exist
   if self.buf == nil or not vim.api.nvim_buf_is_valid(self.buf) then
@@ -103,11 +57,13 @@ function win:get_buf()
   return self.buf
 end
 
+--- @return number?
 function win:get_win()
   if self.id ~= nil and not vim.api.nvim_win_is_valid(self.id) then self.id = nil end
   return self.id
 end
 
+--- @return boolean
 function win:is_open() return self.id ~= nil and vim.api.nvim_win_is_valid(self.id) end
 
 function win:open()
@@ -138,7 +94,6 @@ function win:open()
   vim.api.nvim_set_option_value('filetype', self.config.filetype, { buf = self.buf })
 
   self.cursor_line:update(self.id)
-  if self.scrollbar then self.scrollbar:update(self.id) end
   self:redraw_if_needed()
 end
 
@@ -152,7 +107,6 @@ function win:close()
     vim.api.nvim_win_close(self.id, true)
     self.id = nil
   end
-  if self.scrollbar then self.scrollbar:update() end
   self:redraw_if_needed()
 end
 
@@ -175,8 +129,8 @@ function win:update_size()
   vim.api.nvim_win_set_height(winnr, height)
 end
 
--- todo: fix nvim_win_text_height
--- @return number
+--- todo: fix nvim_win_text_height
+--- @return number
 function win:get_content_height()
   if not self:is_open() then return 0 end
   return vim.api.nvim_win_text_height(self:get_win(), {}).all
@@ -214,13 +168,12 @@ function win:get_border_size()
     bottom = resolved_border[6] == '' and 0 or 1
   end
 
-  -- If there's a scrollbar, the border on the right must be atleast 1
-  if self.scrollbar and self.scrollbar:is_visible() then right = math.max(1, right) end
-
   return { vertical = top + bottom, horizontal = left + right, left = left, right = right, top = top, bottom = bottom }
 end
 
 --- Gets the characters used for the border, if defined
+--- @param border string[]
+--- @return string[]
 function win.expand_border_chars(border)
   assert(type(border) == 'table', 'Border must be a table')
 
@@ -237,12 +190,14 @@ function win.expand_border_chars(border)
 end
 
 --- Gets the height of the window, taking into account the border
+--- @return number
 function win:get_height()
   if not self:is_open() then return 0 end
   return vim.api.nvim_win_get_height(self:get_win()) + self:get_border_size().vertical
 end
 
 --- Gets the width of the longest line in the window
+--- @return number
 function win:get_content_width()
   if not self:is_open() then return 0 end
   local max_width = 0
@@ -253,12 +208,14 @@ function win:get_content_width()
 end
 
 --- Gets the width of the window, taking into account the border
+--- @return number
 function win:get_width()
   if not self:is_open() then return 0 end
   return vim.api.nvim_win_get_width(self:get_win()) + self:get_border_size().horizontal
 end
 
 --- Gets the cursor's distance from all sides of the screen
+--- @return { distance_from_top: number, distance_from_bottom: number, distance_from_left: number, distance_from_right: number }
 function win.get_cursor_screen_position()
   local screen_height = vim.o.lines
   local screen_width = vim.o.columns
@@ -289,48 +246,51 @@ function win.get_cursor_screen_position()
   }
 end
 
+--- @param cursor number[]
 function win:set_cursor(cursor)
   local winnr = self:get_win()
   assert(winnr ~= nil, 'Window must be open to set cursor')
 
   vim.api.nvim_win_set_cursor(winnr, cursor)
 
-  if self.scrollbar then self.scrollbar:update(winnr) end
   self:redraw_if_needed()
 end
 
+--- @param height number
 function win:set_height(height)
   local winnr = self:get_win()
   assert(winnr ~= nil, 'Window must be open to set height')
 
   vim.api.nvim_win_set_height(winnr, height)
 
-  if self.scrollbar then self.scrollbar:update(winnr) end
   self:redraw_if_needed()
 end
 
+--- @param width number
 function win:set_width(width)
   local winnr = self:get_win()
   assert(winnr ~= nil, 'Window must be open to set width')
 
   vim.api.nvim_win_set_width(winnr, width)
 
-  if self.scrollbar then self.scrollbar:update(winnr) end
   self:redraw_if_needed()
 end
 
+--- @param config vim.api.keyset.win_config
 function win:set_win_config(config)
   local winnr = self:get_win()
   assert(winnr ~= nil, 'Window must be open to set window config')
 
   vim.api.nvim_win_set_config(winnr, config)
 
-  if self.scrollbar then self.scrollbar:update(winnr) end
   self:redraw_if_needed()
 end
 
 --- Gets the direction with the most space available, prioritizing the directions in the order of the
 --- direction_priority list
+--- @param direction_priority blink.cmp.WindowDirectionPriority
+--- @param max_height number
+--- @return { height: number, direction: 'n' | 's' }?
 function win:get_vertical_direction_and_height(direction_priority, max_height)
   if type(direction_priority) == 'function' then direction_priority = direction_priority() end
   local constraints = self.get_cursor_screen_position()
@@ -351,6 +311,10 @@ function win:get_vertical_direction_and_height(direction_priority, max_height)
   return { height = height - border_size.vertical, direction = direction }
 end
 
+--- @param anchor_win blink.cmp.Window
+--- @param direction_priority blink.cmp.WindowDirectionPriority
+--- @param desired_min_size { width: number, height: number }
+--- @return { width: number, height: number, direction: 'n' | 's' | 'e' | 'w' }?
 function win:get_direction_with_window_constraints(anchor_win, direction_priority, desired_min_size)
   local cursor_constraints = self.get_cursor_screen_position()
 
