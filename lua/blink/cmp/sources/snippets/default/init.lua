@@ -38,7 +38,7 @@ function snippets:get_completions(context, callback)
   end
 
   local items = vim.tbl_map(
-    function(item) return self.registry:snippet_to_completion_item(item, context.id) end,
+    function(item) return self.registry:snippet_to_completion_item(item, context) end,
     self.cache[filetype]
   )
   callback({
