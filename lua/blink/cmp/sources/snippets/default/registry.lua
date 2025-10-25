@@ -107,20 +107,31 @@ function registry:get_global_snippets()
 end
 
 --- @param snippet blink.cmp.Snippet
---- @param cache_key number
+--- @param context blink.cmp.Context
 --- @return blink.cmp.CompletionItem
-function registry:snippet_to_completion_item(snippet, cache_key)
-  local body = type(snippet.body) == 'string' and snippet.body or table.concat(snippet.body, '\n')
+function registry:snippet_to_completion_item(snippet, context)
+  local body = type(snippet.body) == 'string' and snippet.body --[[@as string]]
+    or table.concat(snippet.body --[[@as table]], '\n')
+
+  local new_text = self:expand_vars(body, context.id)
+  local cursor_row, cursor_col = unpack(context.get_cursor())
 
   ---@type blink.cmp.CompletionItem
   return {
     kind = require('blink.cmp.types').CompletionItemKind.Snippet,
     label = snippet.prefix,
     insertTextFormat = vim.lsp.protocol.InsertTextFormat.Snippet,
-    insertText = self:expand_vars(body, cache_key),
+    insertText = new_text,
     description = snippet.description,
     labelDetails = snippet.description and self.config.use_label_description and { description = snippet.description }
       or nil,
+    textEdit = {
+      range = {
+        start = { line = cursor_row - 1, character = cursor_col - 1 },
+        ['end'] = { line = cursor_row - 1, character = cursor_col },
+      },
+      newText = new_text,
+    },
   }
 end
 
