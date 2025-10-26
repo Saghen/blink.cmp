@@ -6,34 +6,29 @@ local fs = {}
 --- The task resolves once all entries have been processed.
 --- @param path string
 --- @param callback fun(entries: table[]) Callback function called with an array (chunk) of directory entries
---- @param chunk_size? integer Optional number of entries to read per chunk (default 200)
 --- @return blink.cmp.Task
-function fs.scan_dir_async(path, callback, chunk_size)
-  chunk_size = chunk_size or 200
+function fs.scan_dir_async(path, callback)
+  local chunk_size = 200
 
   return async.task.new(function(resolve, reject)
-    uv.fs_opendir(path, function(err, handle)
-      if err or not handle then return reject(err) end
-
-      local function read_dir()
-        uv.fs_readdir(handle, function(err, entries)
-          if err or not entries then
-            uv.fs_closedir(handle, function() end)
-            return reject(err)
-          end
-
-          callback(entries)
-
-          if #entries == chunk_size then
-            read_dir()
-          else
-            uv.fs_closedir(handle, function() end)
-            resolve(true)
-          end
-        end)
+    uv.fs_scandir(path, function(err, req)
+      if err or not req then return reject(err) end
+      local entries = {}
+      local function send_chunk()
+        if #entries > 0 then
+          vim.schedule_wrap(callback)(entries)
+          entries = {}
+        end
       end
-      read_dir()
-    end, chunk_size)
+      while true do
+        local name, type = uv.fs_scandir_next(req)
+        if not name then break end
+        table.insert(entries, { name = name, type = type })
+        if #entries >= chunk_size then send_chunk() end
+      end
+      send_chunk()
+      resolve(true)
+    end)
   end)
 end
 

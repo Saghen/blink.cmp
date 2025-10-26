@@ -55,17 +55,33 @@ end
 --- @param dirname string
 --- @param include_hidden boolean
 --- @param opts blink.cmp.PathOpts
+--- @return blink.cmp.Task
 function lib.candidates(context, dirname, include_hidden, opts)
   local fs = require('blink.cmp.sources.path.fs')
   local ranges = lib.get_text_edit_ranges(context)
   local results = {}
+  local cancelled = false
+
+  -- Prevents excessive memory growth when scanning huge directories
+  local mem_usage_kb = collectgarbage('count')
+  local threshold_kb = 100 * 1024 -- 100Mb
+  if mem_usage_kb > threshold_kb then collectgarbage('collect') end
+
   return async.task.new(function(resolve, reject)
     fs.scan_dir_async(dirname, function(entries_chunk)
+      if cancelled then return end
+
       for _, entry in ipairs(entries_chunk) do
         if include_hidden or entry.name:sub(1, 1) ~= '.' then
           local kind = entry.type == 'directory' and ranges.directory or ranges.file
           local item = lib.entry_to_completion_item(entry, dirname, kind, opts)
           results[#results + 1] = item
+
+          if #results >= opts.max_entries then
+            vim.print(string.format('%d entries in path source reached, further files ignored.', opts.max_entries))
+            cancelled = true
+            return
+          end
         end
       end
     end)

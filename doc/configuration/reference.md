@@ -549,6 +549,8 @@ sources.providers = {
       show_hidden_files_by_default = false,
       -- Treat `/path` as starting from the current working directory (cwd) instead of the root of your filesystem
       ignore_root_slash = false,
+      -- Maximum number of files/directories to return. This limits memory use and responsiveness for very large folders.
+      max_entries = 10000,
     }
   },
 
