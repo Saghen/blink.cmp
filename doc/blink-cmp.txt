@@ -1,4 +1,4 @@
-*blink-cmp.txt*          For NVIM v0.10.0         Last change: 2025 October 12
+*blink-cmp.txt*          For NVIM v0.10.0         Last change: 2025 October 27
 
 ==============================================================================
 Table of Contents                                *blink-cmp-table-of-contents*
@@ -2701,6 +2701,8 @@ PROVIDERS
           show_hidden_files_by_default = false,
           -- Treat `/path` as starting from the current working directory (cwd) instead of the root of your filesystem
           ignore_root_slash = false,
+          -- Maximum number of files/directories to return. This limits memory use and responsiveness for very large folders.
+          max_entries = 10000,
         }
       },
     
@@ -2714,7 +2716,7 @@ PROVIDERS
           search_paths = { vim.fn.stdpath('config') .. '/snippets' },
           global_snippets = { 'all' },
           extended_filetypes = {},
-          ignored_filetypes = {},
+          filter_snippets = function(filetype, file) return true end,
           get_filetype = function(context)
             return vim.bo.filetype
           end,
