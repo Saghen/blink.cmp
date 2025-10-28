@@ -8,7 +8,7 @@
 --- @field ignore_next_text_changed boolean
 --- @field ignore_next_cursor_moved boolean
 --- @field last_char string
---- @field textchangedi_id number
+--- @field textchanged_id integer
 ---
 --- @field new fun(opts: blink.cmp.BufferEventsOptions): blink.cmp.BufferEvents
 --- @field listen fun(self: blink.cmp.BufferEvents, opts: blink.cmp.BufferEventsListener)
@@ -144,7 +144,7 @@ function buffer_events:listen(opts)
     end,
   })
 
-  self.textchangedi_id = vim.api.nvim_create_autocmd('TextChangedI', {
+  self.textchanged_id = vim.api.nvim_create_autocmd('TextChangedI', {
     callback = make_char_added(self, snippet, opts.on_char_added),
   })
 
@@ -181,11 +181,11 @@ end
 --- Effectively ensures that our autocmd listeners run last, after other registered listeners
 --- HACK: Ideally, we would have some way to ensure that we always run after other listeners
 function buffer_events:resubscribe(opts)
-  if self.textchangedi_id == -1 then return end
+  if self.textchanged_id == -1 then return end
 
   local snippet = require('blink.cmp.config').snippets
-  vim.api.nvim_del_autocmd(self.textchangedi_id)
-  self.textchangedi_id = vim.api.nvim_create_autocmd('TextChangedI', {
+  vim.api.nvim_del_autocmd(self.textchanged_id)
+  self.textchanged_id = vim.api.nvim_create_autocmd('TextChangedI', {
     callback = make_char_added(self, snippet, opts.on_char_added),
   })
 end
