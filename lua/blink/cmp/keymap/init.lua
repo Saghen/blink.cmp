@@ -25,19 +25,14 @@ function keymap.preset(mode, preset, filter)
 end
 
 --- @param mode blink.cmp.Mode | blink.cmp.Mode[] | '*'
---- @param key string
---- @param callback fun() | blink.cmp.KeymapCommand | blink.cmp.KeymapCommand[]
+--- @param lhs string
+--- @param rhs fun() | blink.cmp.KeymapCommand | blink.cmp.KeymapCommand[]
 --- @param opts? blink.cmp.KeymapOpts
-function keymap.set(mode, key, callback, opts) end
+function keymap.set(mode, lhs, rhs, opts) end
 
 --- @param mode blink.cmp.Mode | blink.cmp.Mode[] | '*'
---- @param key string
+--- @param lhs string
 --- @param opts? blink.cmp.KeymapOpts
-function keymap.del(mode, key, opts) end
-
---- @param mode blink.cmp.Mode | blink.cmp.Mode[] | '*'
---- @param user_mappings table<string, blink.cmp.KeymapCommand[]> | false
---- @param preset? blink.cmp.KeymapPreset
-function keymap.config(mode, user_mappings, preset) end
+function keymap.del(mode, lhs, opts) end
 
 return keymap

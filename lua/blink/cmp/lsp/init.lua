@@ -1,4 +1,3 @@
--- TODO: the `enable` concept is generic and should be moved to a separate module
 -- TODO: all buffer-local configs should be cleared when the buffer is deleted
 -- TODO: tests
 
@@ -53,10 +52,6 @@ function lsp.get_clients(filter)
   return vim.tbl_filter(function(client) return lsp.is_enabled(client.name, filter) end, vim.lsp.get_clients(filter))
 end
 
--- TODO: make private somehow?
---- @class blink.cmp.lsp.buffer_config
---- @field [string] blink.cmp.lsp.Config
---- @field package _per_buffer_configs table<integer, blink.cmp.lsp.Config>
 local buffer_configs = setmetatable({
   _per_buffer_configs = {},
 }, {
@@ -64,6 +59,7 @@ local buffer_configs = setmetatable({
     return setmetatable({}, {
       __index = function(_, name)
         vim.validate('name', name, 'string')
+        if name == '_per_buffer_configs' then return self._per_buffer_configs end
         return vim.tbl_deep_extend(
           'force',
           (self._per_buffer_configs[bufnr] or {})['*'] or {},
@@ -80,6 +76,9 @@ local buffer_configs = setmetatable({
       end,
     })
   end,
+})
+vim.api.nvim_create_autocmd({ 'BufDelete', 'BufWipeout' }, {
+  callback = function(args) buffer_configs._per_buffer_configs[args.buf] = nil end,
 })
 
 --- @class blink.cmp.lsp.config
@@ -112,7 +111,6 @@ lsp.config = setmetatable({
     return vim.tbl_deep_extend(
       'force',
       self._configs['*'],
-      (vim.lsp.config[name_or_bufnr] or {}).blink_cmp or {},
       self._configs[name_or_bufnr] or {},
       buffer_configs[bufnr][name_or_bufnr]
     )

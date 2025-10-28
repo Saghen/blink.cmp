@@ -61,9 +61,7 @@ local function get_cargo_cmd()
     if nightly then return { 'cargo', 'build', '--release' } end
 
     utils.notify({
-      { 'Rust ' },
-      { 'nightly', 'DiagnosticInfo' },
-      { ' not available via ' },
+      { 'Rust nightly not available via ' },
       { 'cargo --version', 'DiagnosticInfo' },
       { ' and rustup not detected via ' },
       { 'cargo +nightly --version', 'DiagnosticInfo' },

@@ -4,7 +4,7 @@ local lsp = require('blink.cmp.lsp')
 local queue = {}
 
 --- @param context blink.cmp.Context
---- @param on_completions_callback fun(context: blink.cmp.Context, responses: table<string, lsp.CompletionItem[]>)
+--- @param on_completions_callback fun(context: blink.cmp.Context, responses: table<integer, lsp.CompletionItem[]>)
 --- @return blink.cmp.SourcesQueue
 function queue.new(context, on_completions_callback)
   local self = setmetatable({}, { __index = queue })
@@ -17,7 +17,7 @@ function queue.new(context, on_completions_callback)
   return self
 end
 
---- @return table<string, lsp.CompletionItem[]>?
+--- @return table<integer, lsp.CompletionItem[]>?
 function queue:get_cached_completions() return self.cached_items_by_lsp end
 
 --- @param context blink.cmp.Context
@@ -40,9 +40,9 @@ function queue:get_completions(context)
   )
 
   self.request = async.task.all(tasks):map(function(responses)
-    local items_by_lsp = {} --- @type table<string, lsp.CompletionItem[]>
+    local items_by_lsp = {} --- @type table<integer, lsp.CompletionItem[]>
     for _, response in ipairs(responses) do
-      items_by_lsp[response.client_name] = response.items
+      items_by_lsp[response.client_id] = response.items
     end
 
     self.cached_items_by_lsp = items_by_lsp

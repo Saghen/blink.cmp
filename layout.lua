@@ -93,7 +93,7 @@ cmp.list.on_select(function(ctx, item, idx) end)
 cmp.list.on_accept(function(ctx, item) end)
 
 ---- Menu ----
-cmp.menu.config({ ..., doc = { ... } }, filter?)
+cmp.menu.config({ ..., docs = { ... } }, filter?)
 cmp.menu.enable(enable?, filter?) -- enabled by default
 cmp.menu.is_enabled(filter?)
 
@@ -103,20 +103,19 @@ cmp.menu.get_win()
 cmp.menu.on_show(function(ctx) end)
 cmp.menu.on_hide(function(ctx) end)
 
----- Menu docs ----
-cmp.menu.doc.show()
-cmp.menu.doc.hide()
-cmp.menu.doc.scroll_up(count)
-cmp.menu.doc.scroll_down(count)
+-- Menu Docs --
+cmp.menu.docs.show()
+cmp.menu.docs.hide()
+cmp.menu.docs.scroll_up(count)
+cmp.menu.docs.scroll_down(count)
 
-cmp.menu.doc.is_visible()
-cmp.menu.doc.get_win()
+cmp.menu.docs.is_visible()
+cmp.menu.docs.get_win()
 
-cmp.menu.doc.on_show(function(ctx) end)
-cmp.menu.doc.on_hide(function(ctx) end)
+cmp.menu.docs.on_show(function(ctx) end)
+cmp.menu.docs.on_hide(function(ctx) end)
 
 ---- Ghost text ----
-cmp.ghost_text.config({ ... }, filter?)
 cmp.ghost_text.enable(enable?, filter?)
 cmp.ghost_text.is_enabled(filter?)
 
@@ -146,28 +145,27 @@ cmp.lsp.is_enabled('buffer', filter?)
 --- Snippets ---
 -- drop support for pulling snippets from luasnip/mini.snippets. encourage them to support in-process LSPs
 -- as a result, this only affects how snippets are expanded/navigated
-cmp.snippet.config('luasnip', filter?) -- use a preset
+cmp.snippet.preset('luasnip', filter?) -- use a preset
 cmp.snippet.config({ ... }, filter?) -- or define yourself
 
 cmp.snippet.active(filter?)
 cmp.snippet.jump(direction)
 
-cmp.snippet.registry.enable(enable?, filter?) -- enabled by default, but it's empty
-cmp.snippet.registry.is_enabled(filter?)
 cmp.snippet.registry.add({ ... })
 cmp.snippet.registry.remove({ ... })
 cmp.snippet.registry.load({ ...paths }) -- vim.Task
+cmp.snippet.registry.load_friendly_snippets()
 cmp.snippet.registry.reload() -- vim.Task (reloads from .load() paths only)
 cmp.snippet.registry.clear()
 
 --- Signature ---
 cmp.signature.config({
-  doc = false,
+  docs = false,
   direction_priority = { 'n', 's' },
   window = { ... }
 }, filter?)
-cmp.signature.trigger.enable(enable?, filter?) -- disabled by default
-cmp.signature.trigger.is_enabled(filter?)
+cmp.signature.enable(enable?, filter?) -- enabled by default
+cmp.signature.is_enabled(filter?)
 
 cmp.signature.show() -- vim.Task
 cmp.signature.hide()

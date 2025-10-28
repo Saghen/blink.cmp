@@ -70,18 +70,18 @@ function clients.apply_max_items(context, items)
 end
 
 function clients.resolve(item)
-  local client = vim.lsp.get_client_by_id(item.blink.client_id)
+  local client = vim.lsp.get_client_by_id(item.blink_cmp.client_id)
   if client == nil then return async.task.identity(item) end
 
   local lsp_item = vim.deepcopy(item)
-  lsp_item.blink = nil
+  lsp_item.blink_cmp = nil
 
   return async.task.new(function(resolve, reject)
     client:request('completionItem/resolve', lsp_item, function(err, resolved_item)
       if err then
         return reject(err)
       elseif resolved_item ~= nil then
-        resolved_item.blink = item.blink
+        resolved_item.blink_cmp = item.blink_cmp
         resolve(resolved_item)
       else
         resolve(item)

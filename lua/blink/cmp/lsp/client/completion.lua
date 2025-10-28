@@ -2,7 +2,7 @@ local async = require('blink.cmp.lib.async')
 
 --- @class blink.cmp.lsp.cache.Entry
 --- @field context blink.cmp.Context
---- @field response blink.cmp.CompletionResponse
+--- @field response lsp.CompletionList
 
 --- @class blink.cmp.lsp.cache
 local cache = {
@@ -15,15 +15,15 @@ function cache.get(context, client)
   if entry == nil then return end
 
   if context.id ~= entry.context.id then return end
-  if entry.response.is_incomplete_forward and entry.context.cursor[2] ~= context.cursor[2] then return end
-  if not entry.response.is_incomplete_forward and entry.context.cursor[2] > context.cursor[2] then return end
+  if entry.response.isIncomplete and entry.context.cursor[2] ~= context.cursor[2] then return end
+  if not entry.response.isIncomplete and entry.context.cursor[2] > context.cursor[2] then return end
 
   return entry.response
 end
 
 --- @param context blink.cmp.Context
 --- @param client vim.lsp.Client
---- @param response blink.cmp.CompletionResponse
+--- @param response lsp.CompletionList
 function cache.set(context, client, response)
   cache.entries[client.id] = {
     context = context,
@@ -58,10 +58,10 @@ local function request(context, client)
 end
 
 local known_defaults = {
-  'commitCharacters',
-  'insertTextFormat',
-  'insertTextMode',
-  'data',
+  commitCharacters = true,
+  insertTextFormat = true,
+  insertTextMode = true,
+  data = true,
 }
 
 local function get_completions(context, client)
@@ -83,7 +83,7 @@ local function get_completions(context, client)
 
       -- set defaults
       for key, value in pairs(res.itemDefaults or {}) do
-        if vim.tbl_contains(known_defaults, key) then item[key] = item[key] or value end
+        if known_defaults[key] then item[key] = item[key] or value end
       end
       if item.textEdit == nil then
         local new_text = item.textEditText or item.insertText or item.label
@@ -102,7 +102,7 @@ local function get_completions(context, client)
       end
     end
 
-    res.client_name = client.name
+    res.client_id = client.id
     return res
   end)
 end

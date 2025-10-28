@@ -10,42 +10,54 @@ local download = {}
 --- @field from_env? boolean When downloading a prebuilt binary, use the HTTPS_PROXY environment variable. Defaults to true
 --- @field url? string When downloading a prebuilt binary, use this proxy URL. This will ignore the HTTPS_PROXY environment variable
 
---- @param version string
---- @param system_triple string?
---- @param proxy blink.cmp.DownloadProxy?
---- @param extra_curl_args string[]?
---- @return blink.cmp.Task
-function download.from_github(version, system_triple, proxy, extra_curl_args)
-  local triple_task = system_triple and async.task.identity(system_triple) or system.get_triple()
+--- @class blink.cmp.DownloadOpts
+--- @field version? string
+--- @field system_triple? string
+--- @field proxy? blink.cmp.DownloadProxy
+--- @field extra_curl_args? string[]
 
-  return triple_task:map(function(triple)
-    if not triple then
-      utils.notify({
-        { 'Your system is not supported by ' },
-        { ' pre-built binaries ', 'DiagnosticVirtualTextInfo' },
-        { '. Try building from source via ' },
-        { " build = 'cargo build --release' ", 'DiagnosticVirtualTextInfo' },
-        { ' in your lazy.nvim spec and re-installing (requires Rust nightly)' },
-      })
+--- @param opts blink.cmp.DownloadOpts?
+--- @return blink.cmp.Task
+function download.from_github(opts)
+  opts = opts or {}
+  local version_task = opts.version and async.task.identity(opts.version)
+    or async.task.empty():map(function() return require('blink.cmp.fuzzy.download.git').get_tag() end)
+  local triple_task = opts.system_triple and async.task.identity(system_triple) or system.get_triple()
+
+  return version_task:map(function(version)
+    if not version then
+      utils.notify({ { 'Failed to get the current version from git, did you forget to lock your version?' } })
       return
     end
 
-    local base_url = 'https://github.com/saghen/blink.cmp/releases/download/' .. version .. '/'
-    local library_url = base_url .. triple .. files.get_lib_extension()
+    triple_task:map(function(triple)
+      if not triple then
+        utils.notify({
+          { 'Your system is not supported by ' },
+          { ' pre-built binaries ', 'DiagnosticVirtualTextInfo' },
+          { '. Try building from source via ' },
+          { ' :BlinkCmp build ', 'DiagnosticVirtualTextInfo' },
+        })
+        return
+      end
 
-    return download
-      .download_file(library_url, files.lib_filename .. '.tmp', proxy, extra_curl_args)
-      -- Mac caches the library in the kernel, so updating in place causes a crash
-      -- We instead write to a temporary file and rename it, as mentioned in:
-      -- https://developer.apple.com/documentation/security/updating-mac-software
-      :map(
-        function()
-          return files.rename(
-            files.lib_folder .. '/' .. files.lib_filename .. '.tmp',
-            files.lib_folder .. '/' .. files.lib_filename
-          )
-        end
-      )
+      local base_url = 'https://github.com/saghen/blink.cmp/releases/download/' .. version .. '/'
+      local library_url = base_url .. triple .. files.get_lib_extension()
+
+      return download
+        .download_file(library_url, files.lib_filename .. '.tmp', opts.proxy, opts.extra_curl_args)
+        -- Mac caches the library in the kernel, so updating in place causes a crash
+        -- We instead write to a temporary file and rename it, as mentioned in:
+        -- https://developer.apple.com/documentation/security/updating-mac-software
+        :map(
+          function()
+            return files.rename(
+              files.lib_folder .. '/' .. files.lib_filename .. '.tmp',
+              files.lib_folder .. '/' .. files.lib_filename
+            )
+          end
+        )
+    end)
   end)
 end
 
@@ -80,7 +92,7 @@ function download.download_file(url, filename, proxy, extra_curl_args)
 
     vim.system(args, {}, function(out)
       if out.code ~= 0 then
-        reject('Failed to download ' .. filename .. 'for pre-built binaries: ' .. out.stderr)
+        reject('Failed to download ' .. filename .. ': ' .. out.stderr)
       else
         resolve()
       end
