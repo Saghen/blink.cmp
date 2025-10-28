@@ -52,16 +52,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set Rust toolchain
-        if: contains(matrix.target, 'linux')
-        # https://github.com/rust-cross/cargo-zigbuild/issues/327
-        run: echo -e '[toolchain]\nchannel = "nightly-2025-02-19"' > rust-toolchain.toml
-
       - name: Install Rust
         run: |
-          # https://github.com/rust-cross/cargo-zigbuild/issues/327
-          rustup toolchain install nightly-2025-02-19
-          rustup default nightly-2025-02-19
+          rustup toolchain install nightly
+          rustup default nightly
           rustup target add ${{ matrix.target }}
 
       - name: Build for Linux
