@@ -69,6 +69,8 @@ function source:enabled()
   return ok
 end
 
+---@param ctx blink.cmp.Context
+---@param callback fun(result?: blink.cmp.CompletionResponse)
 function source:get_completions(ctx, callback)
   --- @type blink.cmp.CompletionItem[]
   local items = {}
@@ -165,6 +167,8 @@ function source:resolve(item, callback)
   callback(resolved_item)
 end
 
+---@param ctx blink.cmp.Context
+---@param item blink.cmp.CompletionItem
 function source:execute(ctx, item)
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
@@ -190,11 +194,11 @@ function source:execute(ctx, item)
     end
   end
 
-  -- get (0, 0) indexed cursor position
-  local cursor = ctx.get_cursor()
+  local cursor = ctx.get_cursor() --[[@as LuaSnip.BytecolBufferPosition]]
   cursor[1] = cursor[1] - 1
 
   local range = text_edits.get_from_item(item).range
+  ---@type LuaSnip.BufferRegion
   local clear_region = {
     from = { range.start.line, range.start.character },
     to = cursor,
@@ -204,18 +208,19 @@ function source:execute(ctx, item)
   local line_to_cursor = line:sub(1, cursor[2])
   local range_text = line:sub(range.start.character + 1, cursor[2])
 
+  ---@type LuaSnip.Opts.SnipExpandExpandParams?
   local expand_params = snip:matches(line_to_cursor, {
     fallback_match = range_text ~= line_to_cursor and range_text,
   })
 
   if expand_params ~= nil then
+    ---@diagnostic disable-next-line: undefined-field
     if expand_params.clear_region ~= nil then
+      ---@diagnostic disable-next-line: undefined-field
       clear_region = expand_params.clear_region
     elseif expand_params.trigger ~= nil then
-      clear_region = {
-        from = { cursor[1], cursor[2] - #expand_params.trigger },
-        to = cursor,
-      }
+      clear_region.from = { cursor[1], cursor[2] - #expand_params.trigger }
+      clear_region.to = cursor
     end
   end
 
