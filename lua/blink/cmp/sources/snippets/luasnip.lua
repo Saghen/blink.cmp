@@ -75,17 +75,18 @@ function source:get_completions(ctx, callback)
   --- @type blink.cmp.CompletionItem[]
   local items = {}
 
-  -- gather snippets from relevant filetypes, including extensions
+  -- Gather snippets from relevant filetypes, including extensions
   for _, ft in ipairs(require('luasnip.util.util').get_snippet_filetypes()) do
-    if self.items_cache[ft] then
+    if self.items_cache[ft] and #self.items_cache[ft] > 0 then
       for _, item in ipairs(self.items_cache[ft]) do
         table.insert(items, utils.shallow_copy(item))
       end
       goto continue
     end
 
-    -- cache not yet available for this filetype
-    self.items_cache[ft] = {}
+    -- Cache not yet available for this filetype
+    self.items_cache[ft] = nil
+
     -- Gather filetype snippets and, optionally, autosnippets
     local snippets = luasnip.get_snippets(ft, { type = 'snippets' })
     if self.opts.show_autosnippets then
@@ -104,6 +105,7 @@ function source:get_completions(ctx, callback)
       max_priority = math.max(max_priority, snip.effective_priority or 0)
     end
 
+    local ft_items = {}
     for _, snip in ipairs(snippets) do
       -- Convert priority of 1000 (with max of 8000) to string like "00007000|||asd" for sorting
       -- This will put high priority snippets at the top of the list, and break ties based on the trigger
@@ -122,11 +124,13 @@ function source:get_completions(ctx, callback)
           description = table.concat(snip.dscr, ' '),
         } or nil,
       }
-      -- populate snippet cache for this filetype
-      table.insert(self.items_cache[ft], item)
-      -- while we're at it, also populate completion items for this request
+      -- Populate snippet cache for this filetype
+      table.insert(ft_items, item)
+      -- While we're at it, also populate completion items for this request
       table.insert(items, utils.shallow_copy(item))
     end
+
+    self.items_cache[ft] = ft_items
 
     ::continue::
   end
