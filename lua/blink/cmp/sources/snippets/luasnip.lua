@@ -7,13 +7,11 @@
 --- @class blink.cmp.LuasnipSource : blink.cmp.Source
 --- @field config blink.cmp.LuasnipSourceOptions
 --- @field items_cache table<string, blink.cmp.CompletionItem[]>
+local source = {}
 
 local utils = require('blink.cmp.lib.utils')
 
---- @type blink.cmp.LuasnipSource
---- @diagnostic disable-next-line: missing-fields
-local source = {}
-
+--- @type blink.cmp.LuasnipSourceOptions
 local default_config = {
   use_show_condition = true,
   show_autosnippets = true,
@@ -146,13 +144,16 @@ function source:resolve(item, callback)
 
   local resolved_item = vim.deepcopy(item)
 
+  ---@type string|string[]|nil
   local detail = snip:get_docstring()
   if type(detail) == 'table' then detail = table.concat(detail, '\n') end
   resolved_item.detail = detail
 
+  ---@diagnostic disable-next-line: undefined-field
   if snip.dscr then
     resolved_item.documentation = {
       kind = 'markdown',
+      ---@diagnostic disable-next-line: undefined-field
       value = table.concat(vim.lsp.util.convert_input_to_markdown_lines(snip.dscr), '\n'),
     }
   end
@@ -165,9 +166,11 @@ function source:execute(ctx, item)
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
   -- if trigger is a pattern, expand "pattern" instead of actual snippet
+  ---@diagnostic disable-next-line: undefined-field
   if snip.regTrig then
+    ---@diagnostic disable-next-line: undefined-field
     local docTrig = self.config.prefer_doc_trig and snip.docTrig
-    snip = snip:get_pattern_expand_helper()
+    snip = snip:get_pattern_expand_helper() --[[@as LuaSnip.Snippet]]
 
     if docTrig then
       add_luasnip_callback(snip, 'pre_expand', function(snip, _)
