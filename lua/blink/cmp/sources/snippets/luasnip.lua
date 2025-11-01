@@ -11,17 +11,9 @@ local kind_snippet = require('blink.cmp.types').CompletionItemKind.Snippet
 --- @field use_label_description? boolean Whether to put the snippet description in the label description
 
 --- @class blink.cmp.LuasnipSource : blink.cmp.Source
---- @field config blink.cmp.LuasnipSourceOptions
+--- @field opts blink.cmp.LuasnipSourceOptions
 --- @field items_cache table<string, blink.cmp.CompletionItem[]>
 local source = {}
-
---- @type blink.cmp.LuasnipSourceOptions
-local default_config = {
-  use_show_condition = true,
-  show_autosnippets = true,
-  prefer_doc_trig = false,
-  use_label_description = false,
-}
 
 ---@param snippet table
 ---@param event string
@@ -34,17 +26,24 @@ local function add_luasnip_callback(snippet, event, callback)
   snippet.callbacks[-1][events[event]] = callback
 end
 
+---@param opts blink.cmp.LuasnipSourceOptions
 function source.new(opts)
-  local config = vim.tbl_deep_extend('keep', opts, default_config)
-  require('blink.cmp.config.utils').validate('sources.providers.snippets.opts', {
-    use_show_condition = { config.use_show_condition, 'boolean' },
-    show_autosnippets = { config.show_autosnippets, 'boolean' },
-    prefer_doc_trig = { config.prefer_doc_trig, 'boolean' },
-    use_label_description = { config.use_label_description, 'boolean' },
-  }, config)
-
   local self = setmetatable({}, { __index = source })
-  self.config = config
+
+  opts = vim.tbl_deep_extend('keep', opts or {}, {
+    use_show_condition = true,
+    show_autosnippets = true,
+    prefer_doc_trig = false,
+    use_label_description = false,
+  })
+  require('blink.cmp.config.utils').validate('sources.providers.snippets.opts', {
+    use_show_condition = { opts.use_show_condition, 'boolean' },
+    show_autosnippets = { opts.show_autosnippets, 'boolean' },
+    prefer_doc_trig = { opts.prefer_doc_trig, 'boolean' },
+    use_label_description = { opts.use_label_description, 'boolean' },
+  }, opts)
+
+  self.opts = opts
   self.items_cache = {}
 
   local luasnip_ag = vim.api.nvim_create_augroup('BlinkCmpLuaSnipReload', { clear = true })
@@ -87,7 +86,7 @@ function source:get_completions(ctx, callback)
     self.items_cache[ft] = {}
     -- Gather filetype snippets and, optionally, autosnippets
     local snippets = luasnip.get_snippets(ft, { type = 'snippets' })
-    if self.config.show_autosnippets then
+    if self.opts.show_autosnippets then
       local autosnippets = luasnip.get_snippets(ft, { type = 'autosnippets' })
       for _, s in ipairs(autosnippets) do
         add_luasnip_callback(s, 'enter', require('blink.cmp').hide)
@@ -113,11 +112,11 @@ function source:get_completions(ctx, callback)
       local item = {
         kind = kind_snippet,
         label = snip.regTrig and snip.name or snip.trigger,
-        insertText = self.config.prefer_doc_trig and snip.docTrig or snip.trigger,
+        insertText = self.opts.prefer_doc_trig and snip.docTrig or snip.trigger,
         insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
         sortText = sort_text,
         data = { snip_id = snip.id, show_condition = snip.show_condition },
-        labelDetails = snip.dscr and self.config.use_label_description and {
+        labelDetails = snip.dscr and self.opts.use_label_description and {
           description = table.concat(snip.dscr, ' '),
         } or nil,
       }
@@ -131,7 +130,7 @@ function source:get_completions(ctx, callback)
   end
 
   -- Filter items based on show_condition, if configured
-  if self.config.use_show_condition then
+  if self.opts.use_show_condition then
     local line_to_cursor = ctx.line:sub(0, ctx.cursor[2] - 1)
     items = vim.tbl_filter(function(item) return item.data.show_condition(line_to_cursor) end, items)
   end
@@ -173,7 +172,7 @@ function source:execute(ctx, item)
   ---@diagnostic disable-next-line: undefined-field
   if snip.regTrig then
     ---@diagnostic disable-next-line: undefined-field
-    local docTrig = self.config.prefer_doc_trig and snip.docTrig
+    local docTrig = self.opts.prefer_doc_trig and snip.docTrig
     snip = snip:get_pattern_expand_helper() --[[@as LuaSnip.Snippet]]
 
     if docTrig then
