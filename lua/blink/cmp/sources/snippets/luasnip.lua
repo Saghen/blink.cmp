@@ -1,3 +1,9 @@
+---@type LuaSnip.API
+local luasnip
+local utils = require('blink.cmp.lib.utils')
+local text_edits = require('blink.cmp.lib.text_edits')
+local kind_snippet = require('blink.cmp.types').CompletionItemKind.Snippet
+
 --- @class blink.cmp.LuasnipSourceOptions
 --- @field use_show_condition? boolean Whether to use show_condition for filtering snippets
 --- @field show_autosnippets? boolean Whether to show autosnippets in the completion list
@@ -8,8 +14,6 @@
 --- @field config blink.cmp.LuasnipSourceOptions
 --- @field items_cache table<string, blink.cmp.CompletionItem[]>
 local source = {}
-
-local utils = require('blink.cmp.lib.utils')
 
 --- @type blink.cmp.LuasnipSourceOptions
 local default_config = {
@@ -61,7 +65,8 @@ function source.new(opts)
 end
 
 function source:enabled()
-  local ok, _ = pcall(require, 'luasnip')
+  local ok, mod = pcall(require, 'luasnip')
+  if ok then luasnip = mod end
   return ok
 end
 
@@ -81,13 +86,13 @@ function source:get_completions(ctx, callback)
     -- cache not yet available for this filetype
     self.items_cache[ft] = {}
     -- Gather filetype snippets and, optionally, autosnippets
-    local snippets = require('luasnip').get_snippets(ft, { type = 'snippets' })
+    local snippets = luasnip.get_snippets(ft, { type = 'snippets' })
     if self.config.show_autosnippets then
-      local autosnippets = require('luasnip').get_snippets(ft, { type = 'autosnippets' })
+      local autosnippets = luasnip.get_snippets(ft, { type = 'autosnippets' })
       for _, s in ipairs(autosnippets) do
         add_luasnip_callback(s, 'enter', require('blink.cmp').hide)
       end
-      snippets = require('blink.cmp.lib.utils').shallow_copy(snippets)
+      snippets = utils.shallow_copy(snippets)
       vim.list_extend(snippets, autosnippets)
     end
     snippets = vim.tbl_filter(function(snip) return not snip.hidden end, snippets)
@@ -106,7 +111,7 @@ function source:get_completions(ctx, callback)
 
       --- @type lsp.CompletionItem
       local item = {
-        kind = require('blink.cmp.types').CompletionItemKind.Snippet,
+        kind = kind_snippet,
         label = snip.regTrig and snip.name or snip.trigger,
         insertText = self.config.prefer_doc_trig and snip.docTrig or snip.trigger,
         insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
@@ -140,7 +145,7 @@ function source:get_completions(ctx, callback)
 end
 
 function source:resolve(item, callback)
-  local snip = require('luasnip').get_id_snippet(item.data.snip_id)
+  local snip = luasnip.get_id_snippet(item.data.snip_id)
 
   local resolved_item = vim.deepcopy(item)
 
@@ -162,7 +167,6 @@ function source:resolve(item, callback)
 end
 
 function source:execute(ctx, item)
-  local luasnip = require('luasnip')
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
   -- if trigger is a pattern, expand "pattern" instead of actual snippet
@@ -191,7 +195,7 @@ function source:execute(ctx, item)
   local cursor = ctx.get_cursor()
   cursor[1] = cursor[1] - 1
 
-  local range = require('blink.cmp.lib.text_edits').get_from_item(item).range
+  local range = text_edits.get_from_item(item).range
   local clear_region = {
     from = { range.start.line, range.start.character },
     to = cursor,
