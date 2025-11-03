@@ -26,6 +26,28 @@ local function add_luasnip_callback(snippet, event, callback)
   snippet.callbacks[-1][events[event]] = callback
 end
 
+---@param snippet LuaSnip.Snippet
+---@return string?
+local function get_insert_text(snippet)
+  local res = {}
+  for _, node in ipairs(snippet.nodes) do
+    ---@cast node LuaSnip.Node
+    -- TODO: How to know the node type? Would be nice to handle the others as well
+    -- textNodes
+    if type(node.static_text) == 'table' then res[#res + 1] = table.concat(node.static_text, '\n') end
+  end
+
+  -- Fallback
+  if #res == 1 then
+    -- Prefer docTrig over trigger
+    ---@diagnostic disable-next-line: undefined-field
+    if snippet.docTrig then return snippet.docTrig end
+    return snippet.trigger
+  end
+
+  return table.concat(res, '')
+end
+
 ---@param opts blink.cmp.LuasnipSourceOptions
 function source.new(opts)
   local self = setmetatable({}, { __index = source })
@@ -116,7 +138,7 @@ function source:get_completions(ctx, callback)
       local item = {
         kind = kind_snippet,
         label = snip.regTrig and snip.name or snip.trigger,
-        insertText = self.opts.prefer_doc_trig and snip.docTrig or snip.trigger,
+        insertText = get_insert_text(snip),
         insertTextFormat = vim.lsp.protocol.InsertTextFormat.PlainText,
         sortText = sort_text,
         data = { snip_id = snip.id, show_condition = snip.show_condition },
