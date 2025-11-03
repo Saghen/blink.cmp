@@ -178,6 +178,11 @@ function registry:expand_vars(snippet, cache_key)
       end
 
       if replacement then
+        -- Escape special chars according to the snippet grammar EBNF conventions
+        replacement = replacement:gsub('\\', '\\\\') -- Escape backslashes first!
+        replacement = replacement:gsub('%$', '\\$')
+        replacement = replacement:gsub('}', '\\}')
+
         -- Escape % characters (otherwise fails with strings like `%20`)
         local escaped = replacement:gsub('%%', '%%%%')
 
