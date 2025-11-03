@@ -7,7 +7,7 @@ local kind_snippet = require('blink.cmp.types').CompletionItemKind.Snippet
 --- @class blink.cmp.LuasnipSourceOptions
 --- @field use_show_condition? boolean Whether to use show_condition for filtering snippets
 --- @field show_autosnippets? boolean Whether to show autosnippets in the completion list
---- @field prefer_doc_trig? boolean When expanding `regTrig` snippets, prefer `docTrig` over `trig` placeholder
+--- @field prefer_doc_trig? boolean When expanding `regTrig` snippets, prefer `docTrig` over `trig` placeholder (deprecated)
 --- @field use_label_description? boolean Whether to put the snippet description in the label description
 
 --- @class blink.cmp.LuasnipSource : blink.cmp.Source
@@ -55,13 +55,13 @@ function source.new(opts)
   opts = vim.tbl_deep_extend('keep', opts or {}, {
     use_show_condition = true,
     show_autosnippets = true,
-    prefer_doc_trig = false,
+    prefer_doc_trig = true, -- TODO: Remove in v2.0
     use_label_description = false,
   })
   require('blink.cmp.config.utils').validate('sources.providers.snippets.opts', {
     use_show_condition = { opts.use_show_condition, 'boolean' },
     show_autosnippets = { opts.show_autosnippets, 'boolean' },
-    prefer_doc_trig = { opts.prefer_doc_trig, 'boolean' },
+    prefer_doc_trig = { opts.prefer_doc_trig, 'boolean' }, -- TODO: Remove in v2.0
     use_label_description = { opts.use_label_description, 'boolean' },
   }, opts)
 
