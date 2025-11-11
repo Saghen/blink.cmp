@@ -99,7 +99,7 @@ function menu.open_loading(context)
       score = 0,
       score_offset = 0,
       client_id = 0,
-      client_name = ''
+      client_name = '',
     },
   }, {})
 
