@@ -9,7 +9,7 @@
 --- @field resolve_cache table<blink.cmp.CompletionItem, blink.cmp.Task>
 ---
 --- @field new fun(id: string, config: blink.cmp.SourceProviderConfig): blink.cmp.SourceProvider
---- @field enabled fun(self: blink.cmp.SourceProvider): boolean
+--- @field enabled boolean | fun(self: blink.cmp.SourceProvider): boolean
 --- @field get_trigger_characters fun(self: blink.cmp.SourceProvider): string[]
 --- @field get_completions fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, on_items: fun(items: blink.cmp.CompletionItem[], is_cached: boolean))
 --- @field should_show_items fun(self: blink.cmp.SourceProvider, context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
@@ -48,7 +48,10 @@ end
 
 function source:enabled()
   -- user defined
-  if not self.config.enabled() then return false end
+  if self.config.enabled ~= nil then
+    if type(self.config.enabled) == 'boolean' then return self.config.enabled end
+    if type(self.config.enabled) == 'function' then return self.config.enabled() end
+  end
 
   -- source defined
   if self.module.enabled == nil then return true end

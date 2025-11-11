@@ -9,7 +9,7 @@
 
 --- @class blink.cmp.Source
 --- @field new fun(opts: table, config: blink.cmp.SourceProviderConfig): blink.cmp.Source
---- @field enabled? fun(self: blink.cmp.Source): boolean
+--- @field enabled? boolean | fun(self: blink.cmp.Source): boolean
 --- @field get_trigger_characters? fun(self: blink.cmp.Source): string[]
 --- @field get_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, callback: fun(response?: blink.cmp.CompletionResponse)): (fun(): nil) | nil
 --- @field should_show_items? fun(self: blink.cmp.Source, context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
@@ -20,7 +20,7 @@
 --- @field reload? fun(self: blink.cmp.Source): nil
 
 --- @class blink.cmp.SourceOverride
---- @field enabled? fun(self: blink.cmp.Source): boolean
+--- @field enabled? boolean | fun(self: blink.cmp.Source): boolean
 --- @field get_trigger_characters? fun(self: blink.cmp.Source): string[]
 --- @field get_completions? fun(self: blink.cmp.Source, context: blink.cmp.Context, callback: fun(response: blink.cmp.CompletionResponse | nil)): (fun(): nil) | nil
 --- @field should_show_items? fun(self: blink.cmp.Source, context: blink.cmp.Context, items: blink.cmp.CompletionItem[]): boolean
