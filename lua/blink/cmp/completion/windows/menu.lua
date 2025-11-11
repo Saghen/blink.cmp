@@ -85,14 +85,21 @@ function menu.open_loading(context)
   menu.renderer:draw(context, menu.win:get_buf(), {
     {
       label = 'Loading...',
+      detail = '',
+      documentation = '',
 
-      kind_icon = '󰒡',
-      kind_name = '',
       kind = require('blink.cmp.types').CompletionItemKind.Function,
+      kind_name = '',
+      kind_icon = '󰒡',
+      kind_hl = '',
 
       source_id = '',
       source_name = '',
       cursor_column = 0,
+      score = 0,
+      score_offset = 0,
+      client_id = 0,
+      client_name = ''
     },
   }, {})
 
