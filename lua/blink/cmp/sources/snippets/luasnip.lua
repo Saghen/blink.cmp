@@ -14,17 +14,17 @@ local kind_snippet = require('blink.cmp.types').CompletionItemKind.Snippet
 --- @class blink.cmp.LuasnipSource : blink.cmp.Source
 --- @field opts blink.cmp.LuasnipSourceOptions
 --- @field items_cache table<string, blink.cmp.CompletionItem[]>
+--- @field has_loaded boolean
 local source = {}
 
 ---@param snippet table
----@param event string
+---@param event number
 ---@param callback fun(table, table)
 local function add_luasnip_callback(snippet, event, callback)
-  local events = require('luasnip.util.events')
   -- not defined for autosnippets
   if snippet.callbacks == nil then return end
   snippet.callbacks[-1] = snippet.callbacks[-1] or {}
-  snippet.callbacks[-1][events[event]] = callback
+  snippet.callbacks[-1][event] = callback
 end
 
 ---@param snippet LuaSnip.Snippet
@@ -42,8 +42,7 @@ local function regex_callback(snippet, docTrig)
 end
 
 ---@param snippet LuaSnip.Snippet
-local function choice_callback(snippet)
-  local events = require('luasnip.util.events')
+local function choice_callback(snippet, events)
   local types = require('luasnip.util.types')
 
   for _, node in ipairs(snippet.insert_nodes) do
@@ -102,29 +101,32 @@ function source.new(opts)
 
   self.opts = opts
   self.items_cache = {}
+  self.has_loaded = false
 
-  local luasnip_ag = vim.api.nvim_create_augroup('BlinkCmpLuaSnipReload', { clear = true })
-  vim.api.nvim_create_autocmd('User', {
-    pattern = 'LuasnipSnippetsAdded',
-    callback = function() self:reload() end,
-    group = luasnip_ag,
-    desc = 'Reset internal cache of luasnip source of blink.cmp when new snippets are added',
-  })
-  vim.api.nvim_create_autocmd('User', {
-    pattern = 'LuasnipCleanup',
-    callback = function() self:reload() end,
-    group = luasnip_ag,
-    desc = 'Reload luasnip source of blink.cmp when snippets are cleared',
-  })
+  local ok, mod = pcall(require, 'luasnip')
+  if ok then
+    self.has_loaded = true
+    luasnip = mod
+
+    local luasnip_ag = vim.api.nvim_create_augroup('BlinkCmpLuaSnipReload', { clear = true })
+    local events = {
+      { pattern = 'LuasnipSnippetsAdded', desc = 'Clear the Luasnip cache in blink.cmp when new snippets are added' },
+      { pattern = 'LuasnipCleanup', desc = 'Clear the Luasnip cache in blink.cmp when snippets are cleared' },
+    }
+    for _, event in ipairs(events) do
+      vim.api.nvim_create_autocmd('User', {
+        pattern = event.pattern,
+        callback = function() self:reload() end,
+        group = luasnip_ag,
+        desc = event.desc,
+      })
+    end
+  end
 
   return self
 end
 
-function source:enabled()
-  local ok, mod = pcall(require, 'luasnip')
-  if ok then luasnip = mod end
-  return ok
-end
+function source:enabled() return self.has_loaded end
 
 ---@param ctx blink.cmp.Context
 ---@param callback fun(result?: blink.cmp.CompletionResponse)
@@ -134,7 +136,7 @@ function source:get_completions(ctx, callback)
 
   if luasnip.choice_active() then
     ---@type LuaSnip.ChoiceNode
-    local active_choice = require('luasnip.session').active_choice_nodes[ctx.bufnr]
+    local active_choice = luasnip.session.active_choice_nodes[ctx.bufnr]
     for i, choice in ipairs(active_choice.choices) do
       local text = choice:get_static_text()[1]
       table.insert(items, {
@@ -149,8 +151,10 @@ function source:get_completions(ctx, callback)
     return
   end
 
+  local events = require('luasnip.util.events')
+
   -- Else, gather snippets from relevant filetypes, including extensions
-  for _, ft in ipairs(require('luasnip.util.util').get_snippet_filetypes()) do
+  for _, ft in ipairs(luasnip.get_snippet_filetypes()) do
     if self.items_cache[ft] and #self.items_cache[ft] > 0 then
       for _, item in ipairs(self.items_cache[ft]) do
         table.insert(items, utils.shallow_copy(item))
@@ -166,7 +170,7 @@ function source:get_completions(ctx, callback)
     if self.opts.show_autosnippets then
       local autosnippets = luasnip.get_snippets(ft, { type = 'autosnippets' })
       for _, s in ipairs(autosnippets) do
-        add_luasnip_callback(s, 'enter', cmp.hide)
+        add_luasnip_callback(s, events.enter, cmp.hide)
       end
       snippets = utils.shallow_copy(snippets)
       vim.list_extend(snippets, autosnippets)
@@ -252,12 +256,13 @@ function source:execute(ctx, item)
 
   local snip = luasnip.get_id_snippet(item.data.snip_id)
 
+  local events = require('luasnip.util.events')
   if snip.regTrig then
     local docTrig = self.opts.prefer_doc_trig and snip.docTrig
     snip = snip:get_pattern_expand_helper()
-    if docTrig then add_luasnip_callback(snip, 'pre_expand', function(s) regex_callback(s, docTrig) end) end
+    if docTrig then add_luasnip_callback(snip, events.pre_expand, function(s) regex_callback(s, docTrig) end) end
   else
-    add_luasnip_callback(snip, 'pre_expand', choice_callback)
+    add_luasnip_callback(snip, events.pre_expand, function(s) choice_callback(s, events) end)
   end
 
   local cursor = ctx.get_cursor() --[[@as LuaSnip.BytecolBufferPosition]]
