@@ -3,7 +3,7 @@
 ---
 --- @field name string
 --- @field module string
---- @field enabled boolean | fun(): boolean
+--- @field enabled fun(): boolean
 --- @field async fun(ctx: blink.cmp.Context): boolean
 --- @field timeout_ms fun(ctx: blink.cmp.Context): number
 --- @field transform_items fun(ctx: blink.cmp.Context, items: blink.cmp.CompletionItem[]): blink.cmp.CompletionItem[]
