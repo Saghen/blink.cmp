@@ -26,7 +26,7 @@ end
 ---@return boolean
 function cmdline:enabled()
   return vim.bo.ft == 'vim'
-    or (utils.is_command_line({ ':', '@' }) and not utils.in_ex_context({ 'substitute', 'global', 'vglobal' }))
+    or (utils.is_command_line({ ':', '@' }) and not utils.in_ex_context(constants.ex_search_commands))
 end
 
 ---@return table

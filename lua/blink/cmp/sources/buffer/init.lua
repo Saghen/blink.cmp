@@ -3,6 +3,7 @@
 -- but ensure it doesn't add too much complexity
 
 local async = require('blink.cmp.lib.async')
+local constants = require('blink.cmp.sources.cmdline.constants')
 local parser = require('blink.cmp.sources.buffer.parser')
 local buf_utils = require('blink.cmp.sources.buffer.utils')
 local utils = require('blink.cmp.sources.lib.utils')
@@ -16,7 +17,7 @@ local dedup = require('blink.cmp.lib.utils').deduplicate
 --- @field max_total_buffer_size integer Maximum text size across all buffers (default: 500KB)
 --- @field retention_order string[] Order in which buffers are retained for completion, up to the max total size limit
 --- @field use_cache boolean Cache words for each buffer which increases memory usage but drastically reduces cpu usage. Memory usage depends on the size of the buffers from `get_bufnrs`. For 100k items, it will use ~20MBs of memory. Invalidated and refreshed whenever the buffer content is modified.
---- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s) and global (:g) commands. Note: Enabling this option will temporarily disable Neovim's 'inccommand' feature while editing Ex commands, due to a known redraw issue (see neovim/neovim#9783). This means you will lose live substitution previews when using :s, :smagic, or :snomagic while buffer completions are active.
+--- @field enable_in_ex_commands boolean Whether to enable buffer source in substitute (:s), global (:g) and grep commands (:grep, :vimgrep, etc.). Note: Enabling this option will temporarily disable Neovim's 'inccommand' feature while editing Ex commands, due to a known redraw issue (see neovim/neovim#9783). This means you will lose live substitution previews when using :s, :smagic, or :snomagic while buffer completions are active.
 
 --- @param words string[]
 --- @return blink.cmp.CompletionItem[]
@@ -120,7 +121,7 @@ function buffer:is_search_context()
   -- In search mode
   if utils.is_command_line({ '/', '?' }) then return true end
   -- In specific ex commands, if user opts in
-  if self.opts.enable_in_ex_commands and utils.in_ex_context({ 'substitute', 'global', 'vglobal' }) then return true end
+  if self.opts.enable_in_ex_commands and utils.in_ex_context(constants.ex_search_commands) then return true end
 
   return false
 end

@@ -109,6 +109,17 @@ return {
     syntax = 'syntax',
     user = 'user',
   },
+  ex_search_commands = {
+    'substitute',
+    'global',
+    'vglobal',
+    'vimgrep',
+    'vimgrepadd',
+    'grep',
+    'grepadd',
+    'lvimgrep',
+    'lvimgrepadd',
+  },
   modifiers = {
     p = 'full path',
     h = 'directory (head)',
