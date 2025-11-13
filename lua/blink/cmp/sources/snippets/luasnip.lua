@@ -48,19 +48,19 @@ local function choice_callback(snippet, events)
   for _, node in ipairs(snippet.insert_nodes) do
     if node.type == types.choiceNode then
       node.node_callbacks = {
-        [events.enter] = function(
-          n --[[@cast n LuaSnip.ChoiceNode]]
-        )
-          vim.schedule(function()
-            local index = utils.find_idx(n.choices, function(choice) return choice == n.active_choice end)
-            n:set_text_raw({ '' }) -- NOTE: Available since v2.4.1
-            cmp.show({ initial_selected_item_idx = index, providers = { 'snippets' } })
-          end)
+        [events.enter] = function(n)
+          --[[@cast n LuaSnip.ChoiceNode]]
+          n:set_text({ '' }) -- NOTE: Clear the current text, we'll restore it when leaving the node. Available since v2.4.1
+          local index = utils.find_idx(n.choices, function(choice) return choice == n.active_choice end)
+          vim.schedule(function() cmp.show({ initial_selected_item_idx = index, providers = { 'snippets' } }) end)
         end,
         [events.change_choice] = function()
           vim.schedule(function() luasnip.jump(1) end)
         end,
-        [events.leave] = function() vim.schedule(cmp.hide) end,
+        [events.leave] = function(n)
+          --[[@cast n LuaSnip.ChoiceNode]]
+          n:set_text(n.active_choice.static_text)
+        end,
       }
     end
   end
