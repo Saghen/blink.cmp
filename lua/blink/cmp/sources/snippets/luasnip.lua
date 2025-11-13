@@ -69,17 +69,19 @@ end
 ---@param snippet LuaSnip.Snippet
 ---@return string?
 local function get_insert_text(snippet)
+  if snippet.docTrig then return snippet.docTrig end
+
+  local types = require('luasnip.util.types')
   local res = {}
   for _, node in ipairs(snippet.nodes) do
-    if node.static_text then res[#res + 1] = table.concat(node:get_static_text(), '\n') end
-  end
-  -- Fallback
-  if #res == 1 then
-    if snippet.docTrig then return snippet.docTrig end
-    return snippet.trigger
+    if node.static_text then
+      res[#res + 1] = table.concat(node:get_static_text(), '\n')
+    elseif vim.tbl_contains({ types.dynamicNode, types.functionNode }, node.type) then
+      res[#res + 1] = 'xxxxxxx'
+    end
   end
 
-  return table.concat(res, '')
+  return #res == 1 and snippet.trigger or table.concat(res, '')
 end
 
 ---@param opts blink.cmp.LuasnipSourceOptions
