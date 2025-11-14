@@ -1,3 +1,44 @@
+## [1.8.0](https://github.com/Saghen/blink.cmp/compare/v1.7.0...v1.8.0) (2025-11-14)
+
+### Highlights
+
+- Frizbee updated to 0.6.0 for [~2x performance boost](https://github.com/saghen/frizbee/pull/43)
+- Mostly eliminated overhead while running macros
+- Removed `stat` calls and reduced memory usage in path source
+
+### Features
+
+* allow string return in keymap ([#2144](https://github.com/Saghen/blink.cmp/issues/2144)) ([7fc7947](https://github.com/Saghen/blink.cmp/commit/7fc79472833027eb8d8e1a348d139cc66e042893))
+* **cmdline:** enable buffer source for grep commands ([1596716](https://github.com/Saghen/blink.cmp/commit/15967164b71142f95a59f59a7ad6e6d57abc320f)), closes [#2251](https://github.com/Saghen/blink.cmp/issues/2251)
+* **fuzzy:** allow setting sort list as a function ([#2189](https://github.com/Saghen/blink.cmp/issues/2189)) ([138314a](https://github.com/Saghen/blink.cmp/commit/138314a7bda2d987822b40d824f98624f2c5cd37))
+
+### Bug Fixes
+
+* `blink.cmp.KeymapCommand` type annotations ([#2180](https://github.com/Saghen/blink.cmp/issues/2180)) ([a999ddc](https://github.com/Saghen/blink.cmp/commit/a999ddca2f629faf8a554a8fff904931935a7b1c))
+* clamp the start and end lines of the range ([#2177](https://github.com/Saghen/blink.cmp/issues/2177)) ([89c196f](https://github.com/Saghen/blink.cmp/commit/89c196f326b5ea42856eae997191fa7625c2c6eb)), closes [#2170](https://github.com/Saghen/blink.cmp/issues/2170)
+* **cmdline:** handle `:=expr` for proper Lua expression completion ([2fcf66a](https://github.com/Saghen/blink.cmp/commit/2fcf66aa31e37d4b443c669ec1bf189530dcbf20))
+* **cmdline:** skip filename modifiers detection when using help command ([cb87357](https://github.com/Saghen/blink.cmp/commit/cb87357e93376fbe9b12e60333c7f5788baca057)), closes [#2211](https://github.com/Saghen/blink.cmp/issues/2211)
+* **cmdline:** skip handling command separator during path completion ([cc8c9b7](https://github.com/Saghen/blink.cmp/commit/cc8c9b737d9ddc5dd0d9869ca2970a3859be9c5f)), closes [#2192](https://github.com/Saghen/blink.cmp/issues/2192)
+* correct usage of 'e.g.' and 'i.e.' in documentation ([1e96a5b](https://github.com/Saghen/blink.cmp/commit/1e96a5bde3fd15ec6cc1013a6828830b3686aa9d))
+* disable in macros ([afc4f4d](https://github.com/Saghen/blink.cmp/commit/afc4f4d260af11b248a79c5c8b4f82014f7330f4)), closes [#2161](https://github.com/Saghen/blink.cmp/issues/2161)
+* don't modify global &iskeyword ([#2223](https://github.com/Saghen/blink.cmp/issues/2223)) ([8743384](https://github.com/Saghen/blink.cmp/commit/87433840b4d8cce053d6b8cd57f3d75a27c8cd8b))
+* ellipsis double width replacement not applied ([#2225](https://github.com/Saghen/blink.cmp/issues/2225)) ([312097b](https://github.com/Saghen/blink.cmp/commit/312097b9e34e45e430d55968cef014b88e6e3549))
+* injected per-filetype providers not inheriting default providers ([40380e7](https://github.com/Saghen/blink.cmp/commit/40380e711b616a28affb0f4086a2f7de2f2a556b))
+* **luasnip:** only pass `fallback_match` if different from `line_to_cursor` ([a60d8c0](https://github.com/Saghen/blink.cmp/commit/a60d8c0a07a99a8549bc0d74edefc02c47312077))
+* **luasnip:** use actual cursor pos for snippet match ([#2206](https://github.com/Saghen/blink.cmp/issues/2206)) ([de2f709](https://github.com/Saghen/blink.cmp/commit/de2f70935d27c3f911fb37dc20ca5aec60956ebc))
+* **menu:** add missing loading item properties ([ab1b366](https://github.com/Saghen/blink.cmp/commit/ab1b3661e2b263e3fd305f24bfe4b3d5c2049bc4)), closes [#2](https://github.com/Saghen/blink.cmp/issues/2)
+* **nix:** fix Cargo sandbox builds on Darwin via Fenix update ([#2226](https://github.com/Saghen/blink.cmp/issues/2226)) ([d93e01a](https://github.com/Saghen/blink.cmp/commit/d93e01a5570e70830306c265b74699b3a1d38295))
+* **snippet:** handle `$VAR` and `${VAR}` variable forms correctly ([a4ab037](https://github.com/Saghen/blink.cmp/commit/a4ab037eefdb9949896ea8553f918bd6250d62bd)), closes [#2212](https://github.com/Saghen/blink.cmp/issues/2212)
+* **snippets:** ensure proper espcaping of special chars ([#2239](https://github.com/Saghen/blink.cmp/issues/2239)) ([230ccf8](https://github.com/Saghen/blink.cmp/commit/230ccf84764cac7bd81b002cc76be41cbc4671a8)), closes [#2072](https://github.com/Saghen/blink.cmp/issues/2072) [#2028](https://github.com/Saghen/blink.cmp/issues/2028)
+* **snippets:** provide `textEdit` field for builtin snippet ([#2233](https://github.com/Saghen/blink.cmp/issues/2233)) ([2408f14](https://github.com/Saghen/blink.cmp/commit/2408f14f740f89d603cad33fe8cbd92ab068cc92)), closes [#2159](https://github.com/Saghen/blink.cmp/issues/2159)
+* stick to vsnip API in vimscript ([#2197](https://github.com/Saghen/blink.cmp/issues/2197)) ([5eb4e7f](https://github.com/Saghen/blink.cmp/commit/5eb4e7fb3d2d5f28303fb558c614569adabff3ac))
+
+### Performance Improvements
+
+* **path:** drop unused stat calls ([2b44b9c](https://github.com/Saghen/blink.cmp/commit/2b44b9cc94d426b355f1c43e4fc25170f1a89948)), closes [#2196](https://github.com/Saghen/blink.cmp/issues/2196)
+* **path:** improve async dir scan with chunked callbacks ([#2204](https://github.com/Saghen/blink.cmp/issues/2204)) ([5037cfa](https://github.com/Saghen/blink.cmp/commit/5037cfa645a9c4f5d6e2a3f6a44e096df86c8093)), closes [#2196](https://github.com/Saghen/blink.cmp/issues/2196)
+* **path:** limit max entries per directory to 5000 ([5b4055e](https://github.com/Saghen/blink.cmp/commit/5b4055eba7b141096e1bdf7941ff531b2bd98653)), closes [#2196](https://github.com/Saghen/blink.cmp/issues/2196)
+
 ## [1.7.0](https://github.com/Saghen/blink.cmp/compare/v1.6.0...v1.7.0) (2025-09-15)
 
 ### Highlights
