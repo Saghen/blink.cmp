@@ -98,7 +98,7 @@ pub fn fuzzy(
         })?;
 
     // Sort by provider idx then index in haystack
-    matches.sort_by_key(|m| (m.provider_idx, m.mtch.index_in_haystack));
+    matches.sort_by_key(|m| (m.provider_idx, m.mtch.index));
 
     // Sort by user-defined sorts
     if let Some(sorts) = opts.sorts {
@@ -131,7 +131,7 @@ pub fn fuzzy(
 
     Ok((
         matches.iter().map(|m| m.provider_idx).collect(),
-        matches.iter().map(|m| m.mtch.index_in_haystack).collect(),
+        matches.iter().map(|m| m.mtch.index).collect(),
         matches.iter().map(|m| m.score).collect(),
         matches.iter().map(|m| m.mtch.exact).collect(),
     ))
