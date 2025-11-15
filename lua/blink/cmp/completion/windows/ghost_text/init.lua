@@ -22,14 +22,14 @@ local ghost_text = {
   context = nil,
 }
 
--- immediately re-draw the preview when the menu opens/closes
+-- Immediately re-draw the preview when the menu opens/closes
 menu.open_emitter:on(function()
   if ghost_text.is_open() and config.show_with_menu then return end
-  ghost_text.draw_preview()
+  vim.schedule(ghost_text.draw_preview)
 end)
 menu.close_emitter:on(function()
   if ghost_text.is_open() and config.show_without_menu then return end
-  ghost_text.draw_preview()
+  vim.schedule(ghost_text.draw_preview)
 end)
 
 function ghost_text.enabled()
@@ -70,30 +70,23 @@ function ghost_text.show_preview(context, items, selection_idx)
   ghost_text.context = context
 
   vim.api.nvim_set_decoration_provider(ghost_text.ns, {
-    on_win = function(_, _, buf) return (utils.is_cmdwin() or utils.is_noice()) and buf == ghost_text_buf end,
-    on_line = function(_, _, buf)
-      local ok, changedtick = pcall(vim.api.nvim_buf_get_changedtick, buf)
-      if not ok then
-        ghost_text.last_render_tick[buf] = nil
-        return
+    on_win = function(_, _, buf)
+      if buf ~= ghost_text_buf then return end
+
+      -- noice heavily redraw for search types
+      if vim.tbl_contains({ '/', '?' }, vim.fn.getcmdtype()) then
+        local ok, changedtick = pcall(vim.api.nvim_buf_get_changedtick, buf)
+        if not ok then
+          ghost_text.last_render_tick[buf] = nil
+          return
+        end
+        if ghost_text.last_render_tick[buf] == changedtick then return end
+        ghost_text.last_render_tick[buf] = changedtick
       end
-      if ghost_text.last_render_tick[buf] == changedtick then return end
-      ghost_text.last_render_tick[buf] = changedtick
+
       ghost_text.draw_preview()
     end,
   })
-
-  -- Immediately re-draw the preview when the cursor moves/text changes
-  vim.api.nvim_create_autocmd({ 'CursorMovedI', 'TextChangedI' }, {
-    group = vim.api.nvim_create_augroup('BlinkCmpGhostTextRedraw', { clear = true }),
-    callback = function() ghost_text.draw_preview() end,
-  })
-
-  if utils.is_cmdline() then
-    vim.api.nvim__redraw({ buf = ghost_text_buf, flush = true })
-  else
-    ghost_text.draw_preview()
-  end
 end
 
 --- Redraws the ghost text preview if already shown,
@@ -125,27 +118,15 @@ function ghost_text.draw_preview()
 
   local range = text_edit.range
   local line = ghost_text.context.get_line()
+  local start_col, end_col = range.start.character, range['end'].character
 
-  local typed_text = line:sub(range.start.character + 1, range['end'].character)
-  local typed_length = vim.fn.strchars(typed_text)
-  local extmark_col = range['end'].character
-
-  -- For multiline edits, LSP's end.character may not always match the cursor column.
-  -- (e.g. rust-analyzer with unmatched parens).
-  -- Prefer the actual cursor position to avoid out-of-bounds errors.
-  if range.start.line ~= range['end'].line then
-    local cursor_col = vim.api.nvim_win_get_cursor(0)[2]
-    local cursor_text = line:sub(range.start.character + 1, cursor_col)
-    typed_length = vim.fn.strchars(cursor_text)
-    extmark_col = cursor_col
-  end
-
-  -- Clamp typed_length to valid bounds
-  local newtext_chars = vim.fn.strchars(text_edit.newText)
-  typed_length = math.max(0, math.min(typed_length, newtext_chars))
-
+  -- Determine the actual end position for typed text. Use cursor column if
+  -- multiline, otherwise use LSP end character.
+  local typed_end_col = (range.start.line ~= range['end'].line) and ghost_text.context.get_cursor()[2] or end_col
+  local typed_text = line:sub(start_col + 1, typed_end_col)
+  local typed_length = math.max(0, math.min(vim.fn.strchars(typed_text), vim.fn.strchars(text_edit.newText)))
   local untyped_text = vim.fn.strcharpart(text_edit.newText, typed_length)
-  local display_lines = vim.split(untyped_text, '\n', { plain = true }) or {}
+  local display_lines = vim.split(untyped_text, '\n', { plain = true })
 
   local virt_lines = {}
   for i = 2, #display_lines do
@@ -153,7 +134,7 @@ function ghost_text.draw_preview()
   end
 
   ghost_text.extmark_id =
-    vim.api.nvim_buf_set_extmark(buf, highlight_ns, range.start.line, extmark_col + utils.get_offset(), {
+    vim.api.nvim_buf_set_extmark(buf, highlight_ns, range.start.line, typed_end_col + utils.get_offset(), {
       id = ghost_text.extmark_id,
       virt_text_pos = 'inline',
       virt_text = { { display_lines[1], 'BlinkCmpGhostText' } },
@@ -161,8 +142,6 @@ function ghost_text.draw_preview()
       hl_mode = 'combine',
     })
   ghost_text.extmark_buf = buf
-
-  utils.redraw_if_needed()
 end
 
 function ghost_text.clear_preview()

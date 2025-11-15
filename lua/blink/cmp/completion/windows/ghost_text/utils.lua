@@ -1,7 +1,6 @@
 local utils = {}
 
 function utils.is_cmdline() return vim.api.nvim_get_mode().mode == 'c' end
-function utils.is_cmdwin() return vim.fn.win_gettype() == 'command' end
 
 function utils.is_noice()
   return utils.is_cmdline()
