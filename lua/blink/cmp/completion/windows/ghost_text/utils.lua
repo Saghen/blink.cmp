@@ -1,7 +1,6 @@
 local utils = {}
 
 function utils.is_cmdline() return vim.api.nvim_get_mode().mode == 'c' end
-function utils.is_cmdwin() return vim.fn.win_gettype() == 'command' end
 
 function utils.is_noice()
   return utils.is_cmdline()
@@ -14,7 +13,7 @@ end
 function utils.redraw_if_needed()
   if utils.is_cmdline() then
     local bufnr = utils.get_buf() or 0
-    if vim.api.nvim_buf_is_valid(bufnr) then vim.api.nvim__redraw({ buf = utils.get_buf(), flush = true }) end
+    if vim.api.nvim_buf_is_valid(bufnr) then vim.api.nvim__redraw({ buf = bufnr, flush = true }) end
   end
 end
 
