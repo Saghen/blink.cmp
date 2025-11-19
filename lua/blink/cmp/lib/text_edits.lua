@@ -27,7 +27,11 @@ function text_edits.apply(text_edit, additional_text_edits)
     local cur_bufnr = vim.api.nvim_get_current_buf()
     local prev_buflisted = vim.bo[cur_bufnr].buflisted
     vim.lsp.util.apply_text_edits(all_edits, cur_bufnr, 'utf-8')
-    vim.bo[cur_bufnr].buflisted = prev_buflisted
+
+    -- FIXME: restoring buflisted=false on regular file buffers, e.g. gitcommit,
+    -- causes neovim closing the window. Leave them listed to avoid this issue.
+    -- Non-file buffers can be safely restored.
+    if not prev_buflisted and vim.bo[cur_bufnr].buftype ~= '' then vim.bo[cur_bufnr].buflisted = false end
   end
 
   if mode == 'cmdline' then
